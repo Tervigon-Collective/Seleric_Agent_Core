@@ -1,0 +1,36 @@
+id: ltv
+display_name: LTV (New Customer)
+category: finance
+status: certified
+description: >
+  Attributed revenue per new customer in the period.
+  LTV = new_customer_revenue / new_customers. Component of LTV:CAC —
+  not lifetime customer_ltv.avg_ltv.
+formula:
+  human_readable: SUM(new_customer_revenue) / SUM(new_customers)
+  authoritative_source: cube
+cube_mapping:
+  view: ltv_cac
+  measure: ltv_cac.ltv
+aggregation: ratio
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Finance
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard fe-dashboard performanceSummary.js
+  note: >
+    Period new-customer LTV, not serve.customer_ltv lifetime avg_ltv.

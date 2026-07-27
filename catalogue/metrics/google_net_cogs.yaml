@@ -1,0 +1,33 @@
+id: google_net_cogs
+display_name: Google Net COGS
+category: attribution
+status: certified
+description: >
+  Google channel FE lifecycle Net COGS from channel_pnl (placement ACTIVE_OR_KEPT
+  + event return/cancel arms). Not product_cogs SKU grain.
+formula:
+  human_readable: SUM(google channel product + ship + pack + gateway + rto)
+  authoritative_source: cube
+cube_mapping:
+  view: channel_pnl
+  measure: channel_pnl.google_net_cogs
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard/Node-Backend getAttributionChannelPnl

@@ -2,8 +2,10 @@ id: gross_roas
 display_name: Gross ROAS (Shopify-only)
 category: finance
 status: certified
-description: 'Canonical Gross ROAS: Shopify Gross Sales / Shopify ad spend (Meta + Google), computed as a
-  ratio of aggregates. This maps to `canonical_pnl.gross_roas`.'
+description: >
+  Shopify-only Gross ROAS: Shopify Gross Sales / Shopify ad spend (Meta + Google).
+  Maps to canonical_pnl.gross_roas. For All-channels Gross ROAS use
+  gross_roas_all_channels (Shopify + Amazon Attribution gross / total ad spend).
 formula:
   human_readable: SUM(gross_sales) / SUM(shopify_ad_spend)
   authoritative_source: cube
@@ -28,7 +30,7 @@ access_policy:
   scopes:
   - metrics:read
 examples:
-- question: Gross ROAS for June 2026
+- question: Shopify-only Gross ROAS for June 2026
   request:
     measures:
     - gross_roas
@@ -36,7 +38,7 @@ examples:
       start: '2026-06-01'
       end: '2026-06-30'
 validation_tests:
-- June 2026 brand 20 ≈ dashboard 2.03x
+- June 2026 brand 20 ≈ dashboard Shopify Gross ROAS
 deprecated_aliases: []
 ratio_components:
   numerator: canonical_pnl.gross_sales
@@ -47,6 +49,5 @@ dashboard_alignment:
   source: Seleric_Dashboard/Node-Backend
   evidence: src/services/dashboardService.js:142
   note: >
-    Dashboard summary may use blended inputs. This metric is aligned to
-    canonical Cube semantic execution (`canonical_pnl.gross_roas`), which uses
-    Shopify gross sales over Shopify ad spend.
+    Shopify-only. Bare "Gross ROAS" / Historical All-channels resolve to
+    gross_roas_all_channels via glossary. Do not use this for All-channels cards.

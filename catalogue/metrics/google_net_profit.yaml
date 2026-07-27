@@ -1,0 +1,33 @@
+id: google_net_profit
+display_name: Google Net Profit
+category: attribution
+status: certified
+description: >
+  Google channel Net Profit from channel_pnl: Google Net Sales − Google Net COGS −
+  Google ad spend. Matches Attribution / Historical Google Overview.
+formula:
+  human_readable: google_net_sales − google_net_cogs − google_ad_spend
+  authoritative_source: cube
+cube_mapping:
+  view: channel_pnl
+  measure: channel_pnl.google_net_profit
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard/Node-Backend getAttributionChannelPnl

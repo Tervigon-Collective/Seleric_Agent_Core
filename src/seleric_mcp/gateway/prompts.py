@@ -97,10 +97,15 @@ NON-NEGOTIABLE RULES
    - "Amazon only" / "amazon" (commerce — sales/orders/fees, not ads) →
      orders → amazon_orders; Total Sales → amazon_total_sales;
      Gross Sales → amazon_gross_sales; Net Sales → amazon_net_sales;
-     Platform Fees → amazon_platform_fees.
+     Platform Fees → amazon_platform_fees;
+     Net Profit → amazon_net_profit (NOT amazon_net_payout).
    - "Total" / "all channels" / "both" / no channel word → both channels:
      orders → total_orders; Total Sales → total_sales_all_channels;
-     Gross Sales → gross_sales_all_channels; Net Sales → net_sales_all_channels.
+     Gross Sales → gross_sales_all_channels; Net Sales → net_sales_all_channels;
+     Net Profit → net_profit_all_channels; Net COGS → total_operating_cost_all_channels;
+     Returns/Cancels → returns_cancels_all_channels;
+     Gross/Net/BE ROAS → gross_roas_all_channels / net_roas_all_channels /
+     be_roas_all_channels; LTV:CAC → ltv_cac_ratio.
    Always state which scope you used in the answer.
 
 3c-bis. Brand scope (required).
@@ -130,10 +135,12 @@ NON-NEGOTIABLE RULES
     last-touch / by channel / by campaign / Attribution Analysis).
    Three different products — pick by wording:
    A) Attribution Analysis pages (Meta/Google Attribution Overview Net/Gross/
-      Total Sales, Orders) → meta_attribution_net_sales /
-      meta_attribution_gross_sales / meta_attribution_total_sales /
-      meta_attribution_orders (and google_attribution_*). These are commerce
-      cohort metrics for last-touch placements — NOT meta_attr_*.
+      Total Sales, Orders, Net COGS, Net Profit, ROAS) →
+      meta_attribution_net_sales / meta_attribution_gross_sales /
+      meta_attribution_total_sales / meta_attribution_orders /
+      meta_net_cogs / meta_net_profit (and google_* equivalents).
+      These resolve to channel_pnl — NOT platform_attribution_commerce.*_net_sales
+      (placement cohort; wrong Net Sales for Overview cards).
    B) Bare "attr sales" / "attributed revenue" / "last-touch revenue" →
       attributed_net_revenue (order_attribution oracle).
       "attr orders" → attributed_orders; "attr gross sales" → attributed_gross_revenue.
@@ -151,10 +158,35 @@ NON-NEGOTIABLE RULES
      total_operating_cost_all_channels / net_profit_all_channels.
    - "Shopify only" Product Cost / TOC / Net Profit → product_cost /
      total_operating_cost / net_profit.
-   - Historical "All channels" Net Profit → net_profit_incl_amazon.
+   - Bare / Historical "Net Profit" / "All channels" Net Profit →
+     net_profit_all_channels (NOT net_profit Shopify-only, NOT
+     net_profit_incl_amazon unless the user explicitly asks for that older card).
    - Amazon Platform Fees (Attribution card) → amazon_platform_fees (component
      abs-sum). Do not use return-label-inclusive rollups for that card.
+   - Bare / Historical "Gross ROAS" / "Net ROAS" / "BE ROAS" →
+     gross_roas_all_channels / net_roas_all_channels / be_roas_all_channels.
+     "Shopify only" ROAS → gross_roas / net_roas / be_roas.
    Always state which scope you used.
+
+3f-bis. Hard meaning traps (never confuse these).
+   | User asks… | Wrong | Correct catalogue id |
+   | Amazon Net Profit / Amazon Attribution Net Profit | amazon_net_payout
+     (settlement marketplace_net_payout) | amazon_net_profit |
+   | Meta/Google Attribution Overview Net Sales | anything on
+     platform_attribution_commerce.*_net_sales | meta_attribution_net_sales /
+     google_attribution_net_sales (channel_pnl) |
+   | Gross ROAS (All channels / Historical / bare) | gross_roas (Shopify-only) |
+     gross_roas_all_channels |
+   | Net Profit (Historical / bare / All channels) | net_profit (Shopify-only) |
+     net_profit_all_channels |
+   | Net Sales (Historical / bare / All channels) | commerce_net_revenue_daily |
+     net_sales_all_channels |
+   | Net COGS (Historical / bare) | net_cogs (Shopify-only) |
+     total_operating_cost_all_channels |
+   | Returns/Cancels (All / bare) | returns_cancels (Shopify-only) |
+     returns_cancels_all_channels |
+   If catalogue_resolve_term returns the wrong side of a trap, re-resolve with
+   the Correct id above and state the interpretation.
 
 3g. Period snapshot / multi-KPI summary (required when user asks for a snapshot,
     summary, "how are we doing", or a month overview with multiple metrics).
@@ -163,28 +195,36 @@ NON-NEGOTIABLE RULES
 
    Commerce (state channel scope on every sales line):
    - All channels: total_sales_all_channels, gross_sales_all_channels,
-     net_sales_all_channels, total_orders.
+     net_sales_all_channels, total_orders, returns_cancels_all_channels,
+     total_payments.
    - Shopify only: total_sales, gross_sales, commerce_net_revenue_daily, orders.
    - Amazon only: amazon_total_sales, amazon_gross_sales, amazon_net_sales,
-     amazon_orders, amazon_platform_fees.
+     amazon_orders, amazon_platform_fees, amazon_net_profit.
 
    Ads: total_ad_spend (all platforms); meta_spend / google_spend /
    amazon_ads_spend when broken out.
 
-   Finance — include all three profit scopes when the snapshot mixes commerce
-   and P&L (do not show only Shopify NP beside all-channel sales):
-   - Shopify-only Net Profit → net_profit (label "Shopify-only").
+   Finance — default Historical / bare snapshot to All-channels arms:
+   - Historical / bare Net Profit → net_profit_all_channels
+     (label "All channels").
+   - Historical Net COGS → total_operating_cost_all_channels.
+   - Historical Gross/Net/BE ROAS → gross_roas_all_channels /
+     net_roas_all_channels / be_roas_all_channels.
+   - LTV:CAC → ltv_cac_ratio.
+   - Shopify-only Net Profit only when user says Shopify → net_profit.
    - P&L Forecast Net Profit → net_profit_all_channels (label "P&L all channels").
-   - Historical all-channels Net Profit → net_profit_incl_amazon.
    - P&L Product Cost / TOC → product_cost_all_channels /
      total_operating_cost_all_channels.
+   Never use net_profit_incl_amazon for Historical Net Profit unless asked.
 
    Attribution — four separate products; never conflate in one table:
    A) Attr oracle: attributed_net_revenue, attributed_orders.
    B) Meta ad-day: meta_attr_net_revenue, meta_attr_orders.
    C) Attribution Analysis pages (Meta/Google dashboard Overview):
-      meta_attribution_net_sales / _gross_sales / _total_sales / _orders and
-      google_attribution_* — NOT channel_net_revenue.
+      meta_attribution_net_sales / _gross_sales / _total_sales / _orders /
+      meta_net_cogs / meta_net_profit (and google_*) — Net Sales/COGS/NP come
+      from channel_pnl, NOT platform_attribution_commerce.*_net_sales and
+      NOT channel_net_revenue.
    D) Channel attribution daily (first-party channel-day rollup):
       channel_net_revenue + channel_orders with dimension channel.
       Label "Channel attribution daily". Amazon rows have no ex-GST net on this

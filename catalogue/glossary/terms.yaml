@@ -7,21 +7,22 @@ terms:
   # commerce_net_revenue stays placement-axis, order-grain, for breakdowns
   # (city/UTM/payment method) that commerce_performance can't provide.
   - term: topline
-    canonical_id: commerce_net_revenue_daily
+    canonical_id: net_sales_all_channels
   - term: net sales
-    canonical_id: commerce_net_revenue_daily
+    canonical_id: net_sales_all_channels
     definition: >
-      Shopify-only Net Sales (dashboard parity). Does not include Amazon SP.
+      Defaults to All-channels Net Sales. Shopify-only → commerce_net_revenue_daily
+      (or "shopify net sales").
   - term: net sales (ex-gst)
-    canonical_id: commerce_net_revenue_daily
+    canonical_id: net_sales_all_channels
   - term: net sales ex-gst
-    canonical_id: commerce_net_revenue_daily
+    canonical_id: net_sales_all_channels
   - term: net sales (shopify-only)
     canonical_id: commerce_net_revenue_daily
   - term: shopify net sales
     canonical_id: commerce_net_revenue_daily
   - term: revenue
-    canonical_id: commerce_net_revenue_daily
+    canonical_id: net_sales_all_channels
   - term: commerce net revenue
     canonical_id: commerce_net_revenue_daily
   - term: revenue by city
@@ -81,13 +82,13 @@ terms:
       product_gross_profit. Resolve from context (default to units_sold for
       "best selling"); clarify only when the business meaning materially changes.
   - term: gross sales
-    canonical_id: gross_sales
+    canonical_id: gross_sales_all_channels
     definition: >
-      Shopify-only Gross Sales (ex-GST, pre-discount). Does not include Amazon SP.
+      Defaults to All-channels Gross Sales. Shopify-only → gross_sales.
   - term: gross sales (ex-gst)
-    canonical_id: gross_sales
+    canonical_id: gross_sales_all_channels
   - term: gross sales ex-gst
-    canonical_id: gross_sales
+    canonical_id: gross_sales_all_channels
   - term: gross sales (shopify-only)
     canonical_id: gross_sales
   - term: shopify gross sales
@@ -101,8 +102,18 @@ terms:
   - term: coupons
     canonical_id: discounts
   - term: returns and cancellations
-    canonical_id: returns_cancels
+    canonical_id: returns_cancels_all_channels
   - term: returns / cancels
+    canonical_id: returns_cancels_all_channels
+    definition: >
+      Defaults to All-channels Returns/Cancels. Shopify-only → returns_cancels.
+  - term: returns cancels all channels
+    canonical_id: returns_cancels_all_channels
+  - term: all channels returns cancels
+    canonical_id: returns_cancels_all_channels
+  - term: shopify returns cancels
+    canonical_id: returns_cancels
+  - term: shopify-only returns cancels
     canonical_id: returns_cancels
   - term: return revenue
     canonical_id: return_revenue
@@ -149,9 +160,10 @@ terms:
   - term: profit
     canonical_id: net_profit
   - term: net profit
-    canonical_id: net_profit
+    canonical_id: net_profit_all_channels
     definition: >
-      Shopify-only Net Profit (Net Sales − Net COGS − Meta+Google spend).
+      Defaults to All-channels Net Profit (Historical / P&L). For Shopify-only
+      use net_profit (Net Sales − Net COGS − Meta+Google spend).
   - term: net profit (shopify-only)
     canonical_id: net_profit
   - term: shopify only net profit
@@ -167,21 +179,27 @@ terms:
   - term: net profit all channels
     canonical_id: net_profit_all_channels
   - term: historical all channels net profit
-    canonical_id: net_profit_incl_amazon
+    canonical_id: net_profit_all_channels
   - term: net profit blended
     canonical_id: net_profit_blended
   - term: net profit (all platforms)
     canonical_id: net_profit_blended
   - term: COGS
-    canonical_id: net_cogs
+    canonical_id: total_operating_cost_all_channels
   - term: company COGS
-    canonical_id: net_cogs
+    canonical_id: total_operating_cost_all_channels
   - term: net cogs
-    canonical_id: net_cogs
+    canonical_id: total_operating_cost_all_channels
+    definition: >
+      Defaults to All-channels Net COGS / TOC. Shopify-only → net_cogs.
+  - term: Net COGS
+    canonical_id: total_operating_cost_all_channels
   - term: net cogs (shopify-only)
     canonical_id: net_cogs
-  - term: cost of goods
+  - term: shopify net cogs
     canonical_id: net_cogs
+  - term: cost of goods
+    canonical_id: total_operating_cost_all_channels
   - term: product cost
     canonical_id: product_cost_all_channels
   - term: product cost (all channels)
@@ -244,26 +262,83 @@ terms:
   - term: marketing efficiency ratio
     canonical_id: mer
   - term: ROAS
-    canonical_id: net_roas
+    canonical_id: net_roas_all_channels
     definition: >
-      Defaults to Net ROAS ((Net Sales − Net COGS) / Shopify ad spend).
+      Defaults to All-channels Net ROAS. Shopify-only → net_roas.
       Platform-reported Meta/Google/Amazon ROAS is not certified.
   - term: net ROAS
-    canonical_id: net_roas
+    canonical_id: net_roas_all_channels
   - term: net roas
+    canonical_id: net_roas_all_channels
+  - term: net ROAS all channels
+    canonical_id: net_roas_all_channels
+  - term: shopify net ROAS
+    canonical_id: net_roas
+  - term: shopify-only net ROAS
     canonical_id: net_roas
   - term: gross ROAS
-    canonical_id: gross_roas
+    canonical_id: gross_roas_all_channels
+    definition: >
+      Defaults to All-channels Gross ROAS (Shopify + Amazon Attribution gross /
+      total ad spend). For Shopify-only use gross_roas.
   - term: gross roas
+    canonical_id: gross_roas_all_channels
+    definition: >
+      Defaults to All-channels. Prefer gross_roas when the question says Shopify only.
+  - term: gross ROAS all channels
+    canonical_id: gross_roas_all_channels
+  - term: gross roas all channels
+    canonical_id: gross_roas_all_channels
+  - term: all channels gross ROAS
+    canonical_id: gross_roas_all_channels
+  - term: shopify gross ROAS
+    canonical_id: gross_roas
+  - term: shopify-only gross ROAS
+    canonical_id: gross_roas
+  - term: gross ROAS shopify
     canonical_id: gross_roas
   - term: BE ROAS
-    canonical_id: be_roas
+    canonical_id: be_roas_all_channels
   - term: break even ROAS
-    canonical_id: be_roas
+    canonical_id: be_roas_all_channels
   - term: breakeven ROAS
+    canonical_id: be_roas_all_channels
+  - term: BE ROAS all channels
+    canonical_id: be_roas_all_channels
+  - term: shopify BE ROAS
+    canonical_id: be_roas
+  - term: shopify-only BE ROAS
     canonical_id: be_roas
   - term: return on ad spend
-    canonical_id: net_roas
+    canonical_id: net_roas_all_channels
+  - term: LTV:CAC
+    canonical_id: ltv_cac_ratio
+    definition: >
+      Period LTV/CAC for first-time attributed customers. Use ltv_cac.ltv_cac_ratio —
+      not customer_ltv. Revenue arm is paid net only (unpaid placement → 0).
+  - term: ltv cac
+    canonical_id: ltv_cac_ratio
+  - term: ltv to cac
+    canonical_id: ltv_cac_ratio
+  - term: CAC
+    canonical_id: cac
+  - term: customer acquisition cost
+    canonical_id: cac
+  - term: LTV
+    canonical_id: ltv
+    definition: >
+      Period new-customer LTV (new_customer_revenue / new_customers), not lifetime
+      customer_ltv.avg_ltv. Unpaid / payment_pending orders contribute ₹0 revenue.
+  - term: new customers
+    canonical_id: new_customers
+  - term: meta net profit
+    canonical_id: meta_net_profit
+  - term: google net profit
+    canonical_id: google_net_profit
+  - term: meta net cogs
+    canonical_id: meta_net_cogs
+  - term: google net cogs
+    canonical_id: google_net_cogs
   - term: ad spend
     canonical_id: total_ad_spend
     definition: >
@@ -697,8 +772,13 @@ terms:
     canonical_id: amazon_net_profit
   - term: amazon net payout
     canonical_id: amazon_net_payout
+    definition: >
+      Settlement cash to seller (marketplace_net_payout). NOT Amazon Net Profit —
+      for Net Profit use amazon_net_profit (Net Sales − Fees − Product Cost − Ads).
   - term: amazon payout
     canonical_id: amazon_net_payout
+    definition: >
+      Settlement cash ≠ net profit. Prefer amazon_net_profit for "amazon net profit".
   - term: amazon only orders
     canonical_id: amazon_orders
   - term: shopify only orders

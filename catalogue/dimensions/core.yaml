@@ -26,6 +26,9 @@ dimensions:
       amazon_ad_performance: amazon_ad_performance.brand_id
       amazon_commerce_performance: amazon_commerce_performance.brand_id
       amazon_attribution_overview: amazon_attribution_overview.brand_id
+      channel_pnl: channel_pnl.brand_id
+      returns_cancels_all_channels: returns_cancels_all_channels.brand_id
+      ltv_cac: ltv_cac.brand_id
       channel_attribution: channel_attribution.brand_id
       customer_data: customer_data.brand_id
       platform_attribution_commerce: platform_attribution_commerce.brand_id
@@ -442,6 +445,9 @@ dimensions:
       amazon_ad_performance: amazon_ad_performance.report_date
       amazon_commerce_performance: amazon_commerce_performance.report_date
       amazon_attribution_overview: amazon_attribution_overview.report_date
+      channel_pnl: channel_pnl.report_date
+      returns_cancels_all_channels: returns_cancels_all_channels.report_date
+      ltv_cac: ltv_cac.report_date
       channel_attribution: channel_attribution.report_date
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
@@ -588,6 +594,8 @@ dimensions:
     aliases: [marketplace, marketplace channel, shopify vs amazon]
     views:
       channel_attribution: channel_attribution.channel
+      channel_pnl: channel_pnl.channel
+      returns_cancels_all_channels: returns_cancels_all_channels.channel
       funnel_daily: funnel_daily.channel
       session_funnel: session_funnel.channel
       web_events: web_events.channel

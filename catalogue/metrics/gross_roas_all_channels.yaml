@@ -28,8 +28,18 @@ access_policy:
   - growth_lead
   scopes:
   - metrics:read
+examples:
+- question: Gross ROAS for June 2026
+  request:
+    measures:
+    - gross_roas_all_channels
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
 deprecated_aliases: []
 dashboard_alignment:
   status: match
   audited_on: '2026-07-27'
   source: Seleric_Dashboard Historical Analytics Gross ROAS (All channels)
+  note: >
+    Default for bare "Gross ROAS". Shopify-only uses gross_roas.

@@ -188,7 +188,6 @@ function addMessage(kind, who, text) {
 
 function addTool(name, args) {
   const details = el("details", "group border border-zinc-800 bg-zinc-900/20 rounded-lg overflow-hidden transition-all duration-200 my-3 ml-4");
-  details.setAttribute("open", "");
   
   const summary = el("summary", "flex items-center justify-between p-2.5 text-xs font-mono text-zinc-400 cursor-pointer hover:bg-zinc-900/50 hover:text-zinc-200 select-none list-none [&::-webkit-details-marker]:hidden");
   

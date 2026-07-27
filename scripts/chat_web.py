@@ -4,10 +4,12 @@ tool-call streaming to the page.
 
 Run from Base_Agent:
 
-    uv run python scripts/chat_web.py          # http://127.0.0.1:8766
+    uv run python scripts/chat_web.py          # http://127.0.0.1:8766 (auto-reload)
+    CHAT_WEB_RELOAD=0 uv run python scripts/chat_web.py
     CHAT_WEB_PORT=9000 uv run python scripts/chat_web.py
 
 Port / preview size: config.yaml → chat (env overrides still work).
+Auto-reloads on src/catalogue/scripts/config changes (CHAT_WEB_RELOAD=0 to disable).
 Single-session by design (testing tool): one MCP connection, one conversation,
 one scratchpad. POST /reset starts over.
 """
@@ -50,6 +52,7 @@ class AgentRuntime:
 
     def __init__(self) -> None:
         self.llm, self.deployment = chat_client._load_azure()
+        self.router = chat_client._build_router(self.llm)
         self.scratchpad = chat_client.Scratchpad()
         self.session: ClientSession | None = None
         self.openai_tools: list[dict] = []
@@ -95,12 +98,15 @@ class AgentRuntime:
         """Async generator of event dicts for one user turn."""
         self.messages.append({"role": "user", "content": user_text})
 
+        # Tool models drive the loop; the final synthesis escalates to a
+        # reasoning model (see chat_client._chat_loop for the same policy).
+        tier = "tools"
         for _ in range(MAX_TOOL_ROUNDS):
             self.messages[1] = {"role": "system", "content": self.scratchpad.render()}
             try:
                 resp = await asyncio.to_thread(
-                    self.llm.chat.completions.create,
-                    model=self.deployment,
+                    self.router.complete,
+                    tier=tier,
                     messages=self.messages,
                     tools=self.openai_tools,
                     tool_choice="auto",
@@ -109,8 +115,14 @@ class AgentRuntime:
                 yield {"type": "error", "text": f"LLM error: {exc}"}
                 return
 
-            choice = resp.choices[0].message
+            choice = resp.message
             tool_calls = choice.tool_calls or []
+
+            # Tool model is ready to answer -> redo synthesis with a reasoning
+            # model instead of committing the tentative answer.
+            if not tool_calls and tier == "tools":
+                tier = "reasoning"
+                continue
 
             assistant_msg: dict[str, Any] = {"role": "assistant", "content": choice.content or ""}
             if tool_calls:
@@ -123,9 +135,12 @@ class AgentRuntime:
             self.messages.append(assistant_msg)
 
             if not tool_calls:
-                yield {"type": "assistant", "text": (choice.content or "").strip() or "(empty)"}
+                yield {"type": "assistant", "model": resp.model,
+                       "text": (choice.content or "").strip() or "(empty)"}
                 yield {"type": "done", "scratchpad": self.scratchpad.notes}
                 return
+
+            tier = "tools"
 
             for tc in tool_calls:
                 name = tc.function.name
@@ -133,7 +148,7 @@ class AgentRuntime:
                     args = json.loads(tc.function.arguments or "{}")
                 except json.JSONDecodeError:
                     args = {}
-                yield {"type": "tool_call", "tool": name, "args": args}
+                yield {"type": "tool_call", "tool": name, "args": args, "model": resp.model}
                 if name == "scratchpad_write":
                     payload = self.scratchpad.write(args.get("key", ""), args.get("value", ""))
                 else:
@@ -183,7 +198,10 @@ async def reset(request: Request):
 
 async def state(request: Request):
     return JSONResponse({
-        "model": runtime.deployment,
+        "models": {
+            "tools": runtime.router.candidates("tools"),
+            "reasoning": runtime.router.candidates("reasoning"),
+        },
         "tools": [t["function"]["name"] for t in runtime.openai_tools],
         "scratchpad": runtime.scratchpad.notes,
         "turns": sum(1 for m in runtime.messages if m.get("role") == "user"),
@@ -210,5 +228,40 @@ app = Starlette(
 
 
 if __name__ == "__main__":
-    print(f"seleric-mcp test chat -> http://127.0.0.1:{PORT}")
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
+    reload = os.environ.get("CHAT_WEB_RELOAD", "1") != "0"
+    print(f"seleric-mcp test chat -> http://127.0.0.1:{PORT}"
+          + (" (reload on)" if reload else ""))
+    # Import string required for uvicorn --reload (re-spawns worker on change).
+    uvicorn.run(
+        "chat_web:app",
+        app_dir=str(Path(__file__).parent),
+        host="127.0.0.1",
+        port=PORT,
+        log_level="info" if reload else "warning",
+        reload=reload,
+        reload_dirs=[
+            str(ROOT / "src"),
+            str(ROOT / "catalogue"),
+            str(ROOT / "scripts"),
+            str(ROOT),
+        ],
+        reload_excludes=[
+            ".venv",
+            "var",
+            "logs",
+            ".pytest_cache",
+            ".git",
+            "**/__pycache__",
+        ],
+        reload_includes=[
+            "*.py",
+            "*.yaml",
+            "*.yml",
+            "*.html",
+            "*.md",
+            "config.yaml",
+            ".env",
+            ".env.local",
+        ],
+    )
+
