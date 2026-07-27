@@ -8,6 +8,7 @@ when annotations are stringified (PEP 563).
 """
 
 import json
+import os
 import re
 import time
 from datetime import date, datetime, timedelta
@@ -16,6 +17,7 @@ from zoneinfo import ZoneInfo
 
 import structlog
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from ..actions.broker import ActionBroker
 from ..actions.executors.pipeboard import PipeboardExecutor
@@ -195,11 +197,35 @@ class AppContext:
         return stale
 
 
+def _transport_security_from_env() -> TransportSecuritySettings | None:
+    """DNS-rebinding allowlist for streamable-http behind nginx.
+
+    FastMCP defaults to localhost-only Host checks when host=127.0.0.1.
+    Set MCP_ALLOWED_HOSTS / MCP_ALLOWED_ORIGINS (comma-separated) for the
+    public domain, e.g. mcp.seleric.com / https://mcp.seleric.com.
+    """
+    hosts_raw = os.getenv("MCP_ALLOWED_HOSTS", "").strip()
+    origins_raw = os.getenv("MCP_ALLOWED_ORIGINS", "").strip()
+    if not hosts_raw and not origins_raw:
+        return None
+    hosts = [h.strip() for h in hosts_raw.split(",") if h.strip()]
+    origins = [o.strip() for o in origins_raw.split(",") if o.strip()]
+    return TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=hosts or ["127.0.0.1:*", "localhost:*", "[::1]:*"],
+        allowed_origins=origins,
+    )
+
+
 def build_server(settings: Settings) -> FastMCP:
     ctx = AppContext(settings)
+    transport_security = _transport_security_from_env()
     mcp = FastMCP(
         "seleric-mcp",
         instructions=prompt_templates.NO_HALLUCINATION_GUARD,
+        # Bind identity for security defaults; uvicorn --host still controls listen addr.
+        host="0.0.0.0" if transport_security is not None else "127.0.0.1",
+        transport_security=transport_security,
     )
 
     def _log_call(tool: str, **fields: Any) -> str:

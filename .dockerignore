@@ -1,0 +1,10 @@
+.git
+.venv
+var
+**/__pycache__
+**/*.pyc
+.env.local
+cube/.cubestore
+.doc
+tests
+.codebase-memory

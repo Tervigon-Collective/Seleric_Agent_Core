@@ -1,11 +1,15 @@
 # Canonical Cube model: mage-ai/infra/cube ONLY.
 # Base_Agent/cube/model is a stub — do not mount ./cube here.
 #
-#   docker compose up -d --force-recreate cube
+#   docker compose up -d --build --force-recreate
 #   uv run python scripts/smoke_cube.py
 #
-# Note: if mage-cube is already bound to 127.0.0.1:4001, skip this compose
-# and point config.yaml cube.api_url at that instance instead.
+# Public (unchanged nginx):
+#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765
+#   https://mcp.seleric.com/cube/ → 127.0.0.1:4001
+#
+# Note: if mage-cube is already bound to 127.0.0.1:4001, skip the cube service
+# and point CUBE_API_URL / config.yaml at that instance instead.
 name: seleric-mcp
 
 services:
@@ -23,3 +27,29 @@ services:
     extra_hosts:
       - "clickhouse.seleric.com:72.61.228.168"
       - "host.docker.internal:host-gateway"
+
+  mcp:
+    build: .
+    image: seleric-mcp-mcp
+    container_name: seleric-mcp-mcp-1
+    restart: unless-stopped
+    depends_on:
+      - cube
+    env_file:
+      - .env
+    environment:
+      # In-compose Cube (not host loopback)
+      CUBE_API_URL: http://cube:4000
+      SELERIC_MCP_DB: /data/seleric_mcp.db
+      # FastMCP DNS-rebinding / CORS — same public domain via nginx
+      MCP_ALLOWED_HOSTS: mcp.seleric.com,127.0.0.1:*,localhost:*
+      MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*
+    volumes:
+      - ./catalogue:/app/catalogue:ro
+      - ./config.yaml:/app/config.yaml:ro
+      - mcp-data:/data
+    ports:
+      - "127.0.0.1:8765:8765"
+
+volumes:
+  mcp-data:
