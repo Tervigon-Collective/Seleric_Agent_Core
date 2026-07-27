@@ -1,0 +1,58 @@
+id: return_cancel_revenue_all_channels
+display_name: Return / Cancel Revenue (all channels, ex-GST)
+category: commerce
+status: certified
+description: >
+  All-channels Return / Cancel Revenue (ex-GST) — the dashboard General
+  Statistics "Return / Cancel Rev" card (All channels). Shopify event-date
+  return+cancel revenue deduction (commerce_order_events.revenue_deduction_excl_tax,
+  Asia/Kolkata event axis) PLUS Amazon report returns
+  (fct_amazon_return_items.refunded_amount on return_delivery_date; Amazon
+  cancels contribute ₹0). June 2026 brand 20 = ₹5,92,433.30 = Shopify
+  5,79,540.80 + Amazon 12,892.50 (the dashboard displays it negated). For
+  Shopify-only use return_cancel_revenue.
+formula:
+  human_readable: SUM(shopify event revenue_deduction_excl_tax) + SUM(amazon report returns refunded_amount), ex-GST
+  authoritative_source: cube
+cube_mapping:
+  view: returns_cancels_all_channels
+  measure: returns_cancels_all_channels.return_cancel_revenue
+  time_dimension: returns_cancels_all_channels.report_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+supported_filters:
+- date_range
+- brand_id
+- channel
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Revenue lost to returns and cancellations across all channels last month
+  request:
+    measures:
+    - return_cancel_revenue_all_channels
+    time_range:
+      preset: last_month
+validation_tests:
+- return_cancel_revenue_all_channels (June 2026 brand 20) = 592,433.30, matching the General Statistics Return / Cancel Rev card
+- equals return_cancel_revenue (Shopify) + Amazon report returns on the same slice
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: getHistoricalDashboard returns_cancels rev (All channels); commerce_order_events + fct_amazon_return_items

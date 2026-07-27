@@ -11,6 +11,10 @@ import sys
 import urllib.request
 from pathlib import Path
 
+# Windows consoles default to cp1252 and choke on the → glyph used below.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 

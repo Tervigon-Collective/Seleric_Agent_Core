@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 206
+count: 207
 metrics:
   active_orders:
     category: commerce
@@ -1334,13 +1334,13 @@ metrics:
     dashboard_audited_on: '2026-07-27'
   net_sales_all_channels:
     category: commerce
-    cube_view: sales_all_channels
-    contract: null
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
     glossary:
     - Commerce.CommerceOrder
     om_name: netSalesAllChannels
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   new_customer_orders:
     category: commerce
     cube_view: commerce_orders
@@ -1627,6 +1627,15 @@ metrics:
     om_name: returnCancelRevenue
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  return_cancel_revenue_all_channels:
+    category: commerce
+    cube_view: returns_cancels_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: returnCancelRevenueAllChannels
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   return_recovered_cogs:
     category: operations
     cube_view: return_lifecycle

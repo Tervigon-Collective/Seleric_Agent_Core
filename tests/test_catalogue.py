@@ -55,9 +55,14 @@ def test_search_paid_media_glossary(catalogue):
 
 
 def test_search_glossary_term(catalogue):
+    # Glossary policy (terms.yaml): bare financial terms default to ALL-CHANNELS
+    # (the dashboard's headline number); shopify-only needs an explicit qualifier.
+    # "topline" -> net_sales_all_channels, mapped to
+    # canonical_pnl.net_sales_all_channels_pnl = the General Statistics Net Sales
+    # card (June 2026 brand 20 = 3,442,876.25).
     result = catalogue.search("topline")
     assert result.matches
-    assert result.matches[0].id == "commerce_net_revenue_daily"
+    assert result.matches[0].id == "net_sales_all_channels"
     assert result.matches[0].matched_on.startswith("glossary")
 
 
@@ -93,10 +98,12 @@ def test_resolve_total_orders_all_channels(catalogue):
 
 def test_resolve_pnl_metrics_glossary(catalogue):
     cases = {
-        "Gross Sales (Ex-GST)": "gross_sales",
+        # Bare financial terms default to ALL-CHANNELS per terms.yaml (the
+        # dashboard headline card); shopify-only needs an explicit qualifier.
+        "Gross Sales (Ex-GST)": "gross_sales_all_channels",
         "Returns": "return_revenue",
         "Cancelled": "cancel_revenue",
-        "Net Sales (Ex-GST)": "commerce_net_revenue_daily",
+        "Net Sales (Ex-GST)": "net_sales_all_channels",
         "Taxes (18% on Shopify Net)": "taxes_on_net_sales",
         "Product Cost": "product_cost_all_channels",
         "Amazon Platform Fees": "amazon_platform_fees",
@@ -114,7 +121,7 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Net Profit (all channels)": "net_profit_all_channels",
         "Shopify-only Net Profit": "net_profit",
         "shopify only net profit": "net_profit",
-        "Historical all channels Net Profit": "net_profit_incl_amazon",
+        "Historical all channels Net Profit": "net_profit_all_channels",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)
@@ -214,7 +221,7 @@ def test_resolve_attribution_scope(catalogue):
         "sales by channel": "channel_net_revenue",
         "channel gross revenue": "channel_gross_revenue",
         "shopify only net profit": "net_profit",
-        "historical all channels net profit": "net_profit_incl_amazon",
+        "historical all channels net profit": "net_profit_all_channels",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)

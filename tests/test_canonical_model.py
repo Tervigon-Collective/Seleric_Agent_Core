@@ -441,18 +441,24 @@ def test_amazon_net_sales_catalogue_matches_exgst_report_return_basis(catalogue)
     Attribution dashboard = 214,753.49): ex-GST gross (effective_gross_revenue -
     revenue_tax, non-canceled) MINUS report returns on return_delivery_date.
     This SUPERSEDES the earlier 'settlement basis / revenue_principal' narrative,
-    which came from a stale June CSV (retracted). Guard both Amazon net-sales
-    metric descriptions so they stay on the ex-GST report-return basis and never
-    revert to an incl-GST column."""
-    for mid in ("amazon_net_sales", "net_sales_all_channels"):
-        m = catalogue.cat.metrics[mid]
-        formula = m.formula.human_readable.lower()
-        assert "ex-gst" in formula and "return" in formula, (
-            f"{mid} formula must be the ex-GST report-return basis; got: {formula}"
-        )
-        assert "revenue_principal" not in formula and "incl_gst" not in formula, (
-            f"{mid} formula must not use the superseded settlement/incl-GST basis; got: {formula}"
-        )
+    which came from a stale June CSV (retracted). amazon_net_sales stays on the
+    ex-GST report-return basis; net_sales_all_channels is the canonical P&L
+    all-channel net (same spine as net_profit, matching the General Statistics
+    card 3,442,876.25 — a DIFFERENT, larger definition than the Amazon-only net)."""
+    am = catalogue.cat.metrics["amazon_net_sales"]
+    af = am.formula.human_readable.lower()
+    assert "ex-gst" in af and "return" in af, (
+        f"amazon_net_sales formula must be the ex-GST report-return basis; got: {af}"
+    )
+    assert "revenue_principal" not in af and "incl_gst" not in af, (
+        f"amazon_net_sales formula must not use the superseded settlement/incl-GST basis; got: {af}"
+    )
+    # net_sales_all_channels is the canonical P&L spine (matches net_profit + the
+    # General Statistics dashboard card), NOT the Amazon-only report-return net.
+    nsac = catalogue.cat.metrics["net_sales_all_channels"]
+    assert nsac.cube_mapping.measure == "canonical_pnl.net_sales_all_channels_pnl", (
+        f"net_sales_all_channels must map to the canonical P&L all-channel net; got: {nsac.cube_mapping.measure}"
+    )
 
 
 def test_amazon_catalogue_points_at_attribution_overview(catalogue):

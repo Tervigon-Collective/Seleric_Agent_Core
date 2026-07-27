@@ -3,19 +3,21 @@ display_name: Net Sales (all channels)
 category: commerce
 status: certified
 description: >
-  All-channels Net Sales (ex-GST): Shopify net_sales_excl_tax (dashboard parity)
-  plus Amazon ex-GST net = ex-GST gross (effective_gross_revenue − revenue_tax,
-  non-canceled) minus report returns on return_delivery_date (see
-  amazon_net_sales). 2026-07-27 fix: Amazon leg was incl-GST operational; now
-  ex-GST net-of-report-returns, matching the Amazon Attribution Net Sales card.
-  Matches Historical Analytics All channels Net Sales. For Shopify-only use
-  commerce_net_revenue_daily.
+  All-channels Net Sales (ex-GST) from the canonical P&L spine — the SAME view
+  that produces net_profit_all_channels, so the agent's Net Sales and Net Profit
+  always reconcile. Matches the Historical Analytics / General Statistics
+  "Net Sales (All channels)" card (June 2026 brand 20 = ₹34,42,876.25).
+  2026-07-27 fix: was mapped to sales_all_channels.net_sales (₹37,25,305 —
+  the geography-breakdown view with the Amazon-Attribution net basis), which did
+  NOT match the General Statistics card and disagreed with net_profit. For the
+  geography/channel breakdown of all-channel sales use the sales_all_channels
+  view directly; for Shopify-only use commerce_net_revenue_daily.
 formula:
-  human_readable: SUM(shopify net_sales_excl_tax) + (SUM(amazon effective_gross_revenue - revenue_tax) - SUM(amazon report returns)), ex-GST
+  human_readable: canonical_pnl net_sales_all_channels_pnl = Shopify net_sales_excl_tax + Amazon net (canonical P&L basis), ex-GST
   authoritative_source: cube
 cube_mapping:
-  view: sales_all_channels
-  measure: sales_all_channels.net_sales
+  view: canonical_pnl
+  measure: canonical_pnl.net_sales_all_channels_pnl
 aggregation: additive
 unit: currency
 currency_default: INR
@@ -23,34 +25,24 @@ grain: daily
 supported_dimensions:
   - brand_id
   - report_date
-  - channel
-  - shipping_region
-  - shipping_country
-  - shipping_city
 supported_filters:
   - date_range
   - brand_id
-  - channel
-  - shipping_region
-  - shipping_country
-  - shipping_city
 data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 validation_tests:
-  - net_sales_all_channels equals shopify net_sales_excl_tax + (amazon revenue_principal - amazon refund_principal) on any slice
-  - previous figure assuming incl.-GST Amazon basis (June 2026 brand 20 ≈ ₹33,97,210.51) requires re-verification against the ex-tax basis
+  - net_sales_all_channels (June 2026 brand 20) = 3,442,876.25, matching the General Statistics card
+  - net_profit_all_channels = net_sales_all_channels - net_cogs - total_ad_spend on the same slice (same view)
 deprecated_aliases: []
 dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
+  status: match
+  audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
-  evidence: amazonOrderPnl.js:6-9
+  evidence: getHistoricalDashboard net_sales (All channels); canonical_pnl.net_sales_all_channels_pnl
   note: >
-    Inherits the amazon_net_sales tax-basis issue: the catalogue described
-    the Amazon component as incl.-GST (operational_revenue_incl_gst), but
-    amazonOrderPnl.js's own header comment (lines 6-9) establishes that
-    revenue_principal and refund_principal — the fields the live code
-    actually sums for the Amazon leg — are ex-tax. Corrected description,
-    formula, and validation_tests accordingly.
+    Repointed from sales_all_channels.net_sales to canonical_pnl.net_sales_all_channels_pnl.
+    The General Statistics dashboard and net_profit both derive from the canonical
+    P&L spine; sales_all_channels.net_sales is a different (geography-view) net
+    that includes the Amazon-Attribution net basis and does not tie to that card.

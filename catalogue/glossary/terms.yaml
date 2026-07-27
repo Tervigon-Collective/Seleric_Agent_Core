@@ -113,6 +113,19 @@ terms:
     canonical_id: returns_cancels_all_channels
   - term: shopify returns cancels
     canonical_id: returns_cancels
+  - term: return / cancel rev
+    canonical_id: return_cancel_revenue_all_channels
+    definition: >
+      Defaults to All-channels Return/Cancel Revenue (ex-GST) — the dashboard
+      card. Shopify-only → return_cancel_revenue.
+  - term: return / cancel revenue
+    canonical_id: return_cancel_revenue_all_channels
+  - term: return cancel revenue
+    canonical_id: return_cancel_revenue_all_channels
+  - term: return / cancel rev (shopify-only)
+    canonical_id: return_cancel_revenue
+  - term: shopify return cancel revenue
+    canonical_id: return_cancel_revenue
   - term: shopify-only returns cancels
     canonical_id: returns_cancels
   - term: return revenue
