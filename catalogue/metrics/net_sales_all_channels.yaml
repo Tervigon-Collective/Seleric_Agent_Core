@@ -3,15 +3,15 @@ display_name: Net Sales (all channels)
 category: commerce
 status: certified
 description: >
-  All-channels Net Sales: Shopify net_sales_excl_tax (dashboard parity) plus
-  Amazon net sales computed ex-tax as revenue_principal minus refund_principal
-  — not operational_revenue_incl_gst as previously documented (see
-  amazon_net_sales / amazonShared/amazonOrderPnl.js:6-9, whose own header
-  comment establishes revenue_principal/refund_principal as ex-tax fields).
+  All-channels Net Sales (ex-GST): Shopify net_sales_excl_tax (dashboard parity)
+  plus Amazon ex-GST net = ex-GST gross (effective_gross_revenue − revenue_tax,
+  non-canceled) minus report returns on return_delivery_date (see
+  amazon_net_sales). 2026-07-27 fix: Amazon leg was incl-GST operational; now
+  ex-GST net-of-report-returns, matching the Amazon Attribution Net Sales card.
   Matches Historical Analytics All channels Net Sales. For Shopify-only use
   commerce_net_revenue_daily.
 formula:
-  human_readable: SUM(shopify net_sales_excl_tax) + (SUM(amazon revenue_principal) - SUM(amazon refund_principal))
+  human_readable: SUM(shopify net_sales_excl_tax) + (SUM(amazon effective_gross_revenue - revenue_tax) - SUM(amazon report returns)), ex-GST
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels

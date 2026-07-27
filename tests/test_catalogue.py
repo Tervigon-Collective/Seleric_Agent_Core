@@ -152,6 +152,9 @@ def test_resolve_channel_scoped_sales(catalogue):
         "amazon only orders": "amazon_orders",
         "amazon net sales": "amazon_net_sales",
         "amazon gross sales": "amazon_gross_sales",
+        "amazon net profit": "amazon_net_profit",
+        "amazon return count": "amazon_return_count",
+        "amazon refunds": "amazon_return_revenue",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)

@@ -2,29 +2,29 @@ id: meta_attribution_net_sales
 display_name: Meta Attribution Net Sales
 category: attribution
 status: certified
-description: 'Meta Attribution Analysis Overview Net Sales — eligible Shopify commerce
-  for last-touch Meta placements (dashboard_net_sales_excl_tax). NOT meta_attr_net_revenue
-  (ad-day last-touch oracle) and NOT channel_net_revenue alone.
-
-  '
+description: >
+  Meta Attribution Overview / Historical Meta channel Net Sales.
+  Gross − Discounts − event-date Returns − event-date Cancels (channel_pnl).
+  NOT placement-only dashboard_net_sales_excl_tax on platform_attribution_commerce,
+  and NOT meta_attr_net_revenue (ad-day oracle).
 formula:
-  human_readable: SUM(commerce net sales where lt_platform = meta)
+  human_readable: Meta gross − discounts − event returns − event cancels
   authoritative_source: cube
 cube_mapping:
-  view: platform_attribution_commerce
-  measure: platform_attribution_commerce.meta_net_sales
+  view: channel_pnl
+  measure: channel_pnl.meta_net_sales
 aggregation: additive
 unit: currency
 currency_default: INR
-grain: order
+grain: day
 supported_dimensions:
 - brand_id
 - report_date
-- platform
+- channel
 supported_filters:
 - date_range
 - brand_id
-- platform
+- channel
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:
@@ -43,10 +43,10 @@ examples:
       start: '2026-06-01'
       end: '2026-06-30'
 validation_tests:
-- June 2026 brand 20 ≈ ₹24,24,851.18
+- June 2026 brand 20 ≈ ₹22,96,616.94 (dashboard); Cube may be within ~₹2k of commerce_order_events basis
 deprecated_aliases: []
 dashboard_alignment:
   status: match
-  audited_on: '2026-07-21'
+  audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
-  evidence: metaAttribution/analyticsClickhouse.js:626-637
+  evidence: pnlService.getAttributionChannelPnl + lineItemHistoricalSql.buildChannelMetricsSql

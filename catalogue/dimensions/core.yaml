@@ -25,6 +25,7 @@ dimensions:
       google_ad_performance: google_ad_performance.brand_id
       amazon_ad_performance: amazon_ad_performance.brand_id
       amazon_commerce_performance: amazon_commerce_performance.brand_id
+      amazon_attribution_overview: amazon_attribution_overview.brand_id
       channel_attribution: channel_attribution.brand_id
       customer_data: customer_data.brand_id
       platform_attribution_commerce: platform_attribution_commerce.brand_id
@@ -440,6 +441,7 @@ dimensions:
       google_ad_performance: google_ad_performance.report_date
       amazon_ad_performance: amazon_ad_performance.report_date
       amazon_commerce_performance: amazon_commerce_performance.report_date
+      amazon_attribution_overview: amazon_attribution_overview.report_date
       channel_attribution: channel_attribution.report_date
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date

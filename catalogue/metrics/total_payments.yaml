@@ -1,0 +1,41 @@
+id: total_payments
+display_name: Total Payments
+category: commerce
+status: certified
+description: >
+  Historical Analytics Total Payments card — count of Shopify placement
+  non-draft orders across COD + online/prepaid + manual + paytm card machine.
+formula:
+  human_readable: Count of payment-bucketed placement orders
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.total_payment_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions:
+- brand_id
+- order_date
+- payment_bucket
+- payment_method
+- payment_gateway
+supported_filters:
+- date_range
+- brand_id
+- payment_bucket
+data_owner: Commerce
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js buildPaymentBreakdownCte

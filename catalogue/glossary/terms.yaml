@@ -687,6 +687,18 @@ terms:
     canonical_id: amazon_net_sales
   - term: net sales (amazon-only)
     canonical_id: amazon_net_sales
+  - term: amazon net profit
+    canonical_id: amazon_net_profit
+  - term: amazon only net profit
+    canonical_id: amazon_net_profit
+  - term: net profit (amazon-only)
+    canonical_id: amazon_net_profit
+  - term: amazon profit
+    canonical_id: amazon_net_profit
+  - term: amazon net payout
+    canonical_id: amazon_net_payout
+  - term: amazon payout
+    canonical_id: amazon_net_payout
   - term: amazon only orders
     canonical_id: amazon_orders
   - term: shopify only orders
@@ -701,6 +713,26 @@ terms:
     canonical_id: refunded_orders
   - term: returned orders
     canonical_id: refunded_orders
+  - term: amazon return count
+    canonical_id: amazon_return_count
+  - term: amazon returns count
+    canonical_id: amazon_return_count
+  - term: amazon total return count
+    canonical_id: amazon_return_count
+  - term: amazon returns / cancels
+    canonical_id: amazon_return_count
+  - term: amazon refunds
+    canonical_id: amazon_return_revenue
+  - term: amazon returned orders
+    canonical_id: amazon_returned_orders
+  - term: amazon cancelled orders
+    canonical_id: amazon_cancelled_orders
+  - term: amazon return revenue
+    canonical_id: amazon_return_revenue
+  - term: amazon refund amount
+    canonical_id: amazon_return_revenue
+  - term: amazon refunds amount
+    canonical_id: amazon_return_revenue
   - term: COD orders
     canonical_id: cod_orders
   - term: cash on delivery

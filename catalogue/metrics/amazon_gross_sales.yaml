@@ -1,19 +1,19 @@
 id: amazon_gross_sales
-display_name: Gross Sales (Amazon-only — Attribution / effective_gross)
+display_name: Gross Sales (Amazon-only — ex-GST)
 category: commerce
 status: certified
 description: >
-  Amazon SP effective_gross_revenue (order_total on non-canceled placements) —
-  Amazon Attribution Gross Sales card and the Amazon slice inside All-channels
-  Gross Sales. Distinct from amazon_gross_revenue (daily operational incl-GST)
-  and from revenue_principal (P&L ex-GST principal). For Shopify-only use
-  gross_sales; for both use gross_sales_all_channels.
+  Amazon SP gross sales EX-GST on non-canceled placements =
+  effective_gross_revenue − revenue_tax. Matches the Amazon Attribution
+  "Gross Sales" card (June 2026 brand 20 = ₹227,645.99). Cancelled orders
+  excluded. Distinct from amazon_total_sales (incl-GST order_total_header).
 formula:
-  human_readable: SUM(coalesce(effective_gross_revenue, estimated_gross_revenue))
+  human_readable: SUM(coalesce(effective_gross_revenue, estimated_gross_revenue) - revenue_tax), non-canceled placements (ex-GST)
   authoritative_source: cube
 cube_mapping:
-  view: sales_all_channels
-  measure: sales_all_channels.amazon_gross_sales
+  view: amazon_attribution_overview
+  measure: amazon_attribution_overview.gross_sales
+  time_dimension: amazon_attribution_overview.report_date
 aggregation: additive
 unit: currency
 currency_default: INR
@@ -21,26 +21,18 @@ grain: daily
 supported_dimensions:
   - brand_id
   - report_date
-  - channel
-  - shipping_region
-  - shipping_country
-  - shipping_city
 supported_filters:
   - date_range
   - brand_id
-  - channel
-  - shipping_region
-  - shipping_country
-  - shipping_city
 data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 validation_tests:
-  - June 2026 brand 20 ≈ ₹2,68,622
+  - June 2026 brand 20 = ₹227,645.99
 deprecated_aliases: []
 dashboard_alignment:
   status: match
-  audited_on: '2026-07-21'
+  audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
-  evidence: amazonAttribution/buildAmazonAttributionPayload.js:131-133
+  evidence: amazonSummaryMetrics.js amazonDisplayGrossSales

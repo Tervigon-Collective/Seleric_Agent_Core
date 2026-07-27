@@ -3,12 +3,13 @@ display_name: Gross Sales (all channels, ex-GST)
 category: commerce
 status: certified
 description: >
-  All-channels Gross Sales: Shopify gross_sales_excl_tax plus Amazon
-  effective_gross_revenue (Attribution Gross Sales / order_total). Matches
-  Historical Analytics All channels Gross Sales (Amazon slice). For Shopify-only
-  use gross_sales.
+  All-channels Gross Sales (ex-GST): Shopify gross_sales_excl_tax plus Amazon
+  ex-GST gross (effective_gross_revenue − revenue_tax, non-canceled placements —
+  see amazon_gross_sales). 2026-07-27 fix: Amazon leg was incl-GST; now ex-GST,
+  matching the Amazon Attribution Gross Sales card. Matches Historical Analytics
+  All channels Gross Sales. For Shopify-only use gross_sales.
 formula:
-  human_readable: SUM(shopify gross_sales_excl_tax) + SUM(amazon effective_gross)
+  human_readable: SUM(shopify gross_sales_excl_tax) + SUM(amazon effective_gross_revenue - revenue_tax), ex-GST
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
