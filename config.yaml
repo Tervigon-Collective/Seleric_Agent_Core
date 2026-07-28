@@ -9,6 +9,37 @@ cube:
 pipeboard:
   mcp_url: https://meta-ads.mcp.pipeboard.co
 
+# Meta Marketing Graph API — backend for the granular Meta Ads management tools
+# (src/seleric_mcp/ads/meta/). Access token / app secret stay in .env.
+meta:
+  api_version: v21.0
+  graph_base_url: https://graph.facebook.com
+  http_timeout_seconds: 30
+  max_retries: 2
+  write_policies:
+    # Hard cap (minor currency units) rejected by meta_campaigns/adsets_update_budget.
+    # 0 = unlimited (blueprint §12).
+    maximum_budget_minor: 0
+  # Cache TTL for resolved brand_envs credentials (seconds).
+  cred_cache_ttl_seconds: 300
+
+# Google Ads API backend for ads/google/. Shared app creds (developer token,
+# OAuth client id/secret, login_customer_id) come from env (GOOGLE_ADS_* in
+# .env.local); per-tenant refresh_token + customer_id come from core.brand_envs.
+google:
+  api_version: v21
+  cred_cache_ttl_seconds: 300
+  write_policies:
+    # Hard cap (micros) rejected by google_budgets_create/update. 0 = unlimited.
+    maximum_budget_micros: 0
+
+# Postgres holding multi-tenant ad credentials in core.brand_envs (same DB the
+# data_platform/mage-ai loaders read). Connection secrets come from env
+# (PG_DSN or PG*/POSTGRES_* in .env.local); only non-secret defaults live here.
+postgres:
+  schema: core
+  connect_timeout: 8
+
 gateway:
   # Global kill switch for write actions. Must be true to allow commits.
   write_enabled: false
@@ -16,6 +47,13 @@ gateway:
   scopes:
     - metrics:read
     - meta_ads:write:status
+    # Granular Meta Ads management tools (ads/meta/): read = entity list/get +
+    # insights; write = mutations (also gated by write_enabled above).
+    - meta_ads:read
+    - meta_ads:write
+    # Granular Google Ads management tools (ads/google/).
+    - google_ads:read
+    - google_ads:write
 
 storage:
   # SQLite path relative to project root (or absolute)

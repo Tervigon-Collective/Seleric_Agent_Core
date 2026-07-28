@@ -20,6 +20,13 @@ from mcp.server.fastmcp import FastMCP
 from ..actions.broker import ActionBroker
 from ..actions.executors.pipeboard import PipeboardExecutor
 from ..actions.stores import ActionStore, IdempotencyStore
+from ..ads.google.client import GoogleAdsApiClient
+from ..ads.google.credentials import GoogleCredentialStore
+from ..ads.google.tools import register_google_ads_tools
+from ..ads.idempotency import AdsIdempotencyStore, OperationLog
+from ..ads.meta.client import MetaAdsClient
+from ..ads.meta.credentials import MetaCredentialStore
+from ..ads.meta.tools import register_meta_ads_tools
 from ..app.insight_engine import explain as insight_explain
 from ..app.models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from ..app.query_planner import QueryPlanner
@@ -90,6 +97,16 @@ class AppContext:
             ),
             audit=self.audit,
         )
+        # --- Meta Ads management layer (ads/meta/) ---
+        self.meta_ads = MetaAdsClient(settings)
+        self.meta_creds = MetaCredentialStore(settings)
+        # --- Google Ads management layer (ads/google/) ---
+        self.google_ads = GoogleAdsApiClient(settings)
+        self.google_creds = GoogleCredentialStore(settings)
+        self.ads_idempotency = AdsIdempotencyStore(
+            self.db, window=timedelta(hours=settings.idempotency_window_hours)
+        )
+        self.ads_ops = OperationLog(self.db)
         self._freshness_cache: tuple[float, dict] | None = None
         self._view_latest_cache: dict[str, tuple[float, str | None]] = {}
 
@@ -563,6 +580,14 @@ def build_server(settings: Settings) -> FastMCP:
         _log_call("actions_status", action_request_id=action_request_id)
         status = ctx.broker.status(action_request_id)
         return status if status else {"error": f"Unknown action request '{action_request_id}'"}
+
+    # ---------------- Meta Ads management tools (ads/meta/) ----------------
+
+    register_meta_ads_tools(mcp, ctx)
+
+    # ---------------- Google Ads management tools (ads/google/) ----------------
+
+    register_google_ads_tools(mcp, ctx)
 
     # ---------------- resources ----------------
 

@@ -61,6 +61,36 @@ CREATE TABLE IF NOT EXISTS audit_log (
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_audit_log_event ON audit_log(event, created_at);
+
+-- Client-supplied-key idempotency for the granular Ads write tools (blueprint
+-- §13). Distinct from idempotency_keys (broker-derived keys): here the key is
+-- the caller's idempotency_key, scoped per tool, and we store the full prior
+-- result so a replay returns it verbatim. Same key + same request_hash => HIT
+-- (return stored result); same key + different request_hash => CONFLICT.
+CREATE TABLE IF NOT EXISTS ads_idempotency (
+    tool_name TEXT NOT NULL,
+    idempotency_key TEXT NOT NULL,
+    request_hash TEXT NOT NULL,
+    result_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    PRIMARY KEY (tool_name, idempotency_key)
+);
+
+-- Structured per-tool-call operation log for the Ads tools (blueprint §16).
+CREATE TABLE IF NOT EXISTS ads_operations (
+    operation_id TEXT PRIMARY KEY,
+    tool_name TEXT NOT NULL,
+    account_id TEXT,
+    entity_ids TEXT,
+    status TEXT NOT NULL,
+    request_id TEXT,
+    error_code TEXT,
+    idempotency_key TEXT,
+    duration_ms INTEGER,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_ads_operations_tool ON ads_operations(tool_name, created_at);
 """
 
 
