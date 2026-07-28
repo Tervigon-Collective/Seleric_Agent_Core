@@ -3,17 +3,16 @@ display_name: Total Sales (Amazon-only, incl. GST)
 category: commerce
 status: certified
 description: >
-  Amazon SP order_total_header for placements in range; canceled orders
-  contribute ₹0 (the live code zeroes them out — they are NOT summed at
-  their order_total as previously documented here). The Amazon slice inside
-  All-channels Total Sales. For Shopify-only use total_sales; for both
-  channels use total_sales_all_channels.
+  Amazon SP order_total_header for non-canceled placements in range.
+  Matches the Amazon Attribution "Total Sales" card (June 2026 brand 20 =
+  ₹268,622.00). Canceled orders contribute ₹0.
 formula:
-  human_readable: SUM(amazon order_total_header, with canceled orders zeroed to ₹0)
+  human_readable: SUM(order_total_header) on non-canceled Amazon SP placements
   authoritative_source: cube
 cube_mapping:
-  view: sales_all_channels
-  measure: sales_all_channels.amazon_total_sales
+  view: amazon_attribution_overview
+  measure: amazon_attribution_overview.total_sales
+  time_dimension: amazon_attribution_overview.report_date
 aggregation: additive
 unit: currency
 currency_default: INR
@@ -21,17 +20,9 @@ grain: daily
 supported_dimensions:
   - brand_id
   - report_date
-  - channel
-  - shipping_region
-  - shipping_country
-  - shipping_city
 supported_filters:
   - date_range
   - brand_id
-  - channel
-  - shipping_region
-  - shipping_country
-  - shipping_city
 data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
@@ -42,16 +33,10 @@ examples:
       measures: [amazon_total_sales]
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
-  - June 2026 brand 20 = ₹2,73,620
+  - June 2026 brand 20 = ₹268,622.00
 deprecated_aliases: []
 dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
+  status: match
+  audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
-  evidence: amazonSpOrderTotals.js:470
-  note: >
-    The catalogue said canceled Amazon orders are included in this total at
-    their order_total value; amazonSpOrderTotals.js:470 shows the live code
-    zeroes canceled orders out instead, so they contribute ₹0. Corrected
-    description and formula.human_readable to state the zeroing behavior
-    rather than inclusion at order_total.
+  evidence: amazonSummaryMetrics.js amazonDisplayTotalSales

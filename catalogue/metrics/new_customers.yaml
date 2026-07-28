@@ -1,0 +1,34 @@
+id: new_customers
+display_name: New Customers
+category: customer
+status: certified
+description: >
+  Count of first-time attributed customers (is_new_customer=1) with order_date
+  in range from gold.fct_order_attribution argMax. Matches Historical
+  getNewCustomerMetrics.
+formula:
+  human_readable: COUNT(new customers where is_new_customer = 1)
+  authoritative_source: cube
+cube_mapping:
+  view: ltv_cac
+  measure: ltv_cac.new_customers
+aggregation: additive
+unit: count
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst]
+  scopes: [metrics:read]
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js getNewCustomerMetrics

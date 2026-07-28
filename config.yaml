@@ -49,10 +49,35 @@ tunables:
   freshness_grace_days: 1
 
 # Terminal / web chat clients (scripts/chat_*.py). API key stays in .env.
+# One Azure AI Foundry endpoint serves every model below — routing just swaps
+# the model name. `deployment` is the legacy single-model fallback used when
+# the `llm` section is absent.
 azure:
   endpoint: https://llama4-maverick-prod-resource.cognitiveservices.azure.com
   deployment: gpt-5-mini
   api_version: 2024-12-01-preview
+
+# Task-tier model routing + client-side rate limiting (see src/seleric_mcp/llm/).
+# Models within a tier are tried left-to-right; the first with rate-limit
+# headroom wins. On a 429 we fail over immediately to the next, then to the
+# global fallback. Each model has its own independent bucket.
+llm:
+  tiers:
+    # Fast/cheap models drive the agentic tool-calling loop.
+    tools: [gpt-4o-code, DeepSeek-V4-Flash]
+    # Stronger models produce the final synthesis / answer pass.
+    reasoning: [gpt-5-mini, DeepSeek-V4-Pro]
+  # Last resort for any tier when everything above is exhausted.
+  fallback: Kimi-K2.6
+  # Per-model limits (each model independent). Provider caps: 20k TPM, 20 RPM.
+  limits:
+    requests_per_minute: 20
+    tokens_per_minute: 20000
+  # Tokens reserved per call for the not-yet-generated completion.
+  completion_reserve: 1024
+  # Optional per-model overrides, e.g.:
+  # model_limits:
+  #   Kimi-K2.6: { requests_per_minute: 10, tokens_per_minute: 10000 }
 
 chat:
   max_tool_rounds: 1100

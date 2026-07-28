@@ -151,6 +151,24 @@ class ChatSettings:
     tool_preview_chars: int = 4000
 
 
+@dataclass(frozen=True)
+class LLMSettings:
+    """Task-tier model routing + per-model rate limits for the chat clients.
+
+    ``tiers`` maps a task tier ("tools", "reasoning") to the ordered list of
+    models to try; ``fallback`` is the last-resort model for any tier. Limits
+    are per-model (each model gets its own independent bucket); ``model_limits``
+    overrides the default for a specific model.
+    """
+
+    tiers: dict[str, tuple[str, ...]]
+    fallback: str
+    requests_per_minute: float = 20.0
+    tokens_per_minute: float = 20000.0
+    completion_reserve: int = 1024
+    model_limits: dict[str, tuple[float, float]] = field(default_factory=dict)
+
+
 def load_settings(config_path: Path | None = None) -> Settings:
     _load_env()
     cfg = _load_yaml_config(config_path or CONFIG_PATH)
@@ -282,6 +300,60 @@ def load_azure_settings(config_path: Path | None = None) -> AzureSettings:
         endpoint=endpoint,
         deployment=deployment,
         api_version=api_version,
+    )
+
+
+def load_llm_settings(config_path: Path | None = None) -> LLMSettings:
+    """Load the `llm` section of config.yaml (task-tier routing + rate limits).
+
+    Backward-compatible: if no `llm` section exists, both tiers route to the
+    single `azure.deployment` model so existing single-model setups keep
+    working with rate limiting applied.
+    """
+    _load_env()
+    cfg = _load_yaml_config(config_path or CONFIG_PATH)
+    llm = _section(cfg, "llm")
+
+    fallback_default = load_azure_settings(config_path).deployment
+
+    tiers_cfg = llm.get("tiers")
+    tiers: dict[str, tuple[str, ...]] = {}
+    if isinstance(tiers_cfg, dict):
+        for tier, models in tiers_cfg.items():
+            if isinstance(models, str):
+                models = [models]
+            names = tuple(str(m).strip() for m in (models or []) if str(m).strip())
+            if names:
+                tiers[str(tier)] = names
+    if not tiers:
+        # No routing configured — mirror the legacy single deployment.
+        single = fallback_default or ""
+        tiers = {"tools": (single,), "reasoning": (single,)}
+
+    fallback = str(_cfg_get(llm, "fallback", "") or "").strip() or fallback_default
+
+    limits = _section(llm, "limits")
+    rpm = _as_float(_cfg_get(limits, "requests_per_minute", 20), 20.0)
+    tpm = _as_float(_cfg_get(limits, "tokens_per_minute", 20000), 20000.0)
+    completion_reserve = _as_int(_cfg_get(llm, "completion_reserve", 1024), 1024)
+
+    model_limits: dict[str, tuple[float, float]] = {}
+    per_model = _cfg_get(llm, "model_limits", {})
+    if isinstance(per_model, dict):
+        for name, spec in per_model.items():
+            spec = spec or {}
+            model_limits[str(name)] = (
+                _as_float(spec.get("requests_per_minute"), rpm),
+                _as_float(spec.get("tokens_per_minute"), tpm),
+            )
+
+    return LLMSettings(
+        tiers=tiers,
+        fallback=fallback,
+        requests_per_minute=rpm,
+        tokens_per_minute=tpm,
+        completion_reserve=completion_reserve,
+        model_limits=model_limits,
     )
 
 

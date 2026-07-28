@@ -2,28 +2,28 @@ id: google_attribution_net_sales
 display_name: Google Attribution Net Sales
 category: attribution
 status: certified
-description: 'Google Attribution Analysis Overview Net Sales — eligible Shopify commerce
-  for last-touch Google placements. Not ad-day attributed revenue.
-
-  '
+description: >
+  Google Attribution Overview / Historical Google channel Net Sales.
+  Gross − Discounts − event-date Returns − event-date Cancels (channel_pnl).
+  NOT placement-only net on platform_attribution_commerce.
 formula:
-  human_readable: SUM(commerce net sales where lt_platform = google)
+  human_readable: Google gross − discounts − event returns − event cancels
   authoritative_source: cube
 cube_mapping:
-  view: platform_attribution_commerce
-  measure: platform_attribution_commerce.google_net_sales
+  view: channel_pnl
+  measure: channel_pnl.google_net_sales
 aggregation: additive
 unit: currency
 currency_default: INR
-grain: order
+grain: day
 supported_dimensions:
 - brand_id
 - report_date
-- platform
+- channel
 supported_filters:
 - date_range
 - brand_id
-- platform
+- channel
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:
@@ -34,10 +34,10 @@ access_policy:
   scopes:
   - metrics:read
 validation_tests:
-- June 2026 brand 20 ≈ ₹9,89,125.90
+- June 2026 brand 20 ≈ ₹9,52,068.84 (dashboard)
 deprecated_aliases: []
 dashboard_alignment:
   status: match
-  audited_on: '2026-07-21'
+  audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
-  evidence: googleAttribution/analyticsClickhouse.js:783-793
+  evidence: pnlService.getAttributionChannelPnl + lineItemHistoricalSql.buildChannelMetricsSql

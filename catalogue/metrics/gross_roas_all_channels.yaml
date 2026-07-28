@@ -1,0 +1,45 @@
+id: gross_roas_all_channels
+display_name: Gross ROAS (All Channels)
+category: finance
+status: certified
+description: >
+  Historical Analytics All-channels Gross ROAS =
+  (Shopify gross ex-GST + Amazon Attribution gross) / total ad spend.
+formula:
+  human_readable: (shopify_gross + amazon_gross) / total_ad_spend
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.gross_roas_all_channels
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  scopes:
+  - metrics:read
+examples:
+- question: Gross ROAS for June 2026
+  request:
+    measures:
+    - gross_roas_all_channels
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard Historical Analytics Gross ROAS (All channels)
+  note: >
+    Default for bare "Gross ROAS". Shopify-only uses gross_roas.

@@ -1,15 +1,13 @@
-id: amazon_returns_cancels
-display_name: Returns + Cancels Orders (Amazon-only)
+id: amazon_return_count
+display_name: Return Count (Amazon-only, Dashboard Equivalent)
 category: commerce
 status: certified
 description: >
-  Combined count matching the Amazon Attribution / Historical "Returns /
-  Cancels" card: cancelled orders on purchase_date PLUS returned orders on
-  return_delivery_date (Returns Report). June 2026 brand 20 = 15 cancelled +
-  9 returned = 24. Equals amazon_cancelled_orders + amazon_returned_orders
-  on their respective axes. Scope: Amazon SP-only.
+  Alias for the dashboard "Returns / Cancels" card on Amazon: returned orders
+  (delivery-date Returns Report) plus cancelled orders (purchase_date).
+  June 2026 brand 20 = 24. Same Cube measure as amazon_returns_cancels.
 formula:
-  human_readable: amazon_cancelled_orders (purchase_date) + amazon_returned_orders (delivery-date)
+  human_readable: amazon_returned_orders + amazon_cancelled_orders
   authoritative_source: cube
 cube_mapping:
   view: amazon_attribution_overview
@@ -29,12 +27,12 @@ access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 examples:
-  - question: Amazon returns and cancellations last 30 days
+  - question: Amazon total return count last month
     request:
-      measures: [amazon_returns_cancels]
-      time_range: {preset: last_30d}
+      measures: [amazon_return_count]
+      time_range: {preset: last_month}
 validation_tests:
-  - amazon_returns_cancels == amazon_cancelled_orders + amazon_returned_orders
+  - amazon_return_count == amazon_returns_cancels
   - June 2026 brand 20 = 24
 deprecated_aliases: []
 dashboard_alignment:

@@ -1,35 +1,24 @@
 id: amazon_return_revenue
-display_name: Returns Revenue (Amazon-only, incl. GST)
+display_name: Returns Revenue (Amazon-only — Returns Report)
 category: commerce
 status: certified
 description: >
-  Customer refund amount posted against Amazon SP orders, incl. GST, on
-  refund-posted date (return/adjustment axis) — the Amazon slice of the P&L
-  Returns card. Not an order count (use amazon_returned_orders for that).
-  Sourced from gold.fct_amazon_daily_pnl
-  (serve.amazon_commerce_daily.returned_revenue). Unlike Shopify's
-  return_revenue (ex-GST, event-date), this figure is incl.-GST to match the
-  rest of the Amazon commerce surface (amazon_gross_revenue,
-  amazon_net_sales) — never sum directly against Shopify's ex-GST return_revenue
-  without adjusting basis. Pending customer refunds not yet posted to Amazon
-  settlement (gold.int_amazon_return_reconciliation,
-  REPORT_REFUND_PENDING_FINANCE) are folded into the Returns card on the live
-  Seleric Dashboard but are a Node-Backend-only accrual overlay — not
-  reflected in this Cube measure. There is no equivalent "cancelled revenue"
-  figure for Amazon (see amazon_cancelled_orders). Scope: Amazon SP-only. For
-  the Shopify-only equivalent use return_revenue; for all-platform ad spend
-  use total_ad_spend.
+  Amazon Refunds / return revenue from the Seller Central Returns Report on
+  return_delivery_date (delivery-date axis), matching the Amazon Attribution
+  Overview "Refunds" card (June 2026 brand 20 = ₹12,892.50). Deduped per
+  record_id (canonical ids only; excludes fbm_returns: hashes and E+ sci-notation
+  dups). Rejected return lines excluded. This SUPERSEDES the older refund-posted
+  date / refund_principal axis on amazon_commerce_performance.returned_revenue
+  (which returned ₹18,689 for the same June window). Scope: Amazon SP-only.
 formula:
   human_readable: >
-    SUM(refund_principal), incl. GST, on refund-posted date. The catalogued
-    effective_refunds → estimated_refunds → total_refund_amount /
-    refund_principal fallback chain is dead code the live query never reaches
-    — see dashboard_alignment.
+    SUM(refunded_amount) from gold.fct_amazon_return_items on return_delivery_date
+    (canonical record_ids, non-rejected)
   authoritative_source: cube
 cube_mapping:
-  view: amazon_commerce_performance
-  measure: amazon_commerce_performance.returned_revenue
-  time_dimension: amazon_commerce_performance.report_date
+  view: amazon_attribution_overview
+  measure: amazon_attribution_overview.return_revenue
+  time_dimension: amazon_attribution_overview.report_date
 aggregation: additive
 unit: currency
 currency_default: INR
@@ -51,18 +40,11 @@ examples:
       time_range: {preset: last_month}
 validation_tests:
   - amazon_return_revenue >= 0
-  - reconciles to Seleric Dashboard Historical Analytics Amazon Seller Partner Returns card (settled refunds only; excludes pending-refund accrual overlay)
+  - June 2026 brand 20 = ₹12,892.50
 deprecated_aliases:
   - amazon_refund_revenue
 dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
+  status: match
+  audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
-  evidence: amazonSpOrderTotals.js:393,430,472
-  note: >
-    The catalogued resolution logic (effective_refunds, falling back to
-    estimated_refunds, falling back to total_refund_amount / refund_principal)
-    is unreachable dead code in Node-Backend; the live query only ever reads
-    refund_principal. Corrected formula.human_readable to describe the actual
-    single-field resolution rather than the fallback chain; the incl.-GST
-    basis claim itself was not flagged as wrong and is left as-is.
+  evidence: amazonReturnsHelpers.js buildAmazonDeliveryDateReturnsSql; AmazonSummaryCards Refunds

@@ -25,8 +25,13 @@ from openai import AzureOpenAI
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from seleric_mcp.config import load_azure_settings, load_chat_settings  # noqa: E402
+from seleric_mcp.config import (  # noqa: E402
+    load_azure_settings,
+    load_chat_settings,
+    load_llm_settings,
+)
 from seleric_mcp.gateway.prompts import NO_HALLUCINATION_GUARD  # noqa: E402
+from seleric_mcp.llm import LLMRouter, RateLimit  # noqa: E402
 
 MAX_TOOL_ROUNDS = load_chat_settings().max_tool_rounds
 
@@ -108,6 +113,22 @@ def _load_azure() -> tuple[AzureOpenAI, str]:
     return client, azure.deployment
 
 
+def _build_router(client: AzureOpenAI) -> LLMRouter:
+    """Build the task-tier router with per-model rate limiting from config."""
+    llm = load_llm_settings()
+    return LLMRouter(
+        client,
+        tiers=llm.tiers,
+        fallback=llm.fallback,
+        default_limit=RateLimit(llm.requests_per_minute, llm.tokens_per_minute),
+        model_limits={
+            name: RateLimit(rpm, tpm)
+            for name, (rpm, tpm) in llm.model_limits.items()
+        },
+        completion_reserve=llm.completion_reserve,
+    )
+
+
 def _mcp_tools_to_openai(tools: list[Any]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for t in tools:
@@ -140,10 +161,12 @@ def _tool_result_text(result: Any) -> str:
     return "\n".join(parts) if parts else "{}"
 
 
-async def _chat_loop(llm: AzureOpenAI, deployment: str, session: ClientSession) -> None:
+async def _chat_loop(router: LLMRouter, session: ClientSession) -> None:
     listed = await session.list_tools()
     openai_tools = _mcp_tools_to_openai(listed.tools) + [SCRATCHPAD_TOOL]
-    print(f"Connected. {len(openai_tools)} tools from seleric-mcp. Model: {deployment}")
+    print(f"Connected. {len(openai_tools)} tools from seleric-mcp.")
+    print(f"  tool models: {', '.join(router.candidates('tools'))}")
+    print(f"  reasoning models: {', '.join(router.candidates('reasoning'))}")
     print("Type a question (or 'exit' / 'quit' / 'scratchpad').\n")
 
     scratchpad = Scratchpad()
@@ -170,22 +193,30 @@ async def _chat_loop(llm: AzureOpenAI, deployment: str, session: ClientSession) 
 
         messages.append({"role": "user", "content": user})
 
+        # Fast tool-call models drive the loop; when the agent stops calling
+        # tools we escalate the final synthesis to a reasoning model.
+        tier = "tools"
         for _ in range(MAX_TOOL_ROUNDS):
             messages[1] = {"role": "system", "content": scratchpad.render()}
             try:
-                resp = llm.chat.completions.create(
-                    model=deployment,
+                resp = router.complete(
+                    tier=tier,
                     messages=messages,
                     tools=openai_tools,
                     tool_choice="auto",
                 )
             except Exception as exc:
                 print(f"LLM error: {exc}")
-                messages.pop()  # drop failed user turn pairing if needed
                 break
 
-            choice = resp.choices[0].message
+            choice = resp.message
             tool_calls = choice.tool_calls or []
+
+            # Tool model is ready to answer -> redo the synthesis pass with a
+            # reasoning model (without committing the tentative answer).
+            if not tool_calls and tier == "tools":
+                tier = "reasoning"
+                continue
 
             assistant_msg: dict[str, Any] = {
                 "role": "assistant",
@@ -207,9 +238,12 @@ async def _chat_loop(llm: AzureOpenAI, deployment: str, session: ClientSession) 
 
             if not tool_calls:
                 text = (choice.content or "").strip() or "(empty response)"
-                print(f"\nAgent> {text}\n")
+                print(f"\nAgent> [{resp.model}] {text}\n")
                 break
 
+            # Got tool calls — execute them and stay in the tool tier.
+            tier = "tools"
+            print(f"  ({resp.model})")
             for tc in tool_calls:
                 name = tc.function.name
                 try:
@@ -236,7 +270,8 @@ async def _chat_loop(llm: AzureOpenAI, deployment: str, session: ClientSession) 
 
 
 async def main() -> None:
-    llm, deployment = _load_azure()
+    llm, _deployment = _load_azure()
+    router = _build_router(llm)
 
     # Use the current interpreter + module entrypoint (avoids locked .exe on Windows
     # when an HTTP seleric-mcp process is already running).
@@ -256,7 +291,7 @@ async def main() -> None:
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            await _chat_loop(llm, deployment, session)
+            await _chat_loop(router, session)
 
 
 if __name__ == "__main__":

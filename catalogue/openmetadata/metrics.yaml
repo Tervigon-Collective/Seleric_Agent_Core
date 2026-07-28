@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 190
+count: 207
 metrics:
   active_orders:
     category: commerce
@@ -78,13 +78,13 @@ metrics:
     dashboard_audited_on: '2026-07-21'
   amazon_cancelled_orders:
     category: commerce
-    cube_view: amazon_commerce_performance
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.CancelledOrder
     om_name: amazonCancelledOrders
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-27'
   amazon_gross_revenue:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -96,13 +96,13 @@ metrics:
     dashboard_audited_on: '2026-07-21'
   amazon_gross_sales:
     category: commerce
-    cube_view: sales_all_channels
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.CommerceOrder
     om_name: amazonGrossSales
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-27'
   amazon_marketplace_fees:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -112,6 +112,14 @@ metrics:
     om_name: amazonMarketplaceFees
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  amazon_mer:
+    category: amazon
+    cube_view: amazon_attribution_overview
+    contract: null
+    glossary: []
+    om_name: amazonMer
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   amazon_net_payout:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -120,16 +128,25 @@ metrics:
     - Commerce.CommerceOrder
     om_name: amazonNetPayout
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-27'
+  amazon_net_profit:
+    category: commerce
+    cube_view: amazon_attribution_overview
+    contract: null
+    glossary:
+    - Finance.NetProfit
+    om_name: amazonNetProfit
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   amazon_net_sales:
     category: commerce
-    cube_view: sales_all_channels
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.CommerceOrder
     om_name: amazonNetSales
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   amazon_orders:
     category: commerce
     cube_view: orders_all_channels
@@ -148,42 +165,51 @@ metrics:
     om_name: amazonPlatformFees
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  amazon_return_count:
+    category: commerce
+    cube_view: amazon_attribution_overview
+    contract: null
+    glossary:
+    - Commerce.returnsCancels
+    om_name: amazonReturnCount
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   amazon_return_revenue:
     category: commerce
-    cube_view: amazon_commerce_performance
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.ReturnCancelRevenue
     om_name: amazonReturnRevenue
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   amazon_returned_orders:
     category: commerce
-    cube_view: amazon_commerce_performance
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.ReturnedOrder
     om_name: amazonReturnedOrders
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   amazon_returns_cancels:
     category: commerce
-    cube_view: amazon_commerce_performance
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.returnsCancels
     om_name: amazonReturnsCancels
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-27'
   amazon_total_sales:
     category: commerce
-    cube_view: sales_all_channels
+    cube_view: amazon_attribution_overview
     contract: null
     glossary:
     - Commerce.CommerceOrder
     om_name: amazonTotalSales
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   aov:
     category: commerce
     cube_view: commerce_orders
@@ -319,6 +345,14 @@ metrics:
     om_name: beRoas
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  be_roas_all_channels:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary: []
+    om_name: beRoasAllChannels
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   bounce_rate:
     category: web_analytics
     cube_view: funnel_daily
@@ -327,6 +361,14 @@ metrics:
     om_name: bounceRate
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  cac:
+    category: finance
+    cube_view: ltv_cac
+    contract: null
+    glossary: []
+    om_name: cac
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   cancel_revenue:
     category: commerce
     cube_view: canonical_pnl
@@ -529,13 +571,13 @@ metrics:
     dashboard_audited_on: '2026-07-21'
   google_attribution_net_sales:
     category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
+    cube_view: channel_pnl
+    contract: null
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: googleAttributionNetSales
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-27'
   google_attribution_orders:
     category: attribution
     cube_view: platform_attribution_commerce
@@ -617,6 +659,22 @@ metrics:
     om_name: googleInteractions
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  google_net_cogs:
+    category: attribution
+    cube_view: channel_pnl
+    contract: null
+    glossary: []
+    om_name: googleNetCogs
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
+  google_net_profit:
+    category: attribution
+    cube_view: channel_pnl
+    contract: null
+    glossary: []
+    om_name: googleNetProfit
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   google_spend:
     category: paid_media
     cube_view: google_ad_performance
@@ -653,6 +711,14 @@ metrics:
     om_name: grossRoas
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  gross_roas_all_channels:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary: []
+    om_name: grossRoasAllChannels
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   gross_sales:
     category: commerce
     cube_view: commerce_orders
@@ -707,6 +773,22 @@ metrics:
     om_name: lifetimeOrders
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  ltv:
+    category: finance
+    cube_view: ltv_cac
+    contract: null
+    glossary: []
+    om_name: ltv
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
+  ltv_cac_ratio:
+    category: finance
+    cube_view: ltv_cac
+    contract: null
+    glossary: []
+    om_name: ltvCacRatio
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   mer:
     category: finance
     cube_view: canonical_pnl
@@ -790,13 +872,13 @@ metrics:
     dashboard_audited_on: '2026-07-21'
   meta_attribution_net_sales:
     category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
+    cube_view: channel_pnl
+    contract: null
     glossary:
     - Attribution.AttributedNetRevenue
     om_name: metaAttributionNetSales
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-27'
   meta_attribution_orders:
     category: attribution
     cube_view: platform_attribution_commerce
@@ -1030,6 +1112,22 @@ metrics:
     om_name: metaLinkClicks
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  meta_net_cogs:
+    category: attribution
+    cube_view: channel_pnl
+    contract: null
+    glossary: []
+    om_name: metaNetCogs
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
+  meta_net_profit:
+    category: attribution
+    cube_view: channel_pnl
+    contract: null
+    glossary: []
+    om_name: metaNetProfit
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   meta_reach:
     category: paid_media_diagnostic
     cube_view: meta_ad_performance
@@ -1226,15 +1324,23 @@ metrics:
     om_name: netRoas
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  net_roas_all_channels:
+    category: finance
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
+    glossary: []
+    om_name: netRoasAllChannels
+    dashboard_status: drift_corrected
+    dashboard_audited_on: '2026-07-27'
   net_sales_all_channels:
     category: commerce
-    cube_view: sales_all_channels
-    contract: null
+    cube_view: canonical_pnl
+    contract: canonical_pnl_contract_v1
     glossary:
     - Commerce.CommerceOrder
     om_name: netSalesAllChannels
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   new_customer_orders:
     category: commerce
     cube_view: commerce_orders
@@ -1243,6 +1349,14 @@ metrics:
     - Commerce.CommerceOrder
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  new_customers:
+    category: customer
+    cube_view: ltv_cac
+    contract: null
+    glossary: []
+    om_name: newCustomers
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   operating_cost:
     category: finance
     cube_view: canonical_pnl
@@ -1513,6 +1627,15 @@ metrics:
     om_name: returnCancelRevenue
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  return_cancel_revenue_all_channels:
+    category: commerce
+    cube_view: returns_cancels_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: returnCancelRevenueAllChannels
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   return_recovered_cogs:
     category: operations
     cube_view: return_lifecycle
@@ -1540,6 +1663,15 @@ metrics:
     om_name: returnsCancels
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  returns_cancels_all_channels:
+    category: commerce
+    cube_view: returns_cancels_all_channels
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: returnsCancelsAllChannels
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   returns_excl_tax:
     category: operations
     cube_view: refund_events
@@ -1630,6 +1762,15 @@ metrics:
     om_name: totalOrders
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  total_payments:
+    category: commerce
+    cube_view: commerce_orders
+    contract: commerce_performance_contract_v1
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: totalPayments
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-27'
   total_sales:
     category: commerce
     cube_view: commerce_orders

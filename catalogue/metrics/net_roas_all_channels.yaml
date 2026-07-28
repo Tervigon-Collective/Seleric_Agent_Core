@@ -1,0 +1,36 @@
+id: net_roas_all_channels
+display_name: Net ROAS (All Channels)
+category: finance
+status: certified
+description: >
+  Historical All-channels Net ROAS =
+  (all-channel net sales − all-channel TOC) / total ad spend.
+  Uses Amazon Attribution arms for Amazon net / product cost / fees.
+formula:
+  human_readable: (net_sales_all − toc_all) / total_ad_spend
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.net_roas_all_channels
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  scopes:
+  - metrics:read
+deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-27'
+  note: Inherits Shopify commerce_performance net (~7k) and FE COGS residuals.

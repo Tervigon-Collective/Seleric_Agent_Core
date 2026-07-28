@@ -1,0 +1,35 @@
+id: returns_cancels_all_channels
+display_name: Returns / Cancels (All Channels)
+category: commerce
+status: certified
+description: >
+  Historical Analytics All-channels Returns/Cancels count: Shopify distinct
+  event-date return+cancel orders + Amazon cancelled (purchase_date) + Amazon
+  returned (return_delivery_date). For Shopify-only use returns_cancels.
+formula:
+  human_readable: shopify event-date returns+cancels + amazon attribution returns_cancels
+  authoritative_source: cube
+cube_mapping:
+  view: returns_cancels_all_channels
+  measure: returns_cancels_all_channels.returns_cancels
+aggregation: additive
+unit: count
+grain: brand × day
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+supported_filters:
+- date_range
+- brand_id
+- channel
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed: [exec, finance, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard Historical Analytics All-channels Returns/Cancels

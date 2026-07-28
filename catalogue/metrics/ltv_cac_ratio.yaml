@@ -1,0 +1,49 @@
+id: ltv_cac_ratio
+display_name: LTV:CAC
+category: finance
+status: certified
+description: >
+  Historical Analytics LTV:CAC for first-time attributed customers in the period.
+  LTV = new_customer_revenue / new_customers; CAC = total_ad_spend / new_customers;
+  ratio = LTV / CAC. Matches getNewCustomerMetrics + Meta+Google+Amazon spend.
+  new_customer_revenue uses attributedPlacementRevenueExpr: cancelled/voided → 0;
+  else if net_revenue > 0 → net_revenue_excl_tax; else 0 (unpaid does not inflate LTV).
+formula:
+  human_readable: (new_customer_revenue / new_customers) / (total_ad_spend / new_customers)
+  authoritative_source: cube
+cube_mapping:
+  view: ltv_cac
+  measure: ltv_cac.ltv_cac_ratio
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: LTV:CAC for June 2026
+  request:
+    measures:
+    - ltv_cac_ratio
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-27'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js getNewCustomerMetrics + fe performanceSummary.js
