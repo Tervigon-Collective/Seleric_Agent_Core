@@ -91,6 +91,36 @@ SCRATCHPAD_TOOL = {
 }
 
 
+def sanitize_tool_arguments(raw: str | None) -> str:
+    """Return a guaranteed-valid JSON object string for an assistant tool call.
+
+    Some tool-tier models emit '' or malformed/truncated JSON for
+    function.arguments. Echoing that back to the chat API is rejected with
+    400 'Assistant tool call function.arguments must be valid JSON', and because
+    the bad message stays in history it poisons every later turn. Coerce anything
+    unparseable (or non-object) to '{}'.
+    """
+    if not raw or not raw.strip():
+        return "{}"
+    try:
+        parsed = json.loads(raw)
+    except (json.JSONDecodeError, ValueError):
+        return "{}"
+    return json.dumps(parsed) if isinstance(parsed, dict) else "{}"
+
+
+def sanitize_history(messages: list[dict]) -> None:
+    """In-place repair of any assistant tool_call arguments that aren't valid
+    JSON — heals conversations poisoned before this fix so a stuck session
+    recovers on the next turn instead of 400-ing forever."""
+    for m in messages:
+        if m.get("role") == "assistant" and m.get("tool_calls"):
+            for tc in m["tool_calls"]:
+                fn = tc.get("function")
+                if isinstance(fn, dict):
+                    fn["arguments"] = sanitize_tool_arguments(fn.get("arguments"))
+
+
 def _load_azure() -> tuple[AzureOpenAI, str]:
     azure = load_azure_settings()
     missing = [
@@ -198,6 +228,7 @@ async def _chat_loop(router: LLMRouter, session: ClientSession) -> None:
         tier = "tools"
         for _ in range(MAX_TOOL_ROUNDS):
             messages[1] = {"role": "system", "content": scratchpad.render()}
+            sanitize_history(messages)  # heal any prior malformed tool args
             try:
                 resp = router.complete(
                     tier=tier,
@@ -229,7 +260,7 @@ async def _chat_loop(router: LLMRouter, session: ClientSession) -> None:
                         "type": "function",
                         "function": {
                             "name": tc.function.name,
-                            "arguments": tc.function.arguments or "{}",
+                            "arguments": sanitize_tool_arguments(tc.function.arguments),
                         },
                     }
                     for tc in tool_calls

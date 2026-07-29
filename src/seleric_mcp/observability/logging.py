@@ -16,6 +16,10 @@ import structlog
 
 def configure_logging(level: int = logging.INFO) -> None:
     logging.basicConfig(stream=sys.stderr, level=level, format="%(message)s")
+    # httpx logs the full request URL at INFO; keep it at WARNING so query
+    # params (e.g. appsecret_proof) never land in logs. Bearer tokens are sent
+    # as headers (see ads/meta/client.py), which httpx does not log.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
@@ -31,3 +35,12 @@ def configure_logging(level: int = logging.INFO) -> None:
 
 def new_trace_id() -> str:
     return "tr_" + uuid.uuid4().hex[:12]
+
+
+def log_call(tool: str, **fields: object) -> str:
+    """Module-level tool-call logger (mirrors the ``_log_call`` closure in
+    gateway/server.py) so tool modules defined outside ``build_server`` can log
+    consistently. Returns the generated trace_id."""
+    trace_id = new_trace_id()
+    structlog.get_logger().info("tool_call", tool=tool, trace_id=trace_id, **fields)
+    return trace_id

@@ -133,6 +133,38 @@ class Settings:
     freshness_grace_days: int = 1
     default_brand_id: str = "20"
 
+    # --- Meta Marketing Graph API (direct read/write backend for ads/meta/) ---
+    meta_access_token: str = ""
+    meta_app_secret: str = ""
+    meta_api_version: str = "v21.0"
+    meta_graph_base_url: str = "https://graph.facebook.com"
+    meta_max_budget_minor: int = 0
+    meta_http_timeout_seconds: float = 30.0
+    meta_max_retries: int = 2
+    # Resolved Meta credentials cache TTL (seconds) to avoid a DB hit per call.
+    meta_cred_cache_ttl_seconds: int = 300
+
+    # --- Google Ads API (shared app creds from env; per-tenant refresh_token
+    #     + customer_id from core.brand_envs) ---
+    google_developer_token: str = ""
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_login_customer_id: str = ""
+    google_api_version: str = "v21"
+    google_max_budget_micros: int = 0
+    google_cred_cache_ttl_seconds: int = 300
+
+    # --- Postgres (core.brand_envs multi-tenant ad credentials) ---
+    # Mirrors mage-ai's DSN resolution: PG_DSN wins, else PG*/POSTGRES_* parts.
+    pg_dsn: str = ""
+    pg_host: str = ""
+    pg_port: str = "5432"
+    pg_dbname: str = ""
+    pg_user: str = ""
+    pg_password: str = ""
+    pg_schema: str = "core"
+    pg_connect_timeout: int = 8
+
 
 @dataclass(frozen=True)
 class AzureSettings:
@@ -174,6 +206,10 @@ def load_settings(config_path: Path | None = None) -> Settings:
     cfg = _load_yaml_config(config_path or CONFIG_PATH)
     cube = _section(cfg, "cube")
     pipeboard = _section(cfg, "pipeboard")
+    meta = _section(cfg, "meta")
+    meta_write_policies = _section(meta, "write_policies")
+    google = _section(cfg, "google")
+    postgres = _section(cfg, "postgres")
     gateway = _section(cfg, "gateway")
     storage = _section(cfg, "storage")
     defaults = _section(cfg, "defaults")
@@ -241,6 +277,61 @@ def load_settings(config_path: Path | None = None) -> Settings:
             )
         ).rstrip("/"),
         pipeboard_token=_env_str("PIPEBOARD_TOKEN"),
+        meta_access_token=_env_str("META_ACCESS_TOKEN"),
+        meta_app_secret=_env_str("META_APP_SECRET"),
+        meta_api_version=str(
+            _env_or("META_API_VERSION", _cfg_get(meta, "api_version", "v21.0"))
+        ),
+        meta_graph_base_url=str(
+            _env_or(
+                "META_GRAPH_BASE_URL",
+                _cfg_get(meta, "graph_base_url", "https://graph.facebook.com"),
+            )
+        ).rstrip("/"),
+        meta_max_budget_minor=_as_int(
+            _env_or(
+                "META_MAX_BUDGET_MINOR",
+                _cfg_get(meta_write_policies, "maximum_budget_minor", 0),
+            ),
+            0,
+        ),
+        meta_http_timeout_seconds=_as_float(
+            _env_or("META_HTTP_TIMEOUT_S", _cfg_get(meta, "http_timeout_seconds", 30.0)),
+            30.0,
+        ),
+        meta_max_retries=_as_int(
+            _env_or("META_MAX_RETRIES", _cfg_get(meta, "max_retries", 2)), 2
+        ),
+        meta_cred_cache_ttl_seconds=_as_int(
+            _env_or("META_CRED_CACHE_TTL_S", _cfg_get(meta, "cred_cache_ttl_seconds", 300)), 300
+        ),
+        google_developer_token=_env_str("GOOGLE_ADS_DEVELOPER_TOKEN"),
+        google_client_id=_env_str("GOOGLE_ADS_CLIENT_ID"),
+        google_client_secret=_env_str("GOOGLE_ADS_CLIENT_SECRET"),
+        google_login_customer_id=_env_str("GOOGLE_ADS_LOGIN_CUSTOMER_ID"),
+        google_api_version=str(
+            _env_or("GOOGLE_ADS_API_VERSION", _cfg_get(google, "api_version", "v21"))
+        ),
+        google_max_budget_micros=_as_int(
+            _env_or(
+                "GOOGLE_MAX_BUDGET_MICROS",
+                _cfg_get(_section(google, "write_policies"), "maximum_budget_micros", 0),
+            ),
+            0,
+        ),
+        google_cred_cache_ttl_seconds=_as_int(
+            _env_or("GOOGLE_CRED_CACHE_TTL_S", _cfg_get(google, "cred_cache_ttl_seconds", 300)), 300
+        ),
+        pg_dsn=_env_str("PG_DSN"),
+        pg_host=str(_env_or("PGHOST", _env_or("POSTGRES_HOST", _cfg_get(postgres, "host", "")))),
+        pg_port=str(_env_or("PGPORT", _env_or("POSTGRES_PORT", _cfg_get(postgres, "port", "5432")))),
+        pg_dbname=str(_env_or("PGDATABASE", _env_or("POSTGRES_DBNAME", _cfg_get(postgres, "dbname", "")))),
+        pg_user=str(_env_or("PGUSER", _env_or("POSTGRES_USER", _cfg_get(postgres, "user", "")))),
+        pg_password=_env_or("PGPASSWORD", _env_str("POSTGRES_PASSWORD")),
+        pg_schema=str(_cfg_get(postgres, "schema", "core")),
+        pg_connect_timeout=_as_int(
+            _env_or("PG_CONNECT_TIMEOUT", _cfg_get(postgres, "connect_timeout", 8)), 8
+        ),
         write_enabled=write_enabled,
         mcp_service_token=_env_str("MCP_SERVICE_TOKEN"),
         approval_secret=_env_str("APPROVAL_SECRET"),

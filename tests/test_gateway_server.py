@@ -100,7 +100,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
     example in this test file without anything else catching it."""
     mcp, ctx = built_server
     names = {t.name for t in mcp._tool_manager.list_tools()}
-    assert names == {
+    analytics_and_actions = {
         "catalogue_search_metrics",
         "catalogue_get_metric",
         "catalogue_list_dimensions",
@@ -115,6 +115,23 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "actions_commit",
         "actions_status",
     }
+    meta_ads = {
+        "meta_accounts_list", "meta_accounts_get",
+        "meta_campaigns_list", "meta_campaigns_get", "meta_campaigns_create",
+        "meta_campaigns_update", "meta_campaigns_set_status", "meta_campaigns_update_budget",
+        "meta_adsets_list", "meta_adsets_get", "meta_adsets_create", "meta_adsets_update",
+        "meta_adsets_set_status", "meta_adsets_update_budget", "meta_adsets_update_targeting",
+        "meta_ads_list", "meta_ads_get", "meta_ads_create", "meta_ads_set_status",
+        "meta_assets_upload_image", "meta_assets_upload_video",
+        "meta_creatives_create_image", "meta_creatives_create_video", "meta_creatives_preview",
+        "meta_insights_query",
+    }
+    google_ads = {
+        "google_accounts_list_accessible", "google_query_gaql",
+        "google_campaigns_list", "google_campaigns_get", "google_campaigns_set_status",
+        "google_budgets_create", "google_campaigns_create",
+    }
+    assert names == analytics_and_actions | meta_ads | google_ads
 
 
 # ---------- access_policy.scopes enforcement (was declared, never checked) ----------

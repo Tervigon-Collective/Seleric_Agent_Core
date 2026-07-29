@@ -103,6 +103,7 @@ class AgentRuntime:
         tier = "tools"
         for _ in range(MAX_TOOL_ROUNDS):
             self.messages[1] = {"role": "system", "content": self.scratchpad.render()}
+            chat_client.sanitize_history(self.messages)  # heal prior malformed tool args
             try:
                 resp = await asyncio.to_thread(
                     self.router.complete,
@@ -129,7 +130,8 @@ class AgentRuntime:
                 assistant_msg["tool_calls"] = [
                     {"id": tc.id, "type": "function",
                      "function": {"name": tc.function.name,
-                                  "arguments": tc.function.arguments or "{}"}}
+                                  "arguments": chat_client.sanitize_tool_arguments(
+                                      tc.function.arguments)}}
                     for tc in tool_calls
                 ]
             self.messages.append(assistant_msg)
