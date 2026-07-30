@@ -8,9 +8,11 @@ description: >
   "Net Sales" column, evidence buildMetaAttributionPayload.js:409. Use for any Meta
   campaign/adset/ad-scoped net sales question. The Overview "Net Sales" card is
   meta_attribution_net_sales (channel_pnl, event-date returns/cancels basis) — equal
-  to the Table sum only when returns/cancels = 0 in the window. Never mix with Meta's
-  platform-reported purchase_value, nor with attributed_net_revenue (all-channel
-  order oracle).
+  to the Table sum only when returns/cancels = 0 in the window. Net-sales rule
+  (dashboard parity, aligned 2026-07-30): cancelled/voided/revenue-adjustment → 0;
+  paid → net ex-GST; unpaid COD → gross ex-GST − discounts (NOT zero). Never mix with
+  Meta's platform-reported purchase_value, nor with attributed_net_revenue
+  (all-channel order oracle).
 formula:
   human_readable: SUM(attributed_net_revenue_excl_tax)
   authoritative_source: cube
