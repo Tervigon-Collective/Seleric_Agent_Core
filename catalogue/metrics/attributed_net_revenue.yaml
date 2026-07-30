@@ -7,10 +7,12 @@ description: >
   product, LAST-TOUCH model only, ALL channels — NOT the Meta Attribution dashboard.
   For Meta campaign/adset/ad net sales (Meta Attribution Table) use
   meta_attr_net_revenue; for the Meta Attribution Overview "Net Sales" card use
-  meta_attribution_net_sales. Net-sales rule (dashboard parity, aligned 2026-07-30):
+  meta_attribution_net_sales. Canonical net-sales rule (dashboard parity; cube
+  alignment pending serve.order_attribution deploy):
   cancelled/voided/revenue-adjustment → 0; paid → net ex-GST; unpaid COD → gross
   ex-GST − discounts (NOT zero — COD placements count as net sales until
-  cancelled/returned). Uses the same per-order dashboard net sales basis as
+  cancelled/returned). NB: LTV/CAC deliberately stays paid-only (COD → 0). Uses the
+  same per-order dashboard net sales basis as
   Attribution Analysis and serve.commerce_orders, but remains scoped to the
   attribution population/window rather than commerce_net_revenue_daily's period
   event-date rollup. 2026-07-27 fix - the cube (serve_order_attribution) is now scoped
