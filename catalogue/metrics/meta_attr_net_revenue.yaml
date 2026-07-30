@@ -9,8 +9,8 @@ description: >
   campaign/adset/ad-scoped net sales question. The Overview "Net Sales" card is
   meta_attribution_net_sales (channel_pnl, event-date returns/cancels basis) — equal
   to the Table sum only when returns/cancels = 0 in the window. Canonical net-sales
-  rule (dashboard parity; cube alignment pending serve.order_attribution deploy —
-  revenue flows meta_ad_attribution_daily → order_attribution):
+  rule (dashboard parity; fix applied in serve.order_attribution, effective after
+  Cube redeploy — revenue flows meta_ad_attribution_daily → order_attribution):
   cancelled/voided/revenue-adjustment → 0; paid → net ex-GST; unpaid COD → gross
   ex-GST − discounts (NOT zero). Never mix with
   Meta's platform-reported purchase_value, nor with attributed_net_revenue
