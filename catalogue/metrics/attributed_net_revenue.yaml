@@ -2,12 +2,18 @@ id: attributed_net_revenue
 display_name: Attributed Net Revenue
 category: attribution
 status: certified
-description: Placement-axis first-party net revenue (ex-GST) at order grain from the attribution product, LAST-TOUCH model
-  only. Uses the same per-order dashboard net sales basis as Attribution Analysis and serve.commerce_orders, but remains
-  scoped to the attribution population/window rather than commerce_net_revenue_daily's period event-date rollup.
-  2026-07-27 fix - the cube (serve_order_attribution) is now scoped to last_touch_v1; previously it summed across all 4
-  attribution models (first/last/last-non-direct/linear), inflating attributed revenue ~4x. Multi-model comparison lives
-  in serve_attribution_paths, not here.
+description: >
+  Placement-axis first-party net revenue (ex-GST) at order grain from the attribution
+  product, LAST-TOUCH model only, ALL channels — NOT the Meta Attribution dashboard.
+  For Meta campaign/adset/ad net sales (Meta Attribution Table) use
+  meta_attr_net_revenue; for the Meta Attribution Overview "Net Sales" card use
+  meta_attribution_net_sales. Uses the same per-order dashboard net sales basis as
+  Attribution Analysis and serve.commerce_orders, but remains scoped to the
+  attribution population/window rather than commerce_net_revenue_daily's period
+  event-date rollup. 2026-07-27 fix - the cube (serve_order_attribution) is now scoped
+  to last_touch_v1; previously it summed across all 4 attribution models
+  (first/last/last-non-direct/linear), inflating attributed revenue ~4x. Multi-model
+  comparison lives in serve_attribution_paths, not here.
 formula:
   human_readable: SUM(credited_net_revenue_excl_tax) on last_touch_v1 (one credit row per order)
   authoritative_source: cube

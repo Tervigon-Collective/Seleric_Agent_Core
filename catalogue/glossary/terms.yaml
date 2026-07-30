@@ -525,6 +525,11 @@ terms:
     canonical_id: attributed_net_revenue
   - term: attributed sales
     canonical_id: attributed_net_revenue
+    definition: >
+      All-channel last-touch net revenue (order_attribution oracle). For a Meta
+      campaign/adset/ad — the Meta Attribution Analysis Table — use
+      meta_attr_net_revenue; for the Meta Attribution Overview "Net Sales" card use
+      meta_attribution_net_sales. These do not reconcile with attributed_net_revenue.
   - term: attr sales
     canonical_id: attributed_net_revenue
   - term: attr revenue
@@ -552,10 +557,22 @@ terms:
     canonical_id: attributed_gross_revenue
   - term: attributed orders
     canonical_id: attributed_orders
+    definition: >
+      All-channel last-touch order count (order_attribution oracle), one row per
+      order. For orders in a Meta campaign/adset/ad — the Meta Attribution Analysis
+      Table — use meta_attr_orders; for the Meta Attribution Overview "Total Orders"
+      card use meta_attribution_orders. These Meta products do not reconcile with
+      attributed_orders (different grain/cohort). Use attributed_orders only for
+      all-channel or order-level breakdowns (city / payment / new-vs-repeat).
   - term: attr orders
     canonical_id: attributed_orders
   - term: attribution orders
     canonical_id: attributed_orders
+    definition: >
+      All-channel last-touch order count (order_attribution). For a Meta
+      campaign/adset/ad use meta_attr_orders (Table) or meta_attribution_orders
+      (Overview card); for other single platforms use the platform's attribution
+      metric.
   - term: last-touch orders
     canonical_id: attributed_orders
   - term: attributed aov

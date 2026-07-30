@@ -2,8 +2,15 @@ id: meta_attr_orders
 display_name: Meta Attributed Orders
 category: attribution
 status: certified
-description: Orders last-touch attributed to a Meta ad, at campaign x adset x ad x
-  day grain. First-party — never mix with Meta platform-reported purchases.
+description: >
+  Orders last-touch attributed to a Meta ad, at campaign x adset x ad x day grain —
+  this backs the Meta Attribution Analysis TABLE (the per campaign/adset/ad rows),
+  evidence buildMetaAttributionPayload.js:408. Use this for ANY question scoped to a
+  Meta campaign/adset/ad (e.g. "attributed orders in campaign X"); do NOT use
+  attributed_orders (all-channel order oracle). First-party — never mix with Meta
+  platform-reported purchases. The page's Overview "Total Orders" summary card is
+  meta_attribution_orders (commerce cohort); it equals the Table sum only on days
+  with zero returns/cancels.
 formula:
   human_readable: SUM(attributed_orders)
   authoritative_source: cube
