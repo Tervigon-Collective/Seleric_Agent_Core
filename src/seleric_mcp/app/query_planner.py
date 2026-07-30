@@ -22,6 +22,11 @@ from .result_store import ResultStore, StoredResult
 
 IST = ZoneInfo("Asia/Kolkata")
 
+# Granularities finer than a day require an intraday timestamp axis; the view's
+# default date_dimension is a DATE column and bucketing it by hour collapses
+# every row to midnight.
+SUBDAILY_GRANULARITIES = {"hour"}
+
 # P&L-shaped measures must come from canonical_pnl (guard ported from server.js
 # validatePnlQuery): if a metric's id looks like P&L but maps elsewhere, the
 # catalogue is wrong — enforced at load; here we guard breakdown views.
@@ -98,6 +103,28 @@ class QueryPlanner:
         if view_def is not None and view_def.date_dimension:
             return f"{view}.{view_def.date_dimension}"
         return None
+
+    def _time_dimension_for(self, m: MetricDef, granularity: str) -> str | None:
+        """Time axis for this metric, honouring sub-daily granularity.
+
+        Day/week/month/none use the metric's normal axis (event or placement
+        date). Sub-daily granularity (hour) needs a real timestamp column — the
+        default date_dimension is a DATE, so an hourly bucket on it would place
+        every order at midnight. Only views that declare a ``datetime_dimension``
+        can answer hourly; otherwise fail loudly rather than return a silently
+        wrong all-midnight result."""
+        if granularity not in SUBDAILY_GRANULARITIES:
+            return self._effective_time_dimension(m)
+        view = m.cube_mapping.view
+        view_def = self.catalogue.cat.views.get(view)
+        if m.cube_mapping.time_dimension is None and view_def and view_def.datetime_dimension:
+            return f"{view}.{view_def.datetime_dimension}"
+        raise PlanError(
+            f"Granularity '{granularity}' is not available for metric '{m.id}' "
+            f"(view '{view}' has no intraday timestamp axis). Use granularity "
+            "'day', or query an hourly-capable metric such as orders / "
+            "total_sales on commerce_orders."
+        )
 
     # ---------- validation ----------
 
@@ -431,7 +458,7 @@ class QueryPlanner:
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)
         sort_order = self._validate_sort(metrics, view, request.sort)
         current_range = resolve_time_range(request.time_range)
-        time_dimension = self._effective_time_dimension(metrics[0])
+        time_dimension = self._time_dimension_for(metrics[0], request.granularity)
 
         # Default brand scope: without an explicit brand filter, aggregates on
         # brand-scoped views would silently mix other/test brands' rows.

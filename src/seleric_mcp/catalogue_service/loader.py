@@ -97,6 +97,11 @@ class ViewDef(BaseModel):
     name: str
     title: str
     date_dimension: str | None = None
+    # Intraday timestamp axis (bare cube member, e.g. "order_created_at_ist")
+    # used for sub-daily granularity (hour). The default date_dimension is a
+    # DATE column, so bucketing it by hour would collapse every order to
+    # midnight; sub-daily queries must group on this timestamp instead.
+    datetime_dimension: str | None = None
     freshness: Freshness
 
 

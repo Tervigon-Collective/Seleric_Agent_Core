@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, model_validator
 TimePreset = Literal[
     "today", "yesterday", "last_7d", "last_30d", "last_90d", "this_month", "last_month"
 ]
-Granularity = Literal["day", "week", "month", "none"]
+Granularity = Literal["hour", "day", "week", "month", "none"]
 ComparePeriod = Literal["previous_period", "previous_year"]
 FilterOperator = Literal[
     "equals", "notEquals", "contains", "gt", "gte", "lt", "lte", "set", "notSet"

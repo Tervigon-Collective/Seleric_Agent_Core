@@ -4,6 +4,7 @@ views:
   - name: commerce_orders
     title: Commerce Performance (Serve)
     date_dimension: order_date
+    datetime_dimension: order_created_at_ist
     freshness:
       source: serve.commerce_orders
       expected_cadence: "hourly after gold sync, IST"
@@ -70,6 +71,7 @@ views:
   - name: purchase_sequence
     title: Purchase Sequence (Serve)
     date_dimension: order_date
+    datetime_dimension: order_created_at_ist
     freshness:
       source: serve.purchase_sequence (VIEW over gold.fct_orders FINAL)
       expected_cadence: "hourly after gold sync, IST"

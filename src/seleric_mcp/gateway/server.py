@@ -424,7 +424,10 @@ def build_server(settings: Settings) -> FastMCP:
         {"preset": "last_30d"} (today|yesterday|last_7d|last_30d|last_90d|
         this_month|last_month) or {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}.
         filters entries: {"dimension": <id>, "operator": "equals", "values":
-        [...]}. granularity: day|week|month|none. compare_period:
+        [...]}. granularity: hour|day|week|month|none (hour = intraday buckets,
+        only on views with a timestamp axis such as commerce_orders for
+        orders/total_sales; do NOT hand-roll hourly by pulling raw rows).
+        compare_period:
         previous_period|previous_year. sort entries: {"field": <metric_id or
         dimension_id used in this query>, "direction": "asc"|"desc"} — for
         "top N" / "bottom N" questions, sort by the relevant metric desc/asc

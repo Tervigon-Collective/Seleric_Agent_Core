@@ -185,6 +185,35 @@ async def test_run_builds_cube_query_and_provenance(planner, fake_cube):
     assert out["query_id"].startswith("q_")
 
 
+async def test_hour_granularity_uses_timestamp_axis(planner, fake_cube):
+    """Hourly buckets must group on the intraday timestamp dimension, not the
+    order_date DATE column (which would collapse every order to midnight)."""
+    fake_cube.by_prefix["commerce_orders"] = [
+        {"commerce_orders.orders": "6", "commerce_orders.total_sales": "35384"}
+    ]
+    req = QueryRequest(
+        measures=["orders", "total_sales"],
+        time_range=TimeRange(start=date(2026, 7, 29), end=date(2026, 7, 29)),
+        granularity="hour",
+    )
+    await planner.run(req)
+    td = fake_cube.queries[0]["timeDimensions"][0]
+    assert td["dimension"] == "commerce_orders.order_created_at_ist"
+    assert td["granularity"] == "hour"
+
+
+async def test_hour_granularity_rejected_without_timestamp_axis(planner):
+    """Views without a datetime axis must fail loudly on hourly, not silently
+    bucket a DATE column into all-midnight rows."""
+    req = QueryRequest(
+        measures=["net_sales_all_channels"],  # canonical_pnl: daily-only view
+        time_range=TimeRange(start=date(2026, 7, 29), end=date(2026, 7, 29)),
+        granularity="hour",
+    )
+    with pytest.raises(PlanError, match="intraday timestamp axis"):
+        await planner.run(req)
+
+
 async def test_compare_period_fires_two_loads(planner, fake_cube):
     fake_cube.by_prefix["commerce_performance"] = [
         {"commerce_performance.commerce_net_revenue": "10"}
