@@ -191,6 +191,10 @@ class LLMSettings:
     models to try; ``fallback`` is the last-resort model for any tier. Limits
     are per-model (each model gets its own independent bucket); ``model_limits``
     overrides the default for a specific model.
+
+    ``max_wait_rounds`` controls how long to wait when all models are throttled:
+    0 = wait indefinitely, >0 = max retry rounds before raising RateLimitExceeded.
+    ``max_sleep_seconds`` caps the sleep duration per wait round.
     """
 
     tiers: dict[str, tuple[str, ...]]
@@ -198,6 +202,8 @@ class LLMSettings:
     requests_per_minute: float = 20.0
     tokens_per_minute: float = 20000.0
     completion_reserve: int = 1024
+    max_wait_rounds: int = 0  # 0 = unlimited waiting
+    max_sleep_seconds: float = 60.0
     model_limits: dict[str, tuple[float, float]] = field(default_factory=dict)
 
 
@@ -428,6 +434,10 @@ def load_llm_settings(config_path: Path | None = None) -> LLMSettings:
     tpm = _as_float(_cfg_get(limits, "tokens_per_minute", 20000), 20000.0)
     completion_reserve = _as_int(_cfg_get(llm, "completion_reserve", 1024), 1024)
 
+    # Wait behavior: 0 = unlimited waiting, >0 = max retry rounds
+    max_wait_rounds = _as_int(_cfg_get(llm, "max_wait_rounds", 0), 0)
+    max_sleep_seconds = _as_float(_cfg_get(llm, "max_sleep_seconds", 60.0), 60.0)
+
     model_limits: dict[str, tuple[float, float]] = {}
     per_model = _cfg_get(llm, "model_limits", {})
     if isinstance(per_model, dict):
@@ -444,6 +454,8 @@ def load_llm_settings(config_path: Path | None = None) -> LLMSettings:
         requests_per_minute=rpm,
         tokens_per_minute=tpm,
         completion_reserve=completion_reserve,
+        max_wait_rounds=max_wait_rounds,
+        max_sleep_seconds=max_sleep_seconds,
         model_limits=model_limits,
     )
 

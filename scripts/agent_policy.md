@@ -209,6 +209,26 @@ separately — do not join into one table.
 Shopify-only (joined table OK): `measures: ["total_sales", "orders"]` with the
 same dimension.
 
+### Channel-specific metrics
+
+When the user asks for a metric "from Google channel", "from Meta channel", or
+similar channel-specific requests, use the dedicated channel metric — not a
+general metric with a platform filter.
+
+Examples:
+
+- "Net profit from Google channel" → `google_net_profit` (NOT `net_profit` + filter)
+- "Net profit from Meta channel" → `meta_net_profit` (NOT `net_profit` + filter)
+- "Google attribution net sales" → `google_attribution_net_sales`
+- "Meta attribution orders" → `meta_attribution_orders`
+
+These channel-specific metrics are pre-filtered to that channel's data. Do not
+add `lt_platform`, `channel`, or similar filters — they either don't exist on
+that view or will cause errors.
+
+Use `catalogue_resolve_term` with the full phrase (e.g. "google channel net
+profit") to find the correct channel-specific metric.
+
 ### Resolution behavior
 
 #### Resolved

@@ -346,7 +346,19 @@ terms:
     canonical_id: new_customers
   - term: meta net profit
     canonical_id: meta_net_profit
+  - term: meta channel net profit
+    canonical_id: meta_net_profit
+  - term: net profit from meta
+    canonical_id: meta_net_profit
+  - term: net profit from meta channel
+    canonical_id: meta_net_profit
   - term: google net profit
+    canonical_id: google_net_profit
+  - term: google channel net profit
+    canonical_id: google_net_profit
+  - term: net profit from google
+    canonical_id: google_net_profit
+  - term: net profit from google channel
     canonical_id: google_net_profit
   - term: meta net cogs
     canonical_id: meta_net_cogs

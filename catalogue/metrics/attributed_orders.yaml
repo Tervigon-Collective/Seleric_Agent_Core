@@ -3,14 +3,17 @@ display_name: Attributed Orders
 category: attribution
 status: certified
 description: >
-  Count of orders with a resolved last-touch attribution record (order-grain, ALL
-  channels, one row per order — same population as commerce Total Orders). This is
-  NOT the Meta Attribution Analysis dashboard. For orders attributed to a Meta
-  campaign/adset/ad (the Meta Attribution Table, e.g. "attributed orders in campaign
-  X") use meta_attr_orders; for the Meta Attribution Overview "Total Orders" card use
-  meta_attribution_orders. Those Meta products will NOT reconcile with attributed_orders
-  (different grain and cohort). Use attributed_orders only for all-channel or
-  order-level breakdowns (shipping_city / payment_method / is_new_customer).
+  Order-grain last-touch attribution, one row per order over the FULL Shopify
+  placement cohort — the SAME population as commerce Total Orders (Shopify).
+  Every order carries a last-touch channel; orders with no resolved touch fold into
+  organic (lt_platform 'organic', attribution_method 'unattributed'), exactly like
+  the dashboard channel split. So attributed_orders == total_orders (Shopify) and
+  per-channel (lt_platform) breakdowns reconcile to it by construction. For the
+  RESOLVED subset (orders with an identified touch) use touch_attributed_orders and
+  attribution_rate. This is NOT the Meta Attribution Analysis dashboard: for orders
+  attributed to a Meta campaign/adset/ad (the Meta Attribution Table) use
+  meta_attr_orders; for the Meta Attribution Overview "Total Orders" card use
+  meta_attribution_orders (different grain/cohort — they will not tie to this).
 formula:
   human_readable: COUNT(order_id)
   authoritative_source: cube

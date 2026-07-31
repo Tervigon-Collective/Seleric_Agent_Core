@@ -156,6 +156,8 @@ def _build_router(client: AzureOpenAI) -> LLMRouter:
             for name, (rpm, tpm) in llm.model_limits.items()
         },
         completion_reserve=llm.completion_reserve,
+        max_wait_rounds=llm.max_wait_rounds,
+        max_sleep_seconds=llm.max_sleep_seconds,
     )
 
 

@@ -113,6 +113,11 @@ llm:
     tokens_per_minute: 20000
   # Tokens reserved per call for the not-yet-generated completion.
   completion_reserve: 1024
+  # Rate-limit wait behavior: wait for buckets to refill instead of failing.
+  # max_wait_rounds: 0 = wait indefinitely; >0 = max retry rounds before failing.
+  # Each round sleeps up to max_sleep_seconds before retrying.
+  max_wait_rounds: 0        # unlimited waiting (was 8 = ~8 min timeout)
+  max_sleep_seconds: 60     # sleep up to 60s per round
   # Optional per-model overrides, e.g.:
   # model_limits:
   #   Kimi-K2.6: { requests_per_minute: 10, tokens_per_minute: 10000 }

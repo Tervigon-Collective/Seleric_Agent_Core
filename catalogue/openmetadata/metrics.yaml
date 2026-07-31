@@ -409,8 +409,8 @@ metrics:
     contract: null
     glossary: []
     om_name: channelOrders
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   cod_orders:
     category: commerce
     cube_view: commerce_orders

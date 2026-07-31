@@ -371,12 +371,12 @@ def test_every_catalogue_metric_is_in_openmetadata_crosswalk(catalogue):
 
 
 def test_order_attribution_cube_is_single_model_no_fanout():
-    """serve.order_attribution stores 4 attribution models per order (each with
-    the full order's credited net revenue). Summing across all of them inflated
-    every money measure ~4x (2026-07-27: attributed_net_revenue 4,572,946 vs the
-    true last-touch 1,143,237). The cube is declared last-touch, so its source
-    MUST be scoped to a single model. Guard against a revert to the unscoped
-    `sql_table: serve.order_attribution` that reintroduces the fan-out."""
+    """serve.order_attribution is now one last-touch row per order (repointed
+    2026-07-31 to gold.fct_order_attribution, credit_pct=1, no fan-out possible).
+    The cube stays declared last-touch and keeps the attribution_model='last_touch_v1'
+    scope as a belt-and-braces guard. This test guards against a revert to an
+    unscoped `sql_table: serve.order_attribution` or a credit-grain source that
+    could reintroduce multi-model fan-out."""
     import yaml
 
     from seleric_mcp.config import cube_model_dir

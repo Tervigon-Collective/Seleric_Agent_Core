@@ -23,20 +23,24 @@ Routing per :meth:`complete` call:
 from __future__ import annotations
 
 import json
+import logging
 import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
 from .rate_limit import ModelLimiter, RateLimit
 
+_log = logging.getLogger(__name__)
+
 # ~4 chars per token is the usual English rule of thumb; good enough as a
 # pre-call estimate because we reconcile against real usage afterward.
 _CHARS_PER_TOKEN = 4.0
 # Headroom reserved for the completion we haven't generated yet.
 DEFAULT_COMPLETION_RESERVE = 1024
-# Bound the degenerate "everyone throttled" wait loop so we can't spin forever.
-_MAX_WAIT_ROUNDS = 8
-_MAX_SLEEP_SECONDS = 65.0
+# Default wait-loop bounds. These can be overridden via config.yaml llm.max_wait_rounds
+# and llm.max_sleep_seconds. Set max_wait_rounds to 0 for unlimited waiting.
+DEFAULT_MAX_WAIT_ROUNDS = 120  # ~2 hours with 60s sleeps (was 8)
+DEFAULT_MAX_SLEEP_SECONDS = 60.0
 
 
 class RateLimitExceeded(RuntimeError):
@@ -130,6 +134,8 @@ class LLMRouter:
         default_limit: RateLimit,
         model_limits: Mapping[str, RateLimit] | None = None,
         completion_reserve: int = DEFAULT_COMPLETION_RESERVE,
+        max_wait_rounds: int = DEFAULT_MAX_WAIT_ROUNDS,
+        max_sleep_seconds: float = DEFAULT_MAX_SLEEP_SECONDS,
         token_estimator: Callable[..., int] | None = None,
         is_rate_limit_error: Callable[[BaseException], bool] | None = None,
         sleep: Callable[[float], None] = time.sleep,
@@ -139,6 +145,8 @@ class LLMRouter:
         self._tiers = {k: list(v) for k, v in tiers.items()}
         self._fallback = fallback
         self._completion_reserve = completion_reserve
+        self._max_wait_rounds = max_wait_rounds  # 0 = unlimited
+        self._max_sleep_seconds = max_sleep_seconds
         self._estimate = token_estimator or estimate_tokens
         self._is_rate_limit = is_rate_limit_error or _default_is_rate_limit
         self._sleep = sleep
@@ -219,17 +227,24 @@ class LLMRouter:
                 exhausted = set()
 
             wait_rounds += 1
-            if wait_rounds > _MAX_WAIT_ROUNDS:
+            # max_wait_rounds=0 means unlimited waiting
+            if self._max_wait_rounds > 0 and wait_rounds > self._max_wait_rounds:
                 raise RateLimitExceeded(
                     f"rate-limit wait budget exhausted for tier {tier!r} "
-                    f"after trying {attempts}"
+                    f"after trying {attempts} ({wait_rounds} rounds)"
                 )
             wait = min(self._limiters[n].time_until(est) for n in live)
             if wait == float("inf"):
                 raise RateLimitExceeded(
                     f"no model in tier {tier!r} can satisfy a {est}-token request"
                 )
-            self._sleep(min(wait, _MAX_SLEEP_SECONDS))
+            actual_wait = min(wait, self._max_sleep_seconds)
+            # Log that we're waiting (helps users understand the agent isn't stuck)
+            _log.info(
+                f"Rate limit: waiting {actual_wait:.1f}s for tier '{tier}' "
+                f"(round {wait_rounds}, tried: {attempts})"
+            )
+            self._sleep(actual_wait)
 
     def _invoke(
         self,
