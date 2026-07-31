@@ -198,3 +198,17 @@ views:
     freshness:
       source: serve.web_events_daily (VIEW over gold.mart_web_events_daily FINAL)
       expected_cadence: "daily after dw/mart run; 26h SLA"
+  - name: meta_ad_performance_hourly
+    title: Meta Ads Performance (Serve, hourly)
+    date_dimension: report_date
+    datetime_dimension: report_hour_ts
+    freshness:
+      source: serve.meta_ads_hourly
+      expected_cadence: "hourly after gold sync, IST"
+  - name: google_ad_performance_hourly
+    title: Google Ads Performance (Serve, hourly)
+    date_dimension: report_date
+    datetime_dimension: report_hour_ts
+    freshness:
+      source: serve.google_ads_hourly
+      expected_cadence: "hourly after gold sync, IST"

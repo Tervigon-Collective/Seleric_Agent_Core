@@ -4,10 +4,13 @@ category: commerce
 status: certified
 description: >
   Amazon SP net sales EX-GST = Gross Sales − Returns Report refunded_amount
-  on return_delivery_date. Matches the Amazon Attribution "Net Sales" card
-  (June 2026 brand 20 = ₹214,753.49 = 227,645.99 − 12,892.50).
+  on coalesce(return_delivery_date, return_request_date). Matches the Amazon
+  Attribution "Net Sales" card for closed months (June 2026 brand 20 =
+  ₹214,753.49 = 227,645.99 − 12,892.50).
 formula:
-  human_readable: SUM(effective_gross_revenue - revenue_tax on non-canceled placements) - SUM(report returns on return_delivery_date), ex-GST
+  human_readable: >
+    SUM(effective_gross_revenue - revenue_tax on non-canceled placements)
+    - SUM(report returns on coalesce(return_delivery_date, return_request_date)), ex-GST
   authoritative_source: cube
 cube_mapping:
   view: amazon_attribution_overview

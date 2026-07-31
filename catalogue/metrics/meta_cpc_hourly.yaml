@@ -1,0 +1,59 @@
+id: meta_cpc_hourly
+display_name: Meta CPC (hourly)
+category: paid_media
+status: certified
+description: >
+  Meta CPC (hourly) recomputed from aggregated components (ratio-of-aggregates; never SUM/AVG
+  of row ratios). Intraday grain from serve.meta_ad_performance_hourly.
+formula:
+  human_readable: SUM(meta_spend) / SUM(meta_clicks)
+  authoritative_source: cube
+cube_mapping:
+  view: meta_ad_performance_hourly
+  measure: meta_ad_performance_hourly.meta_cpc
+aggregation: ratio
+unit: INR
+grain: hourly ad grain
+supported_dimensions:
+- brand_id
+- report_date
+- hour_of_day
+- report_hour_ts
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_type
+supported_filters:
+- brand_id
+- report_date
+- hour_of_day
+- report_hour_ts
+- ad_account_id
+- campaign_id
+- campaign_name
+- campaign_objective
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- creative_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests:
+- meta_cpc_hourly equals numerator/denominator recomputed on any slice
+ratio_components:
+  numerator: meta_ad_performance_hourly.meta_spend
+  denominator: meta_ad_performance_hourly.meta_clicks
+currency_default: INR
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-31'
+  source: gold.fct_meta_ads_hourly / gold.fct_google_campaigns_hourly
+  note: ratio-of-aggregates over hourly components; reconciles to daily.

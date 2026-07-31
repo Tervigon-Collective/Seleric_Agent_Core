@@ -6,7 +6,8 @@ description: >
   Order-grain last-touch attribution, one row per order over the FULL Shopify
   placement cohort — the SAME population as commerce Total Orders (Shopify).
   Every order carries a last-touch channel; orders with no resolved touch fold into
-  organic (lt_platform 'organic', attribution_method 'unattributed'), exactly like
+  unattributed (lt_platform 'unattributed' or empty-signal organic, attribution_method
+  'unattributed'), exactly like
   the dashboard channel split. So attributed_orders == total_orders (Shopify) and
   per-channel (lt_platform) breakdowns reconcile to it by construction. For the
   RESOLVED subset (orders with an identified touch) use touch_attributed_orders and

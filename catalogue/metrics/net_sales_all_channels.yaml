@@ -43,6 +43,6 @@ dashboard_alignment:
   evidence: getHistoricalDashboard net_sales (All channels); canonical_pnl.net_sales_all_channels_pnl
   note: >
     Repointed from sales_all_channels.net_sales to canonical_pnl.net_sales_all_channels_pnl.
-    The General Statistics dashboard and net_profit both derive from the canonical
-    P&L spine; sales_all_channels.net_sales is a different (geography-view) net
-    that includes the Amazon-Attribution net basis and does not tie to that card.
+    2026-07-31: Amazon arm uses the same ex-GST rule as sales_all_channels
+    (revenue_tax when present, else gross/1.18) so unsettled Amazon rows no longer
+    leave GST in net_sales_all_channels (~₹594/day overstatement observed).

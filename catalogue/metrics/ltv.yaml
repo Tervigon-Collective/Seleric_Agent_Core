@@ -1,11 +1,13 @@
 id: ltv
-display_name: LTV (New Customer)
+display_name: New-customer first-order AOV (LTV card)
 category: finance
 status: certified
 description: >
-  Attributed revenue per new customer in the period.
-  LTV = new_customer_revenue / new_customers. Component of LTV:CAC —
-  not lifetime customer_ltv.avg_ltv.
+  Period new-customer first-order AOV (misnamed "LTV" on Historical LTV:CAC).
+  = new_customer_revenue / new_customers. Revenue arm matches attributed_net_revenue
+  for is_new_customer=1: fct_order_attribution.net_revenue_excl_tax is dashboard net
+  sales (cancelled/voided → 0; paid → net ex-GST; unpaid COD → gross_excl − discounts).
+  Not lifetime customer_ltv.avg_ltv.
 formula:
   human_readable: SUM(new_customer_revenue) / SUM(new_customers)
   authoritative_source: cube
@@ -30,7 +32,8 @@ validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:
   status: match
-  audited_on: '2026-07-27'
+  audited_on: '2026-07-31'
   source: Seleric_Dashboard fe-dashboard performanceSummary.js
   note: >
-    Period new-customer LTV, not serve.customer_ltv lifetime avg_ltv.
+    First-order AOV for new attributed customers; reconciles with
+    attributed_net_revenue filtered to is_new_customer=1. Not lifetime LTV.

@@ -1,0 +1,47 @@
+id: google_spend_hourly
+display_name: Google Spend (hourly)
+category: paid_media
+status: certified
+description: >
+  Google Spend (hourly). Intraday grain from serve.google_ad_performance_hourly; hourly
+  totals reconcile exactly to the daily metric (google_spend).
+  Use hour_of_day (IST 0-23) or report_hour_ts (granularity hour). Platform delivery
+  only (attribution boundary).
+formula:
+  human_readable: SUM(google_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: google_ad_performance_hourly
+  measure: google_ad_performance_hourly.google_spend
+aggregation: additive
+unit: INR
+grain: hourly ad grain
+supported_dimensions:
+- brand_id
+- report_date
+- hour_of_day
+- report_hour_ts
+- campaign_id
+- campaign_name
+- campaign_type
+supported_filters:
+- brand_id
+- report_date
+- hour_of_day
+- report_hour_ts
+- campaign_id
+- campaign_name
+- campaign_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests:
+- google_spend_hourly >= 0 for any slice
+- hourly sum equals daily counterpart for the same brand/date
+currency_default: INR
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-31'
+  source: gold.fct_meta_ads_hourly / gold.fct_google_campaigns_hourly
+  note: Hourly Σ reconciles to the certified daily paid-media metric (verified 2026-07-31 b20).

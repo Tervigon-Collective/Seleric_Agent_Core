@@ -3,11 +3,17 @@ display_name: Amazon Marketplace Fees
 category: commerce
 status: certified
 description: >
-  Amazon marketplace fees from `amazon_commerce_performance.marketplace_fees`
-  (serve.amazon_commerce_daily), additive at brand × day grain. Not Amazon Ads
-  spend.
+  Amazon marketplace fee cost from `amazon_commerce_performance.marketplace_fees`
+  (serve.amazon_commerce_daily), defined as the non-negative abs-sum of effective
+  fee components (commission + closing + shipping + tax-withheld + other). Same
+  economic definition as `amazon_platform_fees` (Attribution card via
+  amazon_daily_pnl); prefer `amazon_platform_fees` for Attribution questions.
+  Posted/signed settlement fees (UNSETTLED → 0) remain on the Cube measure
+  `operational_marketplace_fees` for cash reconciliation only.
 formula:
-  human_readable: SUM(marketplace_fees)
+  human_readable: >
+    SUM(ABS(effective_commission) + ABS(effective_closing) + ABS(effective_shipping)
+    + ABS(effective_tax_withheld) + ABS(effective_other_service_fees))
   authoritative_source: cube
 cube_mapping:
   view: amazon_commerce_performance
@@ -27,14 +33,14 @@ access_policy:
   scopes: [metrics:read]
 currency_default: INR
 validation_tests:
-  - amazon_marketplace_fees >= 0
+  - amazon_marketplace_fees >= 0 for any slice
+  - daily grain non-zero when amazon_platform_fees is non-zero for the same day
 deprecated_aliases: []
 dashboard_alignment:
   status: match
-  audited_on: '2026-07-21'
+  audited_on: '2026-07-31'
   source: Seleric_Dashboard/Node-Backend
-  evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_amazon_commerce_daily.yml:48-53
+  evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_amazon_commerce_daily.yml
   note: >
-    This metric is aligned to the canonical Cube semantic layer
-    (`amazon_commerce_performance.marketplace_fees`). Dashboard-specific naming
-    differences are tracked separately.
+    Aligned to abs(effective_*) so unsettled days are not blank. Distinct from
+    the legacy signed operational column (now Cube operational_marketplace_fees).

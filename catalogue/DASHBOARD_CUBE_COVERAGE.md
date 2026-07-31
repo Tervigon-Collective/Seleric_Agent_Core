@@ -31,7 +31,7 @@ Audited 2026-07-27 (re-verified after gap closes). Cube = agent semantic layer; 
 | Net ROAS | `canonical_pnl.net_roas_all_channels` | **OK** | |
 | BE ROAS | `canonical_pnl.be_roas_all_channels` | **OK** | |
 | Total Payments | `commerce_orders.total_payment_orders` | **OK** | Catalogue id `total_payments` |
-| LTV:CAC | `ltv_cac.ltv_cac_ratio` | **OK** | Paid `net_revenue_excl_tax` only (unpaid → 0) |
+| LTV:CAC | `ltv_cac.ltv_cac_ratio` | **OK** | First-order AOV / CAC; revenue = dashboard net (incl. unpaid COD) |
 
 Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain for Shopify cards.
 
@@ -87,7 +87,7 @@ Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain f
 | All-channel Gross ROAS | `canonical_pnl.gross_roas` (Shopify-only) | `canonical_pnl.gross_roas_all_channels` → catalogue `gross_roas_all_channels` |
 | Historical Net Profit | `canonical_pnl.net_profit` (blended Shopify) or `net_profit_shopify` | `canonical_pnl.net_profit_all_channels` |
 | Returns/Cancels (All) | `commerce_orders.returns_cancels_orders` alone | `returns_cancels_all_channels.returns_cancels` |
-| New-customer LTV revenue | `commerce_orders.dashboard_net_sales_excl_tax` (includes unpaid) | `ltv_cac.new_customer_revenue` (paid net only) |
+| New-customer LTV revenue | — | `ltv_cac.new_customer_revenue` (= attributed_net_revenue for is_new_customer=1; dashboard net incl. unpaid COD) |
 
 **How these are fixed (routing, not value rewrite):**
 1. Catalogue ids already map to the Correct column.

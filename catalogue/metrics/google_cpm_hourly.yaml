@@ -1,0 +1,47 @@
+id: google_cpm_hourly
+display_name: Google CPM (hourly)
+category: paid_media
+status: certified
+description: >
+  Google CPM (hourly) recomputed from aggregated components (ratio-of-aggregates; never SUM/AVG
+  of row ratios). Intraday grain from serve.google_ad_performance_hourly.
+formula:
+  human_readable: SUM(google_spend) / SUM(google_impressions)
+  authoritative_source: cube
+cube_mapping:
+  view: google_ad_performance_hourly
+  measure: google_ad_performance_hourly.google_cpm
+aggregation: ratio
+unit: INR
+grain: hourly ad grain
+supported_dimensions:
+- brand_id
+- report_date
+- hour_of_day
+- report_hour_ts
+- campaign_id
+- campaign_name
+- campaign_type
+supported_filters:
+- brand_id
+- report_date
+- hour_of_day
+- report_hour_ts
+- campaign_id
+- campaign_name
+- campaign_type
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed: [exec, growth_lead, analyst, ops]
+  scopes: [metrics:read]
+validation_tests:
+- google_cpm_hourly equals numerator/denominator recomputed on any slice
+ratio_components:
+  numerator: google_ad_performance_hourly.google_spend
+  denominator: google_ad_performance_hourly.google_impressions
+currency_default: INR
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-31'
+  source: gold.fct_meta_ads_hourly / gold.fct_google_campaigns_hourly
+  note: ratio-of-aggregates over hourly components; reconciles to daily.

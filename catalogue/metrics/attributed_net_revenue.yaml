@@ -11,7 +11,8 @@ description: >
   in serve.order_attribution, effective after Cube redeploy):
   cancelled/voided/revenue-adjustment → 0; paid → net ex-GST; unpaid COD → gross
   ex-GST − discounts (NOT zero — COD placements count as net sales until
-  cancelled/returned). NB: LTV/CAC deliberately stays paid-only (COD → 0). Uses the
+  cancelled/returned). Revenue arm of LTV:CAC uses the same basis for new
+  customers. Uses the
   same per-order dashboard net sales basis as
   Attribution Analysis and serve.commerce_orders, but remains scoped to the
   attribution population/window rather than commerce_net_revenue_daily's period

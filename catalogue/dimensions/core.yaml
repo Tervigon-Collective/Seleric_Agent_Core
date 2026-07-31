@@ -21,8 +21,10 @@ dimensions:
       product_performance: product_performance.brand_id
       product_ad_spend: product_ad_spend.brand_id
       meta_ad_performance: meta_ad_performance.brand_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.brand_id
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
       google_ad_performance: google_ad_performance.brand_id
+      google_ad_performance_hourly: google_ad_performance_hourly.brand_id
       amazon_ad_performance: amazon_ad_performance.brand_id
       amazon_commerce_performance: amazon_commerce_performance.brand_id
       amazon_attribution_overview: amazon_attribution_overview.brand_id
@@ -61,7 +63,10 @@ dimensions:
   # ---- Attribution (2026-07-16): Attribution.MarketingAttribution ----
   - id: lt_platform
     display_name: Last-touch Platform
-    description: Last-touch attributed platform (meta/google/organic/...). Resolved, not raw UTM.
+    description: >
+      Last-touch attributed platform (meta/google/organic/unattributed/...).
+      organic = true organic search only; unattributed = empty UTM / tracking failure
+      (do not treat unattributed as organic).
     views:
       order_attribution: order_attribution.lt_platform
   - id: lt_channel
@@ -114,6 +119,7 @@ dimensions:
   - id: identity_resolution_method
     display_name: Identity Resolution Method
     views:
+      session_funnel: session_funnel.identity_resolution_method
       order_attribution: order_attribution.identity_resolution_method
   - id: is_cod
     display_name: Is COD
@@ -381,6 +387,7 @@ dimensions:
     views:
       commerce_orders: commerce_orders.is_new_customer
       order_attribution: order_attribution.is_new_customer
+      product_performance: product_performance.is_new_customer
   - id: sku
     display_name: SKU
     aliases: [SKU, product sku]
@@ -440,8 +447,10 @@ dimensions:
       sales_all_channels: sales_all_channels.report_date
       meta_ad_attribution: meta_ad_attribution.report_date
       meta_ad_performance: meta_ad_performance.report_date
+      meta_ad_performance_hourly: meta_ad_performance_hourly.report_date
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.report_date
       google_ad_performance: google_ad_performance.report_date
+      google_ad_performance_hourly: google_ad_performance_hourly.report_date
       amazon_ad_performance: amazon_ad_performance.report_date
       amazon_commerce_performance: amazon_commerce_performance.report_date
       amazon_attribution_overview: amazon_attribution_overview.report_date
@@ -463,9 +472,12 @@ dimensions:
     display_name: Campaign ID
     description: Platform campaign identifier.
     views:
+      session_funnel: session_funnel.campaign_id
       meta_ad_performance: meta_ad_performance.campaign_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_id
       meta_ad_attribution: meta_ad_attribution.campaign_id
       google_ad_performance: google_ad_performance.campaign_id
+      google_ad_performance_hourly: google_ad_performance_hourly.campaign_id
       amazon_ad_performance: amazon_ad_performance.campaign_id
   - id: campaign_name
     display_name: Campaign Name
@@ -474,9 +486,11 @@ dimensions:
       session_funnel (distinct semantics — ad platform vs session landing).
     views:
       meta_ad_performance: meta_ad_performance.campaign_name
+      meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_name
       meta_ad_attribution: meta_ad_attribution.campaign_name
       google_ad_performance: google_ad_performance.campaign_name
+      google_ad_performance_hourly: google_ad_performance_hourly.campaign_name
       amazon_ad_performance: amazon_ad_performance.campaign_name
       session_funnel: session_funnel.campaign_name
   - id: campaign_status
@@ -490,6 +504,7 @@ dimensions:
     allowed_values: [OUTCOME_SALES, LINK_CLICKS, OUTCOME_LEADS, OUTCOME_ENGAGEMENT, OUTCOME_AWARENESS]
     views:
       meta_ad_performance: meta_ad_performance.campaign_objective
+      meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_objective
   - id: campaign_type
     display_name: Campaign Type
     description: >
@@ -497,27 +512,36 @@ dimensions:
       Amazon ads program (SP only — SB/SD not ingested).
     views:
       google_ad_performance: google_ad_performance.campaign_type
+      google_ad_performance_hourly: google_ad_performance_hourly.campaign_type
       amazon_ad_performance: amazon_ad_performance.campaign_type
   - id: adset_id
     display_name: Adset ID (Meta)
     views:
+      session_funnel: session_funnel.adset_id
       meta_ad_performance: meta_ad_performance.adset_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.adset_id
       meta_ad_attribution: meta_ad_attribution.adset_id
   - id: adset_name
     display_name: Adset Name (Meta)
     views:
+      session_funnel: session_funnel.adset_name
       meta_ad_performance: meta_ad_performance.adset_name
+      meta_ad_performance_hourly: meta_ad_performance_hourly.adset_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_name
       meta_ad_attribution: meta_ad_attribution.adset_name
   - id: ad_id
     display_name: Ad ID (Meta)
     views:
+      session_funnel: session_funnel.ad_id
       meta_ad_performance: meta_ad_performance.ad_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.ad_id
       meta_ad_attribution: meta_ad_attribution.ad_id
   - id: ad_name
     display_name: Ad Name (Meta)
     views:
+      session_funnel: session_funnel.ad_name
       meta_ad_performance: meta_ad_performance.ad_name
+      meta_ad_performance_hourly: meta_ad_performance_hourly.ad_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_name
       meta_ad_attribution: meta_ad_attribution.ad_name
   - id: creative_id
@@ -528,10 +552,12 @@ dimensions:
     display_name: Creative Type (Meta)
     views:
       meta_ad_performance: meta_ad_performance.creative_type
+      meta_ad_performance_hourly: meta_ad_performance_hourly.creative_type
   - id: ad_account_id
     display_name: Ad Account (Meta)
     views:
       meta_ad_performance: meta_ad_performance.ad_account_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.ad_account_id
   - id: customer_account_id
     display_name: Customer Account (Google)
     views:
@@ -546,7 +572,9 @@ dimensions:
     description: 1 when the report day is outside the mutable restatement window.
     views:
       meta_ad_performance: meta_ad_performance.is_final
+      meta_ad_performance_hourly: meta_ad_performance_hourly.is_final
       google_ad_performance: google_ad_performance.is_final
+      google_ad_performance_hourly: google_ad_performance_hourly.is_final
       amazon_ad_performance: amazon_ad_performance.is_final
   # ---- Meta breakdown port (2026-07-15): serve.meta_ads_breakdown_daily ----
   - id: breakdown_type
@@ -587,10 +615,11 @@ dimensions:
   - id: channel
     display_name: Channel
     description: >
-      On channel_attribution: closed 5-channel set (meta/google/organic_shopify/
-      amazon/organic_amazon). On funnel_daily and session_funnel: FINE channel
-      (ig_feed, google_search, organic, ...). On orders_all_channels /
-      sales_all_channels: marketplace channel (shopify | amazon).
+      On channel_attribution: closed set (meta/google/organic_shopify/unattributed/
+      amazon/organic_amazon). On channel_pnl: meta/google/organic/unattributed.
+      On funnel_daily and session_funnel: FINE channel (ig_feed, google_search,
+      organic, ...). On orders_all_channels / sales_all_channels: marketplace
+      channel (shopify | amazon).
     aliases: [marketplace, marketplace channel, shopify vs amazon]
     views:
       channel_attribution: channel_attribution.channel
@@ -765,4 +794,55 @@ dimensions:
     description: Snowplow platform on session_funnel (web/mobile).
     views:
       session_funnel: session_funnel.platform
-
+  - id: hour_of_day
+    display_name: Hour of Day (IST, 0-23)
+    description: Intraday hour bucket in IST for hourly paid-media views.
+    views:
+      meta_ad_performance_hourly: meta_ad_performance_hourly.hour_of_day
+      google_ad_performance_hourly: google_ad_performance_hourly.hour_of_day
+  - id: report_hour_ts
+    display_name: Report Hour (IST timestamp)
+    description: IST hour timestamp axis (granularity hour) for hourly paid-media views.
+    views:
+      meta_ad_performance_hourly: meta_ad_performance_hourly.report_hour_ts
+      google_ad_performance_hourly: google_ad_performance_hourly.report_hour_ts
+  - id: utm_content
+    display_name: UTM Content
+    description: Ad-level UTM content (creative/link tag).
+    views:
+      session_funnel: session_funnel.utm_content
+  - id: utm_term
+    display_name: UTM Term
+    description: UTM term (keyword/audience tag).
+    views:
+      session_funnel: session_funnel.utm_term
+  - id: session_hour
+    display_name: Session Hour (IST 0-23)
+    description: Hour the session started, IST.
+    views:
+      session_funnel: session_funnel.session_hour
+  - id: session_day_of_week
+    display_name: Session Day of Week (1=Mon)
+    description: ISO day of week the session started.
+    views:
+      session_funnel: session_funnel.session_day_of_week
+  - id: landing_page_resolved
+    display_name: Landing Page (resolved)
+    description: Resolved landing page label for the session.
+    views:
+      session_funnel: session_funnel.landing_page_resolved
+  - id: furthest_stage_bucket
+    display_name: Furthest Funnel Stage
+    description: Exclusive furthest funnel stage the session reached.
+    views:
+      session_funnel: session_funnel.furthest_stage_bucket
+  - id: converted
+    display_name: Converted (session)
+    description: 1 if the session ended in a purchase.
+    views:
+      session_funnel: session_funnel.converted
+  - id: shopify_order_id
+    display_name: Linked Shopify Order
+    description: Order id linked to a converted session.
+    views:
+      session_funnel: session_funnel.shopify_order_id

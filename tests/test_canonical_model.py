@@ -419,8 +419,9 @@ def test_sales_all_channels_amazon_is_exgst_and_excludes_cancels():
 
 
 def test_amazon_attribution_overview_uses_delivery_date_returns_and_net_profit():
-    """Dashboard Amazon Attribution cards use return_delivery_date Returns Report
-    and Net Profit = Net Sales − Fees − Product − Ads — never marketplace_net_payout."""
+    """Dashboard Amazon Attribution cards use Returns Report on
+    coalesce(return_delivery_date, return_request_date) and Net Profit =
+    Net Sales − Fees − Product − Ads — never marketplace_net_payout."""
     import yaml
 
     from seleric_mcp.config import cube_model_dir
@@ -430,16 +431,38 @@ def test_amazon_attribution_overview_uses_delivery_date_returns_and_net_profit()
     sql = raw["sql"].lower()
     measures = {m["name"] for m in raw["measures"]}
     assert "return_delivery_date" in sql
+    assert "return_request_date" in sql
+    assert "coalesce(return_delivery_date, return_request_date)" in sql
     assert "fct_amazon_return_items" in sql
     assert "cogs_product" in sql
     assert "spend" in sql
     assert {"net_profit", "return_revenue", "returns_cancels", "net_sales"} <= measures
 
 
+def test_amazon_commerce_marketplace_fees_uses_abs_effective_components():
+    """amazon_marketplace_fees must be non-negative abs(effective_*) so daily
+    grain is populated for UNSETTLED days (posted operational fees are 0)."""
+    import yaml
+
+    from seleric_mcp.config import cube_model_dir
+
+    f = cube_model_dir() / "cubes" / "serve_amazon_commerce_daily.yml"
+    raw = yaml.safe_load(f.read_text(encoding="utf-8"))["cubes"][0]
+    by_name = {m["name"]: m for m in raw["measures"]}
+    fees = by_name["marketplace_fees"]
+    sql = " ".join(str(fees["sql"]).lower().split())
+    assert "effective_commission" in sql and "abs(" in sql
+    assert "effective_closing" in sql
+    assert "effective_shipping" in sql
+    assert "effective_tax_withheld" in sql
+    assert "effective_other_service_fees" in sql
+
+
 def test_amazon_net_sales_catalogue_matches_exgst_report_return_basis(catalogue):
     """Canonical Amazon net-sales basis (2026-07-27, verified live vs the Amazon
     Attribution dashboard = 214,753.49): ex-GST gross (effective_gross_revenue -
-    revenue_tax, non-canceled) MINUS report returns on return_delivery_date.
+    revenue_tax, non-canceled) MINUS report returns on
+    coalesce(return_delivery_date, return_request_date).
     This SUPERSEDES the earlier 'settlement basis / revenue_principal' narrative,
     which came from a stale June CSV (retracted). amazon_net_sales stays on the
     ex-GST report-return basis; net_sales_all_channels is the canonical P&L

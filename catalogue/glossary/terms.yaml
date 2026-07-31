@@ -261,9 +261,9 @@ terms:
   - term: amazon marketplace fees
     canonical_id: amazon_marketplace_fees
     definition: >
-      Maps to the commerce-semantic marketplace_fees measure on
-      amazon_commerce_performance. For attribution-component fee totals from
-      amazon_daily_pnl, ask for "amazon platform fees".
+      Non-negative abs(effective_*) fee components on amazon_commerce_performance
+      (same economic basis as amazon_platform_fees). Prefer "amazon platform fees"
+      for Attribution Total Fees questions.
   - term: gross margin
     canonical_id: gross_margin_pct
   - term: gross margin %
@@ -327,8 +327,9 @@ terms:
   - term: LTV:CAC
     canonical_id: ltv_cac_ratio
     definition: >
-      Period LTV/CAC for first-time attributed customers. Use ltv_cac.ltv_cac_ratio —
-      not customer_ltv. Revenue arm is paid net only (unpaid placement → 0).
+      Period first-order AOV / CAC for first-time attributed customers.
+      Use ltv_cac.ltv_cac_ratio — not customer_ltv. Revenue arm matches
+      attributed_net_revenue for is_new_customer=1 (dashboard net, incl. unpaid COD).
   - term: ltv cac
     canonical_id: ltv_cac_ratio
   - term: ltv to cac
@@ -340,8 +341,13 @@ terms:
   - term: LTV
     canonical_id: ltv
     definition: >
-      Period new-customer LTV (new_customer_revenue / new_customers), not lifetime
-      customer_ltv.avg_ltv. Unpaid / payment_pending orders contribute ₹0 revenue.
+      Period new-customer first-order AOV (new_customer_revenue / new_customers),
+      not lifetime customer_ltv.avg_ltv. Same dashboard net basis as
+      attributed_net_revenue for new customers (incl. unpaid COD).
+  - term: first-order AOV
+    canonical_id: ltv
+    definition: >
+      Alias for the Historical LTV card — new-customer first-order AOV.
   - term: new customers
     canonical_id: new_customers
   - term: meta net profit

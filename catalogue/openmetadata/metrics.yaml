@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 207
+count: 235
 metrics:
   active_orders:
     category: commerce
@@ -111,7 +111,7 @@ metrics:
     - Commerce.CommerceOrder
     om_name: amazonMarketplaceFees
     dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-31'
   amazon_mer:
     category: amazon
     cube_view: amazon_attribution_overview
@@ -164,7 +164,7 @@ metrics:
     - Finance.NetCogs
     om_name: amazonPlatformFees
     dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_audited_on: '2026-07-31'
   amazon_return_count:
     category: commerce
     cube_view: amazon_attribution_overview
@@ -182,7 +182,7 @@ metrics:
     - Commerce.ReturnCancelRevenue
     om_name: amazonReturnRevenue
     dashboard_status: match
-    dashboard_audited_on: '2026-07-27'
+    dashboard_audited_on: '2026-07-31'
   amazon_returned_orders:
     category: commerce
     cube_view: amazon_attribution_overview
@@ -605,6 +605,15 @@ metrics:
     om_name: googleClicks
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  google_clicks_hourly:
+    category: paid_media
+    cube_view: google_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleClicksHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   google_cpc:
     category: paid_media
     cube_view: google_ad_performance
@@ -614,6 +623,15 @@ metrics:
     om_name: googleCpc
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  google_cpc_hourly:
+    category: paid_media
+    cube_view: google_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleCpcHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   google_cpm:
     category: paid_media
     cube_view: google_ad_performance
@@ -623,6 +641,15 @@ metrics:
     om_name: googleCpm
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  google_cpm_hourly:
+    category: paid_media
+    cube_view: google_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleCpmHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   google_ctr:
     category: paid_media
     cube_view: google_ad_performance
@@ -632,6 +659,15 @@ metrics:
     om_name: googleCtr
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  google_ctr_hourly:
+    category: paid_media
+    cube_view: google_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleCtrHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   google_impressions:
     category: paid_media
     cube_view: google_ad_performance
@@ -641,6 +677,15 @@ metrics:
     om_name: googleImpressions
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  google_impressions_hourly:
+    category: paid_media
+    cube_view: google_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleImpressionsHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   google_interaction_rate:
     category: paid_media
     cube_view: google_ad_performance
@@ -684,6 +729,15 @@ metrics:
     om_name: googleSpend
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  google_spend_hourly:
+    category: paid_media
+    cube_view: google_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleSpendHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   gross_margin_pct:
     category: finance
     cube_view: canonical_pnl
@@ -780,7 +834,7 @@ metrics:
     glossary: []
     om_name: ltv
     dashboard_status: match
-    dashboard_audited_on: '2026-07-27'
+    dashboard_audited_on: '2026-07-31'
   ltv_cac_ratio:
     category: finance
     cube_view: ltv_cac
@@ -788,7 +842,7 @@ metrics:
     glossary: []
     om_name: ltvCacRatio
     dashboard_status: match
-    dashboard_audited_on: '2026-07-27'
+    dashboard_audited_on: '2026-07-31'
   mer:
     category: finance
     cube_view: canonical_pnl
@@ -1005,6 +1059,15 @@ metrics:
     om_name: metaClicks
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  meta_clicks_hourly:
+    category: paid_media
+    cube_view: meta_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaClicksHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   meta_cost_per_landing_page_view:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1041,6 +1104,15 @@ metrics:
     om_name: metaCpc
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  meta_cpc_hourly:
+    category: paid_media
+    cube_view: meta_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaCpcHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   meta_cpm:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1050,6 +1122,15 @@ metrics:
     om_name: metaCpm
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  meta_cpm_hourly:
+    category: paid_media
+    cube_view: meta_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaCpmHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   meta_ctr:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1059,6 +1140,15 @@ metrics:
     om_name: metaCtr
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  meta_ctr_hourly:
+    category: paid_media
+    cube_view: meta_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaCtrHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   meta_frequency:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1094,6 +1184,15 @@ metrics:
     om_name: metaImpressions
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  meta_impressions_hourly:
+    category: paid_media
+    cube_view: meta_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaImpressionsHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   meta_landing_page_views:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1146,6 +1245,15 @@ metrics:
     om_name: metaSpend
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  meta_spend_hourly:
+    category: paid_media
+    cube_view: meta_ad_performance_hourly
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaSpendHourly
+    dashboard_status: match
+    dashboard_audited_on: '2026-07-31'
   meta_thruplays:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1690,6 +1798,134 @@ metrics:
     om_name: rtoCost
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  session_add_to_carts:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAddToCarts
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_atc_rate:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAtcRate
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_atc_to_checkout_rate:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAtcToCheckoutRate
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_avg_page_depth:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAvgPageDepth
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_avg_seconds_to_add_to_cart:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAvgSecondsToAddToCart
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_avg_seconds_to_checkout:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAvgSecondsToCheckout
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_avg_seconds_to_purchase:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionAvgSecondsToPurchase
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_checkout_rate:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionCheckoutRate
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_checkout_steps:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionCheckoutSteps
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_checkout_to_purchase_rate:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionCheckoutToPurchaseRate
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_collection_views:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionCollectionViews
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_conversion_rate:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionConversionRate
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_pdp_rate:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionPdpRate
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_product_views:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionProductViews
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_remove_from_carts:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionRemoveFromCarts
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
+  session_site_searches:
+    category: web_analytics
+    cube_view: session_funnel
+    contract: session_funnel_contract_v1
+    glossary: []
+    om_name: sessionSiteSearches
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-07-31'
   shipping_cost:
     category: finance
     cube_view: canonical_pnl

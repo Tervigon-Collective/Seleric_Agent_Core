@@ -4,15 +4,18 @@ category: commerce
 status: certified
 description: >
   Amazon Refunds / return revenue from the Seller Central Returns Report on
-  return_delivery_date (delivery-date axis), matching the Amazon Attribution
-  Overview "Refunds" card (June 2026 brand 20 = ₹12,892.50). Deduped per
-  record_id (canonical ids only; excludes fbm_returns: hashes and E+ sci-notation
-  dups). Rejected return lines excluded. This SUPERSEDES the older refund-posted
-  date / refund_principal axis on amazon_commerce_performance.returned_revenue
+  coalesce(return_delivery_date, return_request_date): prefer delivery date when
+  present, else request date so in-flight (NULL delivery) returns still deduct
+  from daily Net Sales. Matches the Amazon Attribution Overview "Refunds" card
+  for closed months where delivery is populated (June 2026 brand 20 = ₹12,892.50).
+  Deduped per record_id (canonical ids only; excludes fbm_returns: hashes and E+
+  sci-notation dups). Rejected return lines excluded. This SUPERSEDES the older
+  refund-posted date / refund_principal axis on amazon_commerce_performance.returned_revenue
   (which returned ₹18,689 for the same June window). Scope: Amazon SP-only.
 formula:
   human_readable: >
-    SUM(refunded_amount) from gold.fct_amazon_return_items on return_delivery_date
+    SUM(refunded_amount) from gold.fct_amazon_return_items on
+    coalesce(return_delivery_date, return_request_date)
     (canonical record_ids, non-rejected)
   authoritative_source: cube
 cube_mapping:
@@ -45,6 +48,6 @@ deprecated_aliases:
   - amazon_refund_revenue
 dashboard_alignment:
   status: match
-  audited_on: '2026-07-27'
+  audited_on: '2026-07-31'
   source: Seleric_Dashboard/Node-Backend
   evidence: amazonReturnsHelpers.js buildAmazonDeliveryDateReturnsSql; AmazonSummaryCards Refunds

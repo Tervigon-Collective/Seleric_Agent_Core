@@ -3,14 +3,12 @@ display_name: Channel Orders
 category: attribution
 status: certified
 description: >
-  Orders by the closed channel set (meta / google / organic_shopify / amazon /
-  organic_amazon) on serve.channel_attribution_daily. Reconciles to Total Orders by
-  construction: SUM over all channels == total_orders, and the Shopify channels
-  (meta / google / organic_shopify) == total_orders Shopify with the same last-touch
-  split as the dashboard Historical channel breakdown (fct_order_attribution,
-  argMax lt_platform; unmatched → organic_shopify). Amazon arm excludes Canceled to
-  match the Total Orders amazon cohort. organic_shopify.unattributed_orders exposes
-  the direct/unresolved count folded into that bucket.
+  Orders by the closed channel set (meta / google / organic_shopify / unattributed /
+  amazon / organic_amazon) on serve.channel_attribution_daily. Reconciles to Total
+  Orders by construction: SUM over all channels == total_orders. Shopify last-touch
+  split: meta / google / organic_shopify (true organic search) / unattributed
+  (empty UTM / tracking failure — NOT labeled organic). Amazon arm excludes Canceled
+  to match the Total Orders amazon cohort.
 formula:
   human_readable: SUM(orders) by channel
   authoritative_source: cube
@@ -49,10 +47,7 @@ dashboard_alignment:
   source: Seleric_Dashboard/Node-Backend
   evidence: historicalAnalytics/analyticsClickhouse.js:325-348 (getTotalOrders per-channel)
   note: >
-    Shopify meta/google/organic_shopify split matches the dashboard Historical
-    channel breakdown exactly (getTotalOrders: fct_orders LEFT JOIN
-    fct_order_attribution argMax lt_platform, unmatched → organic). Verified live
-    2026-07-31 brand 20 June: meta 1302 / google 469 / organic_shopify 78 = 1849
-    Shopify + amazon 136 = 1985 total_orders. Amazon channel is an additional
-    detail beyond the dashboard's single Historical amazon row. Guard:
-    scripts/reconcile_attribution_totals.py.
+    2026-07-31: empty-signal orders that were mislabeled organic_shopify are now
+    channel=unattributed. True organic search (bing/…) stays organic_shopify.
+    SUM(meta+google+organic_shopify+unattributed) still equals Shopify total_orders.
+    Guard: scripts/reconcile_attribution_totals.py.
