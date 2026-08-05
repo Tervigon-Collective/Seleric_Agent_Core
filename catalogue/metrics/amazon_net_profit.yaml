@@ -6,7 +6,9 @@ description: >
   Amazon Attribution / Historical Amazon-only Net Profit:
   Net Sales − Total Fees − Product Cost − Amazon Ads spend.
   Matches the Amazon Attribution Overview "Net Profit" card (June 2026
-  brand 20 = ₹59,346.00). This is NOT marketplace_net_payout (settlement
+  brand 20 = ₹66,586.02 after the 2026-08-03 settlement rework — Total Fees
+  now settlement-sourced GST-free for settled orders, label fees removed).
+  This is NOT marketplace_net_payout (settlement
   cash to seller) — use amazon_net_payout for payout. Scope: Amazon SP-only.
 formula:
   human_readable: >
@@ -37,7 +39,7 @@ examples:
       measures: [amazon_net_profit]
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
-  - June 2026 brand 20 = ₹59,346.00
+  - June 2026 brand 20 = ₹66,586.02 (settlement-aware; was ₹59,346.00 pre-2026-08-03)
   - amazon_net_profit != amazon_net_payout
 deprecated_aliases: []
 dashboard_alignment:

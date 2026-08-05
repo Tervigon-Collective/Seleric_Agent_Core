@@ -134,6 +134,18 @@ class Deprecation(BaseModel):
     reason: str
 
 
+class ModuleDef(BaseModel):
+    """A dashboard module's data-access scope. Resolves (via ontology domains
+    + optional extra_views) to a set of allowed cube views, and from there to
+    the catalogue metrics on those views. Declared in catalogue/modules.yaml."""
+
+    id: str
+    display_name: str
+    description: str = ""
+    domains: list[str] = Field(default_factory=list)
+    extra_views: list[str] = Field(default_factory=list)
+
+
 class BrandDef(BaseModel):
     id: str
     name: str
@@ -219,6 +231,7 @@ class Catalogue(BaseModel):
     deprecations: list[Deprecation]
     brands: BrandRegistry | None = None
     openmetadata: OpenMetadataRegistry | None = None
+    modules: dict[str, ModuleDef] = Field(default_factory=dict)
 
 
 def _read_yaml(path: Path) -> dict:
@@ -273,6 +286,14 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     if brands_path.exists():
         brands = BrandRegistry.model_validate(_read_yaml(brands_path))
 
+    modules: dict[str, ModuleDef] = {}
+    modules_path = catalogue_dir / "modules.yaml"
+    if modules_path.exists():
+        for mid, spec in (_read_yaml(modules_path).get("modules") or {}).items():
+            spec = dict(spec or {})
+            spec["id"] = mid
+            modules[mid] = ModuleDef.model_validate(spec)
+
     om_registry: OpenMetadataRegistry | None = None
     om_path = catalogue_dir / "openmetadata" / "registry.yaml"
     if om_path.exists():
@@ -299,6 +320,7 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         deprecations=deprecations,
         brands=brands,
         openmetadata=om_registry,
+        modules=modules,
     )
     _check_integrity(cat)
     return cat
@@ -351,6 +373,26 @@ def _check_integrity(cat: Catalogue) -> None:
                 problems.append(
                     f"openmetadata.contracts.{contract_id}: data_product mismatch"
                 )
+    if cat.modules:
+        onto = cat.openmetadata.ontology if cat.openmetadata else None
+        domain_specs: dict = onto.domains if onto else {}
+        for mod in cat.modules.values():
+            resolved_any = bool(mod.extra_views)
+            for domain in mod.domains:
+                if domain not in domain_specs:
+                    problems.append(f"module {mod.id}: unknown ontology domain '{domain}'")
+                    continue
+                for view in domain_specs[domain].get("cube_views", []) or []:
+                    resolved_any = True
+                    if view not in cat.views:
+                        problems.append(
+                            f"module {mod.id}: domain '{domain}' references unknown view '{view}'"
+                        )
+            for view in mod.extra_views:
+                if view not in cat.views:
+                    problems.append(f"module {mod.id}: unknown extra_view '{view}'")
+            if not resolved_any:
+                problems.append(f"module {mod.id}: resolves to no cube views")
     if problems:
         raise ValueError("Catalogue integrity check failed:\n" + "\n".join(problems))
 

@@ -2,7 +2,7 @@ id: net_profit_all_channels
 display_name: Net Profit (all channels — P&L Forecast)
 category: finance
 status: certified
-description: 'P&L Forecast Net Profit: (Shopify net + Amazon operational revenue / 1.18) − all-channels TOC − Total Ad Spend (Meta+Google+Amazon). Distinct from Shopify-only net_profit and from Historical all-channels net_profit_incl_amazon.
+description: 'P&L Forecast Net Profit: (Shopify net + Amazon Attribution net sales, ex-GST) − all-channels TOC − Total Ad Spend (Meta+Google+Amazon). Amazon platform fees inside TOC are settlement-sourced GST-free for settled orders. Distinct from Shopify-only net_profit and from Historical all-channels net_profit_incl_amazon.
 
   '
 formula:
@@ -37,7 +37,15 @@ examples:
       start: '2026-06-01'
       end: '2026-06-30'
 validation_tests:
-- June 2026 brand 20 ≈ −₹2,78,615.42
+- >-
+  Settlement basis (Amazon platform fees GST-free from settlement, via
+  serve.amazon_attribution_overview then cube canonical_pnl). Identity is
+  net_sales_all − TOC_all − total_ad_spend. June 2026 brand 20 = −₹1,00,994.16
+  as-of 2026-08-04 (net_cogs 14,88,073.57 after gold COGS refresh; Amazon
+  platform fees 43,931.35). The rupee value tracks daily gold net_cogs; earlier
+  snapshots −₹1,66,188.75 (net_cogs 15,53,268 on 2026-08-03) and −₹2,78,615.42
+  (pre-2026-07 Amazon fixes) are stale. Settlement-vs-Finances fee delta is only
+  about ₹18 (43,931.35 vs 43,949.41).
 deprecated_aliases: []
 dashboard_alignment:
   status: match

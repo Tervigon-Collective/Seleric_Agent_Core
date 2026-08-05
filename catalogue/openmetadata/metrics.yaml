@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 235
+count: 238
 metrics:
   active_orders:
     category: commerce
@@ -156,6 +156,15 @@ metrics:
     om_name: amazonOrders
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  amazon_output_gst:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonOutputGst
+    dashboard_status: match
+    dashboard_audited_on: '2026-08-03'
   amazon_platform_fees:
     category: finance
     cube_view: amazon_daily_pnl
@@ -165,6 +174,15 @@ metrics:
     om_name: amazonPlatformFees
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-31'
+  amazon_recoverable_fee_gst:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonRecoverableFeeGst
+    dashboard_status: match
+    dashboard_audited_on: '2026-08-03'
   amazon_return_count:
     category: commerce
     cube_view: amazon_attribution_overview
@@ -201,6 +219,15 @@ metrics:
     om_name: amazonReturnsCancels
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
+  amazon_tcs_tds:
+    category: commerce
+    cube_view: amazon_commerce_performance
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonTcsTds
+    dashboard_status: match
+    dashboard_audited_on: '2026-08-03'
   amazon_total_sales:
     category: commerce
     cube_view: amazon_attribution_overview

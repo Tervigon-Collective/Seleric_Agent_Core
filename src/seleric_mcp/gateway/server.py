@@ -286,6 +286,52 @@ def build_server(settings: Settings) -> FastMCP:
             "caller_scopes": sorted(ctx.settings.caller_scopes),
         }
 
+    def _resolve_module(param: str | None) -> tuple[str | None, dict | None]:
+        """Effective module = the config pin (gateway.module) if set, else the
+        per-call ``param``, else None (unscoped). A per-call module that
+        contradicts a pin is refused. Returns (effective_module, refusal)."""
+        pinned = ctx.settings.module or None
+        if pinned:
+            if param and param != pinned:
+                return None, {
+                    "error": (
+                        f"This MCP instance is pinned to module '{pinned}'; the "
+                        f"requested module '{param}' is not allowed."
+                    ),
+                    "pinned_module": pinned,
+                }
+            return pinned, None
+        return (param or None), None
+
+    def _unknown_module(module: str) -> dict | None:
+        """Access-denied payload if ``module`` is not a known module id."""
+        if ctx.catalogue.get_module(module) is not None:
+            return None
+        return {
+            "error": f"Unknown module '{module}'.",
+            "valid_modules": [m.id for m in ctx.catalogue.list_modules()],
+        }
+
+    def _check_metric_module(metric_ids: list[str], module: str) -> dict | None:
+        """Enforce module scope: refuse any requested metric that does not
+        resolve to a metric on one of the module's allowed views. Mirrors
+        _check_metric_scopes — returns a structured denial, or None if every
+        metric is in scope."""
+        out = sorted(
+            {mid for mid in metric_ids if not ctx.catalogue.is_metric_in_module(mid, module)}
+        )
+        if not out:
+            return None
+        return {
+            "error": (
+                f"One or more requested metrics are outside module '{module}'. "
+                "This module can only query its own domain's metrics."
+            ),
+            "module": module,
+            "out_of_module_metrics": out,
+            "module_metrics": sorted(ctx.catalogue.module_metric_ids(module)),
+        }
+
     def _stale_refusal(stale: dict[str, dict]) -> dict:
         """Structured fail-closed refusal for stale data. The agent must relay
         the refusal, not invent numbers."""
@@ -304,13 +350,24 @@ def build_server(settings: Settings) -> FastMCP:
     # ---------------- catalogue tools ----------------
 
     @mcp.tool()
-    def catalogue_search_metrics(query: str) -> dict:
+    def catalogue_search_metrics(query: str, module: str | None = None) -> dict:
         """Resolve business language (e.g. 'topline', 'MER') to canonical
         catalogue metric ids. Always call this before metrics_query when the
         user's term hasn't been resolved yet. Returns matches with the view
-        and supported dimensions; unknown terms return suggestions only."""
-        _log_call("catalogue_search_metrics", query=query)
-        return ctx.catalogue.search(query).model_dump()
+        and supported dimensions; unknown terms return suggestions only.
+
+        Pass module=<id> (see modules_list — e.g. webanalytics, commerce,
+        attribution) to restrict results to one dashboard module's metrics. If
+        this instance is pinned to a module, that scope is always applied."""
+        _log_call("catalogue_search_metrics", query=query, module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        return ctx.catalogue.search(query, module=effective).model_dump()
 
     @mcp.tool()
     def catalogue_get_metric(metric_id: str) -> dict:
@@ -402,6 +459,26 @@ def build_server(settings: Settings) -> FastMCP:
             "catalogue_version": ctx.catalogue.version,
         }
 
+    @mcp.tool()
+    def modules_list() -> dict:
+        """List dashboard modules (data-access scopes) the caller can target.
+        Pass a module id as the `module` argument to metrics_query /
+        metrics_drilldown / catalogue_search_metrics to scope a call to that
+        module's data — out-of-module metrics are then refused. Each module
+        reports its business domains, allowed cube views, and metric count. If
+        this instance is pinned to one module, `active_module` names it and that
+        module is forced on every call regardless of the argument."""
+        _log_call("modules_list")
+        return {
+            "modules": [m.model_dump() for m in ctx.catalogue.list_modules()],
+            "active_module": ctx.settings.module or None,
+            "note": (
+                "Pass module=<id> to scope a query to a dashboard module. Omit "
+                "for unscoped access unless this instance is pinned."
+            ),
+            "catalogue_version": ctx.catalogue.version,
+        }
+
     # ---------------- metrics tools ----------------
 
     @mcp.tool()
@@ -414,6 +491,7 @@ def build_server(settings: Settings) -> FastMCP:
         compare_period: str | None = None,
         sort: list[dict] | None = None,
         limit: int | None = None,
+        module: str | None = None,
     ) -> dict:
         """THE only path to numeric data. measures = catalogue metric ids
         (from catalogue_search_metrics), not raw cube members. Cube members
@@ -440,12 +518,30 @@ def build_server(settings: Settings) -> FastMCP:
         provenance. For top sales by state with order count (all channels):
         measures=[total_sales_all_channels, total_orders],
         dimensions=[shipping_region], sort by total_sales_all_channels desc.
-        Quote provenance freshness when presenting numbers."""
-        trace_id = _log_call("metrics_query", measures=measures)
+        Quote provenance freshness when presenting numbers. module=<id> (see
+        modules_list) scopes this call to one dashboard module and refuses any
+        measure outside it; a pinned instance forces its module regardless."""
+        trace_id = _log_call("metrics_query", measures=measures, module=module)
         denial = _check_metric_scopes(measures)
         if denial:
             logger.warning("metrics_query_denied", trace_id=trace_id, measures=measures)
             return denial
+        effective_module, mod_refusal = _resolve_module(module)
+        if mod_refusal:
+            return mod_refusal
+        if effective_module is not None:
+            unknown = _unknown_module(effective_module)
+            if unknown:
+                return unknown
+            mod_denial = _check_metric_module(measures, effective_module)
+            if mod_denial:
+                logger.warning(
+                    "metrics_query_module_denied",
+                    trace_id=trace_id,
+                    measures=measures,
+                    module=effective_module,
+                )
+                return mod_denial
         stale = await ctx.stale_views(measures)
         if stale:
             logger.warning("metrics_query_stale_blocked", trace_id=trace_id, stale_views=list(stale))
@@ -474,6 +570,7 @@ def build_server(settings: Settings) -> FastMCP:
         target_dimensions: list[str],
         additional_filters: list[dict] | None = None,
         granularity: str | None = None,
+        module: str | None = None,
     ) -> dict:
         """Drill into a prior metrics_query result: same metrics, time range,
         compare mode and filters, regrouped by target_dimensions. Additional
@@ -481,8 +578,17 @@ def build_server(settings: Settings) -> FastMCP:
         target_dimensions and additional_filters[].dimension are catalogue
         dimension ids (e.g. shipping_region), not Cube view.member strings.
         For composed multi-view parents, pass a part query_id from
-        provenance.part_query_ids — not the parent composition id."""
-        trace_id = _log_call("metrics_drilldown", parent_query_id=parent_query_id)
+        provenance.part_query_ids — not the parent composition id. module=<id>
+        scopes the drilldown to a dashboard module (same rule as metrics_query);
+        a pinned instance forces its module regardless."""
+        trace_id = _log_call("metrics_drilldown", parent_query_id=parent_query_id, module=module)
+        effective_module, mod_refusal = _resolve_module(module)
+        if mod_refusal:
+            return mod_refusal
+        if effective_module is not None:
+            unknown = _unknown_module(effective_module)
+            if unknown:
+                return unknown
         stored = ctx.result_store.get(parent_query_id)
         if stored is not None:
             try:
@@ -494,6 +600,16 @@ def build_server(settings: Settings) -> FastMCP:
                 if denial:
                     logger.warning("metrics_drilldown_denied", trace_id=trace_id, measures=parent_measures)
                     return denial
+                if effective_module is not None:
+                    mod_denial = _check_metric_module(parent_measures, effective_module)
+                    if mod_denial:
+                        logger.warning(
+                            "metrics_drilldown_module_denied",
+                            trace_id=trace_id,
+                            measures=parent_measures,
+                            module=effective_module,
+                        )
+                        return mod_denial
                 stale = await ctx.stale_views(parent_measures)
                 if stale:
                     logger.warning(
@@ -781,6 +897,24 @@ def build_server(settings: Settings) -> FastMCP:
     def confirm_action(action_request_id: str) -> str:
         """Render an action preview as an explicit user confirmation ask."""
         return prompt_templates.CONFIRM_ACTION.format(action_request_id=action_request_id)
+
+    @mcp.prompt()
+    def dashboard_analyst(module: str = "", brand_id: str = "") -> str:
+        """System prompt for the dashboard's in-page analyst chat: the standing
+        no-hallucination guard + a conversational, proactive BI-analyst persona +
+        the current module/brand scope. The dashboard passes the page's module id
+        and the caller's brand_id; this is the single place its chat behaviour,
+        replies, and thought process are authored."""
+        mod = ctx.catalogue.get_module(module) if module else None
+        module_label = mod.display_name if mod is not None else (module or "")
+        brand_label = ""
+        if brand_id:
+            resolved = ctx.catalogue.resolve_brand(str(brand_id))
+            # ResolvedBrand carries .name; ambiguous/unknown fall back to the id.
+            brand_label = getattr(resolved, "name", None) or str(brand_id)
+        return prompt_templates.dashboard_analyst_prompt(
+            module_label=module_label, brand_label=brand_label
+        )
 
     # stash context for __main__ (drift check at startup, http app wiring)
     mcp._seleric_ctx = ctx  # type: ignore[attr-defined]

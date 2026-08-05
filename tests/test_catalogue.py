@@ -343,3 +343,85 @@ def test_freshness(catalogue):
 def test_ratio_metrics_have_flag(catalogue):
     for mid in ("aov", "units_per_order", "product_gross_margin_pct", "average_selling_price"):
         assert catalogue.get_metric(mid).aggregation == "ratio"
+
+
+# ---------------- module (dashboard access scope) registry ----------------
+# catalogue/modules.yaml maps each dashboard module to ontology domains; a
+# module resolves to its domains' cube_views and from there to the metrics on
+# those views. Adding/re-scoping a module is a YAML edit — these tests pin the
+# seeded mapping and the resolution/guard helpers the gateway relies on.
+
+def test_modules_seeded_and_resolved(catalogue):
+    ids = {m.id for m in catalogue.list_modules()}
+    assert ids == {
+        "webanalytics", "commerce", "product", "paidmedia",
+        "attribution", "customer", "finance", "operations",
+    }
+    # WebAnalytics domain views back the funnel module.
+    web = catalogue.module_views("webanalytics")
+    assert {"session_funnel", "funnel_daily"} <= web
+    assert catalogue.module_metric_ids("webanalytics")  # non-empty
+
+
+def test_metric_module_membership(catalogue):
+    # Commerce metric belongs to commerce, not to attribution; the attributed
+    # metric is the mirror image. Proves the view-based boundary is real.
+    assert catalogue.is_metric_in_module("commerce_net_revenue", "commerce")
+    assert not catalogue.is_metric_in_module("attributed_net_revenue", "commerce")
+    assert catalogue.is_metric_in_module("attributed_net_revenue", "attribution")
+    # Unknown module id is never a match.
+    assert not catalogue.is_metric_in_module("commerce_net_revenue", "no_such_module")
+
+
+def test_metric_module_membership_accepts_cube_member(catalogue):
+    # A Cube-qualified measure (as pasted from provenance) resolves to its
+    # catalogue id first, then checks module membership.
+    assert catalogue.is_metric_in_module(
+        "order_attribution.attributed_net_revenue", "attribution"
+    )
+
+
+def test_search_scoped_to_module(catalogue):
+    scoped = catalogue.search("revenue", module="commerce")
+    allowed = catalogue.module_metric_ids("commerce")
+    assert scoped.matches
+    assert all(m.id in allowed for m in scoped.matches)
+    # The same query unscoped can surface out-of-module metrics (e.g. attributed).
+    unscoped_ids = {m.id for m in catalogue.search("revenue").matches}
+    assert unscoped_ids - allowed
+
+
+def test_module_integrity_rejects_unknown_domain(catalogue):
+    import pytest
+
+    from seleric_mcp.catalogue_service.loader import ModuleDef, _check_integrity
+
+    bad = catalogue.cat.model_copy(
+        update={
+            "modules": {
+                **catalogue.cat.modules,
+                "bogus": ModuleDef(id="bogus", display_name="Bogus", domains=["NotADomain"]),
+            }
+        }
+    )
+    with pytest.raises(ValueError, match="unknown ontology domain"):
+        _check_integrity(bad)
+
+
+def test_module_integrity_rejects_unknown_extra_view(catalogue):
+    import pytest
+
+    from seleric_mcp.catalogue_service.loader import ModuleDef, _check_integrity
+
+    bad = catalogue.cat.model_copy(
+        update={
+            "modules": {
+                **catalogue.cat.modules,
+                "bogus": ModuleDef(
+                    id="bogus", display_name="Bogus", extra_views=["no_such_view"]
+                ),
+            }
+        }
+    )
+    with pytest.raises(ValueError, match="unknown extra_view"):
+        _check_integrity(bad)

@@ -1,0 +1,46 @@
+id: amazon_output_gst
+display_name: Amazon Output GST (settlement)
+category: commerce
+status: certified
+description: >
+  Customer GST collected on Amazon orders, itemised on the settlement
+  flat-file (gold.fct_amazon_sp_settlement_order_pnl). Surfaced SEPARATELY —
+  it is deliberately NOT included in Amazon Total Fees or Net Profit. Only
+  populated for SETTLED orders where the settlement fee overlay applies
+  (unsettled orders have no settlement GST line). June 2026 brand 20 =
+  ₹21,292.19.
+formula:
+  human_readable: Σ settlement output_gst for settled orders (purchase_date axis)
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_commerce_performance
+  measure: amazon_commerce_performance.output_gst
+  time_dimension: amazon_commerce_performance.report_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+  - brand_id
+  - report_date
+supported_filters:
+  - date_range
+  - brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed: [exec, finance, analyst, ops]
+  scopes: [metrics:read]
+examples:
+  - question: Amazon output GST for June 2026
+    request:
+      measures: [amazon_output_gst]
+      time_range: {start: "2026-06-01", end: "2026-06-30"}
+validation_tests:
+  - June 2026 brand 20 = ₹21,292.19
+  - not included in amazon_net_profit
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-08-03'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: integrations/amazonShared/amazonSettlementPnl.js (row.output_gst, surfaced separately)

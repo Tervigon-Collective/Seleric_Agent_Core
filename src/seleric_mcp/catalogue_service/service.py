@@ -16,7 +16,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from .loader import BrandDef, Catalogue, DimensionDef, MetricDef
+from .loader import BrandDef, Catalogue, DimensionDef, MetricDef, ModuleDef
 
 # Fuzzy-resolution band fallbacks (SequenceMatcher ratio on normalized
 # strings). Runtime values come from Settings (env-overridable); these only
@@ -45,6 +45,15 @@ class SearchResult(BaseModel):
     matches: list[MetricSummary]
     suggestions: list[str]
     catalogue_version: str
+
+
+class ModuleSummary(BaseModel):
+    id: str
+    display_name: str
+    description: str
+    domains: list[str]
+    views: list[str]
+    metric_count: int
 
 
 class ResolvedTerm(BaseModel):
@@ -142,6 +151,27 @@ class CatalogueService:
         for m in catalogue.metrics.values():
             for alias in m.deprecated_aliases:
                 self._alias_index[alias.lower()] = m.id
+        # Module -> allowed cube views -> allowed catalogue metric ids. Resolved
+        # once here; modules.yaml declares domains, the ontology maps domains to
+        # cube views, and a metric belongs to a module iff its view is allowed.
+        self._module_views: dict[str, set[str]] = {}
+        self._module_metrics: dict[str, set[str]] = {}
+        for mid, mod in catalogue.modules.items():
+            views = self._resolve_module_views(mod)
+            self._module_views[mid] = views
+            self._module_metrics[mid] = {
+                m.id for m in catalogue.metrics.values() if m.cube_mapping.view in views
+            }
+
+    def _resolve_module_views(self, mod: ModuleDef) -> set[str]:
+        views: set[str] = set(mod.extra_views)
+        onto = self.cat.openmetadata.ontology if self.cat.openmetadata else None
+        domain_specs = onto.domains if onto else {}
+        for domain in mod.domains:
+            spec = domain_specs.get(domain) or {}
+            for view in spec.get("cube_views", []) or []:
+                views.add(view)
+        return views
 
     @property
     def version(self) -> str:
@@ -169,12 +199,15 @@ class CatalogueService:
             vocab.append(m.display_name.lower())
         return vocab
 
-    def search(self, query: str) -> SearchResult:
+    def search(self, query: str, module: str | None = None) -> SearchResult:
         q = _normalize(query)
         matches: dict[str, MetricSummary] = {}
+        allowed = self._module_metrics.get(module) if module else None
 
         def add(m: MetricDef, matched_on: str) -> None:
             if not m.is_queryable or m.id in matches:
+                return
+            if allowed is not None and m.id not in allowed:
                 return
             matches[m.id] = MetricSummary(
                 id=m.id,
@@ -303,6 +336,41 @@ class CatalogueService:
 
     def get_metric(self, metric_id: str) -> MetricDef | None:
         return self.cat.metrics.get(metric_id)
+
+    # ---------------- modules (dashboard access scopes) ----------------
+
+    def list_modules(self) -> list[ModuleSummary]:
+        return [
+            ModuleSummary(
+                id=mid,
+                display_name=mod.display_name,
+                description=mod.description.strip(),
+                domains=list(mod.domains),
+                views=sorted(self._module_views.get(mid, set())),
+                metric_count=len(self._module_metrics.get(mid, set())),
+            )
+            for mid, mod in sorted(self.cat.modules.items())
+        ]
+
+    def get_module(self, module_id: str) -> ModuleDef | None:
+        return self.cat.modules.get(module_id)
+
+    def module_views(self, module_id: str) -> set[str]:
+        return set(self._module_views.get(module_id, set()))
+
+    def module_metric_ids(self, module_id: str) -> set[str]:
+        return set(self._module_metrics.get(module_id, set()))
+
+    def is_metric_in_module(self, metric_id: str, module_id: str) -> bool:
+        """True iff metric_id (a catalogue id, deprecated alias, or Cube member)
+        resolves to a metric on one of module_id's allowed views. Unknown
+        modules or unresolvable metrics return False."""
+        allowed = self._module_metrics.get(module_id)
+        if not allowed:
+            return False
+        resolved = self.resolve_metric_id(metric_id)
+        canonical = resolved[0] if resolved else metric_id
+        return canonical in allowed
 
     def resolve_metric_id(self, ref: str) -> tuple[str, str | None] | None:
         """Map a catalogue metric id, deprecated alias, OR a Cube-qualified

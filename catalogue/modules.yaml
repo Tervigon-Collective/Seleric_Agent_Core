@@ -1,0 +1,65 @@
+# Dashboard module registry — the "module-wise" access surface for the MCP.
+#
+# Each module maps to one or more business DOMAINS declared in
+# catalogue/openmetadata/ontology.yaml. A module resolves to the union of its
+# domains' cube_views (plus any extra_views), and from there to every catalogue
+# metric whose cube_mapping.view is in that set. This is the ONLY place the
+# module -> data scope is declared; adding or re-scoping a module is a config
+# edit, not a code change.
+#
+# How it is used (see src/seleric_mcp/gateway/server.py):
+#   - callers pass module="webanalytics" to metrics_query / metrics_drilldown /
+#     catalogue_search_metrics to scope a single call, OR
+#   - a deployment pins one module via config.yaml gateway.module (or the
+#     SELERIC_MCP_MODULE env var) so the whole instance is locked to it.
+# When a module is in effect, out-of-module metrics are hard-refused.
+# With no module in effect the surface is unscoped (full access) — unchanged.
+#
+# Fields:
+#   display_name  human label shown by modules_list
+#   description   optional one-liner
+#   domains       ontology domain names (must exist in ontology.yaml domains)
+#   extra_views   optional escape hatch to add cube views beyond the domains
+
+modules:
+  webanalytics:
+    display_name: Funnel Analytics
+    description: On-site session funnel, web events, and funnel-stage rates.
+    domains: [WebAnalytics]
+
+  commerce:
+    display_name: Commerce Rollup
+    description: Orders, sales, and refunds/returns across all channels.
+    domains: [Commerce]
+
+  product:
+    display_name: Product Performance
+    description: Per-product units, revenue, COGS, and margin.
+    domains: [Product]
+
+  paidmedia:
+    display_name: Paid Media Delivery
+    description: Meta / Google / Amazon ad delivery metrics (spend, CTR, CPC, CPM).
+    domains: [PaidMedia]
+
+  attribution:
+    display_name: Attribution
+    description: >
+      Last-touch, first-party attributed orders and revenue across all channels
+      (Meta / Google / Amazon / Organic). Filter by lt_platform for a channel view.
+    domains: [Attribution]
+
+  customer:
+    display_name: Customer Intelligence
+    description: Customer LTV, repeat behaviour, and purchase sequences.
+    domains: [Customer]
+
+  finance:
+    display_name: Finance / P&L
+    description: Canonical daily P&L — spend, COGS, contribution, net profit, MER.
+    domains: [Finance]
+
+  operations:
+    display_name: Returns & Refunds
+    description: Shopify refund events and return lifecycle.
+    domains: [Operations]

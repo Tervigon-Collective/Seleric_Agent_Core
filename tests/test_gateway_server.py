@@ -107,6 +107,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "catalogue_list_brands",
         "catalogue_resolve_brand",
         "catalogue_resolve_term",
+        "modules_list",
         "metrics_query",
         "metrics_drilldown",
         "insights_explain",
@@ -360,3 +361,135 @@ async def test_scopes_apply_to_cube_member_measure_ref(built_server_no_scopes):
     assert "error" in out
     assert "missing_scopes_by_metric" in out
     assert "commerce_net_revenue" in out["missing_scopes_by_metric"]
+
+
+# ---------- module scoping (dashboard access boundary) ----------
+# catalogue/modules.yaml + gateway helpers scope a call to one dashboard
+# module. Effective module = config pin (gateway.module) if set, else the
+# per-call `module` arg, else none (unscoped = unchanged). In-module metrics
+# pass; out-of-module metrics are hard-refused before Cube is touched.
+
+def _pinned_settings(tmp_path, module):
+    from seleric_mcp.config import Settings
+
+    return Settings(
+        cube_api_url="http://cube.test",
+        seleric_api_key="test-key",
+        cubejs_api_secret="",
+        pipeboard_mcp_url="http://pipeboard.test",
+        pipeboard_token="pb-token",
+        write_enabled=False,
+        mcp_service_token="svc-token",
+        approval_secret="approval-secret",
+        caller_scopes=frozenset({"metrics:read"}),
+        db_path=tmp_path / "test_pinned.db",
+        module=module,
+    )
+
+
+@pytest.fixture()
+def built_server_pinned(fake_cube, result_store, tmp_path):
+    """Instance hard-pinned to the webanalytics (funnel) module."""
+    mcp = build_server(_pinned_settings(tmp_path, "webanalytics"))
+    ctx = mcp._seleric_ctx
+    ctx.result_store = result_store
+    ctx.planner = QueryPlanner(ctx.catalogue, fake_cube, ctx.result_store)
+    return mcp, ctx
+
+
+def test_modules_list_tool_returns_all_modules(built_server):
+    mcp, ctx = built_server
+    out = _tool_fn(mcp, "modules_list")()
+    ids = {m["id"] for m in out["modules"]}
+    assert ids == {
+        "webanalytics", "commerce", "product", "paidmedia",
+        "attribution", "customer", "finance", "operations",
+    }
+    assert out["active_module"] is None  # unscoped instance
+
+
+async def test_metrics_query_module_allows_in_module(built_server, fake_cube):
+    mcp, ctx = built_server
+    fake_cube.by_prefix["commerce_orders"] = [
+        {"commerce_orders.dashboard_net_sales_excl_gst": "100"}
+    ]
+    fn = _tool_fn(mcp, "metrics_query")
+    out = await fn(
+        measures=["commerce_net_revenue"],
+        time_range={"preset": "last_7d"},
+        module="commerce",
+    )
+    assert "out_of_module_metrics" not in out
+    assert out["provenance"]["cube_view"] == "commerce_orders"
+
+
+async def test_metrics_query_module_refuses_out_of_module(built_server, fake_cube):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "metrics_query")
+    out = await fn(
+        measures=["attributed_net_revenue"],
+        time_range={"preset": "last_7d"},
+        module="commerce",
+    )
+    assert out["module"] == "commerce"
+    assert out["out_of_module_metrics"] == ["attributed_net_revenue"]
+    assert "rows" not in out  # refused before Cube was queried
+    assert fake_cube.queries == []
+
+
+async def test_metrics_query_unknown_module_errors(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "metrics_query")
+    out = await fn(
+        measures=["commerce_net_revenue"],
+        time_range={"preset": "last_7d"},
+        module="not_a_module",
+    )
+    assert "error" in out
+    assert "commerce" in out["valid_modules"]
+
+
+async def test_metrics_query_no_module_is_full_access(built_server, fake_cube):
+    """Backward compatibility: with no module in effect, any metric is reachable
+    regardless of which domain it lives in."""
+    mcp, ctx = built_server
+    fake_cube.by_prefix["order_attribution"] = [
+        {"order_attribution.attributed_net_revenue": "500"}
+    ]
+    fn = _tool_fn(mcp, "metrics_query")
+    out = await fn(measures=["attributed_net_revenue"], time_range={"preset": "last_7d"})
+    assert "out_of_module_metrics" not in out
+    assert out["provenance"]["cube_view"] == "order_attribution"
+
+
+async def test_pinned_instance_forces_its_module(built_server_pinned, fake_cube):
+    """A per-call module that contradicts the pin is refused; omitting module
+    still applies the pin and refuses out-of-module metrics."""
+    mcp, ctx = built_server_pinned
+    fn = _tool_fn(mcp, "metrics_query")
+
+    # Contradicting the pin -> refused with the pin named.
+    out = await fn(
+        measures=["commerce_net_revenue"],
+        time_range={"preset": "last_7d"},
+        module="commerce",
+    )
+    assert out["pinned_module"] == "webanalytics"
+
+    # No module arg -> pin applies; a commerce metric is out of the funnel module.
+    out2 = await fn(measures=["commerce_net_revenue"], time_range={"preset": "last_7d"})
+    assert out2["module"] == "webanalytics"
+    assert "commerce_net_revenue" in out2["out_of_module_metrics"]
+    assert fake_cube.queries == []
+
+    # modules_list reports the active pin.
+    assert _tool_fn(mcp, "modules_list")()["active_module"] == "webanalytics"
+
+
+async def test_pinned_instance_allows_in_module_metric(built_server_pinned, fake_cube):
+    mcp, ctx = built_server_pinned
+    fn = _tool_fn(mcp, "metrics_query")
+    # add_to_cart_events is a WebAnalytics metric -> passes the module guard.
+    out = await fn(measures=["add_to_cart_events"], time_range={"preset": "last_7d"})
+    assert "out_of_module_metrics" not in out
+    assert "pinned_module" not in out

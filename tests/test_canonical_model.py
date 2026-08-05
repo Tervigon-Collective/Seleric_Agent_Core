@@ -9,6 +9,7 @@ conventions in test_query_planner.py — see that file for the base cases
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 
 import pytest
 
@@ -421,27 +422,48 @@ def test_sales_all_channels_amazon_is_exgst_and_excludes_cancels():
 def test_amazon_attribution_overview_uses_delivery_date_returns_and_net_profit():
     """Dashboard Amazon Attribution cards use Returns Report on
     coalesce(return_delivery_date, return_request_date) and Net Profit =
-    Net Sales − Fees − Product − Ads — never marketplace_net_payout."""
+    Net Sales − Fees − Product − Ads — never marketplace_net_payout.
+    The cube must read serve.amazon_attribution_overview ONLY (no gold); the
+    returns/settlement logic lives in that serve view DDL."""
     import yaml
 
     from seleric_mcp.config import cube_model_dir
 
     f = cube_model_dir() / "cubes" / "serve_amazon_attribution_overview.yml"
     raw = yaml.safe_load(f.read_text(encoding="utf-8"))["cubes"][0]
-    sql = raw["sql"].lower()
+    # Cube reads the serve view directly — no inline SQL, no gold.
+    assert raw.get("sql_table") == "serve.amazon_attribution_overview"
+    assert "sql" not in raw
     measures = {m["name"] for m in raw["measures"]}
-    assert "return_delivery_date" in sql
-    assert "return_request_date" in sql
-    assert "coalesce(return_delivery_date, return_request_date)" in sql
-    assert "fct_amazon_return_items" in sql
-    assert "cogs_product" in sql
-    assert "spend" in sql
+    assert {"net_profit", "return_revenue", "returns_cancels", "net_sales"} <= measures
+    # Settlement GST surfaced separately.
+    assert {"output_gst", "recoverable_fee_gst", "tcs_tds"} <= measures
+
+    # The returns + settlement logic lives in the serve DDL.
+    ddl = (
+        Path(__file__).resolve().parents[2]
+        / "data_platform"
+        / "mage-ai"
+        / "serve"
+        / "commerce"
+        / "views"
+        / "amazon_attribution_overview.sql"
+    ).read_text(encoding="utf-8").lower()
+    assert "coalesce(return_delivery_date, return_request_date)" in ddl
+    assert "fct_amazon_return_items" in ddl
+    assert "fct_amazon_sp_settlement_order_pnl" in ddl
+    assert "cogs_product" in ddl
+    assert "spend" in ddl
     assert {"net_profit", "return_revenue", "returns_cancels", "net_sales"} <= measures
 
 
-def test_amazon_commerce_marketplace_fees_uses_abs_effective_components():
-    """amazon_marketplace_fees must be non-negative abs(effective_*) so daily
-    grain is populated for UNSETTLED days (posted operational fees are 0)."""
+def test_amazon_commerce_marketplace_fees_is_settlement_aware_from_view():
+    """marketplace_fees must READ the settlement-aware view column
+    serve.amazon_commerce_daily.marketplace_fees (GST-free settlement ladder for
+    settled/non-stale orders; Finances estimate otherwise), NOT recompute
+    abs(effective_*) in the cube (which would bypass the overlay). The Finances
+    abs-component ladder is preserved as marketplace_fees_finances_estimate, and
+    the settlement GST buckets are surfaced separately."""
     import yaml
 
     from seleric_mcp.config import cube_model_dir
@@ -449,13 +471,49 @@ def test_amazon_commerce_marketplace_fees_uses_abs_effective_components():
     f = cube_model_dir() / "cubes" / "serve_amazon_commerce_daily.yml"
     raw = yaml.safe_load(f.read_text(encoding="utf-8"))["cubes"][0]
     by_name = {m["name"]: m for m in raw["measures"]}
-    fees = by_name["marketplace_fees"]
-    sql = " ".join(str(fees["sql"]).lower().split())
-    assert "effective_commission" in sql and "abs(" in sql
-    assert "effective_closing" in sql
-    assert "effective_shipping" in sql
-    assert "effective_tax_withheld" in sql
-    assert "effective_other_service_fees" in sql
+
+    # marketplace_fees reads the view column (settlement-aware); must NOT recompute.
+    fees_sql = " ".join(str(by_name["marketplace_fees"]["sql"]).lower().split())
+    assert fees_sql == "marketplace_fees"
+    assert "effective_commission" not in fees_sql
+
+    # Finances-only abs-component ladder retained for back-compat — the cube
+    # measure reads the view column; the abs(effective_*) ladder lives in the
+    # serve.amazon_commerce_daily DDL.
+    fin_sql = " ".join(
+        str(by_name["marketplace_fees_finances_estimate"]["sql"]).lower().split()
+    )
+    assert fin_sql == "marketplace_fees_finances_estimate"
+
+    ddl = (
+        Path(__file__).resolve().parents[2]
+        / "data_platform"
+        / "mage-ai"
+        / "serve"
+        / "commerce"
+        / "views"
+        / "amazon_commerce_daily.sql"
+    ).read_text(encoding="utf-8").lower()
+    assert "fct_amazon_sp_settlement_order_pnl" in ddl
+    assert "settlement_aware_marketplace_fees" in ddl
+    assert "marketplace_fees_finances_estimate" in ddl
+    for comp in (
+        "effective_commission",
+        "effective_closing",
+        "effective_shipping",
+        "effective_tax_withheld",
+        "effective_other_service_fees",
+    ):
+        assert comp in ddl
+
+    # Settlement GST/withholding surfaced separately (excluded from fees/profit).
+    assert {"output_gst", "recoverable_fee_gst", "tcs_tds"} <= set(by_name)
+    assert str(by_name["output_gst"]["sql"]).strip() == "settlement_output_gst"
+    assert (
+        str(by_name["recoverable_fee_gst"]["sql"]).strip()
+        == "settlement_recoverable_fee_gst"
+    )
+    assert str(by_name["tcs_tds"]["sql"]).strip() == "settlement_tcs_tds"
 
 
 def test_amazon_net_sales_catalogue_matches_exgst_report_return_basis(catalogue):

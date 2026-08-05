@@ -114,6 +114,10 @@ class Settings:
     approval_secret: str
     caller_scopes: frozenset[str]
     db_path: Path
+    # Optional deployment-level module pin (catalogue/modules.yaml id). When set,
+    # this instance is locked to that module: query/search tools scope to it and
+    # a per-call module that contradicts it is refused. Empty = unscoped.
+    module: str = ""
     catalogue_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "catalogue")
 
     # --- behavior tunables ---
@@ -240,6 +244,8 @@ def load_settings(config_path: Path | None = None) -> Settings:
         if s.strip()
     )
 
+    module = str(_env_or("SELERIC_MCP_MODULE", _cfg_get(gateway, "module", ""))).strip()
+
     write_cfg = _as_bool(_cfg_get(gateway, "write_enabled", False), False)
     write_env = os.getenv("WRITE_ENABLED")
     if write_env is not None and write_env.strip() != "":
@@ -342,6 +348,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         mcp_service_token=_env_str("MCP_SERVICE_TOKEN"),
         approval_secret=_env_str("APPROVAL_SECRET"),
         caller_scopes=scopes,
+        module=module,
         db_path=db_path,
         resolve_auto_threshold=_tunable_float(
             "SELERIC_RESOLVE_AUTO_THRESHOLD", "resolve_auto_threshold"

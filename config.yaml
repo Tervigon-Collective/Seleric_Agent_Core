@@ -43,6 +43,13 @@ postgres:
 gateway:
   # Global kill switch for write actions. Must be true to allow commits.
   write_enabled: false
+  # Optional module pin (a catalogue/modules.yaml id, e.g. webanalytics,
+  # commerce, attribution). When set, this instance is locked to that module:
+  # metrics_query/drilldown scope to it and refuse out-of-module metrics, and a
+  # per-call module argument that names a different module is rejected. Leave
+  # empty/absent for an unscoped instance where the caller passes module per
+  # call. Env override: SELERIC_MCP_MODULE.
+  # module: webanalytics
   # Scopes granted to the caller
   scopes:
     - metrics:read
