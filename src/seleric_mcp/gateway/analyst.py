@@ -1,0 +1,493 @@
+"""Production dashboard BI-analyst service — the single agent brain for the
+dashboard's in-page chat.
+
+This is the server-side home of what the Node backend used to re-implement: a
+multi-turn, module- and brand-scoped tool-calling agent that answers business
+questions using ONLY the seleric-mcp analytics tools. It reuses the exact
+runtime the terminal/test chat clients use — the task-tier ``LLMRouter``
+(fast tool models drive the loop, a reasoning model does the final synthesis),
+the durable ``Scratchpad`` conversation memory, and the tool-argument
+sanitizers — so behaviour is consistent everywhere and lives here in Base_Agent,
+not in Node.
+
+Sessions are kept in-process keyed by an opaque ``session_id`` the dashboard
+supplies (one per open chat panel). Each session owns its message history and
+its scratchpad, so follow-ups like "break that down by day" build on the prior
+turn's resolved metric/period without re-asking. Scope (module + brand) is
+injected server-side into every data-tool call, so the model cannot widen it.
+
+Tools run IN-PROCESS against the already-built FastMCP tool manager — no MCP
+round-trip, no extra process — and are restricted to the read-only analytics
+subset (Phase 1). Actions remain a deliberate, separately-gated phase 2.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import os
+import re
+import time
+from collections import OrderedDict
+from typing import Any
+
+import structlog
+
+from ..llm.agent_core import (
+    SCRATCHPAD_TOOL,
+    Scratchpad,
+    build_router,
+    load_azure_client,
+    mcp_tools_to_openai,
+    sanitize_history,
+    sanitize_tool_arguments,
+)
+from . import prompts as prompt_templates
+
+logger = structlog.get_logger()
+
+# Read-only analytics tools the analyst may use. Anything else the MCP exposes
+# (ads mutations, action commit/propose, google_*/meta_* writes) is NOT offered
+# — this keeps the dashboard chat strictly read-only (Phase 1).
+ANALYST_TOOLS = frozenset(
+    {
+        "modules_list",
+        "catalogue_search_metrics",
+        "catalogue_get_metric",
+        "catalogue_list_dimensions",
+        "catalogue_resolve_term",
+        "catalogue_resolve_brand",
+        "catalogue_list_brands",
+        "metrics_query",
+        "metrics_drilldown",
+        "insights_explain",
+    }
+)
+
+# Tools whose ``module`` argument the server forces to the page's module.
+MODULE_SCOPED_TOOLS = frozenset(
+    {"metrics_query", "metrics_drilldown", "catalogue_search_metrics"}
+)
+
+
+def _analyst_env_int(name: str, default: int) -> int:
+    raw = (os.getenv(name) or "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+# ---------------------------------------------------------------------------
+# Scope injection (module + brand) — mirrors the enforcement the tools already
+# do, but applied here so the model never has to (and can't avoid it).
+# ---------------------------------------------------------------------------
+
+
+def _ensure_brand_filter(filters: Any, brand_id: str) -> list[dict]:
+    out = list(filters) if isinstance(filters, list) else []
+    if not any(isinstance(f, dict) and f.get("dimension") == "brand_id" for f in out):
+        out.append({"dimension": "brand_id", "operator": "equals", "values": [str(brand_id)]})
+    return out
+
+
+def inject_scope(name: str, args: dict[str, Any], *, module: str | None, brand_id: str | None) -> dict[str, Any]:
+    """Force module + brand scope onto a tool call, ignoring anything the model
+    set. Returns a new args dict."""
+    a = dict(args or {})
+    if module and name in MODULE_SCOPED_TOOLS:
+        a["module"] = module
+    if brand_id not in (None, ""):
+        if name == "metrics_query":
+            a["filters"] = _ensure_brand_filter(a.get("filters"), brand_id)
+        elif name == "metrics_drilldown":
+            a["additional_filters"] = _ensure_brand_filter(a.get("additional_filters"), brand_id)
+    return a
+
+
+# ---------------------------------------------------------------------------
+# Rich-block parsing — the persona (prompts.py CONVERSATIONAL_BI_ANALYST) emits
+# fenced ```chart / ```table / ```choices JSON blocks the dashboard renders as
+# real UI. We strip + validate them here so the raw JSON never reaches the
+# chat, and Node stays a dumb relay. Ported from the old Node agent.js.
+# ---------------------------------------------------------------------------
+
+_TABLE_FORMATS = frozenset({"inr", "int", "pct", "num"})
+_CHART_TYPES = frozenset({"bar", "line", "area", "pie"})
+
+
+def _fenced_json(answer: str, tag: str) -> tuple[Any, str]:
+    """Parse the first ```<tag> ... ``` fenced JSON block. Returns (data|None,
+    stripped) — the block is removed from ``stripped`` whether or not it parsed,
+    so a malformed block never renders."""
+    m = re.search(r"```" + tag + r"\s*([\s\S]*?)```", answer, re.IGNORECASE)
+    if not m:
+        return None, answer
+    try:
+        data = json.loads(m.group(1).strip())
+    except (json.JSONDecodeError, ValueError):
+        data = None
+    return data, (answer[: m.start()] + answer[m.end():]).strip()
+
+
+def _extract_choices(answer: str) -> tuple[str, list[dict] | None]:
+    data, stripped = _fenced_json(answer, "choices")
+    opts = data if isinstance(data, list) else (data.get("options") if isinstance(data, dict) else None)
+    if not isinstance(opts, list):
+        return stripped, None
+    clean = []
+    for o in opts:
+        if not isinstance(o, dict):
+            continue
+        label = o.get("label").strip() if isinstance(o.get("label"), str) else ""
+        value = o.get("value").strip() if isinstance(o.get("value"), str) and o.get("value").strip() else label
+        if label and value:
+            clean.append({"label": label, "value": value})
+    return stripped, (clean[:4] or None)
+
+
+def _extract_table(answer: str) -> tuple[str, dict | None]:
+    data, stripped = _fenced_json(answer, "table")
+    if not (isinstance(data, dict) and isinstance(data.get("columns"), list) and data.get("rows")):
+        return stripped, None
+    columns = []
+    for c in data["columns"]:
+        if not (isinstance(c, dict) and isinstance(c.get("key"), str) and c["key"]):
+            continue
+        col = {"key": c["key"], "label": c["key"]}
+        if isinstance(c.get("label"), str) and c["label"]:
+            col["label"] = c["label"]
+        if c.get("format") in _TABLE_FORMATS:
+            col["format"] = c["format"]
+        if c.get("align") in ("right", "center"):
+            col["align"] = c["align"]
+        if c.get("muted") is True:
+            col["muted"] = True
+        columns.append(col)
+    if not columns:
+        return stripped, None
+    keys = {c["key"] for c in columns}
+    compare = {}
+    if isinstance(data.get("compare"), dict):
+        for k, v in data["compare"].items():
+            if k in keys and isinstance(v, str) and v in keys:
+                compare[k] = v
+    table: dict[str, Any] = {
+        "columns": columns,
+        "rows": [r for r in data["rows"] if isinstance(r, dict)],
+    }
+    if isinstance(data.get("title"), str):
+        table["title"] = data["title"]
+    if data.get("primary") in keys:
+        table["primary"] = data["primary"]
+    if compare:
+        table["compare"] = compare
+    return stripped, table
+
+
+def _extract_chart(answer: str) -> tuple[str, dict | None]:
+    data, stripped = _fenced_json(answer, "chart")
+    if not (
+        isinstance(data, dict)
+        and data.get("type") in _CHART_TYPES
+        and isinstance(data.get("x"), str)
+        and data.get("x")
+        and isinstance(data.get("series"), list)
+        and data.get("rows")
+    ):
+        return stripped, None
+    series = []
+    for s in data["series"]:
+        if not (isinstance(s, dict) and isinstance(s.get("key"), str) and s["key"]):
+            continue
+        entry = {"key": s["key"], "label": s["key"]}
+        if isinstance(s.get("label"), str) and s["label"]:
+            entry["label"] = s["label"]
+        if s.get("format") in _TABLE_FORMATS:
+            entry["format"] = s["format"]
+        series.append(entry)
+    if not series:
+        return stripped, None
+    chart: dict[str, Any] = {
+        "type": data["type"],
+        "x": data["x"],
+        "series": series,
+        "rows": [r for r in data["rows"] if isinstance(r, dict)],
+    }
+    if isinstance(data.get("title"), str):
+        chart["title"] = data["title"]
+    if data.get("format") in _TABLE_FORMATS:
+        chart["format"] = data["format"]
+    if data.get("stacked") is True:
+        chart["stacked"] = True
+    return stripped, chart
+
+
+def parse_rich_blocks(raw: str) -> dict[str, Any]:
+    """Strip chart -> table -> choices blocks (same order Node used) and return
+    the cleaned answer plus whichever blocks were present."""
+    answer, chart = _extract_chart(raw or "")
+    answer, table = _extract_table(answer)
+    answer, choices = _extract_choices(answer)
+    out: dict[str, Any] = {"answer": answer}
+    if chart:
+        out["chart"] = chart
+    if table:
+        out["table"] = table
+    if choices:
+        out["choices"] = choices
+    return out
+
+
+def _step_label(name: str, args: dict[str, Any]) -> str:
+    a = args or {}
+    if name in ("metrics_query", "metrics_drilldown"):
+        detail = ", ".join(a.get("measures") or []) or ", ".join(a.get("target_dimensions") or [])
+        return f"{name}: {detail}" if detail else name
+    if name in ("catalogue_search_metrics", "catalogue_resolve_term"):
+        q = a.get("query") or a.get("text")
+        return f"{name}: {q}" if q else name
+    if name == "catalogue_get_metric" and a.get("metric_id"):
+        return f"{name}: {a['metric_id']}"
+    return name
+
+
+# ---------------------------------------------------------------------------
+# Session + service
+# ---------------------------------------------------------------------------
+
+
+class AnalystSession:
+    """One dashboard chat panel: message history + scratchpad + fixed scope."""
+
+    def __init__(self, system_prompt: str, module: str | None, brand_id: str | None) -> None:
+        self.module = module
+        self.brand_id = brand_id
+        self.scratchpad = Scratchpad()
+        # messages[0] = system prompt (persona + scope), messages[1] = scratchpad
+        # slot refreshed before every model call. Rest is the conversation.
+        self.messages: list[dict[str, Any]] = [
+            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": self.scratchpad.render()},
+        ]
+        self.last_used = time.monotonic()
+
+    def turns(self) -> int:
+        return sum(1 for m in self.messages if m.get("role") == "user")
+
+
+class AnalystService:
+    """Multi-session BI agent bound to one FastMCP server (in-process tools)."""
+
+    def __init__(self, mcp: Any) -> None:
+        self._mcp = mcp
+        self._ctx = getattr(mcp, "_seleric_ctx", None)
+        self._client, self._deployment = load_azure_client()
+        self._router = build_router(self._client)
+        self._tools: list[dict[str, Any]] | None = None  # lazy (list_tools is async)
+        self._sessions: OrderedDict[str, AnalystSession] = OrderedDict()
+        self._lock = asyncio.Lock()
+        self.max_rounds = _analyst_env_int("ANALYST_MAX_ROUNDS", 40)
+        self.session_ttl = _analyst_env_int("ANALYST_SESSION_TTL_SECONDS", 3600)
+        self.max_sessions = _analyst_env_int("ANALYST_MAX_SESSIONS", 500)
+
+    async def _openai_tools(self) -> list[dict[str, Any]]:
+        if self._tools is None:
+            listed = await self._mcp.list_tools()
+            allowed = [t for t in listed if t.name in ANALYST_TOOLS]
+            self._tools = mcp_tools_to_openai(allowed) + [SCRATCHPAD_TOOL]
+        return self._tools
+
+    def _system_prompt(self, module: str | None, brand_id: str | None) -> str:
+        module_label = module or ""
+        brand_label = ""
+        if self._ctx is not None:
+            if module:
+                mod = self._ctx.catalogue.get_module(module)
+                module_label = mod.display_name if mod is not None else module
+            if brand_id:
+                resolved = self._ctx.catalogue.resolve_brand(str(brand_id))
+                brand_label = getattr(resolved, "name", None) or str(brand_id)
+        persona = prompt_templates.dashboard_analyst_prompt(
+            module_label=module_label, brand_label=brand_label
+        )
+        return persona + "\n\n" + prompt_templates.SCRATCHPAD_USAGE
+
+    def _evict(self) -> None:
+        now = time.monotonic()
+        stale = [sid for sid, s in self._sessions.items() if now - s.last_used > self.session_ttl]
+        for sid in stale:
+            self._sessions.pop(sid, None)
+        while len(self._sessions) > self.max_sessions:
+            self._sessions.popitem(last=False)  # drop least-recently-used
+
+    def _session(self, session_id: str, module: str | None, brand_id: str | None) -> AnalystSession:
+        s = self._sessions.get(session_id)
+        # Scope is fixed per session; if the dashboard reuses an id under a new
+        # module/brand, start fresh so the wrong scope can't leak across.
+        if s is None or s.module != module or s.brand_id != brand_id:
+            s = AnalystSession(self._system_prompt(module, brand_id), module, brand_id)
+            self._sessions[session_id] = s
+        self._sessions.move_to_end(session_id)
+        return s
+
+    async def _run_tool(self, name: str, args: dict[str, Any], session: AnalystSession) -> str:
+        if name == "scratchpad_write":
+            return session.scratchpad.write(args.get("key", ""), args.get("value", ""))
+        tool = self._mcp._tool_manager.get_tool(name)
+        if tool is None:
+            return json.dumps({"error": f"unknown tool: {name}"})
+        try:
+            result = await tool.run(args)  # convert_result=False -> raw dict
+        except Exception as exc:  # noqa: BLE001 — relay tool failure to the model
+            return json.dumps({"error": f"tool call failed: {exc}"})
+        if isinstance(result, (dict, list)):
+            return json.dumps(result, default=str)
+        return str(result)
+
+    async def ask(
+        self, *, session_id: str, question: str, module: str | None, brand_id: str | None
+    ) -> dict[str, Any]:
+        async with self._lock:  # serialize turns of a given process (sessions share the router buckets)
+            session = self._session(session_id, module, brand_id)
+            session.last_used = time.monotonic()
+            self._evict()
+            tools = await self._openai_tools()
+            session.messages.append({"role": "user", "content": question})
+            steps: list[dict[str, Any]] = []
+
+            tier = "tools"
+            for _ in range(self.max_rounds):
+                session.messages[1] = {"role": "system", "content": session.scratchpad.render()}
+                sanitize_history(session.messages)
+                try:
+                    resp = await asyncio.to_thread(
+                        self._router.complete,
+                        tier=tier,
+                        messages=session.messages,
+                        tools=tools,
+                        tool_choice="auto",
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    logger.error("analyst_llm_error", module=module, error=str(exc))
+                    err = RuntimeError(f"LLM error: {exc}")
+                    err.status_code = 502  # type: ignore[attr-defined]
+                    raise err
+
+                choice = resp.message
+                tool_calls = choice.tool_calls or []
+
+                # Tool model is ready to answer -> escalate final synthesis to a
+                # reasoning model before committing the answer.
+                if not tool_calls and tier == "tools":
+                    tier = "reasoning"
+                    continue
+
+                assistant_msg: dict[str, Any] = {"role": "assistant", "content": choice.content or ""}
+                if tool_calls:
+                    assistant_msg["tool_calls"] = [
+                        {
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": sanitize_tool_arguments(tc.function.arguments),
+                            },
+                        }
+                        for tc in tool_calls
+                    ]
+                session.messages.append(assistant_msg)
+
+                if not tool_calls:
+                    parsed = parse_rich_blocks((choice.content or "").strip())
+                    return {"module": module, "steps": steps, "session_id": session_id, **parsed}
+
+                tier = "tools"
+                for tc in tool_calls:
+                    try:
+                        raw_args = json.loads(tc.function.arguments or "{}")
+                    except json.JSONDecodeError:
+                        raw_args = {}
+                    scoped = inject_scope(tc.function.name, raw_args, module=module, brand_id=brand_id)
+                    payload = await self._run_tool(tc.function.name, scoped, session)
+                    ok = not payload.lstrip().startswith('{"error"')
+                    steps.append(
+                        {"tool": tc.function.name, "label": _step_label(tc.function.name, scoped), "module": module, "ok": ok}
+                    )
+                    session.messages.append({"role": "tool", "tool_call_id": tc.id, "content": payload})
+
+            logger.warning("analyst_round_limit", module=module, rounds=self.max_rounds)
+            return {
+                "answer": "I reached my step limit before finishing. Please narrow the question "
+                "(a specific metric and date range works best).",
+                "module": module,
+                "steps": steps,
+                "session_id": session_id,
+            }
+
+
+# ---------------------------------------------------------------------------
+# HTTP surface — mounted onto the same Starlette app that serves /mcp, behind
+# the same bearer-token middleware. The dashboard's Node backend proxies to it.
+# ---------------------------------------------------------------------------
+
+
+def mount_analyst_routes(app: Any, mcp: Any) -> None:
+    """Add POST /agent/ask + GET /agent/health to the streamable-http app.
+
+    The AnalystService is built lazily on first use so a missing Azure config
+    degrades to a 503 on the analyst endpoints only — it never blocks the MCP
+    server from starting."""
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
+    from starlette.routing import Route
+
+    state: dict[str, Any] = {"service": None, "error": None}
+
+    def get_service() -> AnalystService | None:
+        if state["service"] is None and state["error"] is None:
+            try:
+                state["service"] = AnalystService(mcp)
+            except Exception as exc:  # noqa: BLE001
+                state["error"] = str(exc)
+                logger.error("analyst_service_init_failed", error=str(exc))
+        return state["service"]
+
+    async def health(request: "Request") -> "JSONResponse":
+        svc = get_service()
+        return JSONResponse({"ok": svc is not None, "configured": svc is not None, "error": state["error"]})
+
+    async def ask(request: "Request") -> "JSONResponse":
+        svc = get_service()
+        if svc is None:
+            return JSONResponse(
+                {"success": False, "error": f"analyst not configured: {state['error']}"},
+                status_code=503,
+            )
+        try:
+            body = await request.json()
+        except Exception:  # noqa: BLE001
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        question = str(body.get("question") or "").strip()
+        if not question:
+            return JSONResponse({"success": False, "error": "question is required"}, status_code=400)
+        session_id = str(body.get("session_id") or "").strip() or "default"
+        module = body.get("module") or None
+        brand_raw = body.get("brand_id")
+        brand_id = str(brand_raw) if brand_raw not in (None, "") else None
+        try:
+            result = await svc.ask(
+                session_id=session_id, question=question, module=module, brand_id=brand_id
+            )
+            return JSONResponse({"success": True, "data": result})
+        except Exception as exc:  # noqa: BLE001
+            status = getattr(exc, "status_code", 500)
+            logger.error("analyst_ask_failed", module=module, error=str(exc))
+            return JSONResponse({"success": False, "error": str(exc)}, status_code=status)
+
+    app.router.routes.append(Route("/agent/ask", ask, methods=["POST"]))
+    app.router.routes.append(Route("/agent/health", health, methods=["GET"]))

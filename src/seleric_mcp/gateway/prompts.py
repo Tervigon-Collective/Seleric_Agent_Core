@@ -563,6 +563,27 @@ Rules for the block:
 """
 
 
+# Scratchpad usage — only injected by the server-side agent runtime
+# (gateway/analyst.py), which gives the model a real scratchpad_write tool and
+# persists notes across turns of a session. The MCP-served `dashboard_analyst`
+# prompt (used by clients without a scratchpad tool) deliberately omits this.
+SCRATCHPAD_USAGE = """\
+CONVERSATION MEMORY (scratchpad)
+You have a scratchpad_write tool and a SCRATCHPAD block refreshed every turn.
+The moment you resolve or decide something reusable, save it — so follow-ups
+don't re-resolve or re-ask:
+- resolved business term -> catalogue metric id (e.g. "net profit -> net_profit_all_channels")
+- the active period, comparison period, and grain you chose (and why)
+- active filters / brand / dimension selections
+- the latest query_id for each analysis thread (for insights_explain / drilldown)
+- any metric substitution you made after a tool error
+Keep entries short and factual. Empty value deletes a key. Never store numbers,
+speculation, or prose. Reuse the most recent compatible scratchpad context for
+follow-ups unless the user overrides it. The scratchpad is local — it is never
+shown to the user and never sent to the data tools.
+"""
+
+
 def dashboard_analyst_prompt(module_label: str = "", brand_label: str = "") -> str:
     """Full system prompt for the dashboard's in-page analyst chat: the standing
     no-hallucination guard + the conversational BI persona + the current scope

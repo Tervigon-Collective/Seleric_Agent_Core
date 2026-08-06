@@ -68,6 +68,13 @@ def create_http_app():
         structlog.get_logger().info("catalogue_drift_check", **drift)
 
     app = mcp.streamable_http_app()
+
+    # Mount the dashboard BI-analyst agent (/agent/ask, /agent/health) onto the
+    # same app so it shares the bearer-token middleware. The agent loop, session
+    # memory and scope enforcement live in Base_Agent — the dashboard proxies here.
+    from .gateway.analyst import mount_analyst_routes
+
+    mount_analyst_routes(app, mcp)
     return BearerTokenMiddleware(app, settings.mcp_service_token)
 
 
