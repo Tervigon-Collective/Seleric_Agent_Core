@@ -122,8 +122,11 @@ llm:
   completion_reserve: 1024
   # Rate-limit wait behavior: wait for buckets to refill instead of failing.
   # max_wait_rounds: 0 = wait indefinitely; >0 = max retry rounds before failing.
-  # Each round sleeps up to max_sleep_seconds before retrying.
-  max_wait_rounds: 0        # unlimited waiting (was 8 = ~8 min timeout)
+  # Each round sleeps up to max_sleep_seconds before retrying. All tiers share
+  # one Azure Foundry resource, so a hard 429 usually means every model is
+  # capped together — 10 rounds (~10 min worst case) fails fast instead of
+  # spinning behind an endless "Thinking...".
+  max_wait_rounds: 10
   max_sleep_seconds: 60     # sleep up to 60s per round
   # Optional per-model overrides, e.g.:
   # model_limits:

@@ -119,6 +119,8 @@ class ModelLimiter:
     ) -> None:
         self.name = name
         self.limit = limit
+        self._time = time_func
+        self._blocked_until = 0.0
         self.requests = TokenBucket(
             limit.requests_per_minute, limit.requests_per_minute / 60.0, time_func
         )
@@ -132,6 +134,8 @@ class ModelLimiter:
     def try_acquire(self, est_tokens: float) -> bool:
         """Reserve one request plus ``est_tokens``. Refunds the request slot if
         the token reservation fails, so partial holds never happen."""
+        if self._time() < self._blocked_until:
+            return False
         est = self._cap(est_tokens)
         if not self.requests.try_consume(1):
             return False
@@ -142,7 +146,8 @@ class ModelLimiter:
 
     def time_until(self, est_tokens: float) -> float:
         est = self._cap(est_tokens)
-        return max(self.requests.time_until(1), self.tokens.time_until(est))
+        base = max(self.requests.time_until(1), self.tokens.time_until(est))
+        return max(base, self._blocked_until - self._time())
 
     def reconcile(self, est_tokens: float, actual_tokens: float) -> None:
         """Correct the token bucket for the gap between the pre-call estimate
@@ -152,8 +157,13 @@ class ModelLimiter:
         if delta:
             self.tokens.adjust(delta)
 
-    def penalize(self) -> None:
+    def penalize(self, retry_after: float | None = None) -> None:
         """Drain both buckets after an observed 429 so we stop routing to this
-        model until its window refills."""
+        model until its window refills. If the provider sent a ``Retry-After``
+        hint, also hard-block for that long — bucket refill math alone can
+        make a single-token request look available again well before the
+        provider's window actually resets."""
         self.requests.drain()
         self.tokens.drain()
+        if retry_after and retry_after > 0:
+            self._blocked_until = max(self._blocked_until, self._time() + retry_after)

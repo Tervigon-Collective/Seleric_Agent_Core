@@ -117,6 +117,25 @@ def _default_is_rate_limit(exc: BaseException) -> bool:
     return "429" in text or "rate limit" in text or "too many requests" in text
 
 
+def _extract_retry_after(exc: BaseException) -> float | None:
+    """Best-effort read of a provider ``Retry-After`` header off a rate-limit
+    error. Returns None when absent/unparseable so callers fall back to
+    bucket-refill math."""
+    response = getattr(exc, "response", None)
+    headers = getattr(response, "headers", None) if response is not None else None
+    if headers is None:
+        headers = getattr(exc, "headers", None)
+    if not headers:
+        return None
+    value = headers.get("Retry-After") or headers.get("retry-after")
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _usage_total(resp: Any) -> int:
     usage = getattr(resp, "usage", None)
     if usage is None:
@@ -207,7 +226,7 @@ class LLMRouter:
                     resp = self._invoke(name, messages, tools, tool_choice, **kwargs)
                 except Exception as exc:  # noqa: BLE001 - reraise non-rate-limit below
                     if self._is_rate_limit(exc):
-                        self._limiters[name].penalize()
+                        self._limiters[name].penalize(_extract_retry_after(exc))
                         exhausted.add(name)
                         continue
                     raise

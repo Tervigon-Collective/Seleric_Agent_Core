@@ -566,6 +566,10 @@ def mount_analyst_routes(app: Any, mcp: Any) -> None:
             return err_resp
 
         async def event_stream():
+            # Emit immediately so proxies (Next.js / nginx) see first-byte activity
+            # before the LLM/tool loop — otherwise idle waits look like a hung
+            # gateway and surface as 504 while Azure rate-limits are still spinning.
+            yield f"data: {json.dumps({'type': 'status', 'label': 'Working on it…'})}\n\n"
             try:
                 async for ev in svc.ask_stream(**params):
                     yield f"data: {json.dumps(ev, default=str)}\n\n"
