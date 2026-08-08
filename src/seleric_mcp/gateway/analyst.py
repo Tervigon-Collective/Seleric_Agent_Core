@@ -86,6 +86,31 @@ def _analyst_env_int(name: str, default: int) -> int:
 # ---------------------------------------------------------------------------
 
 
+def _flag_repeated_failure(
+    payload: str, fail_counts: dict[str, int], tool_name: str, args: dict[str, Any]
+) -> str:
+    """Track failures per (tool, args) signature across the whole turn and, once
+    the identical call has failed twice, inject a hint into the error payload
+    telling the model to stop retrying it. Without this a bad metric/tool call
+    (e.g. a spend query with no ad platform connected) can burn most of
+    max_rounds retrying the exact same call before ever reaching an answer.
+    Mutates ``fail_counts``; returns the (possibly annotated) payload."""
+    sig = f"{tool_name}:{json.dumps(args, sort_keys=True, default=str)}"
+    fail_counts[sig] = fail_counts.get(sig, 0) + 1
+    if fail_counts[sig] < 2:
+        return payload
+    try:
+        err_obj = json.loads(payload)
+    except json.JSONDecodeError:
+        err_obj = {"error": payload}
+    err_obj["hint"] = (
+        "This exact call has now failed repeatedly. Do not retry it again — answer "
+        "with whatever data you already have, or tell the user this specific "
+        "metric/data is unavailable."
+    )
+    return json.dumps(err_obj, default=str)
+
+
 def _ensure_brand_filter(filters: Any, brand_id: str) -> list[dict]:
     out = list(filters) if isinstance(filters, list) else []
     if not any(isinstance(f, dict) and f.get("dimension") == "brand_id" for f in out):
@@ -361,6 +386,11 @@ class AnalystService:
         tools = await self._openai_tools()
         session.messages.append({"role": "user", "content": question})
         steps: list[dict[str, Any]] = []
+        # Same (tool, args) failing repeatedly across rounds means the model is
+        # stuck retrying instead of moving on — without this a bad metric name
+        # (e.g. a spend query with no ad platform connected) can burn most of
+        # max_rounds retrying the identical call before ever reaching an answer.
+        fail_counts: dict[str, int] = {}
 
         tier = "tools"
         for _ in range(self.max_rounds):
@@ -418,6 +448,10 @@ class AnalystService:
                 scoped = inject_scope(tc.function.name, raw_args, module=module, brand_id=brand_id)
                 payload = await self._run_tool(tc.function.name, scoped, session)
                 ok = not payload.lstrip().startswith('{"error"')
+                if not ok:
+                    payload = _flag_repeated_failure(
+                        payload, fail_counts, tc.function.name, scoped
+                    )
                 step = {"tool": tc.function.name,
                         "label": _step_label(tc.function.name, scoped),
                         "module": module, "ok": ok}

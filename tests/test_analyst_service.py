@@ -51,6 +51,23 @@ def test_inject_scope_forces_module_and_brand_filter():
     assert sum(1 for f in a2["filters"] if f["dimension"] == "brand_id") == 1
 
 
+def test_flag_repeated_failure_only_hints_after_second_identical_failure():
+    fail_counts: dict[str, int] = {}
+    payload = '{"error": "no ad platform connected"}'
+
+    # First failure: passed through untouched.
+    first = A._flag_repeated_failure(payload, fail_counts, "metrics_query", {"m": "total_ad_spend"})
+    assert "hint" not in first
+
+    # Second identical failure: gets a hint telling the model to stop retrying.
+    second = A._flag_repeated_failure(payload, fail_counts, "metrics_query", {"m": "total_ad_spend"})
+    assert "do not retry" in second.lower()
+
+    # A different call (different args) is tracked independently and isn't hinted yet.
+    other = A._flag_repeated_failure(payload, fail_counts, "metrics_query", {"m": "revenue"})
+    assert "hint" not in other
+
+
 def test_choices_capped_and_cleaned():
     _, choices = A._extract_choices(
         'Pick.\n```choices\n{"options":[{"label":"A","value":"do A"},{"label":"B"}]}\n```'
