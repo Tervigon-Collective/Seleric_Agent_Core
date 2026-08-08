@@ -347,85 +347,127 @@ class AnalystService:
             return json.dumps(result, default=str)
         return str(result)
 
+    async def _run_turn(
+        self, session: "AnalystSession", *, session_id: str, question: str,
+        module: str | None, brand_id: str | None,
+    ):
+        """The agent loop as an async generator. Yields progress events —
+        ``{"type": "step", ...}`` as each tool call completes, then exactly one
+        terminal ``{"type": "final", ...}`` (parsed answer + rich blocks) or
+        ``{"type": "error", "error": ..., "status": ...}``. Both ``ask`` (buffered)
+        and ``ask_stream`` (SSE) drive this so behaviour is identical. Caller
+        holds ``self._lock``.
+        """
+        tools = await self._openai_tools()
+        session.messages.append({"role": "user", "content": question})
+        steps: list[dict[str, Any]] = []
+
+        tier = "tools"
+        for _ in range(self.max_rounds):
+            session.messages[1] = {"role": "system", "content": session.scratchpad.render()}
+            sanitize_history(session.messages)
+            try:
+                resp = await asyncio.to_thread(
+                    self._router.complete,
+                    tier=tier,
+                    messages=session.messages,
+                    tools=tools,
+                    tool_choice="auto",
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.error("analyst_llm_error", module=module, error=str(exc))
+                yield {"type": "error", "error": f"LLM error: {exc}", "status": 502}
+                return
+
+            choice = resp.message
+            tool_calls = choice.tool_calls or []
+
+            # Tool model is ready to answer -> escalate final synthesis to a
+            # reasoning model before committing the answer.
+            if not tool_calls and tier == "tools":
+                tier = "reasoning"
+                continue
+
+            assistant_msg: dict[str, Any] = {"role": "assistant", "content": choice.content or ""}
+            if tool_calls:
+                assistant_msg["tool_calls"] = [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": sanitize_tool_arguments(tc.function.arguments),
+                        },
+                    }
+                    for tc in tool_calls
+                ]
+            session.messages.append(assistant_msg)
+
+            if not tool_calls:
+                parsed = parse_rich_blocks((choice.content or "").strip())
+                yield {"type": "final", "module": module, "steps": steps,
+                       "session_id": session_id, **parsed}
+                return
+
+            tier = "tools"
+            for tc in tool_calls:
+                try:
+                    raw_args = json.loads(tc.function.arguments or "{}")
+                except json.JSONDecodeError:
+                    raw_args = {}
+                scoped = inject_scope(tc.function.name, raw_args, module=module, brand_id=brand_id)
+                payload = await self._run_tool(tc.function.name, scoped, session)
+                ok = not payload.lstrip().startswith('{"error"')
+                step = {"tool": tc.function.name,
+                        "label": _step_label(tc.function.name, scoped),
+                        "module": module, "ok": ok}
+                steps.append(step)
+                yield {"type": "step", **step}
+                session.messages.append({"role": "tool", "tool_call_id": tc.id, "content": payload})
+
+        logger.warning("analyst_round_limit", module=module, rounds=self.max_rounds)
+        yield {
+            "type": "final",
+            "answer": "I reached my step limit before finishing. Please narrow the question "
+            "(a specific metric and date range works best).",
+            "module": module,
+            "steps": steps,
+            "session_id": session_id,
+        }
+
     async def ask(
         self, *, session_id: str, question: str, module: str | None, brand_id: str | None
     ) -> dict[str, Any]:
+        """Buffered turn: run the loop and return only the final answer dict."""
         async with self._lock:  # serialize turns of a given process (sessions share the router buckets)
             session = self._session(session_id, module, brand_id)
             session.last_used = time.monotonic()
             self._evict()
-            tools = await self._openai_tools()
-            session.messages.append({"role": "user", "content": question})
-            steps: list[dict[str, Any]] = []
-
-            tier = "tools"
-            for _ in range(self.max_rounds):
-                session.messages[1] = {"role": "system", "content": session.scratchpad.render()}
-                sanitize_history(session.messages)
-                try:
-                    resp = await asyncio.to_thread(
-                        self._router.complete,
-                        tier=tier,
-                        messages=session.messages,
-                        tools=tools,
-                        tool_choice="auto",
-                    )
-                except Exception as exc:  # noqa: BLE001
-                    logger.error("analyst_llm_error", module=module, error=str(exc))
-                    err = RuntimeError(f"LLM error: {exc}")
-                    err.status_code = 502  # type: ignore[attr-defined]
+            final: dict[str, Any] | None = None
+            async for ev in self._run_turn(
+                session, session_id=session_id, question=question, module=module, brand_id=brand_id
+            ):
+                if ev.get("type") == "error":
+                    err = RuntimeError(ev["error"])
+                    err.status_code = ev.get("status", 502)  # type: ignore[attr-defined]
                     raise err
+                if ev.get("type") == "final":
+                    final = {k: v for k, v in ev.items() if k != "type"}
+            return final or {"answer": "", "module": module, "steps": [], "session_id": session_id}
 
-                choice = resp.message
-                tool_calls = choice.tool_calls or []
-
-                # Tool model is ready to answer -> escalate final synthesis to a
-                # reasoning model before committing the answer.
-                if not tool_calls and tier == "tools":
-                    tier = "reasoning"
-                    continue
-
-                assistant_msg: dict[str, Any] = {"role": "assistant", "content": choice.content or ""}
-                if tool_calls:
-                    assistant_msg["tool_calls"] = [
-                        {
-                            "id": tc.id,
-                            "type": "function",
-                            "function": {
-                                "name": tc.function.name,
-                                "arguments": sanitize_tool_arguments(tc.function.arguments),
-                            },
-                        }
-                        for tc in tool_calls
-                    ]
-                session.messages.append(assistant_msg)
-
-                if not tool_calls:
-                    parsed = parse_rich_blocks((choice.content or "").strip())
-                    return {"module": module, "steps": steps, "session_id": session_id, **parsed}
-
-                tier = "tools"
-                for tc in tool_calls:
-                    try:
-                        raw_args = json.loads(tc.function.arguments or "{}")
-                    except json.JSONDecodeError:
-                        raw_args = {}
-                    scoped = inject_scope(tc.function.name, raw_args, module=module, brand_id=brand_id)
-                    payload = await self._run_tool(tc.function.name, scoped, session)
-                    ok = not payload.lstrip().startswith('{"error"')
-                    steps.append(
-                        {"tool": tc.function.name, "label": _step_label(tc.function.name, scoped), "module": module, "ok": ok}
-                    )
-                    session.messages.append({"role": "tool", "tool_call_id": tc.id, "content": payload})
-
-            logger.warning("analyst_round_limit", module=module, rounds=self.max_rounds)
-            return {
-                "answer": "I reached my step limit before finishing. Please narrow the question "
-                "(a specific metric and date range works best).",
-                "module": module,
-                "steps": steps,
-                "session_id": session_id,
-            }
+    async def ask_stream(
+        self, *, session_id: str, question: str, module: str | None, brand_id: str | None
+    ):
+        """Streaming turn: yield each progress event (step -> … -> final/error)
+        for the SSE endpoint. Same loop as ``ask``, nothing buffered."""
+        async with self._lock:
+            session = self._session(session_id, module, brand_id)
+            session.last_used = time.monotonic()
+            self._evict()
+            async for ev in self._run_turn(
+                session, session_id=session_id, question=question, module=module, brand_id=brand_id
+            ):
+                yield ev
 
 
 # ---------------------------------------------------------------------------
@@ -441,7 +483,7 @@ def mount_analyst_routes(app: Any, mcp: Any) -> None:
     degrades to a 503 on the analyst endpoints only — it never blocks the MCP
     server from starting."""
     from starlette.requests import Request
-    from starlette.responses import JSONResponse
+    from starlette.responses import JSONResponse, StreamingResponse
     from starlette.routing import Route
 
     state: dict[str, Any] = {"service": None, "error": None}
@@ -489,5 +531,54 @@ def mount_analyst_routes(app: Any, mcp: Any) -> None:
             logger.error("analyst_ask_failed", module=module, error=str(exc))
             return JSONResponse({"success": False, "error": str(exc)}, status_code=status)
 
+    def _parse_ask_body(body: Any) -> tuple[dict[str, Any] | None, "JSONResponse | None"]:
+        if not isinstance(body, dict):
+            body = {}
+        question = str(body.get("question") or "").strip()
+        if not question:
+            return None, JSONResponse({"success": False, "error": "question is required"}, status_code=400)
+        brand_raw = body.get("brand_id")
+        return {
+            "session_id": str(body.get("session_id") or "").strip() or "default",
+            "question": question,
+            "module": body.get("module") or None,
+            "brand_id": str(brand_raw) if brand_raw not in (None, "") else None,
+        }, None
+
+    async def ask_stream(request: "Request") -> Any:
+        """SSE variant of /agent/ask — emits `data: {json}\\n\\n` frames: one
+        `{"type":"step"}` per tool call as it lands, then a terminal
+        `{"type":"final"}` (or `{"type":"error"}`). The Node backend pipes these
+        straight to the dashboard so the user sees live progress instead of a
+        blank spinner (parity with scripts/chat_web.py)."""
+        svc = get_service()
+        if svc is None:
+            return JSONResponse(
+                {"success": False, "error": f"analyst not configured: {state['error']}"},
+                status_code=503,
+            )
+        try:
+            body = await request.json()
+        except Exception:  # noqa: BLE001
+            body = {}
+        params, err_resp = _parse_ask_body(body)
+        if params is None:
+            return err_resp
+
+        async def event_stream():
+            try:
+                async for ev in svc.ask_stream(**params):
+                    yield f"data: {json.dumps(ev, default=str)}\n\n"
+            except Exception as exc:  # noqa: BLE001 — deliver failure in-band
+                logger.error("analyst_stream_failed", module=params["module"], error=str(exc))
+                yield f"data: {json.dumps({'type': 'error', 'error': str(exc)})}\n\n"
+
+        return StreamingResponse(
+            event_stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
+        )
+
     app.router.routes.append(Route("/agent/ask", ask, methods=["POST"]))
+    app.router.routes.append(Route("/agent/ask/stream", ask_stream, methods=["POST"]))
     app.router.routes.append(Route("/agent/health", health, methods=["GET"]))
