@@ -103,6 +103,10 @@ terms:
     canonical_id: discounts
   - term: returns and cancellations
     canonical_id: returns_cancels_all_channels
+  - term: returns and cancels
+    canonical_id: returns_cancels_all_channels
+  - term: returns/cancels
+    canonical_id: returns_cancels_all_channels
   - term: returns / cancels
     canonical_id: returns_cancels_all_channels
     definition: >
@@ -197,6 +201,10 @@ terms:
     canonical_id: net_profit_blended
   - term: net profit (all platforms)
     canonical_id: net_profit_blended
+  - term: net profit including amazon
+    canonical_id: net_profit_incl_amazon
+  - term: net profit incl amazon
+    canonical_id: net_profit_incl_amazon
   - term: COGS
     canonical_id: total_operating_cost_all_channels
   - term: company COGS
@@ -221,6 +229,8 @@ terms:
     canonical_id: product_cost_all_channels
   - term: product cost (shopify-only)
     canonical_id: product_cost
+  - term: shopify product cost
+    canonical_id: product_cost
   - term: product COGS
     canonical_id: product_cogs
   - term: total operating cost
@@ -230,6 +240,8 @@ terms:
   - term: pnl total operating cost
     canonical_id: total_operating_cost_all_channels
   - term: total operating cost (shopify-only)
+    canonical_id: total_operating_cost
+  - term: shopify total operating cost
     canonical_id: total_operating_cost
   - term: operating cost
     canonical_id: total_operating_cost_all_channels
