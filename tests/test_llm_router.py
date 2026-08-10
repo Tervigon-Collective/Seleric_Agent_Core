@@ -44,11 +44,12 @@ def test_bucket_zero_refill_is_infinite_when_empty():
 
 def test_limiter_acquire_is_all_or_nothing():
     lim = ModelLimiter("m", RateLimit(requests_per_minute=100, tokens_per_minute=10))
-    # first acquire uses the whole token budget
-    assert lim.try_acquire(10) is True
+    cap = lim.tokens.capacity  # burst capacity, not the per-minute rate
+    # first acquire drains the whole token bucket
+    assert lim.try_acquire(cap) is True
     # second fails on tokens; must NOT have consumed a request slot
     before = lim.requests.available
-    assert lim.try_acquire(10) is False
+    assert lim.try_acquire(cap) is False
     assert lim.requests.available == pytest.approx(before, abs=0.01)
 
 

@@ -158,7 +158,17 @@ input.addEventListener('input', function() {
   this.style.height = (this.scrollHeight) + 'px';
 });
 
-function addMessage(kind, who, text) {
+// "2.4s total · 2.2s agent" — total is the browser round-trip, agent is the
+// server's own LLM+tool time (elapsed_ms). Lets you compare this test chat with
+// the dashboard: same agent time, different total = routing/middleware overhead.
+function fmtTiming(totalMs, agentMs) {
+  const secs = (ms) => (ms / 1000).toFixed(1) + "s";
+  let out = secs(totalMs) + " total";
+  if (agentMs != null) out += " · " + secs(agentMs) + " agent";
+  return out;
+}
+
+function addMessage(kind, who, text, meta) {
   const isUser = kind.includes("user");
   const isError = kind.includes("error");
   
@@ -179,8 +189,12 @@ function addMessage(kind, who, text) {
   
   const bubble = el("div", bubbleClass, text);
   wrapper.appendChild(bubble);
+  if (meta) {
+    const metaEl = el("span", "text-[10px] font-mono text-zinc-500 " + (isUser ? "mr-1.5" : "ml-1.5"), meta);
+    wrapper.appendChild(metaEl);
+  }
   container.appendChild(wrapper);
-  
+
   log.appendChild(container);
   log.scrollTop = log.scrollHeight;
   return container;
@@ -312,6 +326,7 @@ async function sendMessage() {
   log.scrollTop = log.scrollHeight;
 
   let openTool = null;
+  const t0 = performance.now();
   try {
     const resp = await fetch("/chat", {
       method: "POST",
@@ -342,11 +357,11 @@ async function sendMessage() {
         }
         else if (ev.type === "assistant") {
           if (thinking.parentNode) thinking.remove();
-          addMessage("agent", "agent", ev.text);
+          addMessage("agent", "agent", ev.text, fmtTiming(performance.now() - t0, ev.elapsed_ms));
         }
         else if (ev.type === "error") {
           if (thinking.parentNode) thinking.remove();
-          addMessage("agent error", "error", ev.text);
+          addMessage("agent error", "error", ev.text, fmtTiming(performance.now() - t0, ev.elapsed_ms));
         }
         else if (ev.type === "done") {
           renderPad(ev.scratchpad);

@@ -13,6 +13,18 @@ import time
 from dataclasses import dataclass
 from typing import Callable
 
+# Burst headroom: the token bucket holds this multiple of the per-minute rate so
+# a single large request (full system prompt + ~50 tool schemas + history can
+# approach the whole per-minute budget) can be admitted without waiting for a
+# 100%-full bucket. Refill still tracks the real per-minute rate, so *sustained*
+# throughput is unchanged and honest to the provider — only the instantaneous
+# burst a single call may claim grows.
+# ponytail: fixed 2x burst; promote to a config knob only if request sizes vary
+# wildly. If one request exceeds burst*rate it still can't fit — that's a real
+# provider-quota problem (shrink per-round tokens or raise the Azure quota), not
+# a limiter bug.
+TOKEN_BURST = 2.0
+
 
 class TokenBucket:
     """Classic token bucket.
@@ -125,7 +137,9 @@ class ModelLimiter:
             limit.requests_per_minute, limit.requests_per_minute / 60.0, time_func
         )
         self.tokens = TokenBucket(
-            limit.tokens_per_minute, limit.tokens_per_minute / 60.0, time_func
+            limit.tokens_per_minute * TOKEN_BURST,  # burst capacity
+            limit.tokens_per_minute / 60.0,          # sustained refill (real rate)
+            time_func,
         )
 
     def _cap(self, est_tokens: float) -> float:

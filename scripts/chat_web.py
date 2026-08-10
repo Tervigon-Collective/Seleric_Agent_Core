@@ -20,6 +20,7 @@ import asyncio
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -97,6 +98,7 @@ class AgentRuntime:
     async def run_turn(self, user_text: str):
         """Async generator of event dicts for one user turn."""
         self.messages.append({"role": "user", "content": user_text})
+        t0 = time.monotonic()  # server-side agent time (LLM + tools), for the UI's response-time badge
 
         # Tool models drive the loop; the final synthesis escalates to a
         # reasoning model (see chat_client._chat_loop for the same policy).
@@ -113,7 +115,8 @@ class AgentRuntime:
                     tool_choice="auto",
                 )
             except Exception as exc:
-                yield {"type": "error", "text": f"LLM error: {exc}"}
+                yield {"type": "error", "text": f"LLM error: {exc}",
+                       "elapsed_ms": int((time.monotonic() - t0) * 1000)}
                 return
 
             choice = resp.message
@@ -138,7 +141,8 @@ class AgentRuntime:
 
             if not tool_calls:
                 yield {"type": "assistant", "model": resp.model,
-                       "text": (choice.content or "").strip() or "(empty)"}
+                       "text": (choice.content or "").strip() or "(empty)",
+                       "elapsed_ms": int((time.monotonic() - t0) * 1000)}
                 yield {"type": "done", "scratchpad": self.scratchpad.notes}
                 return
 
@@ -158,7 +162,12 @@ class AgentRuntime:
                         result = await self.session.call_tool(name, args)
                         payload = chat_client._tool_result_text(result)
                     except Exception as exc:
-                        payload = json.dumps({"error": f"tool call failed: {exc}"})
+                        # Timeouts (MCP client read-timeout / asyncio TimeoutError)
+                        # stringify to "" -> keep the type + repr so it isn't blank.
+                        detail = str(exc).strip() or repr(exc)
+                        payload = json.dumps(
+                            {"error": f"tool call failed: {type(exc).__name__}: {detail}"}
+                        )
                 yield {
                     "type": "tool_result",
                     "tool": name,
@@ -167,7 +176,8 @@ class AgentRuntime:
                 }
                 self.messages.append({"role": "tool", "tool_call_id": tc.id, "content": payload})
 
-        yield {"type": "error", "text": f"stopped after {MAX_TOOL_ROUNDS} tool rounds"}
+        yield {"type": "error", "text": f"stopped after {MAX_TOOL_ROUNDS} tool rounds",
+               "elapsed_ms": int((time.monotonic() - t0) * 1000)}
         yield {"type": "done", "scratchpad": self.scratchpad.notes}
 
 

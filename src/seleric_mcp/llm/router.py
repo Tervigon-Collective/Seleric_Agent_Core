@@ -265,6 +265,74 @@ class LLMRouter:
             )
             self._sleep(actual_wait)
 
+    def complete_stream(
+        self,
+        *,
+        tier: str,
+        messages: Sequence[Mapping[str, Any]],
+        **kwargs: Any,
+    ):
+        """Stream a completion for ``tier`` as text deltas — used for the final
+        answer/synthesis pass, which returns prose (no tools are passed, so the
+        model can't call tools). Yields plain string pieces as they arrive.
+
+        A stream can't be failed over to another model once bytes are flowing,
+        so rate-limit failover only happens BEFORE the first token: a 429 on the
+        opening ``create`` drains that model and tries the next candidate; a
+        failure after any delta has been yielded is re-raised. When every
+        candidate is throttled we wait for a bucket to refill (same safety net
+        as :meth:`complete`)."""
+        cands = self.candidates(tier)
+        est = self._estimate(messages, None, self._completion_reserve)
+        attempts: list[str] = []
+        exhausted: set[str] = set()
+        wait_rounds = 0
+
+        while True:
+            for name in cands:
+                if name in exhausted:
+                    continue
+                if not self._limiters[name].try_acquire(est):
+                    continue
+                attempts.append(name)
+                emitted = False
+                try:
+                    stream = self._client.chat.completions.create(
+                        model=name, messages=messages, stream=True
+                    )
+                    for chunk in stream:
+                        choices = getattr(chunk, "choices", None) or []
+                        if not choices:
+                            continue
+                        piece = getattr(choices[0].delta, "content", None)
+                        if piece:
+                            emitted = True
+                            yield piece
+                    return
+                except Exception as exc:  # noqa: BLE001
+                    if not emitted and self._is_rate_limit(exc):
+                        self._limiters[name].penalize(_extract_retry_after(exc))
+                        exhausted.add(name)
+                        continue
+                    raise
+
+            live = [n for n in cands if n not in exhausted]
+            if not live:
+                live = cands
+                exhausted = set()
+            wait_rounds += 1
+            if self._max_wait_rounds > 0 and wait_rounds > self._max_wait_rounds:
+                raise RateLimitExceeded(
+                    f"rate-limit wait budget exhausted for tier {tier!r} "
+                    f"after trying {attempts} ({wait_rounds} rounds)"
+                )
+            wait = min(self._limiters[n].time_until(est) for n in live)
+            if wait == float("inf"):
+                raise RateLimitExceeded(
+                    f"no model in tier {tier!r} can satisfy a {est}-token request"
+                )
+            self._sleep(min(wait, self._max_sleep_seconds))
+
     def _invoke(
         self,
         model: str,

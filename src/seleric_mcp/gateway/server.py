@@ -561,8 +561,11 @@ def build_server(settings: Settings) -> FastMCP:
         except PlanError as e:
             return e.to_payload()
         except Exception as e:
-            logger.error("metrics_query_failed", trace_id=trace_id, error=str(e))
-            return {"error": str(e)}
+            # Cube read-timeouts / asyncio TimeoutError stringify to "" — keep the
+            # type + repr fallback so the model (and the UI) get a real message,
+            # and log the traceback (not just str) for diagnosis.
+            logger.error("metrics_query_failed", trace_id=trace_id, error=repr(e), exc_info=True)
+            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()
     async def metrics_drilldown(

@@ -279,6 +279,47 @@ def _step_label(name: str, args: dict[str, Any]) -> str:
     return name
 
 
+class _FenceStripper:
+    """Incrementally strips fenced ```...``` blocks out of a STREAMED answer so
+    the persona's raw ```chart/```table/```choices JSON never types out to the
+    user as text — those blocks are parsed and rendered separately at the end
+    (parse_rich_blocks on the full text). Emits only prose that is definitively
+    OUTSIDE a fence, holding back a trailing run of up to two backticks in case
+    a ``` marker is split across streaming chunks."""
+
+    def __init__(self) -> None:
+        self._buf = ""
+        self._in_fence = False
+
+    def feed(self, delta: str) -> str:
+        self._buf += delta
+        out: list[str] = []
+        while True:
+            idx = self._buf.find("```")
+            if idx == -1:
+                # No complete marker yet. Emit everything except a trailing
+                # partial backtick run (<=2) that might begin a fence next chunk.
+                hold = 0
+                while hold < 2 and hold < len(self._buf) and self._buf[-1 - hold] == "`":
+                    hold += 1
+                cut = len(self._buf) - hold
+                chunk, self._buf = self._buf[:cut], self._buf[cut:]
+                if chunk and not self._in_fence:
+                    out.append(chunk)
+                break
+            before = self._buf[:idx]
+            if before and not self._in_fence:
+                out.append(before)
+            self._in_fence = not self._in_fence  # the ``` toggles fence state
+            self._buf = self._buf[idx + 3:]
+        return "".join(out)
+
+    def flush(self) -> str:
+        """Stream ended — emit any trailing prose left outside a fence."""
+        tail, self._buf = self._buf, ""
+        return tail if (tail and not self._in_fence) else ""
+
+
 # ---------------------------------------------------------------------------
 # Session + service
 # ---------------------------------------------------------------------------
@@ -367,10 +408,76 @@ class AnalystService:
         try:
             result = await tool.run(args)  # convert_result=False -> raw dict
         except Exception as exc:  # noqa: BLE001 — relay tool failure to the model
-            return json.dumps({"error": f"tool call failed: {exc}"})
+            # Many failures here (Cube read-timeouts, asyncio TimeoutError) stringify
+            # to "" — which used to surface as a blank "tool call failed:" with no
+            # server trace. Always keep the type + a repr fallback, and log the
+            # full traceback so the real cause is diagnosable.
+            logger.error("analyst_tool_call_failed", tool=name, error=repr(exc), exc_info=True)
+            detail = str(exc).strip() or repr(exc)
+            return json.dumps({"error": f"tool call failed: {type(exc).__name__}: {detail}"})
         if isinstance(result, (dict, list)):
             return json.dumps(result, default=str)
         return str(result)
+
+    async def _stream_final(
+        self, session: "AnalystSession", *, session_id: str,
+        module: str | None, steps: list[dict[str, Any]], t0: float,
+    ):
+        """Stream the reasoning-tier final synthesis: emit ``{"type":"token"}``
+        events (fence-stripped prose) as the model generates the answer, then a
+        single authoritative ``{"type":"final", ...}`` with the parsed answer +
+        rich blocks. The router streams synchronously, so a worker thread pumps
+        its deltas into an asyncio queue this coroutine drains."""
+        session.messages[1] = {"role": "system", "content": session.scratchpad.render()}
+        sanitize_history(session.messages)
+
+        loop = asyncio.get_running_loop()
+        queue: asyncio.Queue = asyncio.Queue()
+        _SENTINEL = object()
+
+        def pump() -> None:
+            try:
+                for piece in self._router.complete_stream(
+                    tier="reasoning", messages=session.messages
+                ):
+                    loop.call_soon_threadsafe(queue.put_nowait, ("delta", piece))
+            except Exception as exc:  # noqa: BLE001 — relay to the async side
+                loop.call_soon_threadsafe(queue.put_nowait, ("error", exc))
+            finally:
+                loop.call_soon_threadsafe(queue.put_nowait, _SENTINEL)
+
+        fut = loop.run_in_executor(None, pump)
+        stripper = _FenceStripper()
+        parts: list[str] = []
+        error: Exception | None = None
+        while True:
+            item = await queue.get()
+            if item is _SENTINEL:
+                break
+            if item[0] == "delta":
+                parts.append(item[1])
+                safe = stripper.feed(item[1])
+                if safe:
+                    yield {"type": "token", "delta": safe}
+            elif item[0] == "error":
+                error = item[1]
+        await fut
+
+        if error is not None:
+            logger.error("analyst_stream_synth_error", module=module, error=str(error))
+            yield {"type": "error", "error": f"LLM error: {error}", "status": 502,
+                   "elapsed_ms": int((time.monotonic() - t0) * 1000)}
+            return
+
+        tail = stripper.flush()
+        if tail:
+            yield {"type": "token", "delta": tail}
+        full = "".join(parts)
+        session.messages.append({"role": "assistant", "content": full})
+        parsed = parse_rich_blocks(full.strip())
+        yield {"type": "final", "module": module, "steps": steps,
+               "session_id": session_id,
+               "elapsed_ms": int((time.monotonic() - t0) * 1000), **parsed}
 
     async def _run_turn(
         self, session: "AnalystSession", *, session_id: str, question: str,
@@ -385,6 +492,7 @@ class AnalystService:
         """
         tools = await self._openai_tools()
         session.messages.append({"role": "user", "content": question})
+        t0 = time.monotonic()  # server-side agent time (LLM + tools), surfaced to the UI
         steps: list[dict[str, Any]] = []
         # Same (tool, args) failing repeatedly across rounds means the model is
         # stuck retrying instead of moving on — without this a bad metric name
@@ -392,8 +500,13 @@ class AnalystService:
         # max_rounds retrying the identical call before ever reaching an answer.
         fail_counts: dict[str, int] = {}
 
+        # Reason -> Act -> Observe -> loop. Each round the model REASONS (one LLM
+        # call) about what to do next; if it asks for tools we ACT on them (in
+        # parallel), OBSERVE the results back into the conversation, and loop.
+        # When it stops asking for tools, the reasoning tier writes the answer.
         tier = "tools"
         for _ in range(self.max_rounds):
+            # --- REASON: one model call decides the next action (or the answer) ---
             session.messages[1] = {"role": "system", "content": session.scratchpad.render()}
             sanitize_history(session.messages)
             try:
@@ -406,21 +519,28 @@ class AnalystService:
                 )
             except Exception as exc:  # noqa: BLE001
                 logger.error("analyst_llm_error", module=module, error=str(exc))
-                yield {"type": "error", "error": f"LLM error: {exc}", "status": 502}
+                yield {"type": "error", "error": f"LLM error: {exc}", "status": 502,
+                       "elapsed_ms": int((time.monotonic() - t0) * 1000)}
                 return
 
             choice = resp.message
             tool_calls = choice.tool_calls or []
 
-            # Tool model is ready to answer -> escalate final synthesis to a
-            # reasoning model before committing the answer.
-            if not tool_calls and tier == "tools":
-                tier = "reasoning"
-                continue
+            # Tool model is ready to answer -> escalate the final synthesis to a
+            # reasoning model, and STREAM it so the answer types out live instead
+            # of landing all at once. (The tools tier already decided no more
+            # data is needed, so the synthesis pass answers with what it has.)
+            if not tool_calls:
+                async for ev in self._stream_final(
+                    session, session_id=session_id, module=module, steps=steps, t0=t0
+                ):
+                    yield ev
+                return
 
-            assistant_msg: dict[str, Any] = {"role": "assistant", "content": choice.content or ""}
-            if tool_calls:
-                assistant_msg["tool_calls"] = [
+            session.messages.append({
+                "role": "assistant",
+                "content": choice.content or "",
+                "tool_calls": [
                     {
                         "id": tc.id,
                         "type": "function",
@@ -430,23 +550,28 @@ class AnalystService:
                         },
                     }
                     for tc in tool_calls
-                ]
-            session.messages.append(assistant_msg)
+                ],
+            })
 
-            if not tool_calls:
-                parsed = parse_rich_blocks((choice.content or "").strip())
-                yield {"type": "final", "module": module, "steps": steps,
-                       "session_id": session_id, **parsed}
-                return
-
-            tier = "tools"
+            # --- ACT: run every tool the model asked for this round concurrently.
+            # These are independent read-only calls whose cost is each one's Cube
+            # round-trip, so gather overlaps them instead of paying them in series.
+            # _run_tool never raises (it returns a JSON error string), so one bad
+            # call can't cancel the batch.
+            planned = []
             for tc in tool_calls:
                 try:
                     raw_args = json.loads(tc.function.arguments or "{}")
                 except json.JSONDecodeError:
                     raw_args = {}
                 scoped = inject_scope(tc.function.name, raw_args, module=module, brand_id=brand_id)
-                payload = await self._run_tool(tc.function.name, scoped, session)
+                planned.append((tc, scoped))
+            payloads = await asyncio.gather(
+                *(self._run_tool(tc.function.name, scoped, session) for tc, scoped in planned)
+            )
+            # --- OBSERVE: fold results back into history in call order (stable
+            # step trace + tool-message order), then loop.
+            for (tc, scoped), payload in zip(planned, payloads):
                 ok = not payload.lstrip().startswith('{"error"')
                 if not ok:
                     payload = _flag_repeated_failure(
@@ -467,6 +592,7 @@ class AnalystService:
             "module": module,
             "steps": steps,
             "session_id": session_id,
+            "elapsed_ms": int((time.monotonic() - t0) * 1000),
         }
 
     async def ask(

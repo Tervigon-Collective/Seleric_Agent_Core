@@ -412,6 +412,17 @@ CURRENT SCOPE (set by the dashboard — do not widen it)
 - Brand: {brand_label}. Numbers are for this brand unless the user names another.
 """
 
+_UNSCOPED_SCOPE_HEADER = """\
+CURRENT SCOPE (set by the dashboard)
+- Data module: none — you have access to ALL data domains (funnel / web
+  analytics, commerce, product, paid media, attribution, customer, finance /
+  P&L, and operations) in a single conversation. Nothing is out of scope; use
+  the catalogue to find the right metric for whatever the user asks, across any
+  domain, and answer directly. Do NOT decline a question for being "in another
+  module".
+- Brand: {brand_label}. Numbers are for this brand unless the user names another.
+"""
+
 CONVERSATIONAL_BI_ANALYST = """\
 YOU ARE A CONVERSATIONAL BI ANALYST
 
@@ -426,8 +437,14 @@ your "thinking"):
 2. State the period, brand, and scope you'll use (and that they can change it).
 3. Decide which catalogue metric(s), time range, and grain answer it — resolve
    business terms with the catalogue tools first.
-Then run the tools. Do not pad this with filler; a couple of crisp lines is
-enough. Never expose internal ids, cube/view names, or query ids in the reply.
+Then run the tools. When a step needs several INDEPENDENT lookups (e.g. two
+metrics on different views, or a term resolution plus a query that doesn't
+depend on it), request them together in one turn as parallel tool calls — they
+run concurrently, so you get the data back faster than firing them one at a
+time. Only chain calls sequentially when one genuinely needs a previous one's
+result (e.g. drilldown needs the parent query_id). Do not pad this with filler;
+a couple of crisp lines is enough. Never expose internal ids, cube/view names,
+or query ids in the reply.
 
 BE PROACTIVE, NOT A NUMBER-DUMP
 - Default to a comparison: run metrics_query with compare_period=previous_period
@@ -588,9 +605,10 @@ def dashboard_analyst_prompt(module_label: str = "", brand_label: str = "") -> s
     """Full system prompt for the dashboard's in-page analyst chat: the standing
     no-hallucination guard + the conversational BI persona + the current scope
     header. ``module_label``/``brand_label`` are human-readable (the dashboard
-    passes them); blanks fall back to neutral wording."""
-    scope = _SCOPE_HEADER.format(
-        module_label=module_label or "the current dashboard module",
-        brand_label=brand_label or "the current brand",
-    )
+    passes them). No ``module_label`` -> the analyst is unscoped (all domains)."""
+    brand = brand_label or "the current brand"
+    if module_label:
+        scope = _SCOPE_HEADER.format(module_label=module_label, brand_label=brand)
+    else:
+        scope = _UNSCOPED_SCOPE_HEADER.format(brand_label=brand)
     return "\n\n".join([NO_HALLUCINATION_GUARD, CONVERSATIONAL_BI_ANALYST, scope])
