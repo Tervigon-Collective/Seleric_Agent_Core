@@ -37,6 +37,9 @@ supported_dimensions:
 - is_prepaid
 - financial_status
 - event_type
+- item_count
+- order_name
+- commerce_order_id
 supported_filters:
 - date_range
 - brand_id
@@ -59,6 +62,9 @@ supported_filters:
 - is_prepaid
 - financial_status
 - event_type
+- item_count
+- order_name
+- commerce_order_id
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

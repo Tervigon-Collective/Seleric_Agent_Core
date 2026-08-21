@@ -501,8 +501,10 @@ def build_server(settings: Settings) -> FastMCP:
         (e.g. shipping_region), not view.qualified members. time_range is
         {"preset": "last_30d"} (today|yesterday|last_7d|last_30d|last_90d|
         this_month|last_month) or {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}.
-        filters entries: {"dimension": <id>, "operator": "equals", "values":
-        [...]}. granularity: hour|day|week|month|none (hour = intraday buckets,
+        filters entries: {"dimension": <id>, "operator": "gt", "values":
+        [...]}. operator is one of equals|notEquals|contains|gt|gte|lt|lte|
+        set|notSet (aliases greater_than/less_than are accepted and mapped to
+        gt/lt). granularity: hour|day|week|month|none (hour = intraday buckets,
         only on views with a timestamp axis such as commerce_orders for
         orders/total_sales; do NOT hand-roll hourly by pulling raw rows).
         compare_period:

@@ -140,6 +140,42 @@ async def test_shipping_region_filter_is_uppercased(planner, fake_cube):
     assert any("uppercased" in w for w in out["warnings"])
 
 
+async def test_item_count_gt_filter_on_refunded_orders(planner, fake_cube):
+    """Multi-item returned orders: refunded_orders + item_count > 1."""
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.returned_orders": "4"}]
+    req = QueryRequest(
+        measures=["refunded_orders"],
+        filters=[FilterSpec(dimension="item_count", operator="greater_than", values=["1"])],
+        time_range=TimeRange(preset="last_30d"),
+    )
+    out = await planner.run(req)
+    q = fake_cube.queries[0]
+    assert {
+        "member": "commerce_orders.item_count",
+        "operator": "gt",
+        "values": ["1"],
+    } in q["filters"]
+    assert q["measures"] == ["commerce_orders.returned_orders"]
+    assert out["provenance"]["cube_view"] == "commerce_orders"
+
+
+async def test_item_count_numeric_values_are_stringified(planner, fake_cube):
+    fake_cube.by_prefix["commerce_orders"] = [{"commerce_orders.returned_orders": "2"}]
+    req = QueryRequest(
+        measures=["refunded_orders"],
+        filters=[FilterSpec(dimension="item_count", operator="gt", values=[2])],  # type: ignore[list-item]
+        time_range=TimeRange(preset="last_30d"),
+    )
+    await planner.run(req)
+    assert fake_cube.queries[0]["filters"][-1]["values"] == ["2"]
+
+
+def test_filter_operator_aliases():
+    assert FilterSpec(dimension="item_count", operator="greater_than", values=["1"]).operator == "gt"
+    assert FilterSpec(dimension="item_count", operator="less_than", values=["3"]).operator == "lt"
+    assert FilterSpec(dimension="item_count", operator="gte", values=[2]).values == ["2"]
+
+
 async def test_filter_dimension_must_be_on_view(planner):
     req = QueryRequest(
         measures=["product_net_revenue"],

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 TimePreset = Literal[
     "today", "yesterday", "last_7d", "last_30d", "last_90d", "this_month", "last_month"
@@ -15,6 +15,32 @@ ComparePeriod = Literal["previous_period", "previous_year"]
 FilterOperator = Literal[
     "equals", "notEquals", "contains", "gt", "gte", "lt", "lte", "set", "notSet"
 ]
+_FILTER_OPERATOR_ALIASES = {
+    "greater_than": "gt",
+    "greaterThan": "gt",
+    "greater_than_or_equal": "gte",
+    "greaterThanOrEqualTo": "gte",
+    "greater_than_or_equal_to": "gte",
+    "gte": "gte",
+    "less_than": "lt",
+    "lessThan": "lt",
+    "less_than_or_equal": "lte",
+    "lessThanOrEqualTo": "lte",
+    "less_than_or_equal_to": "lte",
+    "not_equals": "notEquals",
+    "not_equal": "notEquals",
+    "notEquals": "notEquals",
+    "eq": "equals",
+    "equal": "equals",
+    "equals": "equals",
+    "gt": "gt",
+    "lt": "lt",
+    "lte": "lte",
+    "contains": "contains",
+    "set": "set",
+    "notSet": "notSet",
+    "not_set": "notSet",
+}
 
 
 class TimeRange(BaseModel):
@@ -38,6 +64,25 @@ class FilterSpec(BaseModel):
     dimension: str  # catalogue dimension id
     operator: FilterOperator = "equals"
     values: list[str] = Field(default_factory=list)
+
+    @field_validator("operator", mode="before")
+    @classmethod
+    def _alias_operator(cls, v: object) -> object:
+        if not isinstance(v, str):
+            return v
+        key = v.strip()
+        return _FILTER_OPERATOR_ALIASES.get(key) or _FILTER_OPERATOR_ALIASES.get(
+            key.replace("-", "_")
+        ) or key
+
+    @field_validator("values", mode="before")
+    @classmethod
+    def _stringify_values(cls, v: object) -> object:
+        if v is None:
+            return []
+        if not isinstance(v, list):
+            v = [v]
+        return [str(x) for x in v]
 
 
 class SortSpec(BaseModel):

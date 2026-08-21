@@ -38,6 +38,9 @@ supported_dimensions:
 - return_status
 - fulfillment_status
 - financial_status
+- item_count
+- order_name
+- commerce_order_id
 supported_filters:
 - date_range
 - brand_id
@@ -60,6 +63,9 @@ supported_filters:
 - return_status
 - fulfillment_status
 - financial_status
+- item_count
+- order_name
+- commerce_order_id
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

@@ -37,6 +37,9 @@ supported_dimensions:
 - is_prepaid
 - financial_status
 - event_type
+- item_count
+- order_name
+- commerce_order_id
 supported_filters:
 - date_range
 - brand_id
@@ -59,6 +62,9 @@ supported_filters:
 - is_prepaid
 - financial_status
 - event_type
+- item_count
+- order_name
+- commerce_order_id
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
@@ -76,6 +82,36 @@ examples:
     - refunded_orders
     time_range:
       preset: last_month
+- question: Returned orders with more than 1 item last 30 days
+  request:
+    measures:
+    - refunded_orders
+    filters:
+    - dimension: item_count
+      operator: gt
+      values:
+      - '1'
+    time_range:
+      preset: last_30d
+- question: List returned multi-item orders last 30 days
+  request:
+    measures:
+    - refunded_orders
+    dimensions:
+    - order_name
+    - item_count
+    filters:
+    - dimension: item_count
+      operator: gt
+      values:
+      - '1'
+    - dimension: event_type
+      operator: equals
+      values:
+      - return
+    time_range:
+      preset: last_30d
+    limit: 50
 validation_tests:
 - reconciles to dashboard Returns card for closed periods
 deprecated_aliases:
