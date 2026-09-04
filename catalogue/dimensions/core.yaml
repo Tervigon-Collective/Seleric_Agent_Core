@@ -60,6 +60,41 @@ dimensions:
     views:
       commerce_orders: commerce_orders.order_created_at_ist
       purchase_sequence: purchase_sequence.order_created_at_ist
+  - id: item_count
+    display_name: Items on Order
+    description: >
+      Units on the Shopify order (sum of line quantities from gold.fct_orders).
+      Numeric. Use operator gt/gte/lt/lte/equals — never greater_than.
+      "more than 1 item" / "multi-item" → operator gt, values ["1"].
+      Not units_per_order (that is an average across orders).
+    aliases:
+      - items in order
+      - items on order
+      - line items
+      - item count
+      - units on order
+      - multi-item
+      - more than 1 item
+    views:
+      commerce_orders: commerce_orders.item_count
+  - id: order_name
+    display_name: Order Name
+    description: >
+      Shopify order name (e.g. #1234). Use as a breakdown with limit to list
+      individual orders — not for KPI totals.
+    aliases:
+      - order number
+      - order #
+    views:
+      commerce_orders: commerce_orders.order_name
+  - id: commerce_order_id
+    display_name: Order ID
+    description: >
+      Shopify order id. High cardinality — only use as a breakdown with a
+      limit when listing orders. Prefer order_name for operator-facing lists.
+    aliases: [order id]
+    views:
+      commerce_orders: commerce_orders.order_id
   # ---- Attribution (2026-07-16): Attribution.MarketingAttribution ----
   - id: lt_platform
     display_name: Last-touch Platform

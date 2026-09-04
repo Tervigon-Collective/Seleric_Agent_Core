@@ -23,6 +23,8 @@ def test_dashboard_analyst_prompt_composes_guard_persona_and_scope():
     # Interpolates the current scope.
     assert "Funnel Analytics" in out
     assert "Tilting Heads" in out
+    assert "item_count" in out
+    assert "greater_than" in out
 
 
 def test_dashboard_analyst_prompt_blank_scope_falls_back():

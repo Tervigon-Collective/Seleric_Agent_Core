@@ -852,6 +852,12 @@ terms:
     canonical_id: refunded_orders
   - term: returned orders
     canonical_id: refunded_orders
+  - term: multi-item returned orders
+    canonical_id: refunded_orders
+  - term: returned orders with more than 1 item
+    canonical_id: refunded_orders
+  - term: multi-item orders
+    canonical_id: orders
   - term: amazon return count
     canonical_id: amazon_return_count
   - term: amazon returns count

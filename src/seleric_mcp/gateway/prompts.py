@@ -161,6 +161,25 @@ NON-NEGOTIABLE RULES
    resolved id; if one ever looks like the wrong side of a trap, re-resolve with a
    more specific term and state the interpretation.
 
+3f-ter. Order item-count grain (required).
+   Per-order unit count is dimension item_count on refunded_orders / orders /
+   cancelled_orders / returns_cancels. It is the units on that Shopify order,
+   not units_per_order (that is an average — never use it as a filter).
+   - "returned" / "at least one item returned" → metric refunded_orders
+     (event_date = when the return posted).
+   - "more than N items" / "multi-item" → filter
+     {dimension: "item_count", operator: "gt", values: ["N"]}.
+     More than 1 item → values ["1"]. At least 2 items → operator gte, values ["2"].
+   - Filter operators are ONLY: equals, notEquals, contains, gt, gte, lt, lte,
+     set, notSet. Never send greater_than / less_than / greaterThan.
+   - To LIST those orders: dimensions [order_name, item_count], set limit
+     (50 unless the user asks for more). Do not dump unbounded order_id lists.
+   Combine in one metrics_query: measures=[refunded_orders],
+   filters=[{dimension: item_count, operator: gt, values: ["1"]}],
+   time_range last_30d. When LISTing (dimensions order_name / item_count),
+   also filter event_type equals return — otherwise cancel events in the
+   same window show up as returned_orders=0 rows.
+
 3g. Period snapshot / multi-KPI summary (required when user asks for a snapshot,
     summary, "how are we doing", or a month overview with multiple metrics).
    Query and label each row with an explicit scope tag — never bare "Net Profit"

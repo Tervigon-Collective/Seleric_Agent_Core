@@ -654,3 +654,14 @@ def test_get_ontology_unknown_module(catalogue):
     out = catalogue.get_ontology("not_a_module")
     assert "error" in out
     assert "commerce" in out["valid_modules"]
+
+
+def test_item_count_dimension_is_on_commerce_order_metrics(catalogue):
+    dim = catalogue.resolve_dimension("item_count")
+    assert dim is not None
+    assert dim.views["commerce_orders"] == "commerce_orders.item_count"
+    assert catalogue.resolve_dimension("multi-item") is dim
+    assert catalogue.resolve_dimension("items on order") is dim
+    for mid in ("orders", "refunded_orders", "cancelled_orders", "returns_cancels"):
+        assert "item_count" in catalogue.cat.metrics[mid].supported_dimensions
+        assert "order_name" in catalogue.cat.metrics[mid].supported_dimensions
