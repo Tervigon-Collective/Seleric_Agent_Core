@@ -540,12 +540,11 @@ terms:
   - term: contribution
     canonical_id: null
     definition: Not catalogued in the current commerce/product metric set.
-  - term: LTV
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
   - term: lifetime value
-    canonical_id: null
-    definition: Not catalogued in the current commerce/product metric set.
+    canonical_id: avg_ltv
+    definition: >
+      Customer lifetime net revenue / customers (customer_ltv.avg_ltv). Distinct from
+      the Historical "LTV" card which is new-customer first-order AOV (catalogue id ltv).
   - term: attributed revenue
     canonical_id: attributed_net_revenue
     definition: >

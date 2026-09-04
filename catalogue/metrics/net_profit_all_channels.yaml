@@ -2,12 +2,18 @@ id: net_profit_all_channels
 display_name: Net Profit (all channels — P&L Forecast)
 category: finance
 status: certified
-description: 'P&L Forecast Net Profit: (Shopify net + Amazon Attribution net sales, ex-GST) − all-channels TOC − Total Ad Spend (Meta+Google+Amazon). Amazon platform fees inside TOC are settlement-sourced GST-free for settled orders. Distinct from Shopify-only net_profit and from Historical all-channels net_profit_incl_amazon.
+description: 'P&L Forecast Net Profit: (Shopify net + Amazon Attribution net sales, ex-GST) − all-channels
+  TOC − Total Ad Spend (Meta+Google+Amazon). Amazon platform fees inside TOC are settlement-sourced GST-free
+  for settled orders. Distinct from Shopify-only net_profit and from Historical all-channels net_profit_incl_amazon.
 
   '
 formula:
-  human_readable: pnl_net_sales_all - toc_all_channels - total_ad_spend
+  human_readable: net_sales_all_channels - total_operating_cost_all_channels - total_ad_spend
   authoritative_source: cube
+  depends_on:
+  - net_sales_all_channels
+  - total_operating_cost_all_channels
+  - total_ad_spend
 cube_mapping:
   view: canonical_pnl
   measure: canonical_pnl.net_profit_all_channels
@@ -37,20 +43,21 @@ examples:
       start: '2026-06-01'
       end: '2026-06-30'
 validation_tests:
-- >-
-  Settlement basis (Amazon platform fees GST-free from settlement, via
-  serve.amazon_attribution_overview then cube canonical_pnl). Identity is
-  net_sales_all − TOC_all − total_ad_spend. June 2026 brand 20 = −₹1,00,994.16
-  as-of 2026-08-04 (net_cogs 14,88,073.57 after gold COGS refresh; Amazon
-  platform fees 43,931.35). The rupee value tracks daily gold net_cogs; earlier
-  snapshots −₹1,66,188.75 (net_cogs 15,53,268 on 2026-08-03) and −₹2,78,615.42
-  (pre-2026-07 Amazon fixes) are stale. Settlement-vs-Finances fee delta is only
-  about ₹18 (43,931.35 vs 43,949.41).
+- Settlement basis (Amazon platform fees GST-free from settlement, via serve.amazon_attribution_overview
+  then cube canonical_pnl). Identity is net_sales_all − TOC_all − total_ad_spend. June 2026 brand 20 =
+  −₹1,00,994.16 as-of 2026-08-04 (net_cogs 14,88,073.57 after gold COGS refresh; Amazon platform fees
+  43,931.35). The rupee value tracks daily gold net_cogs; earlier snapshots −₹1,66,188.75 (net_cogs 15,53,268
+  on 2026-08-03) and −₹2,78,615.42 (pre-2026-07 Amazon fixes) are stale. Settlement-vs-Finances fee delta
+  is only about ₹18 (43,931.35 vs 43,949.41).
 deprecated_aliases: []
 dashboard_alignment:
   status: match
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_canonical_pnl.yml:240-253
-  note: >
-    Aligned to canonical Cube semantic execution for all-channels P&L forecast.
+  note: 'Aligned to canonical Cube semantic execution for all-channels P&L forecast.
+
+    '
+companion_measures:
+- net_profit
+- amazon_net_profit

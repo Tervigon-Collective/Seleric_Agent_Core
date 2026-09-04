@@ -370,16 +370,24 @@ def build_server(settings: Settings) -> FastMCP:
         return ctx.catalogue.search(query, module=effective).model_dump()
 
     @mcp.tool()
-    def catalogue_get_metric(metric_id: str) -> dict:
+    def catalogue_get_metric(metric_id: str, module: str | None = None) -> dict:
         """Full catalogue definition for one metric id: formula, cube mapping,
-        dimensions/filters, owner, access policy, freshness, caveats.
+        dimensions/filters, owner, access policy, freshness, caveats, plus an
+        ``openmetadata`` block (data product, entity cluster, related metrics).
 
         Pass a catalogue metric id (e.g. total_sales_all_channels). Cube
         members from provenance (e.g. sales_all_channels.total_sales) are
         accepted and remapped, but NEVER pass cube_mapping.measure into
         metrics_query — always use the returned metric id / query_as.measures.
         """
-        _log_call("catalogue_get_metric", metric_id=metric_id)
+        _log_call("catalogue_get_metric", metric_id=metric_id, module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
         resolved = ctx.catalogue.resolve_metric_id(metric_id)
         if resolved is None:
             result = ctx.catalogue.search(metric_id)
@@ -388,6 +396,10 @@ def build_server(settings: Settings) -> FastMCP:
                 "suggestions": [s.id for s in result.matches] + result.suggestions,
             }
         canonical_id, alias_notice = resolved
+        if effective is not None:
+            denied = _check_metric_module([canonical_id], effective)
+            if denied:
+                return denied
         m = ctx.catalogue.get_metric(canonical_id)
         assert m is not None
         freshness = ctx.catalogue.freshness(m.cube_mapping.view)
@@ -398,6 +410,9 @@ def build_server(settings: Settings) -> FastMCP:
             # Agent-facing: use these ids in metrics_query — not cube_mapping.
             "query_as": {"measures": [m.id]},
         }
+        om_block = ctx.catalogue.metric_om_context(canonical_id)
+        if om_block:
+            out["openmetadata"] = om_block
         if alias_notice:
             out["resolved_from"] = metric_id
             out["resolution_notice"] = alias_notice
@@ -433,6 +448,58 @@ def build_server(settings: Settings) -> FastMCP:
         Weak matches are never silently resolved."""
         _log_call("catalogue_resolve_term", text=text)
         return ctx.catalogue.resolve_term(text).model_dump()
+
+    @mcp.tool()
+    def catalogue_get_ontology(module: str | None = None) -> dict:
+        """Business ontology snapshot: domains, data products, entity clusters
+        (related catalogue metrics), grain/date axes, attribution boundary.
+
+        Pass module=<id> (see modules_list) to scope to one dashboard module's
+        domains. If this instance is pinned to a module, that scope is always
+        applied. Contains no metric values — Cube/metrics_query executes numbers.
+        """
+        _log_call("catalogue_get_ontology", module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        return ctx.catalogue.get_ontology(effective)
+
+    @mcp.tool()
+    def catalogue_related_metrics(metric_id: str, module: str | None = None) -> dict:
+        """Entity-cluster neighbors of a catalogue metric: other catalogue ids
+        in the same business object, plus related glossary terms. Use this to
+        see which metrics share a grain/object (e.g. orders with active_orders)
+        without treating glossary relatedness as causality.
+        """
+        _log_call("catalogue_related_metrics", metric_id=metric_id, module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        resolved = ctx.catalogue.resolve_metric_id(metric_id)
+        if resolved is None:
+            result = ctx.catalogue.search(metric_id)
+            return {
+                "error": f"Unknown metric '{metric_id}'",
+                "suggestions": [s.id for s in result.matches] + result.suggestions,
+            }
+        canonical_id, alias_notice = resolved
+        if effective is not None:
+            denied = _check_metric_module([canonical_id], effective)
+            if denied:
+                return denied
+        out = ctx.catalogue.related_metrics(canonical_id)
+        if alias_notice:
+            out["resolved_from"] = metric_id
+            out["resolution_notice"] = alias_notice
+        return out
 
     @mcp.tool()
     def catalogue_resolve_brand(text: str) -> dict:

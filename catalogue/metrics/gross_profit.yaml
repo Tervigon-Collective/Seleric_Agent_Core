@@ -2,11 +2,14 @@ id: gross_profit
 display_name: Gross Profit (Shopify-only)
 category: finance
 status: certified
-description: 'Canonical gross profit in `serve_canonical_pnl`: Shopify Net Sales − Shopify Net COGS
-  (before ads).'
+description: 'Canonical gross profit in `serve_canonical_pnl`: Shopify Net Sales − Shopify Net COGS (before
+  ads).'
 formula:
-  human_readable: net_sales - net_cogs
+  human_readable: commerce_net_revenue_daily - net_cogs
   authoritative_source: cube
+  depends_on:
+  - commerce_net_revenue_daily
+  - net_cogs
 cube_mapping:
   view: canonical_pnl
   measure: canonical_pnl.gross_profit
@@ -43,6 +46,10 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: src/integrations/historicalAnalytics/analyticsClickhouse.js:543
-  note: >
-    Dashboard summary may use a different blended path. This metric is aligned
-    to canonical Cube semantic execution (`canonical_pnl.gross_profit`).
+  note: 'Dashboard summary may use a different blended path. This metric is aligned to canonical Cube
+    semantic execution (`canonical_pnl.gross_profit`).
+
+    '
+companion_measures:
+- net_profit
+- contribution_margin

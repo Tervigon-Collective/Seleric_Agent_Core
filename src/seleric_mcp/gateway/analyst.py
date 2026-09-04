@@ -54,6 +54,8 @@ ANALYST_TOOLS = frozenset(
         "modules_list",
         "catalogue_search_metrics",
         "catalogue_get_metric",
+        "catalogue_get_ontology",
+        "catalogue_related_metrics",
         "catalogue_list_dimensions",
         "catalogue_resolve_term",
         "catalogue_resolve_brand",
@@ -66,7 +68,14 @@ ANALYST_TOOLS = frozenset(
 
 # Tools whose ``module`` argument the server forces to the page's module.
 MODULE_SCOPED_TOOLS = frozenset(
-    {"metrics_query", "metrics_drilldown", "catalogue_search_metrics"}
+    {
+        "metrics_query",
+        "metrics_drilldown",
+        "catalogue_search_metrics",
+        "catalogue_get_ontology",
+        "catalogue_get_metric",
+        "catalogue_related_metrics",
+    }
 )
 
 

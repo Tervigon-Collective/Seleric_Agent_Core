@@ -7,7 +7,17 @@
         "seleric_mcp",
         "--transport",
         "stdio"
-      ]
+      ],
+      "env": {
+        "WRITE_ENABLED": "true",
+        "OPENMETADATA_BASE_URL": "http://127.0.0.1:8585"
+      }
+    },
+    "openmetadata": {
+      "url": "http://127.0.0.1:8585/mcp",
+      "headers": {
+        "Authorization": "Bearer ${OM_JWT_OR_PAT}"
+      }
     }
   }
 }

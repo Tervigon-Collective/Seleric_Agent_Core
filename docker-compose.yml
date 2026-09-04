@@ -18,10 +18,10 @@ services:
     container_name: seleric-mcp-cube-1
     restart: unless-stopped
     volumes:
-      - ../mage-ai/infra/cube/model:/cube/conf/model:ro
-      - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
+      - ../data_platform/mage-ai/infra/cube/model:/cube/conf/model:ro
+      - ../data_platform/mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
     env_file:
-      - ../mage-ai/infra/cube/.env
+      - ../data_platform/mage-ai/infra/cube/.env
     ports:
       - "127.0.0.1:${CUBE_HOST_PORT:-4001}:4000"
     extra_hosts:
@@ -41,6 +41,7 @@ services:
       # In-compose Cube (not host loopback)
       CUBE_API_URL: http://cube:4000
       SELERIC_MCP_DB: /data/seleric_mcp.db
+      OPENMETADATA_BASE_URL: http://host.docker.internal:8585
       # FastMCP DNS-rebinding / CORS — same public domain via nginx
       MCP_ALLOWED_HOSTS: mcp.seleric.com,127.0.0.1:*,localhost:*
       MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*

@@ -2,12 +2,16 @@ id: cac
 display_name: CAC (Customer Acquisition Cost)
 category: finance
 status: certified
-description: >
-  Period ad spend (Meta+Google+Amazon) per new attributed customer.
-  CAC = total_ad_spend / new_customers. Component of LTV:CAC.
+description: 'Period ad spend (Meta+Google+Amazon) per new attributed customer. CAC = total_ad_spend /
+  new_customers. Component of LTV:CAC.
+
+  '
 formula:
-  human_readable: SUM(total_ad_spend) / SUM(new_customers)
+  human_readable: total_ad_spend / new_customers
   authoritative_source: cube
+  depends_on:
+  - total_ad_spend
+  - new_customers
 cube_mapping:
   view: ltv_cac
   measure: ltv_cac.cac
@@ -23,11 +27,19 @@ supported_filters:
 - brand_id
 data_owner: Growth / Finance
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:
   status: match
   audited_on: '2026-07-27'
   source: Seleric_Dashboard fe-dashboard performanceSummary.js
+ratio_components:
+  numerator: ltv_cac.total_ad_spend
+  denominator: ltv_cac.new_customers
