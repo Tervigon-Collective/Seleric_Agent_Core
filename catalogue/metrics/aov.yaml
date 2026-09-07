@@ -2,11 +2,16 @@ id: aov
 display_name: Average Order Value (Shopify-only)
 category: commerce
 status: certified
-description: 'Shopify Average Order Value at commerce order grain, computed as net
-  revenue divided by order count (ratio of aggregates).'
+description: 'Shopify Average Order Value at commerce order grain: Total Sales (incl. GST) ÷ placement
+  orders — matches dashboard "Average Order Value" / storeMetrics.
+
+  '
 formula:
-  human_readable: commerce_net_revenue / orders
+  human_readable: total_sales / orders
   authoritative_source: cube
+  depends_on:
+  - total_sales
+  - orders
 cube_mapping:
   view: commerce_orders
   measure: commerce_orders.aov
@@ -48,14 +53,18 @@ examples:
       preset: last_90d
 validation_tests:
 - aov > 0 for any slice with orders
-- aov equals commerce_net_revenue ÷ orders for the same slice
+- aov equals total_sales_incl_tax ÷ orders for the same slice
 deprecated_aliases:
 - daily_pnl.avg_order_value
 dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: services/dashboardService.js:141
-  note: >
-    Dashboard summary may compute blended AOV in a separate path. This metric
-    is aligned to canonical Cube semantic execution (`commerce_orders.aov`).
+  status: MATCH
+  audited_on: '2026-09-04'
+  source: Seleric_Dashboard/fe-dashboard
+  evidence: src/lib/metrics/dashboardMetricDefinitions.js Average Order Value; storeMetrics.js totalSales/orders
+  note: 'Cube commerce_orders.aov already uses total_sales_incl_tax / orders. Distinct from Attribution
+    card AOV (Gross Sales ÷ Orders) and True AOV.
+
+    '
+ratio_components:
+  numerator: commerce_orders.total_sales
+  denominator: commerce_orders.orders

@@ -2,19 +2,16 @@ id: meta_attr_net_revenue
 display_name: Meta Attributed Net Revenue
 category: attribution
 status: certified
-description: >
-  Placement-axis first-party net revenue (ex-GST) last-touch attributed to a Meta ad,
-  at campaign x adset x ad x day grain — backs the Meta Attribution Analysis TABLE
-  "Net Sales" column, evidence buildMetaAttributionPayload.js:409. Use for any Meta
-  campaign/adset/ad-scoped net sales question. The Overview "Net Sales" card is
-  meta_attribution_net_sales (channel_pnl, event-date returns/cancels basis) — equal
-  to the Table sum only when returns/cancels = 0 in the window. Canonical net-sales
-  rule (dashboard parity; fix applied in serve.order_attribution, effective after
-  Cube redeploy — revenue flows meta_ad_attribution_daily → order_attribution):
-  cancelled/voided/revenue-adjustment → 0; paid → net ex-GST; unpaid COD → gross
-  ex-GST − discounts (NOT zero). Never mix with
-  Meta's platform-reported purchase_value, nor with attributed_net_revenue
-  (all-channel order oracle).
+description: 'Placement-axis first-party net revenue (ex-GST) last-touch attributed to a Meta ad, at campaign
+  x adset x ad x day grain — backs the Meta Attribution Analysis TABLE "Net Sales" column, evidence buildMetaAttributionPayload.js:409.
+  Use for any Meta campaign/adset/ad-scoped net sales question. The Overview "Net Sales" card is meta_attribution_net_sales
+  (channel_pnl, event-date returns/cancels basis) — equal to the Table sum only when returns/cancels =
+  0 in the window. Canonical net-sales rule (dashboard parity; fix applied in serve.order_attribution,
+  effective after Cube redeploy — revenue flows meta_ad_attribution_daily → order_attribution): cancelled/voided/revenue-adjustment
+  → 0; paid → net ex-GST; unpaid COD → gross ex-GST − discounts (NOT zero). Never mix with Meta''s platform-reported
+  purchase_value, nor with attributed_net_revenue (all-channel order oracle).
+
+  '
 formula:
   human_readable: SUM(attributed_net_revenue_excl_tax)
   authoritative_source: cube
@@ -69,3 +66,5 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: metaAttribution/buildMetaAttributionPayload.js:409
+companion_measures:
+- meta_attribution_net_sales

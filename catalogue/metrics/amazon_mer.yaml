@@ -2,13 +2,16 @@ id: amazon_mer
 display_name: Amazon MER
 category: amazon
 status: certified
-description: >
-  Amazon Attribution Overview MER = Total Sales (incl. GST) ÷ Ads API spend.
-  Distinct from catalogue mer (Shopify net / blended spend) and from ads ROAS
-  (attributed sales / spend).
+description: 'Amazon Attribution Overview MER = Total Sales (incl. GST) ÷ Ads API spend. Distinct from
+  catalogue mer (Shopify net / blended spend) and from ads ROAS (attributed sales / spend).
+
+  '
 formula:
-  human_readable: amazon_total_sales / amazon_ad_spend
+  human_readable: amazon_total_sales / amazon_ads_spend
   authoritative_source: cube
+  depends_on:
+  - amazon_total_sales
+  - amazon_ads_spend
 cube_mapping:
   view: amazon_attribution_overview
   measure: amazon_attribution_overview.mer
@@ -35,3 +38,6 @@ dashboard_alignment:
   status: match
   audited_on: '2026-07-27'
   source: Seleric_Dashboard/fe-dashboard amazonSummaryMetrics.js
+ratio_components:
+  numerator: amazon_attribution_overview.total_sales
+  denominator: amazon_attribution_overview.ad_spend

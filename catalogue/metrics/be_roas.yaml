@@ -8,8 +8,11 @@ description: 'Historical Analytics BE ROAS (FE tooltip / attribution form): Net 
   SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
   use net_profit_blended.'
 formula:
-  human_readable: SUM(net_sales) / (SUM(net_sales) - SUM(net_cogs))
+  human_readable: commerce_net_revenue_daily / (commerce_net_revenue_daily - net_cogs)
   authoritative_source: cube
+  depends_on:
+  - commerce_net_revenue_daily
+  - net_cogs
 cube_mapping:
   view: canonical_pnl
   measure: canonical_pnl.be_roas
@@ -46,3 +49,6 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: src/integrations/attributionPnLHelpers.js:195-196
+ratio_components:
+  numerator: canonical_pnl.net_sales
+  denominator: canonical_pnl.net_cogs

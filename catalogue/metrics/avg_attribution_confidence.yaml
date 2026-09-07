@@ -2,8 +2,8 @@ id: avg_attribution_confidence
 display_name: Average Attribution Confidence
 category: attribution
 status: draft
-description: Not implemented in the dashboard — Node-Backend has no equivalent live
-  calculation. Mean confidence score of the last-touch attribution match.
+description: Not implemented in the dashboard — Node-Backend has no equivalent live calculation. Mean
+  confidence score of the last-touch attribution match.
 formula:
   human_readable: SUM(attribution_confidence) / attributed_orders
   authoritative_source: cube
@@ -68,6 +68,9 @@ dashboard_alignment:
   status: not_implemented
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
-  note: >
-    No confidence-scoring field exists anywhere in Node-Backend for last-touch
-    attribution matches.
+  note: 'No confidence-scoring field exists anywhere in Node-Backend for last-touch attribution matches.
+
+    '
+ratio_components:
+  numerator: order_attribution.attribution_confidence
+  denominator: order_attribution.attributed_orders

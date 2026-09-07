@@ -2,11 +2,11 @@ id: meta_attribution_net_sales
 display_name: Meta Attribution Net Sales
 category: attribution
 status: certified
-description: >
-  Meta Attribution Overview / Historical Meta channel Net Sales.
-  Gross − Discounts − event-date Returns − event-date Cancels (channel_pnl).
-  NOT placement-only dashboard_net_sales_excl_tax on platform_attribution_commerce,
+description: 'Meta Attribution Overview / Historical Meta channel Net Sales. Gross − Discounts − event-date
+  Returns − event-date Cancels (channel_pnl). NOT placement-only dashboard_net_sales_excl_tax on platform_attribution_commerce,
   and NOT meta_attr_net_revenue (ad-day oracle).
+
+  '
 formula:
   human_readable: Meta gross − discounts − event returns − event cancels
   authoritative_source: cube
@@ -50,3 +50,6 @@ dashboard_alignment:
   audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
   evidence: pnlService.getAttributionChannelPnl + lineItemHistoricalSql.buildChannelMetricsSql
+companion_measures:
+- meta_attr_net_revenue
+- meta_net_profit

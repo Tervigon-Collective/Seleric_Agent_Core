@@ -44,7 +44,7 @@ MEASURE_MAP = {
     "net_sales":       dict(dash=("net_sales",),                   cube=["canonical_pnl.net_sales_all_channels_pnl"],       td="canonical_pnl.report_date"),
     "total_cogs":      dict(dash=("total_cogs",),                  cube=["canonical_pnl.total_operating_cost_all_channels"], td="canonical_pnl.report_date"),
     "net_profit":      dict(dash=("net_profit",),                  cube=["canonical_pnl.net_profit_all_channels"],          td="canonical_pnl.report_date"),
-    "returns_cancels": dict(dash=("returns_cancels", "total_count"), cube=["commerce_orders.returns_cancels_orders"],        td="commerce_orders.event_date", known_diff="Shopify-only; Amazon returns/cancels excluded"),
+    "returns_cancels": dict(dash=("returns_cancels", "total_count"), cube=["returns_cancels_all_channels.returns_cancels"], td="returns_cancels_all_channels.report_date"),
     "total_payments":  dict(dash=("total_payments", "total_count"),  cube=["commerce_orders.total_payment_orders"], td="commerce_orders.order_date"),
     "gross_sales":     dict(dash=("gross_sales",),                 cube=["sales_all_channels.gross_sales"],                 td="sales_all_channels.report_date"),
 }

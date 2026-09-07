@@ -2,15 +2,17 @@ id: ltv
 display_name: New-customer first-order AOV (LTV card)
 category: finance
 status: certified
-description: >
-  Period new-customer first-order AOV (misnamed "LTV" on Historical LTV:CAC).
-  = new_customer_revenue / new_customers. Revenue arm matches attributed_net_revenue
-  for is_new_customer=1: fct_order_attribution.net_revenue_excl_tax is dashboard net
-  sales (cancelled/voided → 0; paid → net ex-GST; unpaid COD → gross_excl − discounts).
+description: 'Period new-customer first-order AOV (misnamed "LTV" on Historical LTV:CAC). = new_customer_revenue
+  / new_customers. Revenue arm matches attributed_net_revenue for is_new_customer=1: fct_order_attribution.net_revenue_excl_tax
+  is dashboard net sales (cancelled/voided → 0; paid → net ex-GST; unpaid COD → gross_excl − discounts).
   Not lifetime customer_ltv.avg_ltv.
+
+  '
 formula:
-  human_readable: SUM(new_customer_revenue) / SUM(new_customers)
+  human_readable: new_customer_revenue / new_customers
   authoritative_source: cube
+  depends_on:
+  - new_customers
 cube_mapping:
   view: ltv_cac
   measure: ltv_cac.ltv
@@ -26,14 +28,23 @@ supported_filters:
 - brand_id
 data_owner: Growth / Finance
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:
   status: match
   audited_on: '2026-07-31'
   source: Seleric_Dashboard fe-dashboard performanceSummary.js
-  note: >
-    First-order AOV for new attributed customers; reconciles with
-    attributed_net_revenue filtered to is_new_customer=1. Not lifetime LTV.
+  note: 'First-order AOV for new attributed customers; reconciles with attributed_net_revenue filtered
+    to is_new_customer=1. Not lifetime LTV.
+
+    '
+ratio_components:
+  numerator: ltv_cac.new_customer_revenue
+  denominator: ltv_cac.new_customers

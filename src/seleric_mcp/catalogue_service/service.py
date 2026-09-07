@@ -162,6 +162,21 @@ class CatalogueService:
             self._module_metrics[mid] = {
                 m.id for m in catalogue.metrics.values() if m.cube_mapping.view in views
             }
+        # Entity-cluster index: catalogue metric id -> cluster, plus neighbors.
+        self._metric_cluster: dict[str, str] = {}
+        self._cluster_metrics: dict[str, list[str]] = {}
+        self._cluster_related_glossary: dict[str, list[str]] = {}
+        onto = catalogue.openmetadata.ontology if catalogue.openmetadata else None
+        if onto is not None:
+            for cname, spec in (onto.entity_clusters or {}).items():
+                metrics = [
+                    mid for mid in (spec.get("catalogue_metrics") or [])
+                    if mid in catalogue.metrics
+                ]
+                self._cluster_metrics[cname] = metrics
+                self._cluster_related_glossary[cname] = list(spec.get("related") or [])
+                for mid in metrics:
+                    self._metric_cluster.setdefault(mid, cname)
 
     def _resolve_module_views(self, mod: ModuleDef) -> set[str]:
         views: set[str] = set(mod.extra_views)
@@ -336,6 +351,200 @@ class CatalogueService:
 
     def get_metric(self, metric_id: str) -> MetricDef | None:
         return self.cat.metrics.get(metric_id)
+
+    def _data_product_for_view(self, view: str):
+        om = self.cat.openmetadata
+        if om is None:
+            return None, None
+        view_link = om.views.get(view)
+        if view_link is None:
+            return None, None
+        dp = next((d for d in om.data_products if d.name == view_link.data_product), None)
+        return view_link, dp
+
+    def _unclustered_reason(self, metric_id: str, view: str, category: str) -> str:
+        om = self.cat.openmetadata
+        spec = (om.ontology.unclustered if om and om.ontology else None) or {}
+        by_metric = spec.get("by_metric") or {}
+        by_view = spec.get("by_view") or {}
+        by_category = spec.get("by_category") or {}
+        reason = (
+            by_metric.get(metric_id)
+            or by_view.get(view)
+            or by_category.get(category)
+            or spec.get("default")
+            or "No entity cluster declared for this metric."
+        )
+        return str(reason).strip()
+
+    def metric_om_context(self, metric_id: str) -> dict | None:
+        """Governance snapshot for one catalogue metric: data product, cluster,
+        related catalogue ids, attribution-boundary flag. No numeric values."""
+        m = self.get_metric(metric_id)
+        if m is None:
+            return None
+        om = self.cat.openmetadata
+        link = om.metrics.get(metric_id) if om else None
+        view = m.cube_mapping.view
+        view_link, dp = self._data_product_for_view(view)
+        cluster = self._metric_cluster.get(metric_id)
+        related = [mid for mid in self._cluster_metrics.get(cluster, []) if mid != metric_id] if cluster else []
+        contract_id = (
+            (link.contract if link else None)
+            or (view_link.contract if view_link else None)
+            or (dp.contract if dp else None)
+        )
+        domain = (
+            dp.domain if dp is not None
+            else (link.category if link and link.category else m.category)
+        )
+        glossary = list(link.glossary) if link else []
+        ab = (om.ontology.attribution_boundary if om and om.ontology else None) or {}
+        ab_term = ab.get("om_glossary_term")
+        excluded = set(ab.get("excluded_from_certified") or [])
+        policy = str(ab.get("agent_policy") or "").strip() or None
+        on_boundary_domain = domain in {"PaidMedia", "Attribution"}
+        attribution_boundary = (
+            metric_id in excluded
+            or (bool(ab_term) and ab_term in glossary)
+            or on_boundary_domain
+        )
+        return {
+            "om_name": link.om_name if link else None,
+            "glossary": glossary,
+            "contract": contract_id,
+            "data_product": (
+                view_link.data_product if view_link is not None
+                else (dp.name if dp is not None else None)
+            ),
+            "domain": domain,
+            "serve_table": (
+                view_link.serve_table if view_link is not None
+                else (dp.primary_serve_table if dp is not None else None)
+            ),
+            "cube_view": view,
+            "entity_cluster": cluster,
+            "related_metrics": related,
+            "related_glossary": list(self._cluster_related_glossary.get(cluster, [])) if cluster else [],
+            "unclustered_reason": None if cluster else self._unclustered_reason(metric_id, view, m.category),
+            "attribution_boundary": attribution_boundary,
+            "attribution_policy": policy if on_boundary_domain or attribution_boundary else None,
+        }
+
+    def related_metrics(self, metric_id: str) -> dict:
+        """Entity-cluster neighbors + glossary related terms for one metric."""
+        ctx = self.metric_om_context(metric_id)
+        if ctx is None:
+            return {"error": f"Unknown metric '{metric_id}'"}
+        return {
+            "metric_id": metric_id,
+            "entity_cluster": ctx["entity_cluster"],
+            "glossary": ctx["glossary"],
+            "related_metrics": ctx["related_metrics"],
+            "related_glossary": ctx["related_glossary"],
+            "unclustered_reason": ctx["unclustered_reason"],
+            "data_product": ctx["data_product"],
+            "domain": ctx["domain"],
+            "catalogue_version": self.version,
+        }
+
+    def get_ontology(self, module: str | None = None) -> dict:
+        """Domain-scoped ontology slice: data products, views, entity clusters.
+
+        When ``module`` is set, only that module's ontology domains (and the
+        clusters whose catalogue metrics live on its views) are returned.
+        """
+        om = self.cat.openmetadata
+        if om is None or om.ontology is None:
+            return {"error": "Ontology not loaded (missing catalogue/openmetadata/ontology.yaml)."}
+        onto = om.ontology
+        allowed_domains: set[str] | None = None
+        allowed_views: set[str] | None = None
+        if module:
+            mod = self.get_module(module)
+            if mod is None:
+                return {
+                    "error": f"Unknown module '{module}'.",
+                    "valid_modules": [m.id for m in self.list_modules()],
+                }
+            allowed_domains = set(mod.domains)
+            allowed_views = self.module_views(module)
+
+        domains_out: list[dict] = []
+        for name, spec in (onto.domains or {}).items():
+            if allowed_domains is not None and name not in allowed_domains:
+                continue
+            dps = spec.get("data_products") or (
+                [spec["data_product"]] if spec.get("data_product") else []
+            )
+            domains_out.append(
+                {
+                    "name": name,
+                    "om_glossary": spec.get("om_glossary"),
+                    "owner_team": spec.get("owner_team"),
+                    "data_products": dps,
+                    "cube_views": list(spec.get("cube_views") or []),
+                    "grain": spec.get("grain"),
+                    "date_axes": list(spec.get("date_axes") or []),
+                    "notes": str(spec.get("notes") or "").strip() or None,
+                }
+            )
+
+        clusters_out: list[dict] = []
+        for cname, spec in (onto.entity_clusters or {}).items():
+            metrics = [mid for mid in (spec.get("catalogue_metrics") or []) if mid in self.cat.metrics]
+            if allowed_views is not None:
+                metrics = [
+                    mid for mid in metrics
+                    if self.cat.metrics[mid].cube_mapping.view in allowed_views
+                ]
+                if not metrics:
+                    continue
+            clusters_out.append(
+                {
+                    "id": cname,
+                    "glossary": spec.get("glossary"),
+                    "related_glossary": list(spec.get("related") or []),
+                    "catalogue_metrics": metrics,
+                    "notes": str(spec.get("notes") or "").strip() or None,
+                }
+            )
+
+        dps_out: list[dict] = []
+        for dp in om.data_products:
+            if allowed_domains is not None and dp.domain not in allowed_domains:
+                continue
+            dps_out.append(
+                {
+                    "name": dp.name,
+                    "domain": dp.domain,
+                    "owner_team": dp.owner_team,
+                    "primary_serve_table": dp.primary_serve_table,
+                    "contract": dp.contract,
+                    "cube_views": list(dp.cube_views),
+                    "notes": (dp.notes or "").strip() or None,
+                }
+            )
+
+        include_boundary = allowed_domains is None or bool(
+            allowed_domains & {"PaidMedia", "Attribution"}
+        )
+        ab = onto.attribution_boundary or {}
+        boundary = None
+        if include_boundary:
+            boundary = {
+                "excluded_from_certified": list(ab.get("excluded_from_certified") or []),
+                "om_glossary_term": ab.get("om_glossary_term"),
+                "agent_policy": str(ab.get("agent_policy") or "").strip() or None,
+            }
+        return {
+            "module": module,
+            "domains": domains_out,
+            "data_products": dps_out,
+            "entity_clusters": clusters_out,
+            "attribution_boundary": boundary,
+            "catalogue_version": self.version,
+        }
 
     # ---------------- modules (dashboard access scopes) ----------------
 

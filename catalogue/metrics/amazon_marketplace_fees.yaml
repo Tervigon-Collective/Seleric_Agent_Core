@@ -2,18 +2,18 @@ id: amazon_marketplace_fees
 display_name: Amazon Marketplace Fees
 category: commerce
 status: certified
-description: >
-  Amazon marketplace fee cost from `amazon_commerce_performance.marketplace_fees`
-  (serve.amazon_commerce_daily), defined as the non-negative abs-sum of effective
-  fee components (commission + closing + shipping + tax-withheld + other). Same
-  economic definition as `amazon_platform_fees` (Attribution card via
-  amazon_daily_pnl); prefer `amazon_platform_fees` for Attribution questions.
-  Posted/signed settlement fees (UNSETTLED → 0) remain on the Cube measure
-  `operational_marketplace_fees` for cash reconciliation only.
+description: 'Amazon marketplace fee cost from `amazon_commerce_performance.marketplace_fees` (serve.amazon_commerce_daily),
+  defined as the non-negative abs-sum of effective fee components (commission + closing + shipping + tax-withheld
+  + other). Same economic definition as `amazon_platform_fees` (Attribution card via amazon_daily_pnl);
+  prefer `amazon_platform_fees` for Attribution questions. Posted/signed settlement fees (UNSETTLED →
+  0) remain on the Cube measure `operational_marketplace_fees` for cash reconciliation only.
+
+  '
 formula:
-  human_readable: >
-    SUM(ABS(effective_commission) + ABS(effective_closing) + ABS(effective_shipping)
-    + ABS(effective_tax_withheld) + ABS(effective_other_service_fees))
+  human_readable: 'SUM(ABS(effective_commission) + ABS(effective_closing) + ABS(effective_shipping) +
+    ABS(effective_tax_withheld) + ABS(effective_other_service_fees))
+
+    '
   authoritative_source: cube
 cube_mapping:
   view: amazon_commerce_performance
@@ -22,25 +22,34 @@ aggregation: additive
 unit: INR
 grain: brand × day
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 currency_default: INR
 validation_tests:
-  - amazon_marketplace_fees >= 0 for any slice
-  - daily grain non-zero when amazon_platform_fees is non-zero for the same day
+- amazon_marketplace_fees >= 0 for any slice
+- daily grain non-zero when amazon_platform_fees is non-zero for the same day
 deprecated_aliases: []
 dashboard_alignment:
   status: match
   audited_on: '2026-07-31'
   source: Seleric_Dashboard/Node-Backend
   evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_amazon_commerce_daily.yml
-  note: >
-    Aligned to abs(effective_*) so unsettled days are not blank. Distinct from
-    the legacy signed operational column (now Cube operational_marketplace_fees).
+  note: 'Aligned to abs(effective_*) so unsettled days are not blank. Distinct from the legacy signed
+    operational column (now Cube operational_marketplace_fees).
+
+    '
+companion_measures:
+- amazon_platform_fees

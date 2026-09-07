@@ -136,6 +136,14 @@ chat:
   max_tool_rounds: 1100
   web_port: 8766
   tool_preview_chars: 4000
+  # Tool surface exposed to the LLM each round — the biggest lever on per-round
+  # token cost. Prefix-matched on tool name (whole namespaces add/drop as a unit).
+  # This is an analyst deployment: ad *data* arrives via metrics_query/cube, so the
+  # granular ad-management tools (meta_* / google_*) are pure schema bloat here.
+  # Env overrides: CHAT_TOOL_EXCLUDE_PREFIXES / CHAT_TOOL_ALLOW_PREFIXES (CSV).
+  tool_exclude_prefixes: [meta_, google_]
+  # For an ad-ops deployment instead, allowlist what it needs and leave exclude empty:
+  # tool_allow_prefixes: [meta_, google_, catalogue_, scratchpad_]
 
 # OpenMetadata sidecar (metadata only — not used for metric math).
 # Auth token: OM_JWT_OR_PAT in .env / .env.local

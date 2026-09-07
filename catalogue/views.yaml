@@ -81,6 +81,12 @@ views:
     freshness:
       source: serve.canonical_pnl (commerce oracle + FE §11 Net COGS + ads spend)
       expected_cadence: "hourly after gold sync; costs lag ~1 day (is_final = report_date <= today-3)"
+  - name: daily_pnl
+    title: Daily P&L (alias of canonical_pnl)
+    date_dimension: report_date
+    freshness:
+      source: serve.canonical_pnl via Cube view daily_pnl (legacy measure names)
+      expected_cadence: "hourly after gold sync; costs lag ~1 day (is_final = report_date <= today-3)"
   - name: amazon_daily_pnl
     title: Amazon Daily P&L (Marketplace Fees)
     date_dimension: report_date
@@ -212,3 +218,44 @@ views:
     freshness:
       source: serve.google_ads_hourly
       expected_cadence: "hourly after gold sync, IST"
+
+  # --- Registered 2026-09-07 to close reconcile_layers VIEW_NOT_IN_CATALOGUE.
+  # These Cube views were already certified in OpenMetadata but carried no agent-side
+  # date axis, so metrics_query could not time-filter them and the staleness gate
+  # could not fail closed on them.
+  - name: touchpoints
+    title: Pre-Purchase Touchpoints (Serve)
+    date_dimension: order_date
+    freshness:
+      source: serve.touchpoints (VIEW over gold.fct_touchpoints FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: attribution_paths
+    title: Attribution Paths (Serve, per-model journey)
+    date_dimension: order_date
+    freshness:
+      source: serve.attribution_paths (VIEW over gold.fct_attribution_paths FINAL)
+      expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_settlement_reconciliation
+    title: Amazon Settlement Reconciliation (Serve, ACTUAL)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_settlement_reconciliation
+      expected_cadence: "per Amazon settlement posting (typically fortnightly), IST"
+  - name: amazon_order_item_pnl
+    title: Amazon Order-Item P&L (Serve, ACTUAL)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_order_item_pnl
+      expected_cadence: "daily after Amazon SP finance sync, IST"
+  - name: amazon_daily_pnl_actual
+    title: Amazon Daily P&L — Settled Actuals (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_daily_pnl_actual
+      expected_cadence: "daily after Amazon SP finance sync, IST"
+  - name: amazon_accounts_exceptions
+    title: Amazon Accounts Close Exceptions (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_accounts_exceptions
+      expected_cadence: "daily after Amazon SP finance sync, IST"

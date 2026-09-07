@@ -2,14 +2,13 @@ id: meta_attribution_orders
 display_name: Meta Attribution Orders
 category: attribution
 status: certified
-description: >
-  Meta Attribution Analysis OVERVIEW "Total Orders" summary card — eligible Shopify
-  placements with last-touch Meta (commerce cohort), evidence
-  analyticsClickhouse.js:626-637. Matches channel_orders for meta. DISTINCT from
-  meta_attr_orders, which is the ad-grain TABLE on the same page: the two coincide on
-  days with zero returns/cancels but diverge over multi-day ranges (grain + dedup).
-  For per-campaign/adset/ad breakdowns use meta_attr_orders; for all-channel orders
-  use attributed_orders.
+description: 'Meta Attribution Analysis OVERVIEW "Total Orders" summary card — eligible Shopify placements
+  with last-touch Meta (commerce cohort), evidence analyticsClickhouse.js:626-637. Matches channel_orders
+  for meta. DISTINCT from meta_attr_orders, which is the ad-grain TABLE on the same page: the two coincide
+  on days with zero returns/cancels but diverge over multi-day ranges (grain + dedup). For per-campaign/adset/ad
+  breakdowns use meta_attr_orders; for all-channel orders use attributed_orders.
+
+  '
 formula:
   human_readable: COUNT(eligible orders where lt_platform = meta)
   authoritative_source: cube
@@ -44,3 +43,5 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: metaAttribution/analyticsClickhouse.js:626-637
+companion_measures:
+- meta_attr_orders

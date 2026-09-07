@@ -370,16 +370,24 @@ def build_server(settings: Settings) -> FastMCP:
         return ctx.catalogue.search(query, module=effective).model_dump()
 
     @mcp.tool()
-    def catalogue_get_metric(metric_id: str) -> dict:
+    def catalogue_get_metric(metric_id: str, module: str | None = None) -> dict:
         """Full catalogue definition for one metric id: formula, cube mapping,
-        dimensions/filters, owner, access policy, freshness, caveats.
+        dimensions/filters, owner, access policy, freshness, caveats, plus an
+        ``openmetadata`` block (data product, entity cluster, related metrics).
 
         Pass a catalogue metric id (e.g. total_sales_all_channels). Cube
         members from provenance (e.g. sales_all_channels.total_sales) are
         accepted and remapped, but NEVER pass cube_mapping.measure into
         metrics_query — always use the returned metric id / query_as.measures.
         """
-        _log_call("catalogue_get_metric", metric_id=metric_id)
+        _log_call("catalogue_get_metric", metric_id=metric_id, module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
         resolved = ctx.catalogue.resolve_metric_id(metric_id)
         if resolved is None:
             result = ctx.catalogue.search(metric_id)
@@ -388,6 +396,10 @@ def build_server(settings: Settings) -> FastMCP:
                 "suggestions": [s.id for s in result.matches] + result.suggestions,
             }
         canonical_id, alias_notice = resolved
+        if effective is not None:
+            denied = _check_metric_module([canonical_id], effective)
+            if denied:
+                return denied
         m = ctx.catalogue.get_metric(canonical_id)
         assert m is not None
         freshness = ctx.catalogue.freshness(m.cube_mapping.view)
@@ -398,6 +410,9 @@ def build_server(settings: Settings) -> FastMCP:
             # Agent-facing: use these ids in metrics_query — not cube_mapping.
             "query_as": {"measures": [m.id]},
         }
+        om_block = ctx.catalogue.metric_om_context(canonical_id)
+        if om_block:
+            out["openmetadata"] = om_block
         if alias_notice:
             out["resolved_from"] = metric_id
             out["resolution_notice"] = alias_notice
@@ -433,6 +448,58 @@ def build_server(settings: Settings) -> FastMCP:
         Weak matches are never silently resolved."""
         _log_call("catalogue_resolve_term", text=text)
         return ctx.catalogue.resolve_term(text).model_dump()
+
+    @mcp.tool()
+    def catalogue_get_ontology(module: str | None = None) -> dict:
+        """Business ontology snapshot: domains, data products, entity clusters
+        (related catalogue metrics), grain/date axes, attribution boundary.
+
+        Pass module=<id> (see modules_list) to scope to one dashboard module's
+        domains. If this instance is pinned to a module, that scope is always
+        applied. Contains no metric values — Cube/metrics_query executes numbers.
+        """
+        _log_call("catalogue_get_ontology", module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        return ctx.catalogue.get_ontology(effective)
+
+    @mcp.tool()
+    def catalogue_related_metrics(metric_id: str, module: str | None = None) -> dict:
+        """Entity-cluster neighbors of a catalogue metric: other catalogue ids
+        in the same business object, plus related glossary terms. Use this to
+        see which metrics share a grain/object (e.g. orders with active_orders)
+        without treating glossary relatedness as causality.
+        """
+        _log_call("catalogue_related_metrics", metric_id=metric_id, module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        resolved = ctx.catalogue.resolve_metric_id(metric_id)
+        if resolved is None:
+            result = ctx.catalogue.search(metric_id)
+            return {
+                "error": f"Unknown metric '{metric_id}'",
+                "suggestions": [s.id for s in result.matches] + result.suggestions,
+            }
+        canonical_id, alias_notice = resolved
+        if effective is not None:
+            denied = _check_metric_module([canonical_id], effective)
+            if denied:
+                return denied
+        out = ctx.catalogue.related_metrics(canonical_id)
+        if alias_notice:
+            out["resolved_from"] = metric_id
+            out["resolution_notice"] = alias_notice
+        return out
 
     @mcp.tool()
     def catalogue_resolve_brand(text: str) -> dict:
@@ -872,13 +939,69 @@ def build_server(settings: Settings) -> FastMCP:
         if v is None:
             return f"Unknown view '{view}'. Valid: {', '.join(sorted(ctx.catalogue.cat.views))}"
         metrics = [m for m in ctx.catalogue.cat.metrics.values() if m.cube_mapping.view == view]
-        lines = [f"# {v.title} ({view})", "", "## Metrics"]
-        for m in metrics:
-            lines.append(f"- `{m.id}` ({m.aggregation}) -> {m.cube_mapping.measure}: {m.description.strip()}")
+        lines = [f"# {v.title} ({view})", ""]
+
+        # Provenance first: which governed domain and data product stands behind
+        # these numbers, and at what grain. Without it a client cannot tell two
+        # similarly-named views apart, or know which one it is allowed to trust.
+        om = ctx.catalogue.cat.openmetadata
+        domains = (om.ontology.domains if om and om.ontology else None) or {}
+        for dom_name, dom in domains.items():
+            if view not in (dom.get("cube_views") or []):
+                continue
+            products = dom.get("data_products") or (
+                [dom["data_product"]] if dom.get("data_product") else []
+            )
+            lines.append(f"- Domain: **{dom_name}** (owner: {dom.get('owner_team', 'unassigned')})")
+            # Prefer the exact per-view link over the domain's whole product list:
+            # a client needs the one product that certifies THIS view.
+            link = (om.views or {}).get(view) if om else None
+            if link:
+                lines.append(f"- Data product: **{link.data_product}**")
+                lines.append(f"- Serve table: `{link.serve_table}`")
+                if link.gold_inputs:
+                    lines.append(f"- Built from: {', '.join(f'`{g}`' for g in link.gold_inputs)}")
+                if link.contract:
+                    lines.append(f"- Contract: {link.contract}")
+            elif products:
+                lines.append(f"- Data products (domain-level): {', '.join(products)}")
+            if dom.get("grain"):
+                lines.append(f"- Domain grain: {dom['grain']}")
+            if dom.get("notes"):
+                lines.append(f"- Scope & boundaries: {' '.join(dom['notes'].split())}")
+            break
+        else:
+            lines.append("- Domain: **unassigned** — this view is not mapped to an ontology domain; "
+                         "treat its numbers as uncertified.")
+
+        date_dim = v.date_dimension
+        lines.append(
+            f"- Date axis: `{date_dim}`" if date_dim
+            else "- Date axis: none — master data; do NOT apply a time filter, it would drop rows."
+        )
+        lines.append(f"- Freshness: {v.freshness.expected_cadence} from {v.freshness.source}")
+
+        lines.append("\n## Metrics")
+        if not metrics:
+            lines.append("_No catalogued metrics map to this view._")
+        for m in sorted(metrics, key=lambda x: x.id):
+            lines.append(f"- `{m.id}` ({m.aggregation}, {m.unit}) -> {m.cube_mapping.measure}")
+            lines.append(f"  - {m.description.strip()}")
+            if m.formula and m.formula.human_readable:
+                lines.append(f"  - Formula: {' '.join(m.formula.human_readable.split())}")
+
         lines.append("\n## Dimensions")
-        for d in ctx.catalogue.list_dimensions(view):
-            lines.append(f"- `{d.id}` -> {d.views[view]}" + (" (time)" if d.is_time else ""))
-        lines.append(f"\nFreshness: {v.freshness.expected_cadence} from {v.freshness.source}")
+        for d in sorted(ctx.catalogue.list_dimensions(view), key=lambda x: x.id):
+            head = f"- `{d.id}` -> {d.views[view]}" + (" (time)" if d.is_time else "")
+            lines.append(head)
+            if d.description:
+                lines.append(f"  - {' '.join(d.description.split())}")
+            if d.aliases:
+                lines.append(f"  - Also called: {', '.join(d.aliases)}")
+            if d.allowed_values:
+                lines.append(f"  - Values: {', '.join(d.allowed_values)}")
+
+        lines.append("\nPass the catalogue `id` (not the Cube member) to metrics_query.")
         return "\n".join(lines)
 
     @mcp.resource("docs://data-freshness")

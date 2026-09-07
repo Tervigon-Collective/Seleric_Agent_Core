@@ -2,12 +2,17 @@ id: net_profit
 display_name: Net Profit (Shopify-only, Meta+Google spend)
 category: finance
 status: certified
-description: 'Canonical P&L net profit in `serve_canonical_pnl`: Shopify net sales (ex-GST) − Shopify Net
-  COGS − Shopify ad spend (Meta + Google). This maps to `canonical_pnl.net_profit_shopify` and is distinct
-  from all-platform variants (`net_profit_blended`, `net_profit_all_channels`).'
+description: 'Canonical P&L net profit in `serve_canonical_pnl`: Shopify net sales (ex-GST) − Shopify
+  Net COGS − Shopify ad spend (Meta + Google). This maps to `canonical_pnl.net_profit_shopify` and is
+  distinct from all-platform variants (`net_profit_blended`, `net_profit_all_channels`).'
 formula:
-  human_readable: net_sales - net_cogs - total_ad_spend
+  human_readable: commerce_net_revenue_daily - net_cogs - (meta_spend + google_spend)
   authoritative_source: cube
+  depends_on:
+  - commerce_net_revenue_daily
+  - net_cogs
+  - meta_spend
+  - google_spend
 cube_mapping:
   view: canonical_pnl
   measure: canonical_pnl.net_profit_shopify
@@ -45,7 +50,10 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: src/services/dashboardService.js:132,136
-  note: >
-    Dashboard summary computes a blended number, but this catalogue metric is
-    intentionally aligned to canonical Cube semantic execution
-    (`canonical_pnl.net_profit_shopify`) for agent consistency.
+  note: 'Dashboard summary computes a blended number, but this catalogue metric is intentionally aligned
+    to canonical Cube semantic execution (`canonical_pnl.net_profit_shopify`) for agent consistency.
+
+    '
+companion_measures:
+- net_profit_all_channels
+- net_profit_blended

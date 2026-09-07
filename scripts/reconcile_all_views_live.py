@@ -157,7 +157,8 @@ def main() -> int:
          ["canonical_pnl.net_profit_all_channels"], "canonical_pnl.report_date", False,
          "inherits Shopify net_sales + COGS residuals"),
         ("hist.returns_cancels", num(rc.get("total_count")),
-         ["returns_cancels_all_channels.returns_cancels"], "returns_cancels_all_channels.report_date", True, None),
+         ["returns_cancels_all_channels.returns_cancels"], "returns_cancels_all_channels.report_date", True,
+         "Shopify event-grain ±1 vs FE line-item event counts"),
         ("hist.payments_count", num(pay.get("total_count")),
          ["commerce_orders.total_payment_orders"],
          "commerce_orders.order_date", True, None),
@@ -207,13 +208,17 @@ def main() -> int:
         ("amazon_ads.spend", num(amz_ad),
          ["amazon_ad_performance.amazon_ads_spend"], "amazon_ad_performance.report_date", False, None),
 
-        # --- Meta / Google Attribution Analysis (orders / total / gross) ---
+        # --- Meta / Google placement sales (Historical breakdown uses raw lt_platform;
+        # serve.order_attribution remaps Meta organic/link_in_bio → unattributed) ---
         ("meta_attr.orders", fnum(dig(hist, "orders_breakdown", "meta")),
-         ["platform_attribution_commerce.meta_orders"], "platform_attribution_commerce.report_date", True, None),
+         ["platform_attribution_commerce.meta_orders"], "platform_attribution_commerce.report_date", True,
+         "Historical raw lt_platform vs serve Meta-organic->unattributed remap (~11 orders)"),
         ("meta_attr.total_sales", fnum(dig(hist, "sales_breakdown", "meta")),
-         ["platform_attribution_commerce.meta_total_sales"], "platform_attribution_commerce.report_date", False, None),
+         ["platform_attribution_commerce.meta_total_sales"], "platform_attribution_commerce.report_date", False,
+         "Historical raw lt_platform vs serve Meta-organic->unattributed remap"),
         ("meta_attr.gross_sales", fnum(dig(hist, "gross_sales_breakdown", "meta")),
-         ["platform_attribution_commerce.meta_gross_sales"], "platform_attribution_commerce.report_date", False, None),
+         ["platform_attribution_commerce.meta_gross_sales"], "platform_attribution_commerce.report_date", False,
+         "Historical raw lt_platform vs serve Meta-organic->unattributed remap"),
         ("google_attr.orders", fnum(dig(hist, "orders_breakdown", "google")),
          ["platform_attribution_commerce.google_orders"], "platform_attribution_commerce.report_date", True, None),
         ("google_attr.total_sales", fnum(dig(hist, "sales_breakdown", "google")),

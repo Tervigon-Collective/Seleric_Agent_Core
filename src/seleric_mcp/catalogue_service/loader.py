@@ -18,6 +18,9 @@ from pydantic import BaseModel, Field
 class Formula(BaseModel):
     human_readable: str
     authoritative_source: Literal["cube"] = "cube"
+    # Catalogue metric ids this derived metric is composed from (agent/ontology
+    # disambiguation). Prefer real catalogue ids over free-text tokens.
+    depends_on: list[str] = Field(default_factory=list)
 
 
 class CubeMapping(BaseModel):
@@ -206,6 +209,10 @@ class OpenMetadataOntology(BaseModel):
     domains: dict = Field(default_factory=dict)
     entity_clusters: dict = Field(default_factory=dict)
     attribution_boundary: dict = Field(default_factory=dict)
+    # Explicit reasons for catalogue metrics that are not in an entity cluster.
+    # Shape: {default?: str, by_metric?: {id: reason}, by_view?: {view: reason},
+    #         by_category?: {category: reason}}
+    unclustered: dict = Field(default_factory=dict)
 
 
 class OpenMetadataRegistry(BaseModel):
@@ -329,6 +336,21 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
 def _check_integrity(cat: Catalogue) -> None:
     """Fail fast on internal inconsistencies (bad refs between YAML files)."""
     problems: list[str] = []
+
+    # Display names must be unique (case-insensitive) so agents/ontology never
+    # collide on English labels that map to different metric identities.
+    by_display: dict[str, str] = {}
+    for m in cat.metrics.values():
+        key = m.display_name.strip().casefold()
+        if not key:
+            problems.append(f"metric {m.id}: empty display_name")
+        elif key in by_display:
+            problems.append(
+                f"duplicate display_name {m.display_name!r}: {by_display[key]} and {m.id}"
+            )
+        else:
+            by_display[key] = m.id
+
     for m in cat.metrics.values():
         if m.cube_mapping.view not in cat.views:
             problems.append(f"metric {m.id}: unknown view {m.cube_mapping.view}")
@@ -347,9 +369,37 @@ def _check_integrity(cat: Catalogue) -> None:
                 problems.append(
                     f"metric {m.id}: dimension {dim_id} has no mapping for view {m.cube_mapping.view}"
                 )
+        if m.aggregation == "ratio" and m.ratio_components is None:
+            hr = (m.formula.human_readable or "").strip().upper()
+            # AVG(...) cube rollups are ratios in the catalogue sense but are not
+            # decomposable into additive numerator/denominator catalogue metrics.
+            if not hr.startswith("AVG("):
+                problems.append(
+                    f"metric {m.id}: aggregation=ratio requires ratio_components "
+                    f"(numerator/denominator) so agents can decompose the formula"
+                )
+        for dep in m.formula.depends_on:
+            if dep not in cat.metrics:
+                problems.append(f"metric {m.id}: formula.depends_on unknown metric '{dep}'")
+        for companion in m.companion_measures:
+            if companion not in cat.metrics:
+                problems.append(f"metric {m.id}: companion_measures unknown metric '{companion}'")
+
+    # Glossary terms are indexed case-insensitively — conflicting targets confuse agents.
+    gloss_by_norm: dict[str, tuple[str, str | None]] = {}
     for t in cat.glossary:
         if t.canonical_id is not None and t.canonical_id not in cat.metrics:
             problems.append(f"glossary term '{t.term}': unknown canonical_id {t.canonical_id}")
+        norm = t.term.strip().lower()
+        if norm in gloss_by_norm:
+            prev_term, prev_id = gloss_by_norm[norm]
+            if prev_id != t.canonical_id:
+                problems.append(
+                    f"glossary term collision '{t.term}' vs '{prev_term}': "
+                    f"{prev_id} vs {t.canonical_id}"
+                )
+        else:
+            gloss_by_norm[norm] = (t.term, t.canonical_id)
     if cat.openmetadata:
         for view_name, link in cat.openmetadata.views.items():
             if view_name not in cat.views:

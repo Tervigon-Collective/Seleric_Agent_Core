@@ -2,10 +2,11 @@ id: session_atc_to_checkout_rate
 display_name: ATC to Checkout Rate
 category: web_analytics
 status: certified
-description: >
-  ATC to Checkout Rate on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing
-  page, session hour/day, channel. First-touch ad attribution on the session.
+description: 'ATC to Checkout Rate on serve.session_funnel — the session-grain customer-journey OLAP fact.
+  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session hour/day,
+  channel. First-touch ad attribution on the session.
+
+  '
 formula:
   human_readable: checkout_sessions / atc_sessions
   authoritative_source: cube
@@ -79,8 +80,13 @@ supported_filters:
 - identity_resolution_method
 data_owner: Growth / Web Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 validation_tests:
 - session_atc_to_checkout_rate resolves on session_funnel at ad/funnel/device grain
 currency_default: INR
@@ -89,3 +95,6 @@ dashboard_alignment:
   audited_on: '2026-07-31'
   source: serve.session_funnel (Snowplow journey OLAP)
   note: Journey OLAP surface; no direct dashboard card. First-touch ad attribution.
+ratio_components:
+  numerator: session_funnel.checkout_sessions
+  denominator: session_funnel.atc_sessions

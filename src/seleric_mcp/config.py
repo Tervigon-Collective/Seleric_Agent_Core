@@ -102,6 +102,15 @@ def _as_int(value: Any, default: int) -> int:
     return int(value)
 
 
+def _as_str_tuple(value: Any) -> tuple[str, ...]:
+    """Normalize a YAML list or a comma-separated env string into a tuple of
+    non-empty, stripped strings. Absent/empty -> ()."""
+    if value is None or value == "":
+        return ()
+    items = value if isinstance(value, (list, tuple)) else str(value).split(",")
+    return tuple(s.strip() for s in items if str(s).strip())
+
+
 @dataclass(frozen=True)
 class Settings:
     cube_api_url: str
@@ -185,6 +194,13 @@ class ChatSettings:
     max_tool_rounds: int = 1100
     web_port: int = 8766
     tool_preview_chars: int = 4000
+    # Tool-surface policy for the LLM (biggest lever on per-round token cost).
+    # If allow_prefixes is non-empty it's an allowlist; else exclude_prefixes is
+    # a denylist; empty both = expose every tool. Prefix-matched on tool name so
+    # whole namespaces (e.g. "meta_", "google_") add/drop as a unit — no code
+    # change to re-scope the agent.
+    tool_allow_prefixes: tuple[str, ...] = ()
+    tool_exclude_prefixes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -485,5 +501,11 @@ def load_chat_settings(config_path: Path | None = None) -> ChatSettings:
                 _cfg_get(chat, "tool_preview_chars", 4000),
             ),
             4000,
+        ),
+        tool_allow_prefixes=_as_str_tuple(
+            _env_or("CHAT_TOOL_ALLOW_PREFIXES", _cfg_get(chat, "tool_allow_prefixes", None))
+        ),
+        tool_exclude_prefixes=_as_str_tuple(
+            _env_or("CHAT_TOOL_EXCLUDE_PREFIXES", _cfg_get(chat, "tool_exclude_prefixes", None))
         ),
     )

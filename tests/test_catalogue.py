@@ -96,6 +96,138 @@ def test_resolve_total_orders_all_channels(catalogue):
     assert r.metric_id == "orders"
 
 
+# Golden set lifted verbatim from the system prompt's hardcoded disambiguation
+# (prompts.py §3c channel scope, §3f P&L/ROAS scope, §3f-bis "hard meaning traps").
+# Every phrase→id pair the prompt hand-maintains must resolve through the
+# catalogue glossary instead. Passing here means that prompt block is redundant
+# and can be deleted; a failure pinpoints the one glossary term still missing.
+# This is the proof-of-concept family: net_profit / ROAS / Net COGS / Amazon.
+PROMPT_TRAP_GOLDEN = {
+    # §3f-bis hard meaning traps — bare/historical/all-channels defaults, and the
+    # Amazon net-profit-vs-payout trap (the single most cited confusion).
+    "Amazon Net Profit": "amazon_net_profit",
+    "amazon profit": "amazon_net_profit",
+    "amazon net payout": "amazon_net_payout",  # the trap's *wrong* side, resolved on purpose
+    "Net Profit": "net_profit_all_channels",
+    "Net COGS": "total_operating_cost_all_channels",
+    "Gross ROAS": "gross_roas_all_channels",
+    "Net ROAS": "net_roas_all_channels",
+    "BE ROAS": "be_roas_all_channels",
+    # §3c/§3f all-channels (bare) defaults.
+    "Net Sales": "net_sales_all_channels",
+    "P&L Net Profit": "net_profit_all_channels",
+    # Shopify-only variants require the explicit qualifier.
+    "shopify net profit": "net_profit",
+    "shopify net cogs": "net_cogs",
+    "shopify gross ROAS": "gross_roas",
+    "shopify net ROAS": "net_roas",
+    "shopify BE ROAS": "be_roas",
+    # Amazon-only finance.
+    "amazon platform fees": "amazon_platform_fees",
+}
+
+
+def test_prompt_trap_table_resolves_via_glossary(catalogue):
+    """The prompt's hardcoded scope/trap map is redundant with the glossary."""
+    for term, expected in PROMPT_TRAP_GOLDEN.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), f"{term!r} did not resolve: {r}"
+        assert r.metric_id == expected, f"{term!r}: got {r.metric_id}, want {expected}"
+
+
+# Family 1 — §3c commerce channel scope (sales & orders). Bare term = all channels;
+# shopify/amazon need the explicit channel word. Guards deleting prompt §3c.
+PROMPT_COMMERCE_SCOPE_GOLDEN = {
+    "Total Sales": "total_sales_all_channels",
+    "shopify total sales": "total_sales",
+    "amazon total sales": "amazon_total_sales",
+    "Gross Sales": "gross_sales_all_channels",
+    "shopify gross sales": "gross_sales",
+    "amazon gross sales": "amazon_gross_sales",
+    "shopify net sales": "commerce_net_revenue_daily",
+    "amazon net sales": "amazon_net_sales",
+    "total orders": "total_orders",
+    "shopify orders": "orders",
+    "amazon orders": "amazon_orders",
+    "returns and cancels": "returns_cancels_all_channels",
+    "ltv:cac": "ltv_cac_ratio",
+}
+
+
+def test_prompt_commerce_scope_resolves_via_glossary(catalogue):
+    for term, expected in PROMPT_COMMERCE_SCOPE_GOLDEN.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), f"{term!r} did not resolve: {r}"
+        assert r.metric_id == expected, f"{term!r}: got {r.metric_id}, want {expected}"
+
+
+# Family 2 — §3d ad/marketing platform scope. Guards deleting prompt §3d.
+PROMPT_ADS_SCOPE_GOLDEN = {
+    "meta ads": "meta_spend",
+    "meta spend": "meta_spend",
+    "google ads": "google_spend",
+    "google spend": "google_spend",
+    "amazon ads": "amazon_ads_spend",
+    "amazon spend": "amazon_ads_spend",
+    "shopify ad spend": "shopify_ad_spend",
+    "ad spend": "total_ad_spend",
+    "total ad spend": "total_ad_spend",
+    "performance marketing": "total_ad_spend",
+}
+
+
+def test_prompt_ads_scope_resolves_via_glossary(catalogue):
+    for term, expected in PROMPT_ADS_SCOPE_GOLDEN.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), f"{term!r} did not resolve: {r}"
+        assert r.metric_id == expected, f"{term!r}: got {r.metric_id}, want {expected}"
+
+
+# Family 3 — §3f P&L vs Historical finance-line scope (product cost, TOC, and the
+# net_profit_incl_amazon "older card" that must resolve ONLY when named). Guards
+# deleting prompt §3f.
+PROMPT_FINANCE_SCOPE_GOLDEN = {
+    "product cost": "product_cost_all_channels",
+    "shopify product cost": "product_cost",
+    "total operating cost": "total_operating_cost_all_channels",
+    "shopify total operating cost": "total_operating_cost",
+    "pnl net profit": "net_profit_all_channels",
+    "net profit including amazon": "net_profit_incl_amazon",
+}
+
+
+def test_prompt_finance_scope_resolves_via_glossary(catalogue):
+    for term, expected in PROMPT_FINANCE_SCOPE_GOLDEN.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), f"{term!r} did not resolve: {r}"
+        assert r.metric_id == expected, f"{term!r}: got {r.metric_id}, want {expected}"
+
+
+# Family 5 — §3e attribution. Four DISTINCT products keyed on subtle wording, not a
+# channel-scope default. Guards deleting prompt §3e's id lists.
+PROMPT_ATTRIBUTION_GOLDEN = {
+    # A) Attribution Overview cards (channel_pnl)
+    "meta attribution net sales": "meta_attribution_net_sales",
+    "google attribution net sales": "google_attribution_net_sales",
+    # B) order_attribution oracle (the bare "attr" default)
+    "attributed revenue": "attributed_net_revenue",
+    "attr sales": "attributed_net_revenue",
+    "attributed orders": "attributed_orders",
+    # C) Meta ad-grain last-touch
+    "meta attr net revenue": "meta_attr_net_revenue",
+    "meta attributed sales": "meta_attr_net_revenue",
+    # D) channel attribution daily
+    "channel net revenue": "channel_net_revenue",
+}
+
+
+def test_prompt_attribution_resolves_via_glossary(catalogue):
+    for term, expected in PROMPT_ATTRIBUTION_GOLDEN.items():
+        r = catalogue.resolve_term(term)
+        assert isinstance(r, ResolvedTerm), f"{term!r} did not resolve: {r}"
+        assert r.metric_id == expected, f"{term!r}: got {r.metric_id}, want {expected}"
+
+
 def test_resolve_pnl_metrics_glossary(catalogue):
     cases = {
         # Bare financial terms default to ALL-CHANNELS per terms.yaml (the
@@ -345,6 +477,49 @@ def test_ratio_metrics_have_flag(catalogue):
         assert catalogue.get_metric(mid).aggregation == "ratio"
 
 
+def test_unique_display_names_and_ratio_components(catalogue):
+    """Agents/ontology must never see two metrics with the same English label,
+    and every ratio (except AVG rollups) must declare ratio_components."""
+    seen: dict[str, str] = {}
+    for m in catalogue.cat.metrics.values():
+        key = m.display_name.strip().casefold()
+        assert key not in seen, f"duplicate display_name {m.display_name!r}: {seen[key]} vs {m.id}"
+        seen[key] = m.id
+        if m.aggregation == "ratio":
+            hr = (m.formula.human_readable or "").strip().upper()
+            if hr.startswith("AVG("):
+                continue
+            assert m.ratio_components is not None, f"{m.id} missing ratio_components"
+            assert m.ratio_components.numerator and m.ratio_components.denominator
+
+
+def test_trap_metrics_have_depends_on_catalogue_ids(catalogue):
+    """Derived P&L / ROAS traps must compose from real catalogue metric ids."""
+    traps = {
+        "net_profit_all_channels": {
+            "net_sales_all_channels",
+            "total_operating_cost_all_channels",
+            "total_ad_spend",
+        },
+        "be_roas_all_channels": {"net_sales_all_channels", "total_operating_cost_all_channels"},
+        "gross_roas_all_channels": {"gross_sales_all_channels", "total_ad_spend"},
+        "ltv_cac_ratio": {"ltv", "cac"},
+        "aov": {"total_sales", "orders"},
+    }
+    for mid, want in traps.items():
+        m = catalogue.get_metric(mid)
+        assert m is not None
+        deps = set(m.formula.depends_on)
+        assert want <= deps, f"{mid}: missing depends_on {want - deps}"
+        for dep in deps:
+            assert dep in catalogue.cat.metrics, f"{mid}: unknown depends_on {dep}"
+    # Near-dup Meta Overview vs ad-grain table stay linked
+    assert "meta_attribution_orders" in catalogue.get_metric("meta_attr_orders").companion_measures
+    assert "meta_attr_orders" in catalogue.get_metric("meta_attribution_orders").companion_measures
+    assert "amazon_net_payout" in catalogue.get_metric("amazon_net_profit").companion_measures
+
+
+
 # ---------------- module (dashboard access scope) registry ----------------
 # catalogue/modules.yaml maps each dashboard module to ontology domains; a
 # module resolves to its domains' cube_views and from there to the metrics on
@@ -425,6 +600,60 @@ def test_module_integrity_rejects_unknown_extra_view(catalogue):
     )
     with pytest.raises(ValueError, match="unknown extra_view"):
         _check_integrity(bad)
+
+
+def test_every_catalogue_metric_has_cluster_or_unclustered_reason(catalogue):
+    missing = []
+    non_catalogue_related = []
+    for mid in catalogue.cat.metrics:
+        ctx = catalogue.metric_om_context(mid)
+        assert ctx is not None, mid
+        if ctx["entity_cluster"]:
+            assert ctx["unclustered_reason"] is None, mid
+            for rel in ctx["related_metrics"]:
+                if rel not in catalogue.cat.metrics:
+                    non_catalogue_related.append((mid, rel))
+        elif not ctx["unclustered_reason"]:
+            missing.append(mid)
+        else:
+            assert ctx["related_metrics"] == []
+    assert not missing, f"metrics with neither cluster nor unclustered reason: {missing[:20]}"
+    assert not non_catalogue_related, f"related ids that are not catalogue metrics: {non_catalogue_related[:20]}"
+
+
+def test_metric_om_context_orders_cluster(catalogue):
+    ctx = catalogue.metric_om_context("orders")
+    assert ctx["om_name"] == "orders"
+    assert ctx["data_product"] == "CommercePerformance"
+    assert ctx["domain"] == "Commerce"
+    assert ctx["entity_cluster"] == "commerce_order"
+    assert "active_orders" in ctx["related_metrics"]
+    assert "orders" not in ctx["related_metrics"]
+    assert ctx["contract"]
+    assert ctx["serve_table"]
+    assert ctx["attribution_boundary"] is False
+
+
+def test_related_metrics_are_catalogue_ids(catalogue):
+    out = catalogue.related_metrics("meta_spend")
+    assert out["entity_cluster"] == "paid_delivery"
+    assert set(out["related_metrics"]) == {"google_spend", "amazon_ads_spend"}
+    assert out["domain"] == "PaidMedia"
+    assert all(mid in catalogue.cat.metrics for mid in out["related_metrics"])
+
+
+def test_get_ontology_unscoped_has_all_domains(catalogue):
+    out = catalogue.get_ontology()
+    names = {d["name"] for d in out["domains"]}
+    assert {"Commerce", "PaidMedia", "Finance", "Attribution"} <= names
+    assert out["attribution_boundary"]["om_glossary_term"] == "Paid Media.Platform-ReportedConversion"
+    assert out["module"] is None
+
+
+def test_get_ontology_unknown_module(catalogue):
+    out = catalogue.get_ontology("not_a_module")
+    assert "error" in out
+    assert "commerce" in out["valid_modules"]
 
 
 def test_item_count_dimension_is_on_commerce_order_metrics(catalogue):

@@ -2,13 +2,16 @@ id: be_roas_all_channels
 display_name: Break-Even ROAS (All Channels)
 category: finance
 status: certified
-description: >
-  Historical Analytics All-channels BE ROAS =
-  all-channel Net Sales / (all-channel Net Sales − all-channel TOC).
-  Shopify-only BE ROAS is be_roas.
+description: 'Historical Analytics All-channels BE ROAS = all-channel Net Sales / (all-channel Net Sales
+  − all-channel TOC). Shopify-only BE ROAS is be_roas.
+
+  '
 formula:
-  human_readable: net_sales_all / (net_sales_all - toc_all)
+  human_readable: net_sales_all_channels / (net_sales_all_channels - total_operating_cost_all_channels)
   authoritative_source: cube
+  depends_on:
+  - net_sales_all_channels
+  - total_operating_cost_all_channels
 cube_mapping:
   view: canonical_pnl
   measure: canonical_pnl.be_roas_all_channels
@@ -34,3 +37,6 @@ dashboard_alignment:
   status: match
   audited_on: '2026-07-27'
   source: Seleric_Dashboard Historical Analytics BE ROAS (All channels)
+ratio_components:
+  numerator: canonical_pnl.net_sales_all_channels_pnl
+  denominator: canonical_pnl.total_operating_cost_all_channels

@@ -27,10 +27,12 @@ domains:
     data_products: [MetaAdsPerformance, GoogleAdsPerformance, AmazonAdsPerformance]
     cube_views:
       - meta_ad_performance
+      - meta_ad_performance_hourly
       - meta_ad_breakdown_performance
       - google_ad_performance
+      - google_ad_performance_hourly
       - amazon_ad_performance
-    grain: Daily
+    grain: Daily (+ Meta/Google hourly)
     date_axes: [report_date]
     notes: >
       Delivery metrics only — platform attribution excluded from certified ports.
@@ -39,7 +41,7 @@ domains:
     om_glossary: Attribution
     owner_team: growth-attribution
     data_products: [MarketingAttribution, ChannelAttribution]
-    cube_views: [order_attribution, meta_ad_attribution, channel_attribution]
+    cube_views: [order_attribution, meta_ad_attribution, touchpoints, attribution_paths, channel_attribution]
     grain: Order (+ Meta ad-day + channel-day)
     date_axes: [order_date, report_date]
     notes: >
@@ -71,7 +73,12 @@ domains:
     om_glossary: Finance
     owner_team: finance-team
     data_products: [CanonicalPnl, AmazonAccounts]
-    cube_views: [canonical_pnl]
+    cube_views:
+      - canonical_pnl
+      - amazon_settlement_reconciliation
+      - amazon_order_item_pnl
+      - amazon_daily_pnl_actual
+      - amazon_accounts_exceptions
     grain: Daily (+ Settlement + OrderItem)
     date_axes: [report_date]
     notes: >
@@ -227,3 +234,27 @@ attribution_boundary:
     Use the certified MarketingAttribution product (order_attribution /
     meta_ad_attribution — first-party revenue, last-touch, Meta/Google only)
     for attributed revenue; Amazon attributed sales/ACOS remain excluded.
+
+# Metrics not listed in entity_clusters. Lookup order: by_metric, by_view,
+# by_category, then default. Agents treat these as view-siblings, not a
+# shared business object.
+unclustered:
+  default: >
+    No entity cluster declared. Treat as a sibling of other metrics on the
+    same Cube view, not as a shared business object.
+  by_view:
+    session_funnel: Session-grain funnel stages; rates are ratio-of-aggregates, not an entity cluster.
+    funnel_daily: Channel-day funnel rollup; companion of SessionFunnel, not a shared object cluster.
+    web_events: Event-grain EventStream counts; no durable visitor identity.
+    web_events_daily: Daily EventStream rollup; distinct counts are not additive.
+    refund_events: Shopify refund-event grain; return revenue oracle stays on Commerce.
+    return_lifecycle: Refund-line companion of ReturnsRefunds; not clustered with commerce_events.
+    channel_attribution: Channel-day attribution rollup with mixed GST basis; not last-touch order grain.
+    customer_data: Profile/consent master data; lifetime metrics live on CustomerIntelligence.
+    meta_ad_breakdown_performance: Placement/device/age breakdown of Meta delivery; parent cluster is paid_delivery.
+    amazon_daily_pnl: Amazon daily P&L port; not mixed with Shopify finance_pnl.
+    orders_all_channels: Cross-channel order union; GST basis differs by row, not a single cluster.
+  by_category:
+    paid_media_meta: Delivery/engagement siblings of paid_delivery (spend + Meta video are clustered).
+    paid_media_google: Delivery siblings of paid_delivery (google_spend is clustered).
+    paid_media_amazon: Delivery siblings of paid_delivery (amazon_ads_spend is clustered).

@@ -2,12 +2,12 @@ id: amazon_net_payout
 display_name: Amazon Net Payout (settlement cash)
 category: commerce
 status: certified
-description: >
-  Effective Amazon settlement cash to seller (marketplace_net_payout) from
-  serve.amazon_commerce_daily / gold.fct_amazon_daily_pnl. This is NOT the
-  Amazon Attribution "Net Profit" card — for Net Profit use amazon_net_profit
-  (Net Sales − Fees − Product Cost − Ads). June 2026 brand 20 payout ≈
-  ₹123,661.90 while Attribution Net Profit = ₹59,346.00.
+description: 'Effective Amazon settlement cash to seller (marketplace_net_payout) from serve.amazon_commerce_daily
+  / gold.fct_amazon_daily_pnl. This is NOT the Amazon Attribution "Net Profit" card — for Net Profit use
+  amazon_net_profit (Net Sales − Fees − Product Cost − Ads). June 2026 brand 20 payout ≈ ₹123,661.90 while
+  Attribution Net Profit = ₹59,346.00.
+
+  '
 formula:
   human_readable: SUM(marketplace_net_payout)
   authoritative_source: cube
@@ -18,15 +18,21 @@ aggregation: additive
 unit: INR
 grain: brand × day
 supported_dimensions:
-  - brand_id
-  - report_date
+- brand_id
+- report_date
 supported_filters:
-  - date_range
-  - brand_id
+- date_range
+- brand_id
 data_owner: Commerce Ops
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst, ops]
-  scopes: [metrics:read]
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
 currency_default: INR
 validation_tests: []
 deprecated_aliases: []
@@ -35,6 +41,9 @@ dashboard_alignment:
   audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
   evidence: amazonShared/amazonOrderPnl.js:98-99
-  note: >
-    Explicitly NOT Net Profit. Agent questions saying "amazon net profit"
-    must resolve to amazon_net_profit, not this metric.
+  note: 'Explicitly NOT Net Profit. Agent questions saying "amazon net profit" must resolve to amazon_net_profit,
+    not this metric.
+
+    '
+companion_measures:
+- amazon_net_profit

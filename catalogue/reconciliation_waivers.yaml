@@ -1,0 +1,16 @@
+# Reviewed exceptions for scripts/reconcile_layers.py.
+#
+# Key is "<CODE>:<subject>" exactly as the report prints it; the value is why the
+# gap is accepted. A waived finding still appears in the report, marked WAIVED,
+# and never gates CI — so accepted debt stays visible and attributable rather
+# than vanishing. Delete the entry when the gap is closed.
+#
+# Do NOT waive to quiet a real gap. Waive only when the object is genuinely not
+# meant to reach the serve layer.
+
+waivers:
+  # Superseded upstream: the breakdown fact is served through the mart built on
+  # top of it (gold.mart_meta_ad_breakdown_daily -> serve.meta_ads_breakdown_daily).
+  GOLD_NOT_SERVED:gold.fct_meta_ads_breakdown_daily: >
+    Upstream of gold.mart_meta_ad_breakdown_daily, which is served as
+    serve.meta_ads_breakdown_daily. Serving both would duplicate the same grain.

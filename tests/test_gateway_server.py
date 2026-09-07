@@ -103,6 +103,8 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
     analytics_and_actions = {
         "catalogue_search_metrics",
         "catalogue_get_metric",
+        "catalogue_get_ontology",
+        "catalogue_related_metrics",
         "catalogue_list_dimensions",
         "catalogue_list_brands",
         "catalogue_resolve_brand",
@@ -314,6 +316,52 @@ async def test_catalogue_get_metric_aliases_cube_member(built_server):
     assert out["id"] == "total_sales_all_channels"
     assert out["query_as"] == {"measures": ["total_sales_all_channels"]}
     assert out.get("resolved_from") == "sales_all_channels.total_sales"
+
+
+async def test_catalogue_get_metric_includes_openmetadata_block(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metric")
+    out = fn("orders")
+    assert "error" not in out
+    om = out["openmetadata"]
+    assert om["data_product"] == "CommercePerformance"
+    assert om["entity_cluster"] == "commerce_order"
+    assert "active_orders" in om["related_metrics"]
+    assert all(mid in ctx.catalogue.cat.metrics for mid in om["related_metrics"])
+    assert "value" not in om and "rows" not in om
+
+
+async def test_catalogue_related_metrics_returns_cluster_neighbors(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_related_metrics")
+    out = fn("orders")
+    assert out["entity_cluster"] == "commerce_order"
+    assert "orders" not in out["related_metrics"]
+    assert "active_orders" in out["related_metrics"]
+    assert all(isinstance(mid, str) and mid in ctx.catalogue.cat.metrics for mid in out["related_metrics"])
+
+
+async def test_catalogue_get_ontology_scopes_to_module(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_ontology")
+    out = fn(module="commerce")
+    assert "error" not in out
+    assert out["module"] == "commerce"
+    assert {d["name"] for d in out["domains"]} == {"Commerce"}
+    assert {dp["name"] for dp in out["data_products"]} >= {"CommercePerformance", "AmazonCommercePerformance"}
+    cluster_ids = {c["id"] for c in out["entity_clusters"]}
+    assert "commerce_order" in cluster_ids
+    assert "finance_pnl" not in cluster_ids
+    assert out["attribution_boundary"] is None
+
+
+async def test_catalogue_get_ontology_paidmedia_includes_attribution_boundary(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_ontology")
+    out = fn(module="paidmedia")
+    assert out["module"] == "paidmedia"
+    assert out["attribution_boundary"]
+    assert "platform_reported_roas" in out["attribution_boundary"]["excluded_from_certified"]
 
 
 async def test_catalogue_resolve_term_aliases_cube_member(built_server):

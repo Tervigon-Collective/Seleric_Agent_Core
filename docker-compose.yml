@@ -1,15 +1,14 @@
-# Canonical Cube model: mage-ai/infra/cube ONLY.
-# Base_Agent/cube/model is a stub — do not mount ./cube here.
+# THE Cube + MCP stack for this host.
+# Cube YAML lives in /opt/seleric/mage-ai/infra/cube (not this repo).
+# Do not start mage-ai/infra/cube/docker-compose.yml or mcp_stack Cube here —
+# both would fight :4001 / duplicate the semantic layer.
 #
-#   docker compose up -d --build --force-recreate
+#   docker compose up -d
 #   uv run python scripts/smoke_cube.py
 #
-# Public (unchanged nginx):
-#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765
-#   https://mcp.seleric.com/cube/ → 127.0.0.1:4001
-#
-# Note: if mage-cube is already bound to 127.0.0.1:4001, skip the cube service
-# and point CUBE_API_URL / config.yaml at that instance instead.
+# Public:
+#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core)
+#   https://mcp.seleric.com/cube/ → 127.0.0.1:4001  (this cube service)
 name: seleric-mcp
 
 services:
@@ -41,6 +40,7 @@ services:
       # In-compose Cube (not host loopback)
       CUBE_API_URL: http://cube:4000
       SELERIC_MCP_DB: /data/seleric_mcp.db
+      OPENMETADATA_BASE_URL: http://host.docker.internal:8585
       # FastMCP DNS-rebinding / CORS — same public domain via nginx
       MCP_ALLOWED_HOSTS: mcp.seleric.com,127.0.0.1:*,localhost:*
       MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*

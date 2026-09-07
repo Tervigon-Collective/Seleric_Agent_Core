@@ -2,12 +2,16 @@ id: total_operating_cost_all_channels
 display_name: Total Operating Cost (all channels — P&L)
 category: finance
 status: certified
-description: 'P&L Forecast Total Operating Cost: Shopify Net COGS + Amazon product cost + abs(operational marketplace fees). For Shopify-only TOC / Net COGS use total_operating_cost / net_cogs.
+description: 'Historical / P&L all-channels Total Operating Cost: Shopify Net COGS + Amazon Attribution
+  product cost + Amazon Attribution platform fees. For Shopify-only TOC / Net COGS use total_operating_cost
+  / net_cogs.
 
   '
 formula:
-  human_readable: SUM(net_cogs + amazon_cogs + abs(amazon_marketplace_fees))
+  human_readable: net_cogs + amazon_attr_product_cost + amazon_attr_platform_fees
   authoritative_source: cube
+  depends_on:
+  - net_cogs
 cube_mapping:
   view: canonical_pnl
   measure: canonical_pnl.total_operating_cost_all_channels
@@ -40,8 +44,11 @@ validation_tests:
 - June 2026 brand 20 ≈ ₹17,26,296.46
 deprecated_aliases: []
 dashboard_alignment:
-  status: unclear
-  audited_on: '2026-07-21'
+  status: MATCH
+  audited_on: '2026-09-04'
   source: Seleric_Dashboard/Node-Backend
-  evidence: services/pnlService.js:208
-  note: End value plausibly matches but is a single pre-blended field, not composed the way the catalogue formula literally states.
+  evidence: infra/cube/model/cubes/serve_canonical_pnl.yml total_operating_cost_all_channels
+  note: 'Formula text corrected to match Cube (amazon_attr_product_cost + amazon_attr_platform_fees),
+    not abs(operational marketplace fees).
+
+    '

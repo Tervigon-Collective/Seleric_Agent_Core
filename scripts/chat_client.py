@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from seleric_mcp.config import (  # noqa: E402
+    ChatSettings,
     load_azure_settings,
     load_chat_settings,
     load_llm_settings,
@@ -33,7 +34,8 @@ from seleric_mcp.config import (  # noqa: E402
 from seleric_mcp.gateway.prompts import NO_HALLUCINATION_GUARD  # noqa: E402
 from seleric_mcp.llm import LLMRouter, RateLimit  # noqa: E402
 
-MAX_TOOL_ROUNDS = load_chat_settings().max_tool_rounds
+_CHAT: ChatSettings = load_chat_settings()
+MAX_TOOL_ROUNDS = _CHAT.max_tool_rounds
 
 # Agent policy lives in an editable file next to this script, not in code.
 _POLICY_PATH = Path(__file__).with_name("agent_policy.md")
@@ -161,9 +163,25 @@ def _build_router(client: AzureOpenAI) -> LLMRouter:
     )
 
 
+# Context engineering: right-size the tool surface the LLM re-reads every round
+# (its single biggest per-round token cost). The policy — allow/exclude tool-name
+# prefixes — lives in config.yaml (chat.tool_allow_prefixes / tool_exclude_prefixes,
+# env-overridable), NOT here, so the agent is re-scoped without touching code. An
+# analyst deployment excludes "meta_"/"google_" (ad *data* still arrives via
+# metrics_query/cube); an ad-ops deployment can allowlist them instead.
+def _tool_exposed(name: str, settings: ChatSettings = _CHAT) -> bool:
+    if settings.tool_allow_prefixes:
+        return name.startswith(settings.tool_allow_prefixes)
+    if settings.tool_exclude_prefixes:
+        return not name.startswith(settings.tool_exclude_prefixes)
+    return True
+
+
 def _mcp_tools_to_openai(tools: list[Any]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for t in tools:
+        if not _tool_exposed(t.name):
+            continue
         schema = t.inputSchema or {"type": "object", "properties": {}}
         out.append(
             {
