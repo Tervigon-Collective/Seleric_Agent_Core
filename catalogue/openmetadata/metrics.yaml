@@ -1573,15 +1573,6 @@ metrics:
     om_name: productCostAllChannels
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
-  product_google_ad_spend:
-    category: product
-    cube_view: product_ad_spend
-    contract: product_performance_contract_v1
-    glossary:
-    - Product.ProductPerformance
-    om_name: productGoogleAdSpend
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
   product_gross_margin_pct:
     category: product
     cube_view: product_performance
@@ -1598,15 +1589,6 @@ metrics:
     glossary:
     - Product.ProductGrossProfit
     om_name: productGrossProfit
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  product_meta_ad_spend:
-    category: product
-    cube_view: product_ad_spend
-    contract: product_performance_contract_v1
-    glossary:
-    - Product.ProductPerformance
-    om_name: productMetaAdSpend
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
   product_net_revenue:
@@ -1627,15 +1609,6 @@ metrics:
     om_name: productOrders
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
-  product_other_ad_spend:
-    category: product
-    cube_view: product_ad_spend
-    contract: product_performance_contract_v1
-    glossary:
-    - Product.ProductPerformance
-    om_name: productOtherAdSpend
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
   product_return_revenue:
     category: product
     cube_view: product_performance
@@ -1644,15 +1617,6 @@ metrics:
     - Product.Product
     om_name: productReturnRevenue
     dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
-  product_total_ad_spend:
-    category: product
-    cube_view: product_ad_spend
-    contract: product_performance_contract_v1
-    glossary:
-    - Product.ProductPerformance
-    om_name: productTotalAdSpend
-    dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
   product_views:
     category: web_analytics

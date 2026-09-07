@@ -1,7 +1,7 @@
 id: product_google_ad_spend
 display_name: Product Google Ad Spend (SKU-attributed)
 category: product
-status: draft
+status: broken   # serve.product_ad_spend_daily does not exist (2026-09-07)
 description: >
   Not implemented in the dashboard as of this audit — no SKU-attributed ad
   spend exists anywhere in Node-Backend. Directional Google ad spend

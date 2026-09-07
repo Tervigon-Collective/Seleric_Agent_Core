@@ -1,3 +1,11 @@
+# DERIVED FIELDS: date_dimension and datetime_dimension are now generated from the
+# port's data contract (mage-ai/openmetadata/contracts/*.yml -> semantics.serving_date_axis,
+# grain.time_dimension) and the Cube view's own time members, via
+# scripts/sync_catalogue_from_sources.py. The generated value WINS at runtime; a
+# value written here that disagrees is inert and is reported by
+# scripts/reconcile_layers.py as DERIVED_FIELD_CONTRADICTED.
+# Still hand-authored here: title, notes, and freshness.expected_cadence (human
+# operational knowledge no system derives).
 # Cube serve views exposed to the agent. Source of truth for names:
 # C:\SpacePeppers\SpacePeppers\cube_mcp\semantic_layer_serve\model\views\serve_views.yml
 views:
@@ -20,12 +28,8 @@ views:
     freshness:
       source: serve.product_performance (VIEW over gold.fct_order_items FINAL)
       expected_cadence: "hourly after gold sync, IST"
-  - name: product_ad_spend
-    title: Product Ad Spend (SKU-attributed)
-    date_dimension: report_date
-    freshness:
-      source: serve.product_ad_spend_daily
-      expected_cadence: "hourly after gold sync + paid-media, IST"
+  # product_ad_spend removed 2026-09-07: serve.product_ad_spend_daily does not exist.
+
   - name: meta_ad_performance
     title: Meta Ads Performance (Serve, daily)
     date_dimension: report_date
@@ -259,3 +263,10 @@ views:
     freshness:
       source: serve.amazon_accounts_exceptions
       expected_cadence: "daily after Amazon SP finance sync, IST"
+  - name: amazon_orders
+    title: Amazon Orders (Serve, order grain)
+    date_dimension: order_date
+    datetime_dimension: order_created_at
+    freshness:
+      source: serve.amazon_orders (VIEW over gold.fct_amazon_sp_orders FINAL)
+      expected_cadence: "daily after Amazon SP sync, IST"

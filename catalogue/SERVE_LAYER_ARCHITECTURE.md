@@ -51,8 +51,8 @@ Two rules make this tractable, and both are now machine-checked:
 | catalogue metrics | 238 | 34 sit on views no module can reach; **6 name a Cube member that does not exist** |
 | Cube measures/dimensions | ~1000 | **958 carry no description** |
 
-Baseline on 2026-09-07 after the fixes in §3.1: **53 blockers, 1293 warnings,
-1 waived**. Run `py scripts/reconcile_layers.py` for the live list; exit code is
+Baseline on 2026-09-07 after the fixes in §3.1 and the source-of-truth work in
+§7: **50 blockers, 1296 warnings, 1 waived**. Run `py scripts/reconcile_layers.py` for the live list; exit code is
 1 while any blocker stands, so it can gate CI directly.
 
 ---
@@ -235,3 +235,252 @@ py scripts/reconcile_layers.py --json               # machine-readable
 Accepted gaps go in `catalogue/reconciliation_waivers.yaml` keyed by
 `CODE:subject`. A waived finding still prints, marked `WAIVED`, and never gates
 — so accepted debt stays visible and attributable instead of disappearing.
+
+---
+
+## 7. Source of truth: who owns which fact
+
+The same facts used to be restated in five files across three repos, so adding a
+Cube view meant five edits and any one of them could silently rot. Each fact now
+has exactly one owner, and everything derived from it is generated.
+
+| Fact | Owner | Read from |
+|---|---|---|
+| table + column existence | ClickHouse | `system.tables` / `system.columns` |
+| **gold → serve lineage** | ClickHouse | the serve view's own SQL — never declared |
+| Cube view names, members, types | Cube model | `/cubejs-api/v1/meta` + `model/cubes/*.yml` |
+| view → serve table (output port) | OM product spec | `output_ports` |
+| domain, owner, certification | `openmetadata/domains|products/*.yml` | |
+| grain, required columns, DQ tests | `openmetadata/contracts/*.yml` | |
+| **serving date axis** | `openmetadata/contracts/*.yml` | `semantics.serving_date_axis` |
+| freshness SLA | `openmetadata/slos/freshness.yml` | |
+| business prose, entity clusters, attribution boundary, metric semantics | `catalogue/` | hand-authored — no system derives these |
+
+`serving_date_axis` is deliberately distinct from `grain.time_dimension`: a
+customer-grain port has no time column in its key but still serves an axis to
+filter on. Conflating them is why `customer_ltv` looked axis-less.
+
+### The generator
+
+`scripts/sync_catalogue_from_sources.py` reads those owners and writes
+`catalogue/openmetadata/crosswalk.generated.yaml` — domains, data products, and
+per-view provenance (owning product, serve table, **verified** gold inputs,
+contract, date axis, freshness, members). Output is byte-deterministic for
+identical sources, so `--check` distinguishes real drift from a re-run and can
+gate CI.
+
+The loader overlays it at startup. Generated values win; entries the generator
+cannot derive are **preserved, not dropped**, so a Cube view no product claims
+yet keeps working and is reported as `VIEW_HAND_MAINTAINED` until it gets an
+owner. That makes this a migration with a shrinking backlog rather than a
+big-bang cutover.
+
+### Adding a Cube view now
+
+1. Add the cube + view to `mage-ai/infra/cube/model/`.
+2. Declare `- serve.<table>` and `- cube_view: <view>` on the owning product.
+3. Add a contract with `grain` and `semantics.serving_date_axis`.
+4. `py infra/openmetadata/generate_product_registry.py`
+5. `py scripts/sync_catalogue_from_sources.py`
+
+Domain mapping, lineage, contract binding, date axis and freshness all follow.
+No edit to `ontology.yaml`, `views.yaml`, `registry.yaml` or `contracts.yaml`.
+
+### What this found on the first run
+
+- `canonical_pnl` declared 5 "gold inputs" that were **serve** tables plus one
+  table it never reads; its 9 real inputs were undeclared. 9 views had wrong or
+  incomplete lineage.
+- The agent-side contract list was stale by 6 contracts and pinned
+  `attribution_order_contract_v1`, superseded by v2 in OM.
+- `serve.meta_ads_hourly` and `serve.google_ads_hourly` were served and
+  cube-exposed but declared as ports by nothing and had **no contract**. Both
+  contracts now exist.
+- `EventStream` was referenced by the ontology and the agent registry but had no
+  OpenMetadata product. Created — WebAnalytics is now fully governed.
+- All 39 date axes reproduce the hand-maintained values exactly, from the
+  contracts and the Cube model.
+
+
+---
+
+## 8. Duplicates and denormalisation (2026-09-07)
+
+### 8.1 Duplicates — audited, one real bug
+
+Gold is `ReplacingMergeTree` throughout, so duplicates are a *read* problem, not a
+storage problem: a query without `FINAL` sees every unmerged version.
+
+- **Storage:** 70 of 72 gold tables have zero duplicate sorting keys right now.
+  The exceptions are `_ch_sync_snapshot_state` (infra) and
+  `fct_product_variant_cost_history` (16.1%, and unserved).
+- **Reads:** all 43 serve view definitions were audited alias-aware
+  (`FROM gold.t AS x FINAL`, not just `FROM gold.t FINAL`). Five relations read
+  without `FINAL` but dedupe explicitly with `argMax(...) ... GROUP BY key`,
+  which is equivalent and correct: `order_attribution`, `channel_pnl`,
+  `amazon_attribution_overview`, `amazon_commerce_daily`,
+  `amazon_return_items_delivered`.
+- **One genuine bug**, now fixed: `serve.amazon_finance_charge_types_daily` did
+  `sum(e.amount)` / `sum(1)` over `gold.fct_amazon_sp_finance_events` and
+  LEFT JOINed `gold.dim_amazon_charge_type` with **no `FINAL` on either side**,
+  while its own header comment claimed `FINAL`. Latent, not active — both
+  sources happen to be merged — but `fct_amazon_sp_finance_events` carries 12
+  active parts, so any re-ingest inflates every charge amount until a background
+  merge catches up. Totals unchanged after the fix (₹456,548.39 / 33,326 lines).
+
+Note `gold.fct_order_items` runs **81 active parts** and `fct_orders` 63. Nothing
+reads them without `FINAL` today, so this is safe — but it is the reason `FINAL`
+discipline is not optional here.
+
+### 8.2 Denormalisation — `serve.meta_ads_daily` v2
+
+The relation carried `creative_id`, `adset_id` and `campaign_id` and none of the
+attributes behind them, so an agent could filter by an opaque id and nothing
+else. Now joined from gold, each verified 1:1 on `(brand_id, key)` under `FINAL`
+so the grain cannot change:
+
+| Source | Added |
+|---|---|
+| `dim_creative` | name, title, body, status, CTA type, thumbnail, destination URL |
+| `dim_ad` | ad_format, headline, destination URL |
+| `dim_adset` | type, optimization goal, billing event, bid strategy/amount, budgets |
+| `dim_campaign` | buying type, bid strategy, budgets, start/end date |
+| `dim_ad_neurohack_map` | tag codes, hack names, categories — **as arrays** |
+
+Neurohack tags are 1:many (4,137 rows / 2,037 ads); joining them directly would
+have doubled every row, so they are aggregated to arrays and exposed as joined
+strings. Budgets are `max()` measures, never `sum()` — summing a budget across
+days or ads is meaningless.
+
+**Verified before promotion** via a shadow view: 23,841 rows → 23,841 rows,
+identical unique grain key, identical spend / impressions / clicks, zero original
+columns lost. Contract bumped to v2 with a `grain_unchanged_by_dim_joins` test.
+
+This closed 5 of the 6 `NOT_DENORMALISED` findings on the Meta relations and
+brought `dim_creative`, `dim_ad`, `dim_adset`, `dim_campaign` and
+`dim_ad_neurohack_map` into the serve layer. `dim_adset_geo` remains.
+
+### 8.3 What denormalising immediately exposed
+
+**`creative_id` has stopped populating in `gold.fct_meta_ads_daily`.** Coverage
+by month:
+
+| … 2026-06 | 2026-07 | 2026-08 | 2026-09 |
+|---|---|---|---|
+| 99–100% | 91.5% | **13.3%** | **0%** |
+
+So creative-level analysis works on history but returns `(unnamed)` for 92% of
+last-30-day spend — not a modelling fault, an upstream Meta loader regression
+that started in early August 2026 and nobody had noticed, because nothing
+downstream had ever tried to use the column. **This needs a loader fix.**
+
+Related upstream sparsity: only 68 of 1,830 Meta ad sets in `gold.dim_adset`
+carry `bid_strategy` (~2%), so `adset_bid_strategy` is documented as
+"null means unknown, never absent".
+
+### 8.4 Six broken metrics closed
+
+`session_avg_page_depth`, `session_avg_seconds_to_{add_to_cart,checkout,purchase}`,
+`avg_attribution_confidence` and `avg_days_between_orders` each named a ratio
+numerator Cube did not expose. All six columns existed in serve; they were simply
+never surfaced as measures. Added to the cubes and their views. The server's
+boot-time drift check now reports `"broken": []` for the first time.
+
+### 8.5 Still open
+
+Blockers 53 → **44**. What remains is scope, not defects:
+
+- **26 gold facts/marts with no serve port** (§2.1). Each needs a serve relation,
+  a cube, a contract and an owning product — a design decision per table, not a
+  mechanical fix.
+- **9 Cube views with no owning data product** (§3.2) — a governance decision.
+- `serve.amazon_orders` has no cube.
+- 28 remaining `NOT_DENORMALISED` findings on other relations, the same pattern
+  as §8.2 applied to Google, Amazon, session and commerce relations.
+- ~950 Cube members still undescribed.
+
+
+---
+
+## 9. Logic, reconciliation and data bug hunt (2026-09-07)
+
+Codified as `scripts/check_data_quality.py` (data-level, slow) alongside
+`scripts/reconcile_layers.py` (structural, fast). Waivers in
+`catalogue/data_quality_waivers.yaml`.
+
+### 9.1 Clean — verified, not assumed
+
+| Check | Result |
+|---|---|
+| Serve relations unique on their contract grain | **29 / 29 clean** |
+| Catalogue `aggregation` vs Cube measure type | **0 mismatches** (238 metrics vs 990 measures) |
+| Non-additive quantities exposed as `sum` (reach, distinct, rates) | **0** |
+| Ad spend: platform view vs `canonical_pnl` | **exact**, Meta / Google / Amazon |
+| Hourly vs daily spend + impressions | **exact**, Meta and Google |
+| P&L accounting identities | **all hold exactly** |
+
+Three P&L identities *appeared* to break. All three were wrong assumptions on my
+part about this model's shape, and each is explicitly documented in the
+catalogue: `total_operating_cost` is a declared alias of `net_cogs`;
+`operating_cost` (ship + pack + gateway + RTO) is already *inside* `net_cogs`;
+`contribution_margin` equals `gross_profit` because opex is folded into COGS.
+The real identities — `net_cogs = product_cost + operating_cost`,
+`gross_profit = net_sales − net_cogs`, `net_profit = contribution_margin −
+total_ad_spend` — hold to the paisa.
+
+Likewise the ~20% spread between `meta_attr_net_revenue` (₹16.86L),
+`meta_attribution_net_sales` (₹13.84L) and `meta_attribution_total_sales`
+(₹17.24L) is **deliberate and documented**: ad-day table oracle vs Overview card
+with event-date returns deducted vs incl-GST. Each description states what it is
+NOT and cross-references the others.
+
+### 9.2 Real bugs found
+
+**UNMAPPED_TENANT — `brand_id = 28`.** Present in 7 serve relations with
+**₹23.45L of ad spend** flowing into `canonical_pnl` through today, but absent
+from `catalogue/brands.yaml`. The agent cannot name it or answer any question
+about it, while its rows land in every all-brand aggregate. (`brand_id = 0` also
+appears in `meta_ad_attribution_daily` — a null-key sentinel.)
+
+**COVERAGE_REGRESSION — the whole Meta creative block, not just `creative_id`.**
+`creative_id`, `creative_type`, `creative_name/title/status/cta/thumbnail/
+image/destination`, `ad_format`, `ad_headline` all fell from ~89% to ~5% in the
+last 30 days, across `meta_ad_performance`, `_hourly` and
+`meta_ad_breakdown_performance`. One upstream root cause, ten affected
+dimensions. Totals stay correct throughout, which is exactly why no
+totals-based check would ever catch it.
+
+**DEAD_DIMENSION — 24 dimensions the agent can group by that carry no signal.**
+Worst offenders:
+
+- `commerce_orders.utm_source / utm_medium / utm_campaign` — **0 of 22,798
+  orders** populated, and empty in `gold.fct_orders` too. "Revenue by UTM
+  source" looks answerable and returns one unlabelled bucket holding 100% of
+  revenue.
+- `session_funnel.device_type / browser_family / os_family` — 0 of 367,503
+  sessions. "Conversion rate by device" is a top-five analytics question.
+- `meta_ad_breakdown_performance.country / impression_device` — 0 of 293,786
+  rows, on the view whose entire purpose is geo/device breakdowns. The real
+  breakdowns live in `breakdown_type` (region, age_and_gender, placement,
+  platform_device, publisher_platform); these two columns are modelling
+  leftovers.
+- `amazon_ad_performance.campaign_status / campaign_type / bidding_strategy /
+  portfolio_id / daily_budget` — all constant or empty.
+- `customer_data.accepts_marketing` — constant `0` for all 29,105 customers.
+  Nobody is marked opted-in; treat as unusable for consent decisions.
+
+**Five dead dimensions this session introduced.** `adset_type`,
+`adset_billing_event`, `adset_bid_strategy`, `campaign_buying_type` and
+`campaign_bid_strategy` came from the §8.2 denormalisation, but
+`gold.dim_adset` / `dim_campaign` hold a single constant for Meta. Removed from
+the certified view (definitions kept on the cube, with a breadcrumb) and dropped
+from 28 metric allowlists. The structural gate then caught the dangling
+`campaign_buying_type` entry left in `catalogue/dimensions/core.yaml` — the two
+gates cross-checking each other.
+
+### 9.3 Waivers
+
+19 `brand_id` / account findings are waived with reasons: Amazon SP, Snowplow and
+hourly ad ingest are onboarded for brand 20 only, so single-tenancy is the correct
+state of the world there. Each waiver stops being valid the moment a second brand
+is connected, and the finding reappears automatically.

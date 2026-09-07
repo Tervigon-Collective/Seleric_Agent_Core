@@ -1,3 +1,7 @@
+# DERIVED FILE (overlaid at load time): contract summaries are generated from
+# mage-ai/openmetadata/contracts/*.yml via scripts/sync_catalogue_from_sources.py
+# into catalogue/openmetadata/crosswalk.generated.yaml, which wins over anything
+# written here. Edit the OpenMetadata contract, then regenerate.
 # Data contract summaries for agent-certified surfaces (mirrors mage-ai/openmetadata/contracts/).
 # Cube executes; OM governs contract approval + DQ test suites.
 

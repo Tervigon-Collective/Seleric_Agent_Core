@@ -19,7 +19,6 @@ dimensions:
       customer_ltv: customer_ltv.brand_id
       purchase_sequence: purchase_sequence.brand_id
       product_performance: product_performance.brand_id
-      product_ad_spend: product_ad_spend.brand_id
       meta_ad_performance: meta_ad_performance.brand_id
       meta_ad_performance_hourly: meta_ad_performance_hourly.brand_id
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
@@ -430,27 +429,23 @@ dimensions:
       product_performance: product_performance.sku
       return_lifecycle: return_lifecycle.sku
       web_events: web_events.sku
-      product_ad_spend: product_ad_spend.sku
   - id: product_id
     display_name: Product ID
     description: Shopify product identifier (stable key).
     views:
       product_performance: product_performance.product_id
       web_events: web_events.product_id
-      product_ad_spend: product_ad_spend.product_id
   - id: variant_id
     display_name: Variant ID
     description: Shopify variant identifier (stable key).
     views:
       product_performance: product_performance.variant_id
-      product_ad_spend: product_ad_spend.variant_id
   - id: product_title
     display_name: Product Title
     aliases: [product, product name]
     views:
       product_performance: product_performance.product_title
       return_lifecycle: return_lifecycle.product_title
-      product_ad_spend: product_ad_spend.product_title
   - id: variant_title
     display_name: Variant Title
     aliases: [variant]
@@ -496,7 +491,6 @@ dimensions:
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
       platform_attribution_commerce: platform_attribution_commerce.report_date
-      product_ad_spend: product_ad_spend.report_date
   - id: platform
     display_name: Attribution Platform
     description: Last-touch platform bucket on platform_attribution_commerce (meta | google | organic).
@@ -881,3 +875,45 @@ dimensions:
     description: Order id linked to a converted session.
     views:
       session_funnel: session_funnel.shopify_order_id
+  - id: creative_name
+    display_name: Creative Name
+    description: >
+      Meta creative name (gold.dim_creative, ~90% populated). The natural key for creative-level
+      performance comparison; creative_id is the stable id. Null means the creative is not in the
+      dimension yet, not that the ad has no creative.
+    aliases: [creative, ad creative, creative title]
+    views:
+      meta_ad_performance: meta_ad_performance.creative_name
+  - id: creative_cta_type
+    display_name: Creative CTA
+    description: >
+      Call-to-action button on the Meta creative (SHOP_NOW, LEARN_MORE, ...). Group by this to
+      compare CTA performance. Delivery only - it says nothing about attributed revenue.
+    aliases: [cta, call to action, button]
+    views:
+      meta_ad_performance: meta_ad_performance.creative_cta_type
+  - id: ad_format
+    display_name: Ad Format
+    description: >
+      Meta ad format from gold.dim_ad (single image, video, carousel). Delivery efficiency is only
+      comparable within the same format - video and static have different natural CPM.
+    aliases: [format, creative format]
+    views:
+      meta_ad_performance: meta_ad_performance.ad_format
+  - id: adset_optimization_goal
+    display_name: Ad Set Optimization Goal
+    description: >
+      What Meta optimised delivery for on the ad set (PURCHASE, LINK_CLICKS, ...). CPC and CPM are
+      only comparable within the same optimization goal; comparing across goals is misleading.
+    aliases: [optimization goal, optimisation goal, delivery goal]
+    views:
+      meta_ad_performance: meta_ad_performance.adset_optimization_goal
+  - id: neurohack_tag_codes
+    display_name: Neurohack Tags
+    description: >
+      Comma-joined neurohack creative tags for the ad (gold.dim_ad_neurohack_map, ~60% populated).
+      An ad can carry SEVERAL tags, so this is a joined list, not one value per row - filter with
+      contains, and never group by it expecting one tag per ad.
+    aliases: [neurohack, neurotag, creative tag, hack]
+    views:
+      meta_ad_performance: meta_ad_performance.neurohack_tag_codes

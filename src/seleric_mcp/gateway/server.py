@@ -509,7 +509,16 @@ def build_server(settings: Settings) -> FastMCP:
         here and pass filters=[{dimension:'brand_id', operator:'equals',
         values:[brand_id]}]. Never invent a brand_id."""
         _log_call("catalogue_resolve_brand", text=text)
-        return ctx.catalogue.resolve_brand(text).model_dump()
+        out = ctx.catalogue.resolve_brand(text).model_dump()
+        # A resolved brand that is only partially represented in serve must carry
+        # its caveat, or the agent will answer a P&L question for a tenant whose
+        # revenue side is not in this warehouse.
+        bid = out.get("brand_id")
+        if bid:
+            b = next((x for x in ctx.catalogue.list_brands(include_test=True) if x.id == bid), None)
+            if b is not None and b.scope_note:
+                out["scope_note"] = b.scope_note
+        return out
 
     @mcp.tool()
     def catalogue_list_brands() -> dict:

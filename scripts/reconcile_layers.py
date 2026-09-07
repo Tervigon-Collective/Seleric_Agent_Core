@@ -39,9 +39,13 @@ GOLD_EXEMPT_PREFIXES = ("int_", "raw_", "_ch_")
 GOLD_EXEMPT = {"_ch_sync_snapshot_state"}
 
 # The gold sync does full-refresh as "write to temp -> atomic RENAME -> drop old",
-# so a run that lands mid-sync sees short-lived scratch tables. Ignore them, or the
-# report is non-deterministic and flaps in CI.
-SCRATCH_RE = re.compile(r"(^\.inner)|(^__)|(_tmp$)|(^tmp_)|(_new$)|(_old$)|(_swap$)|(_bak$)|(_backup$)")
+# so a run landing mid-sync sees short-lived scratch tables. Observed live:
+# gold.fct_meta_ads_daily_sync_tmp_12511 (<table>_sync_tmp_<pid>). Ignore them, or
+# the report is non-deterministic and flaps in CI.
+SCRATCH_RE = re.compile(
+    r"(^\.inner)|(^__)|(_sync_tmp_\d+$)|(_tmp_\d+$)|(_tmp$)|(^tmp_)"
+    r"|(_new$)|(_old$)|(_swap$)|(_bak$)|(_backup$)"
+)
 
 # Deliberate, reviewed exceptions. Key is "CODE:subject"; value is the reason.
 # A waived finding is reported as WAIVED and never gates CI — so every accepted
@@ -188,6 +192,56 @@ def load_om() -> dict:
     }
 
 
+def check_crosswalk(r: Report, cat: dict) -> None:
+    """The generated crosswalk must be current, and no hand file may contradict it."""
+    import subprocess
+
+    gen = CORE / "scripts" / "sync_catalogue_from_sources.py"
+    cw_path = CORE / "catalogue" / "openmetadata" / "crosswalk.generated.yaml"
+    if not cw_path.exists():
+        r.add("reconciliation", "BLOCKER", "CROSSWALK_MISSING", "crosswalk.generated.yaml",
+              "the derived crosswalk has never been generated, so the agent is running entirely "
+              "on hand-maintained restatements of Cube / OpenMetadata / ClickHouse",
+              f"py {gen.relative_to(CORE)}")
+        return
+    proc = subprocess.run(  # noqa: S603 - fixed local script
+        [sys.executable, str(gen), "--check"], capture_output=True, text=True, cwd=str(CORE)
+    )
+    if proc.returncode != 0:
+        r.add("reconciliation", "BLOCKER", "CROSSWALK_STALE", "crosswalk.generated.yaml",
+              "the crosswalk no longer matches its sources — a Cube view, contract, product or "
+              "serve-view SQL changed and the agent is serving the previous shape",
+              f"py {gen.relative_to(CORE)}")
+
+    cw = yaml.safe_load(cw_path.read_text()) or {}
+    cw_domains = cw.get("domains") or {}
+    cw_views = cw.get("views") or {}
+
+    # Hand files may still carry entries the generator cannot derive (a Cube view
+    # no data product claims). Those are the migration backlog - report them so the
+    # list shrinks, rather than letting them look authoritative forever.
+    for dname, dspec in (cat["ontology"].get("domains") or {}).items():
+        derived = set((cw_domains.get(dname) or {}).get("cube_views") or [])
+        for v in dspec.get("cube_views") or []:
+            if v not in derived:
+                r.add("reconciliation", "WARN", "VIEW_HAND_MAINTAINED", f"{dname} -> {v}",
+                      "this view is mapped to its domain only by hand, because no OpenMetadata "
+                      "data product claims it — the one mapping the generator cannot derive",
+                      "give the view an owning data product, then delete the hand entry")
+
+    # A hand-authored value that disagrees with the derived one is now inert at
+    # runtime (generated wins) but still misleads a reader.
+    for v in cat["views"].values():
+        gen_v = cw_views.get(v["name"]) or {}
+        for field in ("date_dimension", "datetime_dimension"):
+            hand, derived = v.get(field), gen_v.get(field)
+            if derived and hand and hand != derived:
+                r.add("reconciliation", "WARN", "DERIVED_FIELD_CONTRADICTED", f"{v['name']}.{field}",
+                      f"catalogue/views.yaml says '{hand}'; the contract/Cube model derive "
+                      f"'{derived}'. The derived value wins at runtime",
+                      "delete the hand-authored value, or fix the contract if it is wrong")
+
+
 def load_catalogue() -> dict:
     ont = yaml.safe_load((CORE / "catalogue/openmetadata/ontology.yaml").read_text())
     core_reg = yaml.safe_load((CORE / "catalogue/openmetadata/registry.yaml").read_text())
@@ -199,8 +253,25 @@ def load_catalogue() -> dict:
         m = yaml.safe_load(f.read_text()) or {}
         m["_file"] = f.name
         metrics[m.get("id", f.stem)] = m
+    # Mirror loader._apply_crosswalk: generated domain -> cube_views wins, hand
+    # entries the generator cannot derive are preserved. Validating the raw file
+    # instead would report drift the runtime does not actually have.
+    cw_path = CORE / "catalogue" / "openmetadata" / "crosswalk.generated.yaml"
+    cw_domains = (yaml.safe_load(cw_path.read_text()) or {}).get("domains", {}) if cw_path.exists() else {}
+    effective: dict[str, dict] = {}
+    for dname, dspec in (ont.get("domains") or {}).items():
+        merged = dict(dspec)
+        gen = cw_domains.get(dname) or {}
+        for key in ("data_products", "cube_views"):
+            derived = list(gen.get(key) or [])
+            merged[key] = derived + [x for x in (dspec.get(key) or []) if x not in derived]
+        effective[dname] = merged
+    for dname, gen in cw_domains.items():
+        effective.setdefault(dname, dict(gen))
+
     return {
         "ontology": ont,
+        "effective_domains": effective,
         "registry": core_reg,
         "views": {v["name"]: v for v in (views.get("views") or [])},
         "modules": (modules.get("modules") or {}),
@@ -398,7 +469,7 @@ def check_coverage(r: Report, wh: dict, cb: dict, cat: dict) -> None:
 
 # -------------------------------------------------- 2. OpenMetadata reconcile
 def check_reconciliation(r: Report, wh: dict, cb: dict, om: dict, cat: dict) -> None:
-    ont_domains = cat["ontology"].get("domains", {})
+    ont_domains = cat["effective_domains"]
     cube_views = set(cb["views"])
     serve_set = set(wh["serve"])
 
@@ -533,6 +604,8 @@ def check_reconciliation(r: Report, wh: dict, cb: dict, om: dict, cat: dict) -> 
     # 2k. catalogue metrics land on real Cube views/members
     vmembers = view_members(cb, cb.get("live_members"))
     for mid, m in cat["metrics"].items():
+        if m.get("status") == "broken":
+            continue  # already parked and reported as broken; not a second finding
         cm = m.get("cube_mapping") or {}
         v = cm.get("view")
         if not v:
@@ -633,7 +706,7 @@ def check_semantics(r: Report, wh: dict, cb: dict, om: dict, cat: dict) -> None:
                   f"add examples in {m['_file']}")
 
     # metrics must be reachable from at least one module, or they are dead weight
-    ont_domains = cat["ontology"].get("domains", {})
+    ont_domains = cat["effective_domains"]
     module_views: set[str] = set()
     for spec in cat["modules"].values():
         for d in spec.get("domains", []) or []:
@@ -697,6 +770,7 @@ def main() -> int:
     check_coverage(r, wh, cb, cat)
     check_reconciliation(r, wh, cb, om, cat)
     check_semantics(r, wh, cb, om, cat)
+    check_crosswalk(r, cat)
 
     findings = r.findings
     if args.section:

@@ -155,6 +155,11 @@ class BrandDef(BaseModel):
     code: str | None = None
     status: Literal["active", "test", "inactive"] = "active"
     aliases: list[str] = Field(default_factory=list)
+    # Data-coverage caveat surfaced with every brand resolution. A tenant can be
+    # present in some serve relations and absent from others (e.g. paid media but
+    # no commerce), which makes any P&L or per-order metric wrong rather than
+    # merely empty. Stated here so the agent warns instead of answering.
+    scope_note: str | None = None
 
 
 class BrandRegistry(BaseModel):
@@ -317,6 +322,14 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
             om_raw["ontology"] = _read_yaml(ontology_path)
         om_registry = OpenMetadataRegistry.model_validate(om_raw)
 
+    # Overlay the generated crosswalk. Everything in it is DERIVED from the systems
+    # that own the fact (ClickHouse lineage, the Cube model, the OpenMetadata specs),
+    # so it wins over any hand-authored restatement. Entries the crosswalk does not
+    # know about are preserved rather than dropped: a Cube view no data product
+    # claims yet must keep working, and scripts/reconcile_layers.py reports it as
+    # still hand-maintained so the exception list shrinks instead of hiding.
+    _apply_crosswalk(catalogue_dir, om_registry, views)
+
     cat = Catalogue(
         version=version,
         metrics=metrics,
@@ -331,6 +344,98 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     )
     _check_integrity(cat)
     return cat
+
+
+
+def _apply_crosswalk(
+    catalogue_dir: Path, om: "OpenMetadataRegistry | None", views: dict[str, "ViewDef"]
+) -> dict | None:
+    """Overlay catalogue/openmetadata/crosswalk.generated.yaml onto the catalogue.
+
+    Returns the crosswalk document (or None when absent, so a deployment without
+    it behaves exactly as before).
+    """
+    path = catalogue_dir / "openmetadata" / "crosswalk.generated.yaml"
+    if not path.exists():
+        return None
+    cw = _read_yaml(path)
+    cw_views = cw.get("views") or {}
+    cw_domains = cw.get("domains") or {}
+
+    # 1. Date axes come from the port's contract / the Cube view, never from a
+    #    second hand-maintained copy.
+    for name, spec in cw_views.items():
+        v = views.get(name)
+        if v is None:
+            continue
+        if spec.get("date_dimension"):
+            v.date_dimension = spec["date_dimension"]
+        if spec.get("datetime_dimension"):
+            v.datetime_dimension = spec["datetime_dimension"]
+
+    if om is None:
+        return cw
+
+    # 1a. Data products are derived from the OpenMetadata specs. A product declared
+    #     there but not restated in the hand-written registry must still resolve, or
+    #     every view it owns fails the integrity check.
+    known = {p.name for p in om.data_products}
+    for gen in cw.get("data_products") or []:
+        if gen["name"] in known:
+            continue
+        om.data_products.append(OpenMetadataDataProduct.model_validate({
+            "name": gen["name"],
+            "domain": gen.get("domain") or "",
+            "owner_team": gen.get("owner_team") or "",
+            "primary_serve_table": gen.get("primary_serve_table") or "",
+            "contract": (gen.get("contracts") or [""])[0] or "",
+            "secondary_contracts": list((gen.get("contracts") or [])[1:]),
+            "cube_views": list(gen.get("cube_views") or []),
+        }))
+
+    # 1b. Contract summaries are derived from mage-ai/openmetadata/contracts/.
+    #     Generated wins; anything hand-authored that the generator does not know
+    #     about is kept so no existing reference dangles.
+    for cname, cspec in (cw.get("contracts") or {}).items():
+        payload = {k: v for k, v in cspec.items() if k != "contract_file"}
+        if not payload.get("data_product") or not payload.get("domain"):
+            continue  # incomplete spec - leave whatever the hand file said
+        om.contracts[cname] = OpenMetadataContract.model_validate(payload)
+
+    if om.ontology is None:
+        return cw
+
+    # 2. A domain's products and cube views are derived from the OM product specs.
+    #    Union rather than replace: views no product claims yet stay reachable.
+    for dname, dspec in (om.ontology.domains or {}).items():
+        gen = cw_domains.get(dname)
+        if not gen:
+            continue
+        if gen.get("owner_team"):
+            dspec["owner_team"] = gen["owner_team"]
+        for key in ("data_products", "cube_views"):
+            derived = list(gen.get(key) or [])
+            existing = list(dspec.get(key) or [])
+            dspec[key] = derived + [x for x in existing if x not in derived]
+        dspec["_ungoverned_cube_views"] = [
+            x for x in (dspec.get("cube_views") or []) if x not in (gen.get("cube_views") or [])
+        ]
+
+    # 3. Per-view provenance (owning product, serve table, verified gold lineage,
+    #    contract) is derived. This is what the agent shows a client, so it must be
+    #    the real lineage, not a declared one.
+    for name, spec in cw_views.items():
+        if not spec.get("data_product"):
+            continue
+        link = om.views.get(name)
+        payload = {
+            "data_product": spec["data_product"],
+            "serve_table": spec.get("serve_table") or (link.serve_table if link else ""),
+            "gold_inputs": list(spec.get("gold_inputs") or []),
+            "contract": spec.get("contract") or (link.contract if link else None),
+        }
+        om.views[name] = OpenMetadataViewLink.model_validate(payload)
+    return cw
 
 
 def _check_integrity(cat: Catalogue) -> None:

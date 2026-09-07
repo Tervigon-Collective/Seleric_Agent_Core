@@ -1,3 +1,12 @@
+# DERIVED FIELDS: each domain's owner_team, data_products and cube_views are
+# generated from mage-ai/openmetadata/domains|products/*.yml via
+# scripts/sync_catalogue_from_sources.py and overlaid at load time. To add a Cube
+# view to a domain, declare it as a `- cube_view:` output port on the owning data
+# product — do NOT add it here.
+# Entries kept here that no data product claims still work, and are reported as
+# VIEW_HAND_MAINTAINED until the view gets an owner.
+# Still hand-authored here: grain, date_axes, notes, entity_clusters,
+# attribution_boundary and unclustered — business semantics no system derives.
 # Business ontology crosswalk (agent catalogue ↔ OpenMetadata glossaries).
 # Full OM specs: mage-ai/openmetadata/glossary/*.yml
 
@@ -11,6 +20,7 @@ domains:
       - commerce_performance
       - amazon_commerce_performance
       - amazon_daily_pnl
+      - amazon_orders
       - orders_all_channels
     grain: Order (+ Daily Amazon)
     date_axes: [placement, event]

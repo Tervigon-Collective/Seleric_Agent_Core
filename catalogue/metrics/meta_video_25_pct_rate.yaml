@@ -29,6 +29,11 @@ supported_dimensions:
 - ad_name
 - creative_id
 - creative_type
+- creative_name
+- creative_cta_type
+- ad_format
+- adset_optimization_goal
+- neurohack_tag_codes
 supported_filters:
 - date_range
 - brand_id
@@ -43,6 +48,11 @@ supported_filters:
 - ad_name
 - creative_id
 - creative_type
+- creative_name
+- creative_cta_type
+- ad_format
+- adset_optimization_goal
+- neurohack_tag_codes
 data_owner: Growth / Paid Media
 access_policy:
   roles_allowed:

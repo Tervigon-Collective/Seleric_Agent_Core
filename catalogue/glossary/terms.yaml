@@ -961,14 +961,6 @@ terms:
     canonical_id: web_sessions
   - term: sessions
     canonical_id: web_sessions
-  - term: product ad spend
-    canonical_id: product_total_ad_spend
-  - term: ad spend by product
-    canonical_id: product_total_ad_spend
-  - term: meta spend by product
-    canonical_id: product_meta_ad_spend
-  - term: google spend by product
-    canonical_id: product_google_ad_spend
   - term: spend on product
     definition: >
       Use product_total_ad_spend (all), product_meta_ad_spend, product_google_ad_spend,

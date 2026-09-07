@@ -16,6 +16,26 @@ brands:
       - tilting-heads
       - TH
       - brand 20
+  - id: "28"
+    name: Commbitz
+    code: CMB
+    status: active
+    aliases:
+      - commbitz
+      - commbitz esim
+      - comm bitz
+      - CMB
+      - brand 28
+    scope_note: >
+      PAID MEDIA ONLY in this warehouse. Commbitz has Meta and Google ad spend
+      (meta_ad_performance, google_ad_performance, canonical_pnl, channel_pnl)
+      but ZERO rows in commerce_orders, order_attribution, customer_ltv and
+      session_funnel — its commerce data lives in the separate `commbitz`
+      ClickHouse database and is not modelled here. Consequence: canonical_pnl
+      shows Commbitz with ad spend and no revenue, so net_profit, ROAS, MER,
+      AOV and every per-order metric are WRONG for brand 28, not merely empty.
+      Answer spend and delivery questions only; refuse profitability and
+      commerce questions and say the revenue side is not in this warehouse.
   - id: "26"
     name: Sniff Theory
     code: ST

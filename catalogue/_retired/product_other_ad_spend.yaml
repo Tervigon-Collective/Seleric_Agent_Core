@@ -1,7 +1,7 @@
 id: product_other_ad_spend
 display_name: Product Other Ad Spend (SKU-attributed)
 category: product
-status: draft
+status: broken   # serve.product_ad_spend_daily does not exist (2026-09-07)
 description: >
   Not implemented in the dashboard as of this audit — the catalogue itself
   admits this is unimplemented, and no SKU-attributed ad spend exists

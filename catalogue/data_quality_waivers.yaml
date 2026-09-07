@@ -1,0 +1,42 @@
+# Reviewed exceptions for scripts/check_data_quality.py.
+# Key is "<CODE>:<subject>"; the value is why it is accepted. Waived findings
+# still print, marked with ~, and never gate — accepted debt stays visible.
+#
+# Do NOT waive a dimension that SHOULD carry signal. Waive only where a single
+# value is the correct state of the world.
+
+waivers:
+  # Amazon SP is onboarded for Tilting Heads (brand 20) only, so every Amazon
+  # relation is legitimately single-tenant today. These stop being waivers the
+  # moment a second brand is connected.
+  DEAD_DIMENSION:amazon_ad_performance.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_daily_pnl.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_commerce_performance.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_attribution_overview.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_order_item_pnl.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_daily_pnl_actual.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_accounts_exceptions.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_settlement_reconciliation.brand_id: Amazon SP onboarded for brand 20 only.
+  DEAD_DIMENSION:amazon_settlement_reconciliation.account_id: One Amazon seller account for brand 20.
+
+  # Snowplow web tracking is deployed on the brand 20 storefront only.
+  DEAD_DIMENSION:session_funnel.brand_id: Snowplow deployed on brand 20 storefront only.
+  DEAD_DIMENSION:web_events.brand_id: Snowplow deployed on brand 20 storefront only.
+  DEAD_DIMENSION:web_events_daily.brand_id: Snowplow deployed on brand 20 storefront only.
+  DEAD_DIMENSION:touchpoints.brand_id: Touchpoints derive from Snowplow sessions (brand 20 only).
+  DEAD_DIMENSION:attribution_paths.brand_id: Attribution paths derive from Snowplow sessions (brand 20 only).
+
+  # Meta/Google hourly ingest is enabled for the brand 20 ad account only.
+  DEAD_DIMENSION:meta_ad_performance_hourly.brand_id: Hourly Meta ingest enabled for brand 20 only.
+  DEAD_DIMENSION:meta_ad_performance_hourly.ad_account_id: One Meta ad account for brand 20.
+  DEAD_DIMENSION:meta_ad_breakdown_performance.brand_id: Breakdown ingest enabled for brand 20 only.
+  DEAD_DIMENSION:meta_ad_breakdown_performance.ad_account_id: One Meta ad account for brand 20.
+  DEAD_DIMENSION:daily_pnl.brand_id: Historical daily_pnl port is scoped to brand 20.
+
+  # These three Meta insight breakdowns are DISABLED in platform_config.yaml
+  # (streams.ads_insights_{country,dma,demographics_age}: false), so their
+  # watermarks are frozen by design, not stuck. Delete the waiver if a stream is
+  # re-enabled - the finding should come back if it then fails to advance.
+  STUCK_INGEST_CURSOR:meta.ads_insights_country (brand 20): Stream disabled in platform_config.yaml.
+  STUCK_INGEST_CURSOR:meta.ads_insights_dma (brand 20): Stream disabled in platform_config.yaml.
+  STUCK_INGEST_CURSOR:meta.ads_insights_demographics_age (brand 20): Stream disabled in platform_config.yaml.

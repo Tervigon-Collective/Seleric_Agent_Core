@@ -1,19 +1,19 @@
-id: product_meta_ad_spend
-display_name: Product Meta Ad Spend (SKU-attributed)
+id: product_total_ad_spend
+display_name: Product Total Ad Spend (SKU-attributed)
 category: product
-status: draft
+status: broken   # serve.product_ad_spend_daily does not exist (2026-09-07)
 description: >
   Not implemented in the dashboard as of this audit — no SKU-attributed ad
-  spend exists anywhere in Node-Backend. Directional Meta ad spend allocated
-  to each SKU/day from last-touch attributed orders and campaign-day Meta
-  spend (revenue-share within campaign). Pair with product_net_revenue for
-  ROAS. Same campaign spend can appear across many SKUs.
+  spend exists anywhere in Node-Backend. Total directional ad spend on a SKU
+  (Meta + Google + Other). Allocated from last-touch attributed line revenue
+  and campaign-day spend — compare with product_net_revenue for product
+  ROAS. Fan-out caveat applies at campaign grain.
 formula:
-  human_readable: SUM(meta_spend_attributed) at SKU grain
+  human_readable: SUM(total_ad_spend_attributed) = Meta + Google + Other at SKU grain
   authoritative_source: cube
 cube_mapping:
   view: product_ad_spend
-  measure: product_ad_spend.meta_spend_attributed
+  measure: product_ad_spend.total_ad_spend_attributed
   time_dimension: product_ad_spend.report_date
 aggregation: additive
 unit: currency
@@ -36,13 +36,13 @@ access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst]
   scopes: [metrics:read]
 examples:
-  - question: Meta ad spend by product last 30 days
+  - question: Total ad spend by product Meta vs Google last month
     request:
-      measures: [product_meta_ad_spend, product_net_revenue]
+      measures: [product_meta_ad_spend, product_google_ad_spend, product_total_ad_spend]
       dimensions: [product_title]
-      time_range: {preset: last_30d}
+      time_range: {preset: last_month}
 validation_tests:
-  - product_meta_ad_spend >= 0 for any slice
+  - product_total_ad_spend >= product_meta_ad_spend for any slice
 deprecated_aliases: []
 dashboard_alignment:
   status: not_implemented
