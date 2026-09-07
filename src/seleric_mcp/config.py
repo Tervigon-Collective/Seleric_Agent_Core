@@ -24,10 +24,9 @@ CONFIG_PATH = PROJECT_ROOT / "config.yaml"
 
 
 def cube_model_dir() -> Path:
-    """Canonical Cube model directory. The model moved from Base_Agent/cube/model
-    (now a stub README) to data_platform/mage-ai/infra/cube/model — the compose
-    file mounts that path into the Cube container. Override with CUBE_MODEL_DIR;
-    falls back to the legacy in-repo path if the canonical one is absent."""
+    """Canonical Cube model directory. The model lives in mage-ai/infra/cube/model
+    (this host: /opt/seleric/mage-ai/...). Override with CUBE_MODEL_DIR; also
+    accepts data_platform/mage-ai/infra/cube/model, then the in-repo stub."""
     env = os.getenv("CUBE_MODEL_DIR", "").strip()
     if env:
         return Path(env)

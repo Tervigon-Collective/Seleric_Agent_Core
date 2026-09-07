@@ -17,10 +17,10 @@ services:
     container_name: seleric-mcp-cube-1
     restart: unless-stopped
     volumes:
-      - ../data_platform/mage-ai/infra/cube/model:/cube/conf/model:ro
-      - ../data_platform/mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
+      - ../mage-ai/infra/cube/model:/cube/conf/model:ro
+      - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
     env_file:
-      - ../data_platform/mage-ai/infra/cube/.env
+      - ../mage-ai/infra/cube/.env
     ports:
       - "127.0.0.1:${CUBE_HOST_PORT:-4001}:4000"
     extra_hosts:
