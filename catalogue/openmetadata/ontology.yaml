@@ -6,7 +6,7 @@
 # Entries kept here that no data product claims still work, and are reported as
 # VIEW_HAND_MAINTAINED until the view gets an owner.
 # Still hand-authored here: grain, date_axes, notes, entity_clusters,
-# attribution_boundary and unclustered — business semantics no system derives.
+# attribution_boundary, grain_defaults and unclustered — business semantics no system derives.
 # Business ontology crosswalk (agent catalogue ↔ OpenMetadata glossaries).
 # Full OM specs: mage-ai/openmetadata/glossary/*.yml
 
@@ -262,6 +262,45 @@ attribution_boundary:
     Use the certified MarketingAttribution product (order_attribution /
     meta_ad_attribution — first-party revenue, last-touch, Meta/Google only)
     for attributed revenue; Amazon attributed sales/ACOS remain excluded.
+
+# Grain-first defaults when an operator names a dimension and no measure.
+# Agents must not invent these; catalogue_resolve_dimension + this block are
+# the vocabulary. Hand-authored (same class as attribution_boundary).
+grain_defaults:
+  by_channel:
+    when: unspecified "by channel" / "channel-wise" report with no measure named
+    dimension_id: channel
+    product: ChannelAttribution
+    view: channel_attribution
+    value_space: closed set (meta/google/organic_shopify/unattributed/amazon/organic_amazon)
+    default_measure: channel_orders
+    revenue_companion: channel_net_revenue
+    revenue_companion_status: draft
+    agent_policy: >
+      Do not invent this default. Unspecified by-channel grain is
+      ChannelAttribution + dimension channel (closed set). Query channel_orders
+      (certified) until channel_net_revenue is certified. Never slice
+      commerce_net_revenue_daily, gross_sales, or orders by channel or
+      lt_channel — those Shopify commerce metrics have no channel dimension.
+    alternates:
+      - dimension_id: lt_channel
+        product: MarketingAttribution
+        view: order_attribution
+        measures: [attributed_net_revenue, attributed_orders]
+        note: FINE last-touch (ig_feed/fb_feed/google_pmax/...) — not the closed set
+      - dimension_id: channel
+        product: CrossChannelCommerce
+        views: [orders_all_channels, sales_all_channels]
+        note: marketplace shopify | amazon
+      - dimension_id: channel
+        product: SessionFunnel
+        views: [funnel_daily, session_funnel]
+        note: FINE session/funnel channel (ig_feed, google_search, organic, ...)
+      - dimension_id: channel
+        product: ChannelAttribution
+        view: channel_pnl
+        measures: [meta_attribution_net_sales, google_attribution_net_sales]
+        note: P&L Meta/Google/organic/unattributed — Attribution Analysis Overview
 
 # Metrics not listed in entity_clusters. Lookup order: by_metric, by_view,
 # by_category, then default. Agents treat these as view-siblings, not a

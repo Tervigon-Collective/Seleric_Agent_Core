@@ -299,6 +299,17 @@ def test_every_catalogue_dimension_mapping_exists_in_its_view(catalogue):
     assert problems == [], f"catalogue dimensions pointing at members their view doesn't expose: {problems}"
 
 
+def test_shopify_commerce_metrics_do_not_support_channel_grain(catalogue):
+    """Plan B3: Cube/catalogue must not expose channel/lt_channel on Shopify
+    commerce totals — that would let a grain pass fetch a fake channel-wise
+    dashboard Net Sales number."""
+    forbidden = {"channel", "lt_channel"}
+    for mid in ("commerce_net_revenue_daily", "gross_sales", "orders"):
+        m = catalogue.cat.metrics[mid]
+        overlap = forbidden.intersection(m.supported_dimensions)
+        assert not overlap, f"{mid} lists attribution channel dims {overlap}"
+
+
 def test_every_catalogue_metric_mapping_exists_in_its_view(catalogue):
     view_members = _view_members()
     problems = []

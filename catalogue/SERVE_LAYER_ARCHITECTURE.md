@@ -153,6 +153,34 @@ Closed 2026-09-09 (no longer a product-assignment decision):
 
 Declared lineage now matches ClickHouse gold-closure in `catalogue/openmetadata/registry.yaml` (verified 2026-09-09). `canonical_pnl` no longer claims `gold.fct_daily_pnl`; `commerce_orders` no longer claims `gold.dim_customers`.
 
+### 3.3 Grain-first default: unspecified “by channel”
+
+Operators and agents must not invent a product when the question names grain
+and no measure (“channel-wise report”, “by channel”). The catalogue states
+the default in `ontology.yaml` `grain_defaults.by_channel` (also returned by
+`catalogue_get_ontology`):
+
+| When | Product | Dimension | Measure |
+|---|---|---|---|
+| Unspecified by-channel / channel-wise, no measure | **ChannelAttribution** | `channel` (closed set: meta / google / organic_shopify / unattributed / amazon / organic_amazon) on `channel_attribution` | **`channel_orders`** (certified). Named revenue companion is `channel_net_revenue` (draft — glossary still maps “sales by channel” here; do not `metrics_query` until certified). |
+
+Alternates — pick only when the user names them, never by regex:
+
+- Last-touch FINE: `lt_channel` + `attributed_net_revenue` / `attributed_orders` (MarketingAttribution / `order_attribution`).
+- Marketplace shopify \| amazon: `channel` on `orders_all_channels` / `sales_all_channels` (CrossChannelCommerce).
+- Funnel/web FINE: `channel` on `funnel_daily` / `session_funnel`.
+- P&L Overview: `channel` on `channel_pnl` (`meta_attribution_net_sales` / `google_attribution_net_sales`).
+
+Shopify commerce totals are a different product. `commerce_net_revenue_daily`,
+`gross_sales`, and `orders` do **not** expose `channel` or `lt_channel` in Cube
+or in catalogue `supported_dimensions`. A “channel-wise Shopify net sales”
+answer must use ChannelAttribution (or last-touch), not a fake slice of the
+dashboard Net Sales card.
+
+Resolve grain through `catalogue_resolve_dimension`. Bare “channel” is
+ambiguous (`channel` vs `lt_channel`); “last-touch channel” is `lt_channel`.
+Do not add phrase-table glossary rows such as “channel wise report” → a measure.
+
 ---
 
 ## 4. Semantic navigation

@@ -58,6 +58,7 @@ ANALYST_TOOLS = frozenset(
         "catalogue_related_metrics",
         "catalogue_list_dimensions",
         "catalogue_resolve_term",
+        "catalogue_resolve_dimension",
         "catalogue_resolve_brand",
         "catalogue_list_brands",
         "metrics_query",
@@ -280,7 +281,7 @@ def _step_label(name: str, args: dict[str, Any]) -> str:
     if name in ("metrics_query", "metrics_drilldown"):
         detail = ", ".join(a.get("measures") or []) or ", ".join(a.get("target_dimensions") or [])
         return f"{name}: {detail}" if detail else name
-    if name in ("catalogue_search_metrics", "catalogue_resolve_term"):
+    if name in ("catalogue_search_metrics", "catalogue_resolve_term", "catalogue_resolve_dimension"):
         q = a.get("query") or a.get("text")
         return f"{name}: {q}" if q else name
     if name == "catalogue_get_metric" and a.get("metric_id"):

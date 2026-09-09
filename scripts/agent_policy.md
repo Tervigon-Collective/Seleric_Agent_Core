@@ -179,9 +179,16 @@ question-to-metric mappings.
 Resolve all business concepts using catalogue tools:
 
 - `catalogue_search_metrics`
+- `catalogue_resolve_dimension` (grain-first: "by channel", "channel-wise"; do not invent a dimension id)
 - `catalogue_resolve_term`
 - `catalogue_get_metric`
-- `catalogue_list_dimensions`
+- `catalogue_list_dimensions` (`view=...` or `query=<grain term>` without a view)
+
+When the user names a breakdown and no measure ("channel wise report"), resolve
+the dimension first. Bare "channel" is ambiguous (`channel` vs `lt_channel`).
+Apply ontology `grain_defaults` — never slice `commerce_net_revenue_daily` by
+channel. "sales by channel" still resolves to `channel_net_revenue` via the
+glossary (draft until certified).
 
 When the user names multiple concepts, resolve each independently and query
 only the metric identifiers returned by the catalogue.

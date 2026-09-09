@@ -109,6 +109,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "catalogue_list_brands",
         "catalogue_resolve_brand",
         "catalogue_resolve_term",
+        "catalogue_resolve_dimension",
         "modules_list",
         "metrics_query",
         "metrics_drilldown",
@@ -370,6 +371,29 @@ async def test_catalogue_resolve_term_aliases_cube_member(built_server):
     out = fn("orders_all_channels.orders")
     assert out["kind"] == "resolved"
     assert out["metric_id"] == "total_orders"
+
+
+async def test_catalogue_resolve_dimension_channel_is_ambiguous(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_resolve_dimension")
+    out = fn("channel")
+    assert out["kind"] == "ambiguous"
+    ids = {c["dimension_id"] for c in out["candidates"]}
+    assert "channel" in ids
+    assert "lt_channel" in ids
+    assert "commerce_net_revenue_daily" not in str(out)
+
+
+async def test_catalogue_list_dimensions_query_without_view(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_list_dimensions")
+    out = fn(query="channel")
+    assert "error" not in out
+    ids = {d["id"] for d in out["dimensions"]}
+    assert "channel" in ids
+    assert "lt_channel" in ids
+    empty = fn()
+    assert "error" in empty
 
 
 async def test_insights_explain_rejects_composed_parent(built_server, fake_cube):

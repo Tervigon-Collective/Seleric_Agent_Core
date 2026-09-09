@@ -106,6 +106,12 @@ dimensions:
   - id: lt_channel
     display_name: Last-touch Channel
     description: Last-touch attributed channel (ig_feed/fb_feed/google_pmax/...). Resolved, not raw UTM.
+    aliases:
+      - last-touch channel
+      - last touch channel
+      - last-touch
+      - lt channel
+      - fine channel
     views:
       order_attribution: order_attribution.lt_channel
   - id: lt_utm_source
@@ -314,7 +320,7 @@ dimensions:
   - id: payment_method
     display_name: Payment Method
     description: Payment method on the order (COD, prepaid gateways, upi, razorpay, …).
-    aliases: [payment, payment method, gateway method, payment type, payment mode]
+    aliases: [payment, payment method, gateway method, payment type, payment mode, by payment, payment-wise, payment wise]
     views:
       commerce_orders: commerce_orders.payment_method
       order_attribution: order_attribution.payment_method
@@ -418,7 +424,7 @@ dimensions:
   - id: shipping_city
     display_name: Shipping City
     description: Destination city on the order shipping address.
-    aliases: [city, ship city, shipping city, ship_to_city]
+    aliases: [city, ship city, shipping city, ship_to_city, by city, city-wise, city wise]
     views:
       commerce_orders: commerce_orders.shipping_city
       product_performance: product_performance.shipping_city
@@ -561,6 +567,7 @@ dimensions:
     description: >
       Platform campaign name on paid-media views; UTM/campaign name on
       session_funnel (distinct semantics — ad platform vs session landing).
+    aliases: [by campaign, campaign-wise, campaign wise, campaign name]
     views:
       meta_ad_performance: meta_ad_performance.campaign_name
       meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_name
@@ -720,8 +727,19 @@ dimensions:
       amazon/organic_amazon). On channel_pnl: meta/google/organic/unattributed.
       On funnel_daily and session_funnel: FINE channel (ig_feed, google_search,
       organic, ...). On orders_all_channels / sales_all_channels: marketplace
-      channel (shopify | amazon).
-    aliases: [marketplace, marketplace channel, shopify vs amazon]
+      channel (shopify | amazon). Distinct from lt_channel (last-touch FINE on
+      order_attribution). Unspecified "by channel" / "channel-wise" with no
+      measure defaults to ChannelAttribution closed set — see ontology
+      grain_defaults; do not slice Shopify commerce totals by this dim.
+    aliases:
+      - marketplace
+      - marketplace channel
+      - shopify vs amazon
+      - by channel
+      - channel-wise
+      - channel wise
+      - channelwise
+      - channel report
     views:
       channel_attribution: channel_attribution.channel
       channel_pnl: channel_pnl.channel

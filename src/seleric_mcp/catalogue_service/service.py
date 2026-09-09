@@ -41,10 +41,36 @@ class MetricSummary(BaseModel):
     matched_on: str  # which field/synonym matched
 
 
+class SupportingMetric(BaseModel):
+    id: str
+    display_name: str
+    status: str
+    view: str
+    queryable: bool
+
+
+class DimensionProduct(BaseModel):
+    name: str | None = None
+    view: str
+    cube_member: str
+    value_space: str | None = None
+
+
+class DimensionSummary(BaseModel):
+    id: str
+    display_name: str
+    aliases: list[str]
+    views: dict[str, str]
+    products: list[DimensionProduct]
+    supporting_metrics: list[SupportingMetric]
+    matched_on: str
+
+
 class SearchResult(BaseModel):
     matches: list[MetricSummary]
     suggestions: list[str]
     catalogue_version: str
+    dimensions: list[DimensionSummary] = []
 
 
 class ModuleSummary(BaseModel):
@@ -129,6 +155,70 @@ class UnknownBrand(BaseModel):
         "Brand not in the registry. Ask the user to clarify, or use the default "
         "(Tilting Heads) if they did not name a brand."
     )
+
+
+class DimensionCandidate(BaseModel):
+    dimension_id: str
+    display_name: str
+    confidence: float
+    matched_via: str
+    aliases: list[str]
+    views: dict[str, str]
+    products: list[DimensionProduct]
+    supporting_metrics: list[SupportingMetric]
+
+
+class ResolvedDimension(BaseModel):
+    kind: Literal["resolved"] = "resolved"
+    term: str
+    dimension_id: str
+    display_name: str
+    confidence: float = 1.0
+    auto_resolved: bool = False
+    matched_via: str | None = None
+    aliases: list[str] = []
+    views: dict[str, str] = {}
+    products: list[DimensionProduct] = []
+    supporting_metrics: list[SupportingMetric] = []
+
+
+class AmbiguousDimension(BaseModel):
+    kind: Literal["ambiguous"] = "ambiguous"
+    term: str
+    candidates: list[DimensionCandidate]
+    guidance: str = (
+        "Several catalogue dimensions share this grain language. Pick the "
+        "candidate whose product and value space fit the user's intent "
+        "(channel vs last-touch lt_channel vs marketplace shopify|amazon), "
+        "or apply ontology grain_defaults when no measure is named. Never "
+        "invent a dimension id or slice a metric that does not list it."
+    )
+
+
+class UnknownDimension(BaseModel):
+    kind: Literal["unknown"] = "unknown"
+    term: str
+    suggestions: list[str]
+    guidance: str = (
+        "Dimension not in the catalogue. Do not guess a grain — ask the user "
+        "to clarify, or pick from the suggestions if one clearly matches."
+    )
+
+
+# Polymorphic `channel` value spaces by Cube view (from dimensions/core.yaml).
+_CHANNEL_VIEW_VALUE_SPACE: dict[str, str] = {
+    "channel_attribution": (
+        "closed set (meta/google/organic_shopify/unattributed/amazon/organic_amazon)"
+    ),
+    "channel_pnl": "meta/google/organic/unattributed",
+    "funnel_daily": "FINE channel (ig_feed, google_search, organic, ...)",
+    "session_funnel": "FINE channel (ig_feed, google_search, organic, ...)",
+    "web_events": "FINE channel (ig_feed, google_search, organic, ...)",
+    "web_events_daily": "FINE channel (ig_feed, google_search, organic, ...)",
+    "orders_all_channels": "marketplace (shopify | amazon)",
+    "sales_all_channels": "marketplace (shopify | amazon)",
+    "returns_cancels_all_channels": "marketplace (shopify | amazon)",
+}
 
 
 class CatalogueService:
@@ -217,6 +307,7 @@ class CatalogueService:
     def search(self, query: str, module: str | None = None) -> SearchResult:
         q = _normalize(query)
         matches: dict[str, MetricSummary] = {}
+        dim_matches: dict[str, DimensionSummary] = {}
         allowed = self._module_metrics.get(module) if module else None
 
         def add(m: MetricDef, matched_on: str) -> None:
@@ -235,15 +326,52 @@ class CatalogueService:
                 matched_on=matched_on,
             )
 
-        # 1. Exact glossary hits rank first (the query may contain several terms).
+        def add_dim(d: DimensionDef, matched_on: str) -> None:
+            if d.id in dim_matches:
+                return
+            dim_matches[d.id] = self._dimension_summary(d, matched_on)
+
+        q_tokens = set(q.replace(",", " ").split())
+
+        # 1. Glossary hits rank first (metric shortcuts and grain language).
         for term, entry in self._glossary_index.items():
-            if term in q and entry.canonical_id:
+            nterm = _normalize(term)
+            if not nterm or nterm not in q:
+                continue
+            if entry.canonical_id:
                 m = self.cat.metrics.get(entry.canonical_id)
                 if m:
                     add(m, f"glossary:{term}")
+            if entry.canonical_dimension_id:
+                d = self.cat.dimensions.get(entry.canonical_dimension_id)
+                if d:
+                    add_dim(d, f"glossary:{term}")
 
-        # 2. Token overlap on id / display_name / description.
-        q_tokens = set(q.replace(",", " ").split())
+        # 2. Dimension id / display_name / alias (grain-first; not a metric map).
+        # Do not token-overlap every dim whose id contains "order" — that
+        # pollutes metric search. Match an exact id token ("channel"), a
+        # multi-word id/display_name contained in the query, or an alias.
+        for d in self.cat.dimensions.values():
+            id_norm = _normalize(d.id)
+            name_norm = _normalize(d.display_name)
+            if " " not in id_norm and id_norm in q_tokens:
+                add_dim(d, "name")
+                continue
+            if " " in id_norm and id_norm in q:
+                add_dim(d, "name")
+                continue
+            if name_norm == q or (len(name_norm.split()) >= 2 and name_norm in q):
+                add_dim(d, "display_name")
+                continue
+            for alias in d.aliases:
+                na = _normalize(alias)
+                if not na:
+                    continue
+                if na == q or (na in q and len(na.split()) >= 2) or na in q_tokens:
+                    add_dim(d, f"alias:{alias}")
+                    break
+
+        # 3. Token overlap on metric id / display_name / description.
         for m in self._searchable_metrics():
             hay_id = set(m.id.lower().replace("_", " ").split())
             hay_name = set(m.display_name.lower().split())
@@ -252,13 +380,32 @@ class CatalogueService:
             elif any(tok in m.description.lower() for tok in q_tokens if len(tok) > 3):
                 add(m, "description")
 
+        # Grain hits: drop description-only metrics that do not support those
+        # dimensions (stops "report" in a commerce blurb winning a channel-wise
+        # question). Then attach queryable metrics that declare the dim.
+        if dim_matches:
+            grain_ids = set(dim_matches)
+            for mid, summary in list(matches.items()):
+                if summary.matched_on == "description" and not grain_ids.intersection(
+                    summary.supported_dimensions
+                ):
+                    del matches[mid]
+            for did in grain_ids:
+                for rec in self._supporting_metric_records(did, queryable_only=True):
+                    m = self.cat.metrics.get(rec.id)
+                    if m:
+                        add(m, f"dimension:{did}")
+
         suggestions: list[str] = []
-        if not matches:
-            suggestions = difflib.get_close_matches(q, self._vocabulary(), n=5, cutoff=0.5)
+        if not matches and not dim_matches:
+            suggestions = difflib.get_close_matches(
+                q, self._vocabulary() + self._dimension_vocabulary(), n=5, cutoff=0.5
+            )
         return SearchResult(
             matches=list(matches.values()),
             suggestions=suggestions,
             catalogue_version=self.version,
+            dimensions=list(dim_matches.values()),
         )
 
     def resolve_term(
@@ -285,6 +432,16 @@ class CatalogueService:
                 return ResolvedTerm(
                     term=text, metric_id=entry.canonical_id,
                     matched_via=f"glossary:{t}", definition=entry.definition,
+                )
+            dim_id = entry.canonical_dimension_id
+            if dim_id:
+                return DefinitionOnlyTerm(
+                    term=text,
+                    definition=(
+                        entry.definition
+                        or f"Grain language for dimension '{dim_id}'. "
+                        "Use catalogue_resolve_dimension; do not guess a metric."
+                    ),
                 )
             return DefinitionOnlyTerm(term=text, definition=entry.definition or "")
         if t in self.cat.metrics and self.cat.metrics[t].is_queryable:
@@ -449,10 +606,13 @@ class CatalogueService:
         }
 
     def get_ontology(self, module: str | None = None) -> dict:
-        """Domain-scoped ontology slice: data products, views, entity clusters.
+        """Business ontology snapshot: domains, data products, entity clusters
+        (related catalogue metrics), grain/date axes, attribution boundary,
+        grain-first defaults.
 
-        When ``module`` is set, only that module's ontology domains (and the
-        clusters whose catalogue metrics live on its views) are returned.
+        Pass module=<id> (see modules_list) to scope to one dashboard module's
+        domains. If this instance is pinned to a module, that scope is always
+        applied. Contains no metric values — Cube/metrics_query executes numbers.
         """
         om = self.cat.openmetadata
         if om is None or om.ontology is None:
@@ -543,6 +703,7 @@ class CatalogueService:
             "data_products": dps_out,
             "entity_clusters": clusters_out,
             "attribution_boundary": boundary,
+            "grain_defaults": onto.grain_defaults or None,
             "catalogue_version": self.version,
         }
 
@@ -658,8 +819,264 @@ class CatalogueService:
                 return d
         return None
 
-    def list_dimensions(self, view: str) -> list[DimensionDef]:
-        return [d for d in self.cat.dimensions.values() if view in d.views]
+    def resolve_dimension_term(
+        self, text: str
+    ) -> ResolvedDimension | AmbiguousDimension | UnknownDimension:
+        """NL → dimension with confidence bands. Never returns a metric.
+
+        Bare shared grain words (``channel``) stay ambiguous when sibling
+        dimensions share that token (``lt_channel``, ``acquisition_channel``).
+        Unique multi-word aliases (``last-touch channel``, ``channel wise``)
+        auto-resolve. Exact planner lookup remains ``resolve_dimension()``.
+        """
+        raw = (text or "").strip()
+        if not raw:
+            return UnknownDimension(term=text, suggestions=self._dimension_vocabulary()[:8])
+        norm = _normalize(raw)
+        q_tokens = [t for t in norm.split() if t]
+        q_token_set = set(q_tokens)
+
+        scored: dict[str, tuple[float, str]] = {}
+        for d in self.cat.dimensions.values():
+            best_score = 0.0
+            best_via = "id"
+            for form, via in self._dimension_forms(d):
+                if not form:
+                    continue
+                if form == norm:
+                    score = 1.0
+                elif len(form.split()) >= 2 and form in norm:
+                    score = 0.95
+                else:
+                    score = difflib.SequenceMatcher(None, norm, form).ratio()
+                if score > best_score:
+                    best_score = score
+                    best_via = via
+            id_tokens = set(_normalize(d.id).split())
+            name_tokens = set(_normalize(d.display_name).split())
+            if q_token_set & id_tokens or q_token_set & name_tokens:
+                if 0.70 > best_score:
+                    best_score = 0.70
+                    best_via = "token"
+            if best_score >= self.ambiguous_threshold:
+                scored[d.id] = (best_score, best_via)
+
+        def shared_token_siblings(did: str) -> list[str]:
+            if len(q_tokens) != 1:
+                return []
+            tok = q_tokens[0]
+            sibs: list[str] = []
+            for other_id, other in self.cat.dimensions.items():
+                if other_id == did:
+                    continue
+                other_tokens = set(_normalize(other.id).split())
+                other_name = set(_normalize(other.display_name).split())
+                if tok in other_tokens or tok in other_name:
+                    sibs.append(other_id)
+            return sibs
+
+        exact = [did for did, (score, _) in scored.items() if score == 1.0]
+        if len(exact) == 1 and not shared_token_siblings(exact[0]):
+            return self._resolved_dimension(
+                text, exact[0], scored[exact[0]][0], scored[exact[0]][1], auto=False
+            )
+        if len(exact) == 1:
+            for sib in shared_token_siblings(exact[0]):
+                scored.setdefault(sib, (self.ambiguous_threshold, "token"))
+
+        ranked = sorted(scored.items(), key=lambda item: item[1][0], reverse=True)
+        if ranked and ranked[0][1][0] >= self.auto_threshold:
+            top_id, (top_score, top_via) = ranked[0]
+            clear_winner = (
+                len(ranked) == 1
+                or top_score - ranked[1][1][0] >= self.runner_up_margin
+            )
+            if clear_winner and not (len(q_tokens) == 1 and shared_token_siblings(top_id)):
+                return self._resolved_dimension(
+                    text, top_id, top_score, top_via, auto=top_score < 1.0
+                )
+
+        contenders = [
+            self._dimension_candidate(did, score, via)
+            for did, (score, via) in ranked
+            if score >= self.ambiguous_threshold
+        ][:8]
+        if contenders:
+            return AmbiguousDimension(term=text, candidates=contenders)
+        return UnknownDimension(
+            term=text,
+            suggestions=difflib.get_close_matches(
+                norm, self._dimension_vocabulary(), n=5, cutoff=0.5
+            ),
+        )
+
+    def _dimension_forms(self, d: DimensionDef) -> list[tuple[str, str]]:
+        forms: list[tuple[str, str]] = [
+            (_normalize(d.id), "id"),
+            (_normalize(d.display_name), "display_name"),
+        ]
+        for alias in d.aliases:
+            forms.append((_normalize(alias), f"alias:{alias}"))
+        for member in d.views.values():
+            forms.append((_normalize(member), "cube_member"))
+        for term, entry in self._glossary_index.items():
+            if entry.canonical_dimension_id == d.id:
+                forms.append((_normalize(term), f"glossary:{term}"))
+        return forms
+
+    def _dimension_vocabulary(self) -> list[str]:
+        vocab: list[str] = []
+        for d in self.cat.dimensions.values():
+            vocab.append(d.id)
+            vocab.append(d.display_name.lower())
+            vocab.extend(a.lower() for a in d.aliases)
+        for term, entry in self._glossary_index.items():
+            if entry.canonical_dimension_id:
+                vocab.append(term)
+        return vocab
+
+    def _dimension_products(self, d: DimensionDef) -> list[DimensionProduct]:
+        products: list[DimensionProduct] = []
+        for view, member in d.views.items():
+            _link, dp = self._data_product_for_view(view)
+            value_space = None
+            if d.id == "channel":
+                value_space = _CHANNEL_VIEW_VALUE_SPACE.get(view)
+            elif d.id == "lt_channel":
+                value_space = "FINE last-touch (ig_feed/fb_feed/google_pmax/...)"
+            products.append(
+                DimensionProduct(
+                    name=dp.name if dp is not None else None,
+                    view=view,
+                    cube_member=member,
+                    value_space=value_space,
+                )
+            )
+        return products
+
+    def _supporting_metric_records(
+        self, dimension_id: str, *, queryable_only: bool = False, limit: int | None = 40
+    ) -> list[SupportingMetric]:
+        records: list[SupportingMetric] = []
+        for m in self.cat.metrics.values():
+            if dimension_id not in m.supported_dimensions:
+                continue
+            if m.status == "broken":
+                continue
+            if queryable_only and not m.is_queryable:
+                continue
+            records.append(
+                SupportingMetric(
+                    id=m.id,
+                    display_name=m.display_name,
+                    status=m.status,
+                    view=m.cube_mapping.view,
+                    queryable=m.is_queryable,
+                )
+            )
+        records.sort(key=lambda r: (not r.queryable, r.id))
+        if limit is not None:
+            return records[:limit]
+        return records
+
+    def metrics_supporting_dimension(
+        self, dimension_id: str, *, exclude: str | None = None
+    ) -> list[str]:
+        """Queryable catalogue ids that declare support for dimension_id.
+
+        Prefer same-category metrics and id-token overlap with the excluded
+        metric so e.g. cancel_revenue + shipping_region suggests
+        event_cancel_revenue ahead of unrelated product metrics.
+        """
+        exclude_metric = self.cat.metrics.get(exclude) if exclude else None
+        exclude_cat = exclude_metric.category if exclude_metric else None
+        exclude_tokens = {
+            t for t in (exclude or "").lower().replace("-", "_").split("_") if len(t) > 2
+        }
+        scored: list[tuple[int, str]] = []
+        for mid, m in self.cat.metrics.items():
+            if not m.is_queryable or mid == exclude:
+                continue
+            if dimension_id not in m.supported_dimensions:
+                continue
+            score = 0
+            if exclude_cat and m.category == exclude_cat:
+                score += 3
+            mid_tokens = set(mid.lower().replace("-", "_").split("_"))
+            score += len(exclude_tokens & mid_tokens)
+            scored.append((-score, mid))
+        scored.sort()
+        return [mid for _, mid in scored[:8]]
+
+    def _dimension_summary(self, d: DimensionDef, matched_on: str) -> DimensionSummary:
+        return DimensionSummary(
+            id=d.id,
+            display_name=d.display_name,
+            aliases=list(d.aliases),
+            views=dict(d.views),
+            products=self._dimension_products(d),
+            supporting_metrics=self._supporting_metric_records(d.id),
+            matched_on=matched_on,
+        )
+
+    def _dimension_candidate(
+        self, dimension_id: str, score: float, via: str
+    ) -> DimensionCandidate:
+        d = self.cat.dimensions[dimension_id]
+        return DimensionCandidate(
+            dimension_id=d.id,
+            display_name=d.display_name,
+            confidence=round(score, 2),
+            matched_via=via,
+            aliases=list(d.aliases),
+            views=dict(d.views),
+            products=self._dimension_products(d),
+            supporting_metrics=self._supporting_metric_records(d.id),
+        )
+
+    def _resolved_dimension(
+        self, term: str, dimension_id: str, score: float, via: str, *, auto: bool
+    ) -> ResolvedDimension:
+        d = self.cat.dimensions[dimension_id]
+        return ResolvedDimension(
+            term=term,
+            dimension_id=d.id,
+            display_name=d.display_name,
+            confidence=round(score, 2),
+            auto_resolved=auto,
+            matched_via=via,
+            aliases=list(d.aliases),
+            views=dict(d.views),
+            products=self._dimension_products(d),
+            supporting_metrics=self._supporting_metric_records(d.id),
+        )
+
+    def list_dimensions(
+        self, view: str | None = None, query: str | None = None
+    ) -> list[DimensionDef]:
+        """Dimensions on a Cube view, or grain-first search by term (no view)."""
+        dims = list(self.cat.dimensions.values())
+        if view:
+            dims = [d for d in dims if view in d.views]
+        if query:
+            q = _normalize(query)
+            q_tokens = set(q.split())
+            hits: list[DimensionDef] = []
+            for d in dims:
+                forms = {_normalize(d.id), _normalize(d.display_name)}
+                forms.update(_normalize(a) for a in d.aliases)
+                id_tokens = set(_normalize(d.id).split())
+                name_tokens = set(_normalize(d.display_name).split())
+                if q in forms or any(f and (f == q or (len(f.split()) >= 2 and f in q)) for f in forms):
+                    hits.append(d)
+                    continue
+                if q_tokens & id_tokens or q_tokens & name_tokens:
+                    hits.append(d)
+                    continue
+                if q_tokens & {_normalize(a) for a in d.aliases if a}:
+                    hits.append(d)
+            return hits
+        return dims
 
     def freshness(self, view: str) -> dict | None:
         v = self.cat.views.get(view)

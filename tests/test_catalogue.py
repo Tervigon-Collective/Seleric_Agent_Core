@@ -1,5 +1,8 @@
 from seleric_mcp.catalogue_service.service import (
+    AmbiguousDimension,
     AmbiguousTerm,
+    DefinitionOnlyTerm,
+    ResolvedDimension,
     ResolvedTerm,
     UnknownTerm,
 )
@@ -648,6 +651,11 @@ def test_get_ontology_unscoped_has_all_domains(catalogue):
     assert {"Commerce", "PaidMedia", "Finance", "Attribution"} <= names
     assert out["attribution_boundary"]["om_glossary_term"] == "Paid Media.Platform-ReportedConversion"
     assert out["module"] is None
+    grain = out["grain_defaults"]["by_channel"]
+    assert grain["dimension_id"] == "channel"
+    assert grain["product"] == "ChannelAttribution"
+    assert grain["default_measure"] == "channel_orders"
+    assert grain["revenue_companion"] == "channel_net_revenue"
 
 
 def test_get_ontology_unknown_module(catalogue):
@@ -665,3 +673,91 @@ def test_item_count_dimension_is_on_commerce_order_metrics(catalogue):
     for mid in ("orders", "refunded_orders", "cancelled_orders", "returns_cancels"):
         assert "item_count" in catalogue.cat.metrics[mid].supported_dimensions
         assert "order_name" in catalogue.cat.metrics[mid].supported_dimensions
+
+
+def test_resolve_dimension_channel_is_ambiguous_not_a_commerce_metric(catalogue):
+    r = catalogue.resolve_dimension_term("channel")
+    assert isinstance(r, AmbiguousDimension)
+    ids = {c.dimension_id for c in r.candidates}
+    assert "channel" in ids
+    assert "lt_channel" in ids
+    blob = r.model_dump()
+    assert "commerce_net_revenue_daily" not in str(blob)
+    products = {
+        p.name
+        for c in r.candidates
+        if c.dimension_id == "channel"
+        for p in c.products
+        if p.name
+    }
+    assert "ChannelAttribution" in products
+
+
+def test_resolve_dimension_last_touch_channel(catalogue):
+    r = catalogue.resolve_dimension_term("last-touch channel")
+    assert isinstance(r, ResolvedDimension)
+    assert r.dimension_id == "lt_channel"
+    supporting = {m.id for m in r.supporting_metrics}
+    assert "attributed_net_revenue" in supporting
+    assert "commerce_net_revenue_daily" not in supporting
+
+
+def test_resolve_dimension_shopify_vs_amazon_is_marketplace_channel(catalogue):
+    r = catalogue.resolve_dimension_term("shopify vs amazon")
+    assert isinstance(r, ResolvedDimension)
+    assert r.dimension_id == "channel"
+    views = {p.view for p in r.products}
+    assert "orders_all_channels" in views or "sales_all_channels" in views
+
+
+def test_planner_exact_lookup_channel_unchanged(catalogue):
+    dim = catalogue.resolve_dimension("channel")
+    assert dim is not None
+    assert dim.id == "channel"
+
+
+def test_grain_only_search_does_not_return_commerce_net_revenue_daily(catalogue):
+    phrases = (
+        "channel wise report",
+        "channel-wise",
+        "by channel",
+        "Get me channel wise report",
+    )
+    for q in phrases:
+        result = catalogue.search(q)
+        match_ids = {m.id for m in result.matches}
+        dim_ids = {d.id for d in result.dimensions}
+        assert "commerce_net_revenue_daily" not in match_ids, q
+        assert "channel" in dim_ids, q
+        supporting = {m.id for d in result.dimensions for m in d.supporting_metrics}
+        assert "channel_orders" in supporting or "channel_orders" in match_ids, q
+        r = catalogue.resolve_dimension_term(q)
+        assert r.kind in ("resolved", "ambiguous"), q
+        if r.kind == "resolved":
+            assert r.dimension_id == "channel", q
+            assert "commerce_net_revenue_daily" not in {m.id for m in r.supporting_metrics}
+        else:
+            ids = {c.dimension_id for c in r.candidates}
+            assert "channel" in ids, q
+            assert "commerce_net_revenue_daily" not in str(r.model_dump())
+
+
+def test_sales_by_channel_glossary_still_resolves_channel_net_revenue(catalogue):
+    r = catalogue.resolve_term("sales by channel")
+    assert isinstance(r, ResolvedTerm)
+    assert r.metric_id == "channel_net_revenue"
+
+
+def test_bare_grain_glossary_is_definition_only_not_a_metric(catalogue):
+    r = catalogue.resolve_term("channel wise")
+    assert isinstance(r, DefinitionOnlyTerm)
+    assert "channel" in r.definition.lower()
+
+
+def test_list_dimensions_search_by_term_without_view(catalogue):
+    hits = catalogue.list_dimensions(query="channel")
+    ids = {d.id for d in hits}
+    assert "channel" in ids
+    assert "lt_channel" in ids
+    scoped = catalogue.list_dimensions(view="channel_attribution", query="channel")
+    assert {d.id for d in scoped} == {"channel"}

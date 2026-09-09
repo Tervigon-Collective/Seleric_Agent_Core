@@ -161,31 +161,7 @@ class QueryPlanner:
     def _metrics_supporting_dimension(
         self, dimension_id: str, *, exclude: str | None = None
     ) -> list[str]:
-        """Catalogue ids that declare support for dimension_id (for PlanError hints).
-
-        Prefer same-category metrics and id-token overlap with the excluded
-        metric so e.g. cancel_revenue + shipping_region suggests
-        event_cancel_revenue ahead of unrelated product metrics.
-        """
-        exclude_metric = self.catalogue.cat.metrics.get(exclude) if exclude else None
-        exclude_cat = exclude_metric.category if exclude_metric else None
-        exclude_tokens = {
-            t for t in (exclude or "").lower().replace("-", "_").split("_") if len(t) > 2
-        }
-        scored: list[tuple[int, str]] = []
-        for mid, m in self.catalogue.cat.metrics.items():
-            if not m.is_queryable or mid == exclude:
-                continue
-            if dimension_id not in m.supported_dimensions:
-                continue
-            score = 0
-            if exclude_cat and m.category == exclude_cat:
-                score += 3
-            mid_tokens = set(mid.lower().replace("-", "_").split("_"))
-            score += len(exclude_tokens & mid_tokens)
-            scored.append((-score, mid))
-        scored.sort()
-        return [mid for _, mid in scored[:8]]
+        return self.catalogue.metrics_supporting_dimension(dimension_id, exclude=exclude)
 
     def _validate_dimensions(self, metrics: list[MetricDef], dimension_ids: list[str]) -> list[str]:
         """Returns qualified cube dimension members."""

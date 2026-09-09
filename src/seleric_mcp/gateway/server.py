@@ -419,25 +419,53 @@ def build_server(settings: Settings) -> FastMCP:
         return out
 
     @mcp.tool()
-    def catalogue_list_dimensions(view: str) -> dict:
-        """Valid dimensions/filters for a Cube view (e.g. canonical_pnl,
-        commerce_orders, meta_ad_performance, customer_ltv).
+    def catalogue_list_dimensions(view: str | None = None, query: str | None = None) -> dict:
+        """Valid dimensions/filters for a Cube view, or a grain-first search
+        by English term when the view is not yet known.
+
+        Pass ``view`` (e.g. commerce_orders) to list that view's dimensions.
+        Pass ``query`` without ``view`` for grain-first questions ("channel
+        wise", "by city") so you are not stuck needing a view first. Pass both
+        to filter one view's dimensions by term. At least one argument is
+        required.
 
         Use each dimension's catalogue ``id`` (e.g. shipping_region) in
         metrics_query dimensions/filters — not the views[view] Cube member.
         """
-        _log_call("catalogue_list_dimensions", view=view)
-        if view not in ctx.catalogue.cat.views:
+        _log_call("catalogue_list_dimensions", view=view, query=query)
+        if not view and not query:
+            return {
+                "error": (
+                    "Pass view and/or query. Grain-first questions: "
+                    "query=<term> without view."
+                ),
+            }
+        if view and view not in ctx.catalogue.cat.views:
             return {
                 "error": f"Unknown view '{view}'",
                 "valid_views": sorted(ctx.catalogue.cat.views),
             }
         return {
             "view": view,
-            "dimensions": [d.model_dump() for d in ctx.catalogue.list_dimensions(view)],
+            "query": query,
+            "dimensions": [
+                d.model_dump() for d in ctx.catalogue.list_dimensions(view=view, query=query)
+            ],
             "note": "Pass dimension id (not views[*] Cube members) to metrics_query.",
             "catalogue_version": ctx.catalogue.version,
         }
+
+    @mcp.tool()
+    def catalogue_resolve_dimension(text: str) -> dict:
+        """Resolve grain language (e.g. 'channel', 'last-touch channel',
+        'channel wise report') to catalogue dimension id(s). Returns resolved
+        | ambiguous | unknown — never a metric. Ambiguous candidates include
+        products, views, value spaces, and metrics whose supported_dimensions
+        include the dim. Bare 'channel' is ambiguous (channel vs lt_channel);
+        do not silently pick commerce_net_revenue_daily. Apply ontology
+        grain_defaults when no measure is named."""
+        _log_call("catalogue_resolve_dimension", text=text)
+        return ctx.catalogue.resolve_dimension_term(text).model_dump()
 
     @mcp.tool()
     def catalogue_resolve_term(text: str) -> dict:
@@ -452,7 +480,8 @@ def build_server(settings: Settings) -> FastMCP:
     @mcp.tool()
     def catalogue_get_ontology(module: str | None = None) -> dict:
         """Business ontology snapshot: domains, data products, entity clusters
-        (related catalogue metrics), grain/date axes, attribution boundary.
+        (related catalogue metrics), grain/date axes, attribution boundary,
+        grain-first defaults.
 
         Pass module=<id> (see modules_list) to scope to one dashboard module's
         domains. If this instance is pinned to a module, that scope is always

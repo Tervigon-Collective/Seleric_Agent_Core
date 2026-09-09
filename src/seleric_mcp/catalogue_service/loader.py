@@ -92,7 +92,8 @@ class DimensionDef(BaseModel):
 
 class GlossaryTerm(BaseModel):
     term: str
-    canonical_id: str | None = None
+    canonical_id: str | None = None  # catalogue metric id
+    canonical_dimension_id: str | None = None  # catalogue dimension id (grain language)
     definition: str | None = None
 
 
@@ -214,6 +215,10 @@ class OpenMetadataOntology(BaseModel):
     domains: dict = Field(default_factory=dict)
     entity_clusters: dict = Field(default_factory=dict)
     attribution_boundary: dict = Field(default_factory=dict)
+    # Grain-first defaults when an operator names a dimension and no measure.
+    # Hand-authored; agents must not invent this. Shape is free-form YAML
+    # (see ontology.yaml grain_defaults) returned as-is by get_ontology.
+    grain_defaults: dict = Field(default_factory=dict)
     # Explicit reasons for catalogue metrics that are not in an entity cluster.
     # Shape: {default?: str, by_metric?: {id: reason}, by_view?: {view: reason},
     #         by_category?: {category: reason}}
@@ -495,6 +500,11 @@ def _check_integrity(cat: Catalogue) -> None:
     for t in cat.glossary:
         if t.canonical_id is not None and t.canonical_id not in cat.metrics:
             problems.append(f"glossary term '{t.term}': unknown canonical_id {t.canonical_id}")
+        if t.canonical_dimension_id is not None and t.canonical_dimension_id not in cat.dimensions:
+            problems.append(
+                f"glossary term '{t.term}': unknown canonical_dimension_id "
+                f"{t.canonical_dimension_id}"
+            )
         norm = t.term.strip().lower()
         if norm in gloss_by_norm:
             prev_term, prev_id = gloss_by_norm[norm]

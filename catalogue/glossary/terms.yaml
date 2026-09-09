@@ -679,12 +679,14 @@ terms:
     canonical_id: channel_orders
   - term: channel sales
     canonical_id: channel_net_revenue
+    canonical_dimension_id: channel
     definition: >
       Channel attribution daily — first-party Shopify net by channel (meta/google/
       organic_shopify). NOT Meta/Google Attribution Analysis Overview Net Sales;
       for dashboard parity use meta_attribution_net_sales / google_attribution_net_sales.
   - term: channel revenue
     canonical_id: channel_net_revenue
+    canonical_dimension_id: channel
   - term: channel net revenue
     canonical_id: channel_net_revenue
   - term: channel attribution sales
@@ -695,14 +697,37 @@ terms:
     canonical_id: channel_gross_revenue
   - term: orders by channel
     canonical_id: channel_orders
+    canonical_dimension_id: channel
   - term: sales by channel
     canonical_id: channel_net_revenue
+    canonical_dimension_id: channel
     definition: >
       Channel attribution daily rollup. For Meta/Google Attribution Analysis
       dashboard numbers use "meta attribution net sales" / "google attribution
       net sales" instead.
   - term: revenue by channel
     canonical_id: channel_net_revenue
+    canonical_dimension_id: channel
+  - term: by channel
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel (ChannelAttribution closed set by
+      default — see ontology grain_defaults). Distinct from last-touch
+      lt_channel. No measure is implied; resolve the dimension first.
+  - term: channel wise
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel. Not a measure shortcut. Distinct
+      from lt_channel (last-touch FINE). Unspecified channel-wise report uses
+      ChannelAttribution + channel_orders.
+  - term: channel-wise
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel. Not a measure shortcut.
+  - term: channelwise
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel. Not a measure shortcut.
   - term: attribution analysis by channel
     canonical_id: null
     definition: >
