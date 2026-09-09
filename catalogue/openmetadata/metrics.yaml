@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 238
+count: 257
 metrics:
   active_orders:
     category: commerce
@@ -12,6 +12,12 @@ metrics:
     - Commerce.ActiveOrder
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  ad_channel_net_sales:
+    category: attribution
+    cube_view: ad_channel_pnl
+    contract: null
+    glossary: []
+    om_name: adChannelNetSales
   add_to_cart_events:
     category: web_analytics
     cube_view: web_events_daily
@@ -21,6 +27,52 @@ metrics:
     om_name: addToCartEvents
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  amazon_actual_daily_gross_profit:
+    category: finance
+    cube_view: amazon_daily_pnl_actual
+    contract: null
+    glossary: []
+    om_name: amazonActualDailyGrossProfit
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
+  amazon_actual_daily_net_payout:
+    category: finance
+    cube_view: amazon_daily_pnl_actual
+    contract: null
+    glossary: []
+    om_name: amazonActualDailyNetPayout
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
+  amazon_actual_item_gross_profit:
+    category: finance
+    cube_view: amazon_order_item_pnl
+    contract: null
+    glossary: []
+    om_name: amazonActualItemGrossProfit
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
+  amazon_actual_item_net_payout:
+    category: finance
+    cube_view: amazon_order_item_pnl
+    contract: null
+    glossary: []
+    om_name: amazonActualItemNetPayout
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
+  amazon_ads_ad_group_spend:
+    category: paid_media
+    cube_view: amazon_ads_ad_groups
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: amazonAdsAdGroupSpend
+  amazon_ads_ad_spend:
+    category: paid_media
+    cube_view: amazon_ads_ads
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: amazonAdsAdSpend
   amazon_ads_clicks:
     category: paid_media
     cube_view: amazon_ad_performance
@@ -85,6 +137,14 @@ metrics:
     om_name: amazonCancelledOrders
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
+  amazon_close_exceptions:
+    category: finance
+    cube_view: amazon_accounts_exceptions
+    contract: null
+    glossary: []
+    om_name: amazonCloseExceptions
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   amazon_gross_revenue:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -103,6 +163,20 @@ metrics:
     om_name: amazonGrossSales
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
+  amazon_item_units_ordered:
+    category: commerce
+    cube_view: amazon_order_items
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonItemUnitsOrdered
+  amazon_ledger_amount:
+    category: commerce
+    cube_view: amazon_finance_charge_types_daily
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonLedgerAmount
   amazon_marketplace_fees:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -174,6 +248,22 @@ metrics:
     om_name: amazonPlatformFees
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-31'
+  amazon_recon_header_variance:
+    category: finance
+    cube_view: amazon_settlement_reconciliation
+    contract: null
+    glossary: []
+    om_name: amazonReconHeaderVariance
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
+  amazon_recon_settlements:
+    category: finance
+    cube_view: amazon_settlement_reconciliation
+    contract: null
+    glossary: []
+    om_name: amazonReconSettlements
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   amazon_recoverable_fee_gst:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -192,6 +282,13 @@ metrics:
     om_name: amazonReturnCount
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
+  amazon_return_request_orders:
+    category: commerce
+    cube_view: amazon_returns_daily
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonReturnRequestOrders
   amazon_return_revenue:
     category: commerce
     cube_view: amazon_attribution_overview
@@ -219,6 +316,24 @@ metrics:
     om_name: amazonReturnsCancels
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
+  amazon_sp_order_total:
+    category: commerce
+    cube_view: amazon_orders
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonSpOrderTotal
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
+  amazon_sp_orders_grain:
+    category: commerce
+    cube_view: amazon_orders
+    contract: null
+    glossary:
+    - Commerce.CommerceOrder
+    om_name: amazonSpOrdersGrain
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   amazon_tcs_tds:
     category: commerce
     cube_view: amazon_commerce_performance
@@ -244,8 +359,8 @@ metrics:
     glossary:
     - Commerce.AverageOrderValue
     om_name: aov
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: MATCH
+    dashboard_audited_on: '2026-09-04'
   attributed_aov:
     category: attribution
     cube_view: order_attribution
@@ -300,6 +415,14 @@ metrics:
     om_name: attributedRefundAmount
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
+  attribution_path_orders:
+    category: attribution
+    cube_view: attribution_paths
+    contract: null
+    glossary: []
+    om_name: attributionPathOrders
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   attribution_rate:
     category: attribution
     cube_view: order_attribution
@@ -363,6 +486,14 @@ metrics:
     om_name: avgOrdersPerCustomer
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  avg_touch_count:
+    category: attribution
+    cube_view: attribution_paths
+    contract: null
+    glossary: []
+    om_name: avgTouchCount
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   be_roas:
     category: finance
     cube_view: canonical_pnl
@@ -554,6 +685,12 @@ metrics:
     om_name: eventsPerSession
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  finance_waterfall_net_profit:
+    category: finance
+    cube_view: finance_waterfall
+    contract: null
+    glossary: []
+    om_name: financeWaterfallNetProfit
   first_orders:
     category: customer
     cube_view: purchase_sequence
@@ -765,6 +902,13 @@ metrics:
     om_name: googleSpendHourly
     dashboard_status: match
     dashboard_audited_on: '2026-07-31'
+  google_status_changes:
+    category: paid_media
+    cube_view: google_ads_status_history
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: googleStatusChanges
   gross_margin_pct:
     category: finance
     cube_view: canonical_pnl
@@ -1281,6 +1425,13 @@ metrics:
     om_name: metaSpendHourly
     dashboard_status: match
     dashboard_audited_on: '2026-07-31'
+  meta_status_changes:
+    category: paid_media
+    cube_view: meta_ads_status_history
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: metaStatusChanges
   meta_thruplays:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1519,6 +1670,12 @@ metrics:
     om_name: packagingCost
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  payment_amount_signed:
+    category: finance
+    cube_view: payments
+    contract: null
+    glossary: []
+    om_name: paymentAmountSigned
   payment_gateway_fees:
     category: finance
     cube_view: canonical_pnl
@@ -1528,6 +1685,14 @@ metrics:
     om_name: paymentGatewayFees
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  pre_purchase_touches:
+    category: attribution
+    cube_view: touchpoints
+    contract: null
+    glossary: []
+    om_name: prePurchaseTouches
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   prepaid_orders:
     category: commerce
     cube_view: commerce_orders
@@ -1978,8 +2143,8 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: totalOperatingCostAllChannels
-    dashboard_status: unclear
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: MATCH
+    dashboard_audited_on: '2026-09-04'
   total_orders:
     category: commerce
     cube_view: orders_all_channels
@@ -2025,6 +2190,14 @@ metrics:
     om_name: touchAttributedOrders
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  touch_distinct_orders:
+    category: attribution
+    cube_view: touchpoints
+    contract: null
+    glossary: []
+    om_name: touchDistinctOrders
+    dashboard_status: not_in_dashboard
+    dashboard_audited_on: '2026-09-09'
   units_per_order:
     category: product
     cube_view: product_performance

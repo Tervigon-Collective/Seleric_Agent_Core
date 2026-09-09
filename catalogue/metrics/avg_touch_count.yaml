@@ -5,7 +5,7 @@ status: certified
 description: Average touch_count per attribution path (ratio-of-aggregates). Shopify-only; not last-touch
   credit_pct.
 formula:
-  human_readable: avg_touch_count
+  human_readable: AVG(touch_count)
   authoritative_source: cube
 cube_mapping:
   view: attribution_paths

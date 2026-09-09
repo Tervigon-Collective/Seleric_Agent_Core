@@ -304,8 +304,85 @@ class CatalogueService:
             vocab.append(m.display_name.lower())
         return vocab
 
+    def _metric_summary(self, m: MetricDef, matched_on: str) -> MetricSummary:
+        return MetricSummary(
+            id=m.id,
+            display_name=m.display_name,
+            category=m.category,
+            description=m.description.strip(),
+            aggregation=m.aggregation,
+            view=m.cube_mapping.view,
+            supported_dimensions=m.supported_dimensions,
+            matched_on=matched_on,
+        )
+
+    def list_metrics(self, module: str | None = None) -> SearchResult:
+        """Queryable metrics with supported_dimensions — catalogue bootstrap listing.
+
+        Empty ``catalogue_search_metrics`` and ``catalogue_list_metrics`` use this
+        so agents can warm a grain cache without a search term.
+        """
+        allowed = self._module_metrics.get(module) if module else None
+        matches = [
+            self._metric_summary(m, "list")
+            for m in self._searchable_metrics()
+            if allowed is None or m.id in allowed
+        ]
+        return SearchResult(
+            matches=matches,
+            suggestions=[],
+            catalogue_version=self.version,
+            dimensions=[],
+        )
+
+    def bootstrap(self, module: str | None = None) -> dict:
+        """One-shot warm payload: queryable metrics + slim dimension index + grain_defaults."""
+        listed = self.list_metrics(module=module)
+        allowed_views = self._module_views.get(module) if module else None
+        dimensions: list[dict] = []
+        for d in self.cat.dimensions.values():
+            if allowed_views is not None and not (set(d.views) & allowed_views):
+                continue
+            dimensions.append(
+                {
+                    "id": d.id,
+                    "display_name": d.display_name,
+                    "aliases": list(d.aliases),
+                    "views": dict(d.views),
+                    "products": [p.model_dump() for p in self._dimension_products(d)],
+                }
+            )
+        onto = self.get_ontology(module)
+        return {
+            "metrics": [m.model_dump() for m in listed.matches],
+            "dimensions": dimensions,
+            "grain_defaults": onto.get("grain_defaults") if "error" not in onto else None,
+            "catalogue_version": self.version,
+        }
+
+    def lookup_metric(self, metric_id: str) -> tuple[MetricDef, str | None] | None:
+        """Queryable resolve, or exact id including draft/broken (for get_metric)."""
+        resolved = self.resolve_metric_id(metric_id)
+        if resolved is not None:
+            mid, notice = resolved
+            m = self.cat.metrics.get(mid)
+            return (m, notice) if m is not None else None
+        raw = (metric_id or "").strip()
+        m = self.cat.metrics.get(raw)
+        if m is not None:
+            notice = None
+            if not m.is_queryable:
+                notice = (
+                    f"Metric '{m.id}' is status={m.status} and cannot be queried. "
+                    "Use a certified companion (see supported_dimensions / related metrics)."
+                )
+            return m, notice
+        return None
+
     def search(self, query: str, module: str | None = None) -> SearchResult:
         q = _normalize(query)
+        if not q:
+            return self.list_metrics(module=module)
         matches: dict[str, MetricSummary] = {}
         dim_matches: dict[str, DimensionSummary] = {}
         allowed = self._module_metrics.get(module) if module else None
@@ -315,16 +392,7 @@ class CatalogueService:
                 return
             if allowed is not None and m.id not in allowed:
                 return
-            matches[m.id] = MetricSummary(
-                id=m.id,
-                display_name=m.display_name,
-                category=m.category,
-                description=m.description.strip(),
-                aggregation=m.aggregation,
-                view=m.cube_mapping.view,
-                supported_dimensions=m.supported_dimensions,
-                matched_on=matched_on,
-            )
+            matches[m.id] = self._metric_summary(m, matched_on)
 
         def add_dim(d: DimensionDef, matched_on: str) -> None:
             if d.id in dim_matches:
@@ -409,8 +477,20 @@ class CatalogueService:
         )
 
     def resolve_term(
-        self, text: str
-    ) -> ResolvedTerm | DefinitionOnlyTerm | AmbiguousTerm | UnknownTerm:
+        self,
+        text: str,
+        kind: str | None = None,
+    ) -> (
+        ResolvedTerm
+        | DefinitionOnlyTerm
+        | AmbiguousTerm
+        | UnknownTerm
+        | ResolvedDimension
+        | AmbiguousDimension
+        | UnknownDimension
+    ):
+        if (kind or "").strip().lower() == "dimension":
+            return self.resolve_dimension_term(text)
         t = text.strip().lower()
 
         # 0. Cube-qualified measure / deprecated Cube alias pasted from

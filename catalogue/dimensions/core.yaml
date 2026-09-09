@@ -39,6 +39,23 @@ dimensions:
       web_events_daily: web_events_daily.brand_id
       refund_events: refund_events.brand_id
       return_lifecycle: return_lifecycle.brand_id
+      ad_channel_pnl: ad_channel_pnl.brand_id
+      amazon_daily_pnl_actual: amazon_daily_pnl_actual.brand_id
+      amazon_order_item_pnl: amazon_order_item_pnl.brand_id
+      amazon_ads_ad_groups: amazon_ads_ad_groups.brand_id
+      amazon_ads_ads: amazon_ads_ads.brand_id
+      amazon_accounts_exceptions: amazon_accounts_exceptions.brand_id
+      amazon_order_items: amazon_order_items.brand_id
+      amazon_finance_charge_types_daily: amazon_finance_charge_types_daily.brand_id
+      amazon_settlement_reconciliation: amazon_settlement_reconciliation.brand_id
+      amazon_returns_daily: amazon_returns_daily.brand_id
+      amazon_orders: amazon_orders.brand_id
+      attribution_paths: attribution_paths.brand_id
+      finance_waterfall: finance_waterfall.brand_id
+      google_ads_status_history: google_ads_status_history.brand_id
+      meta_ads_status_history: meta_ads_status_history.brand_id
+      payments: payments.brand_id
+      touchpoints: touchpoints.brand_id
   - id: order_date
     display_name: Order Date
     description: IST order placement day.
@@ -50,6 +67,9 @@ dimensions:
       product_performance: product_performance.order_date
       refund_events: refund_events.order_date
       return_lifecycle: return_lifecycle.order_date
+      amazon_orders: amazon_orders.order_date
+      attribution_paths: attribution_paths.order_date
+      touchpoints: touchpoints.order_date
   - id: order_created_at_ist
     display_name: Order Created At (IST)
     description: >
@@ -103,6 +123,7 @@ dimensions:
       (do not treat unattributed as organic).
     views:
       order_attribution: order_attribution.lt_platform
+      touchpoints: touchpoints.lt_platform
   - id: lt_channel
     display_name: Last-touch Channel
     description: Last-touch attributed channel (ig_feed/fb_feed/google_pmax/...). Resolved, not raw UTM.
@@ -168,6 +189,7 @@ dimensions:
     views:
       order_attribution: order_attribution.attribution_model
       meta_ad_attribution: meta_ad_attribution.attribution_model
+      attribution_paths: attribution_paths.attribution_model
   - id: identity_resolution_method
     display_name: Identity Resolution Method
     description: >
@@ -265,6 +287,7 @@ dimensions:
       product_performance: product_performance.order_status
       purchase_sequence: purchase_sequence.order_status
       refund_events: refund_events.order_status
+      amazon_orders: amazon_orders.order_status
   - id: return_status
     display_name: Return Status
     description: Return lifecycle status on the order / line.
@@ -545,6 +568,11 @@ dimensions:
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
       platform_attribution_commerce: platform_attribution_commerce.report_date
+      amazon_daily_pnl_actual: amazon_daily_pnl_actual.report_date
+      amazon_order_item_pnl: amazon_order_item_pnl.report_date
+      amazon_accounts_exceptions: amazon_accounts_exceptions.report_date
+      amazon_settlement_reconciliation: amazon_settlement_reconciliation.report_date
+      amazon_returns_daily: amazon_returns_daily.report_date
   - id: platform
     display_name: Attribution Platform
     description: Last-touch platform bucket on platform_attribution_commerce (meta | google | organic).
@@ -1044,6 +1072,22 @@ dimensions:
     aliases: [optimization goal, optimisation goal, delivery goal]
     views:
       meta_ad_performance: meta_ad_performance.adset_optimization_goal
+  - id: seller_sku
+    display_name: Seller SKU
+    description: >
+      Amazon seller SKU on actuals and order-item ports. Not Shopify variant_sku.
+    aliases: [sku, amazon sku, seller sku]
+    views:
+      amazon_order_item_pnl: amazon_order_item_pnl.seller_sku
+      amazon_order_items: amazon_order_items.seller_sku
+  - id: exception_type
+    display_name: Exception Type
+    description: >
+      Amazon Accounts close-exception class (Finances vs settlement mismatch).
+      Diagnose recon breaks; not a P&L dimension.
+    aliases: [close exception, exception class]
+    views:
+      amazon_accounts_exceptions: amazon_accounts_exceptions.exception_type
   - id: neurohack_tag_codes
     display_name: Neurohack Tags
     description: >

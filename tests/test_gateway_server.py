@@ -102,6 +102,8 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
     names = {t.name for t in mcp._tool_manager.list_tools()}
     analytics_and_actions = {
         "catalogue_search_metrics",
+        "catalogue_list_metrics",
+        "catalogue_bootstrap",
         "catalogue_get_metric",
         "catalogue_get_ontology",
         "catalogue_related_metrics",
@@ -373,6 +375,54 @@ async def test_catalogue_resolve_term_aliases_cube_member(built_server):
     assert out["metric_id"] == "total_orders"
 
 
+async def test_catalogue_search_empty_query_lists_metrics(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_search_metrics")
+    out = fn("")
+    ids = {m["id"] for m in out["matches"]}
+    assert out["matches"]
+    assert "commerce_net_revenue_daily" in ids
+    assert all(m.get("supported_dimensions") is not None for m in out["matches"])
+    listed = _tool_fn(mcp, "catalogue_list_metrics")()
+    assert {m["id"] for m in listed["matches"]} == ids
+
+
+async def test_catalogue_bootstrap_includes_grain_index(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_bootstrap")
+    out = fn()
+    metric_ids = {m["id"] for m in out["metrics"]}
+    dim_ids = {d["id"] for d in out["dimensions"]}
+    assert "commerce_net_revenue_daily" in metric_ids
+    assert "channel" in dim_ids
+    assert "lt_channel" in dim_ids
+    lt = next(d for d in out["dimensions"] if d["id"] == "lt_channel")
+    assert any("last-touch" in a.lower() or "last touch" in a.lower() for a in lt["aliases"])
+    assert out["grain_defaults"]["by_channel"]["default_measure"] == "channel_orders"
+
+
+async def test_catalogue_get_metric_returns_draft_channel_net_revenue(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metric")
+    out = fn("channel_net_revenue")
+    assert "error" not in out or out.get("id") == "channel_net_revenue"
+    assert out["id"] == "channel_net_revenue"
+    assert out["status"] == "draft"
+    assert out["queryable"] is False
+    assert "channel" in out["supported_dimensions"]
+
+
+async def test_catalogue_resolve_term_kind_dimension(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_resolve_term")
+    out = fn("channel", kind="dimension")
+    assert out["kind"] == "ambiguous"
+    ids = {c["dimension_id"] for c in out["candidates"]}
+    assert "channel" in ids
+    assert "lt_channel" in ids
+    assert "metric_id" not in out
+
+
 async def test_catalogue_resolve_dimension_channel_is_ambiguous(built_server):
     mcp, ctx = built_server
     fn = _tool_fn(mcp, "catalogue_resolve_dimension")
@@ -392,8 +442,9 @@ async def test_catalogue_list_dimensions_query_without_view(built_server):
     ids = {d["id"] for d in out["dimensions"]}
     assert "channel" in ids
     assert "lt_channel" in ids
-    empty = fn()
-    assert "error" in empty
+    all_dims = fn()
+    assert "error" not in all_dims
+    assert {d["id"] for d in all_dims["dimensions"]} >= {"channel", "lt_channel"}
 
 
 async def test_insights_explain_rejects_composed_parent(built_server, fake_cube):

@@ -63,12 +63,15 @@ NON-NEGOTIABLE RULES
    build metrics_query. Use it as the default resolver and go straight to
    metrics_query. Reach for the others only when search doesn't settle it — do
    not chain all five out of habit:
-   - catalogue_search_metrics   (primary — id + view + dimensions in one call)
+   - catalogue_search_metrics   (primary — id + view + dimensions in one call;
+     empty query lists every queryable metric for cache warm)
+   - catalogue_list_metrics / catalogue_bootstrap  (dedicated warm)
    - catalogue_resolve_dimension (grain-first: "by channel", "channel-wise";
      never invent a dimension id from English)
-   - catalogue_resolve_term     (a single ambiguous/trap term needing a verdict)
-   - catalogue_get_metric       (only when you need the formula/policy/caveats)
-   - catalogue_list_dimensions  (view=... or query=<grain term> without a view)
+   - catalogue_resolve_term     (metric by default; kind=dimension for grain)
+   - catalogue_get_metric       (only when you need the formula/policy/caveats;
+     draft ids return status=draft, not unknown)
+   - catalogue_list_dimensions  (view=..., query=<grain term>, or omit both)
 
    Grain-first questions (a breakdown named, no measure): call
    catalogue_resolve_dimension on the question. Bare "channel" is ambiguous

@@ -55,7 +55,7 @@ data_products:
   domain: Commerce
   owner_team: commerce-data-team
   primary_serve_table: clickhouse.default.serve.orders_all_channels
-  contract: orders_all_channels_contract_v1
+  contract: cross_channel_orders_contract_v1
   secondary_contracts:
   - sales_all_channels_contract_v1
   - returns_cancels_all_channels_contract_v1

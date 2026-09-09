@@ -178,11 +178,12 @@ question-to-metric mappings.
 
 Resolve all business concepts using catalogue tools:
 
-- `catalogue_search_metrics`
+- `catalogue_search_metrics` (empty query lists every queryable metric — bootstrap)
+- `catalogue_list_metrics` / `catalogue_bootstrap` (dedicated warm: metrics + dimension aliases + grain_defaults)
 - `catalogue_resolve_dimension` (grain-first: "by channel", "channel-wise"; do not invent a dimension id)
-- `catalogue_resolve_term`
-- `catalogue_get_metric`
-- `catalogue_list_dimensions` (`view=...` or `query=<grain term>` without a view)
+- `catalogue_resolve_term` (`kind=dimension` for grain; default is metric-only)
+- `catalogue_get_metric` (draft ids such as `channel_net_revenue` return status=draft, not "unknown")
+- `catalogue_list_dimensions` (`view=...`, `query=<grain term>`, or omit both for the full index)
 
 When the user names a breakdown and no measure ("channel wise report"), resolve
 the dimension first. Bare "channel" is ambiguous (`channel` vs `lt_channel`).

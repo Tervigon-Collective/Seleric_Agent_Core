@@ -761,3 +761,34 @@ def test_list_dimensions_search_by_term_without_view(catalogue):
     assert "lt_channel" in ids
     scoped = catalogue.list_dimensions(view="channel_attribution", query="channel")
     assert {d.id for d in scoped} == {"channel"}
+
+
+def test_empty_search_lists_queryable_metrics_for_bootstrap(catalogue):
+    result = catalogue.search("")
+    ids = {m.id for m in result.matches}
+    assert result.matches
+    assert "commerce_net_revenue_daily" in ids
+    assert "channel_orders" in ids
+    assert "channel_net_revenue" not in ids  # draft, not queryable
+    assert all(m.matched_on == "list" for m in result.matches)
+    listed = catalogue.list_metrics()
+    assert {m.id for m in listed.matches} == ids
+
+
+def test_lookup_metric_returns_draft_channel_net_revenue(catalogue):
+    hit = catalogue.lookup_metric("channel_net_revenue")
+    assert hit is not None
+    m, notice = hit
+    assert m.id == "channel_net_revenue"
+    assert m.status == "draft"
+    assert notice and "cannot be queried" in notice
+
+
+def test_resolve_term_kind_dimension_does_not_return_a_metric(catalogue):
+    from seleric_mcp.catalogue_service.service import AmbiguousDimension
+
+    r = catalogue.resolve_term("channel", kind="dimension")
+    assert isinstance(r, AmbiguousDimension)
+    ids = {c.dimension_id for c in r.candidates}
+    assert "channel" in ids
+    assert "lt_channel" in ids

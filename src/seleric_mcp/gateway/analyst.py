@@ -76,6 +76,8 @@ MODULE_SCOPED_TOOLS = frozenset(
         "catalogue_get_ontology",
         "catalogue_get_metric",
         "catalogue_related_metrics",
+        "catalogue_list_metrics",
+        "catalogue_bootstrap",
     }
 )
 

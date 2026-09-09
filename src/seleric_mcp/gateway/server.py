@@ -356,6 +356,10 @@ def build_server(settings: Settings) -> FastMCP:
         user's term hasn't been resolved yet. Returns matches with the view
         and supported dimensions; unknown terms return suggestions only.
 
+        Empty query (or whitespace) lists every queryable metric — this is the
+        catalogue bootstrap listing (supported_dimensions included). Prefer
+        catalogue_list_metrics / catalogue_bootstrap when warming a cache.
+
         Pass module=<id> (see modules_list — e.g. webanalytics, commerce,
         attribution) to restrict results to one dashboard module's metrics. If
         this instance is pinned to a module, that scope is always applied."""
@@ -368,6 +372,39 @@ def build_server(settings: Settings) -> FastMCP:
             if unknown:
                 return unknown
         return ctx.catalogue.search(query, module=effective).model_dump()
+
+    @mcp.tool()
+    def catalogue_list_metrics(module: str | None = None) -> dict:
+        """List every queryable catalogue metric with view and supported_dimensions.
+
+        Use this (or catalogue_search_metrics with an empty query) to warm an
+        agent catalogue cache. Grain lives on each match's supported_dimensions
+        — do not require a view first. Pass module=<id> to scope."""
+        _log_call("catalogue_list_metrics", module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        return ctx.catalogue.list_metrics(module=effective).model_dump()
+
+    @mcp.tool()
+    def catalogue_bootstrap(module: str | None = None) -> dict:
+        """One-shot catalogue warm: queryable metrics (with supported_dimensions),
+        slim dimension index (id, aliases, views, products), and ontology
+        grain_defaults. Prefer this over an empty search when the agent cache
+        is cold."""
+        _log_call("catalogue_bootstrap", module=module)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        return ctx.catalogue.bootstrap(module=effective)
 
     @mcp.tool()
     def catalogue_get_metric(metric_id: str, module: str | None = None) -> dict:
@@ -388,27 +425,27 @@ def build_server(settings: Settings) -> FastMCP:
             unknown = _unknown_module(effective)
             if unknown:
                 return unknown
-        resolved = ctx.catalogue.resolve_metric_id(metric_id)
-        if resolved is None:
+        looked_up = ctx.catalogue.lookup_metric(metric_id)
+        if looked_up is None:
             result = ctx.catalogue.search(metric_id)
             return {
                 "error": f"Unknown metric '{metric_id}'",
                 "suggestions": [s.id for s in result.matches] + result.suggestions,
             }
-        canonical_id, alias_notice = resolved
+        m, alias_notice = looked_up
+        canonical_id = m.id
         if effective is not None:
             denied = _check_metric_module([canonical_id], effective)
             if denied:
                 return denied
-        m = ctx.catalogue.get_metric(canonical_id)
-        assert m is not None
         freshness = ctx.catalogue.freshness(m.cube_mapping.view)
         out = {
             **m.model_dump(),
             "freshness": freshness,
             "catalogue_version": ctx.catalogue.version,
+            "queryable": m.is_queryable,
             # Agent-facing: use these ids in metrics_query — not cube_mapping.
-            "query_as": {"measures": [m.id]},
+            "query_as": {"measures": [m.id]} if m.is_queryable else {"measures": []},
         }
         om_block = ctx.catalogue.metric_om_context(canonical_id)
         if om_block:
@@ -426,20 +463,13 @@ def build_server(settings: Settings) -> FastMCP:
         Pass ``view`` (e.g. commerce_orders) to list that view's dimensions.
         Pass ``query`` without ``view`` for grain-first questions ("channel
         wise", "by city") so you are not stuck needing a view first. Pass both
-        to filter one view's dimensions by term. At least one argument is
-        required.
+        to filter one view's dimensions by term. Omit both to list the full
+        dimension index (bootstrap).
 
         Use each dimension's catalogue ``id`` (e.g. shipping_region) in
         metrics_query dimensions/filters — not the views[view] Cube member.
         """
         _log_call("catalogue_list_dimensions", view=view, query=query)
-        if not view and not query:
-            return {
-                "error": (
-                    "Pass view and/or query. Grain-first questions: "
-                    "query=<term> without view."
-                ),
-            }
         if view and view not in ctx.catalogue.cat.views:
             return {
                 "error": f"Unknown view '{view}'",
@@ -468,14 +498,15 @@ def build_server(settings: Settings) -> FastMCP:
         return ctx.catalogue.resolve_dimension_term(text).model_dump()
 
     @mcp.tool()
-    def catalogue_resolve_term(text: str) -> dict:
-        """Resolve a single business term to its canonical metric. Returns a
-        typed result: resolved (may be auto_resolved with a confidence score
-        from normalization/fuzzy match) | definition_only | ambiguous (ranked
-        candidates — pick the obvious one or ask) | unknown (suggestions).
-        Weak matches are never silently resolved."""
-        _log_call("catalogue_resolve_term", text=text)
-        return ctx.catalogue.resolve_term(text).model_dump()
+    def catalogue_resolve_term(text: str, kind: str | None = None) -> dict:
+        """Resolve a single business term. Default kind is metric.
+
+        Pass kind=dimension to resolve grain language (same as
+        catalogue_resolve_dimension). Returns a typed result: resolved |
+        definition_only | ambiguous | unknown. Weak matches are never silently
+        resolved. kind=dimension never returns a metric."""
+        _log_call("catalogue_resolve_term", text=text, kind=kind)
+        return ctx.catalogue.resolve_term(text, kind=kind).model_dump()
 
     @mcp.tool()
     def catalogue_get_ontology(module: str | None = None) -> dict:
