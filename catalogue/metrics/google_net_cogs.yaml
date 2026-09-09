@@ -25,6 +25,13 @@ data_owner: Growth / Attribution
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst]
   scopes: [metrics:read]
+examples:
+- question: Google Net COGS last 30 days
+  request:
+    measures:
+    - google_net_cogs
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

@@ -35,6 +35,13 @@ access_policy:
   - analyst
   scopes:
   - metrics:read
+examples:
+- question: Google Net Profit last 30 days
+  request:
+    measures:
+    - google_net_profit
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

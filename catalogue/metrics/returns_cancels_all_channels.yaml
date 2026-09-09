@@ -27,6 +27,13 @@ data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Returns / Cancels (All Channels) last 30 days
+  request:
+    measures:
+    - returns_cancels_all_channels
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

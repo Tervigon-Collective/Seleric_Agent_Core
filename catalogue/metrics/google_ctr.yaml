@@ -34,6 +34,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google CTR last 30 days
+  request:
+    measures:
+    - google_ctr
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_ctr equals (google_clicks / google_impressions) recomputed on any slice
 ratio_components:

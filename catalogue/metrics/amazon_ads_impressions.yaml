@@ -2,7 +2,10 @@ id: amazon_ads_impressions
 display_name: Amazon Ads Impressions
 category: paid_media
 status: certified
-description: Amazon SP campaign impressions.
+description: >
+  Amazon Sponsored Products campaign impressions on report_date from
+  amazon_ad_performance. Platform delivery only — not attributed impressions-to-purchase
+  and not ACOS.
 formula:
   human_readable: SUM(amazon_ads_impressions)
   authoritative_source: cube
@@ -37,6 +40,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Amazon Ads Impressions last 30 days
+  request:
+    measures:
+    - amazon_ads_impressions
+    time_range:
+      preset: last_30d
 validation_tests:
 - amazon_ads_impressions >= 0 for any slice
 dashboard_alignment:

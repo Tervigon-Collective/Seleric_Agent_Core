@@ -49,6 +49,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Spend (breakdown) last 30 days
+  request:
+    measures:
+    - meta_breakdown_spend
+    time_range:
+      preset: last_30d
 validation_tests:
 - single breakdown_type totals reconcile to meta_spend/meta_impressions on meta_ad_performance
 currency_default: INR

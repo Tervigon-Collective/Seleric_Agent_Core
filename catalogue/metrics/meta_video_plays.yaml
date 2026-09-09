@@ -2,7 +2,9 @@ id: meta_video_plays
 display_name: Meta Video Plays
 category: paid_media
 status: draft
-description: Video plays on Meta ads.
+description: >
+  Meta video plays on report_date from meta_ad_performance. Platform delivery/engagement
+  only — not 3s views, ThruPlay, or attributed conversions.
 formula:
   human_readable: SUM(meta_video_plays)
   authoritative_source: cube
@@ -59,6 +61,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Video Plays last 30 days
+  request:
+    measures:
+    - meta_video_plays
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_video_plays >= 0 for any slice
 dashboard_alignment:

@@ -33,6 +33,13 @@ access_policy:
   - growth_lead
   scopes:
   - metrics:read
+examples:
+- question: Net ROAS (All Channels) last 30 days
+  request:
+    measures:
+    - net_roas_all_channels
+    time_range:
+      preset: last_30d
 deprecated_aliases: []
 dashboard_alignment:
   status: drift_corrected

@@ -43,6 +43,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Recovered COGS (Returns) last 30 days
+  request:
+    measures:
+    - return_recovered_cogs
+    time_range:
+      preset: last_30d
 validation_tests:
 - return_recovered_cogs >= 0 for any slice
 deprecated_aliases: []

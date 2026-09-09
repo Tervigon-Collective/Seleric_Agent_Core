@@ -55,6 +55,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Events per Session last 30 days
+  request:
+    measures:
+    - events_per_session
+    time_range:
+      preset: last_30d
 validation_tests:
 - events_per_session >= 1 on unfiltered slices
 ratio_components:

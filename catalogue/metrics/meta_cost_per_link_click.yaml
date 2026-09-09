@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Cost per Link Click last 30 days
+  request:
+    measures:
+    - meta_cost_per_link_click
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_cost_per_link_click equals meta_spend / meta_link_clicks recomputed on any slice
 ratio_components:

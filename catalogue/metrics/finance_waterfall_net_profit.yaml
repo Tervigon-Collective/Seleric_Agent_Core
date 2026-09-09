@@ -1,0 +1,38 @@
+id: finance_waterfall_net_profit
+display_name: Finance Waterfall Net Profit
+category: finance
+status: certified
+description: >
+  Waterfall line_net_profit from serve.finance_waterfall_daily (gold.fct_finance_waterfall_daily). NOT canonical_pnl.net_profit and NOT gold.fct_daily_pnl (broken cost basis). Use only for waterfall questions.
+formula:
+  human_readable: line_net_profit
+  authoritative_source: cube
+cube_mapping:
+  view: finance_waterfall
+  measure: finance_waterfall.line_net_profit
+aggregation: additive
+unit: INR
+grain: daily brand
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Finance Waterfall Net Profit last 30 days
+  request:
+    measures:
+    - finance_waterfall_net_profit
+    time_range:
+      preset: last_30d
+validation_tests:
+- finance_waterfall_net_profit is defined on view finance_waterfall

@@ -35,6 +35,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Attribution Orders last 30 days
+  request:
+    measures:
+    - meta_attribution_orders
+    time_range:
+      preset: last_30d
 validation_tests:
 - June 2026 brand 20 = 1,299
 deprecated_aliases: []

@@ -43,6 +43,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Cost per Landing Page View last 30 days
+  request:
+    measures:
+    - meta_cost_per_landing_page_view
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_cost_per_landing_page_view equals meta_spend / meta_landing_page_views recomputed on
   any slice

@@ -32,6 +32,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Amazon Ads CTR last 30 days
+  request:
+    measures:
+    - amazon_ads_ctr
+    time_range:
+      preset: last_30d
 validation_tests:
 - amazon_ads_ctr equals (amazon_ads_clicks / amazon_ads_impressions) recomputed on
   any slice

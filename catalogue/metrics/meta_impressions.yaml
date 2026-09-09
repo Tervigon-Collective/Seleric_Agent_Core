@@ -2,7 +2,9 @@ id: meta_impressions
 display_name: Meta Impressions
 category: paid_media
 status: certified
-description: Ad impressions delivered by Meta.
+description: >
+  Meta ad impressions delivered on report_date from meta_ad_performance. Platform
+  delivery only — not reach (non-additive) and not platform-reported purchase value.
 formula:
   human_readable: SUM(meta_impressions)
   authoritative_source: cube
@@ -59,6 +61,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Impressions last 30 days
+  request:
+    measures:
+    - meta_impressions
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_impressions >= 0 for any slice
 dashboard_alignment:

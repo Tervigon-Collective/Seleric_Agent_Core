@@ -64,6 +64,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Returns (ex-GST, refund events) last 30 days
+  request:
+    measures:
+    - returns_excl_tax
+    time_range:
+      preset: last_30d
 validation_tests:
 - returns_excl_tax >= 0 for any slice
 deprecated_aliases: []

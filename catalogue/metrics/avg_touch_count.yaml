@@ -1,0 +1,46 @@
+id: avg_touch_count
+display_name: Average Touches per Path
+category: attribution
+status: certified
+description: Average touch_count per attribution path (ratio-of-aggregates). Shopify-only; not last-touch
+  credit_pct.
+formula:
+  human_readable: avg_touch_count
+  authoritative_source: cube
+cube_mapping:
+  view: attribution_paths
+  measure: attribution_paths.avg_touch_count
+aggregation: ratio
+unit: count
+grain: order x model
+supported_dimensions:
+- brand_id
+- order_date
+- attribution_model
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Average Touches per Path last 30 days
+  request:
+    measures:
+    - avg_touch_count
+    time_range:
+      preset: last_30d
+validation_tests:
+- avg_touch_count is defined on attribution_paths
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

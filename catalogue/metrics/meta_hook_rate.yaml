@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Hook Rate last 30 days
+  request:
+    measures:
+    - meta_hook_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_hook_rate equals meta_video_3s_views / meta_impressions recomputed on any slice
 ratio_components:

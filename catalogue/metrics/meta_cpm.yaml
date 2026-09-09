@@ -59,6 +59,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta CPM last 30 days
+  request:
+    measures:
+    - meta_cpm
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_cpm equals meta_spend / meta_impressions recomputed on any slice
 ratio_components:

@@ -115,6 +115,9 @@ dimensions:
       order_attribution: order_attribution.lt_utm_source
   - id: lt_utm_medium
     display_name: Last-touch UTM Medium
+    description: >
+      Lt Utm Medium: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       order_attribution: order_attribution.lt_utm_medium
   - id: lt_utm_campaign
@@ -129,14 +132,23 @@ dimensions:
       order_attribution: order_attribution.lt_campaign_id
   - id: lt_campaign_name
     display_name: Last-touch Campaign Name
+    description: >
+      Lt Campaign Name: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       order_attribution: order_attribution.lt_campaign_name
   - id: lt_adset_name
     display_name: Last-touch Adset Name
+    description: >
+      Lt Adset Name: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       order_attribution: order_attribution.lt_adset_name
   - id: lt_ad_name
     display_name: Last-touch Ad Name
+    description: >
+      Lt Ad Name: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       order_attribution: order_attribution.lt_ad_name
   - id: attribution_method
@@ -152,6 +164,9 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.attribution_model
   - id: identity_resolution_method
     display_name: Identity Resolution Method
+    description: >
+      Identity Resolution Method: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
     views:
       session_funnel: session_funnel.identity_resolution_method
       order_attribution: order_attribution.identity_resolution_method
@@ -196,19 +211,31 @@ dimensions:
       customer_data: customer_data.acquisition_platform
   - id: acquisition_channel
     display_name: Acquisition Channel
+    description: >
+      Channel credited with customer acquisition on the profile. Not the last-touch platform
+      on order_attribution.
     views:
       customer_ltv: customer_ltv.acquisition_channel
       customer_data: customer_data.acquisition_channel
   - id: acquisition_campaign
     display_name: Acquisition Campaign
+    description: >
+      Campaign credited with first purchase (hashed/profile). CustomerData / LTV only — not
+      last-touch order attribution.
     views:
       customer_ltv: customer_ltv.acquisition_campaign
   - id: is_repeat_customer
     display_name: Is Repeat Customer
+    description: >
+      Is Repeat Customer: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       customer_ltv: customer_ltv.is_repeat_customer
   - id: lifetime_order_count_band
     display_name: Lifetime Order Count Band
+    description: >
+      Lifetime Order Count Band: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
     allowed_values: ["1", "2", "3-5", "6+"]
     views:
       customer_ltv: customer_ltv.lifetime_order_count_band
@@ -260,11 +287,17 @@ dimensions:
       purchase_sequence: purchase_sequence.order_seq
   - id: order_seq_band
     display_name: Order Sequence Band
+    description: >
+      Order Seq Band: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     allowed_values: ["1st", "2nd", "3rd", "4th+"]
     views:
       purchase_sequence: purchase_sequence.order_seq_band
   - id: is_first_order
     display_name: Is First Order
+    description: >
+      Is First Order: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       purchase_sequence: purchase_sequence.is_first_order
   - id: event_date
@@ -424,6 +457,9 @@ dimensions:
       product_performance: product_performance.is_new_customer
   - id: sku
     display_name: SKU
+    description: >
+      Sku: shared catalogue dimension for grouping and filters. Not a measure; empty/null
+      means unknown, never a separate bucket unless documented.
     aliases: [SKU, product sku]
     views:
       product_performance: product_performance.sku
@@ -442,23 +478,35 @@ dimensions:
       product_performance: product_performance.variant_id
   - id: product_title
     display_name: Product Title
+    description: >
+      Product Title: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     aliases: [product, product name]
     views:
       product_performance: product_performance.product_title
       return_lifecycle: return_lifecycle.product_title
   - id: variant_title
     display_name: Variant Title
+    description: >
+      Variant Title: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     aliases: [variant]
     views:
       product_performance: product_performance.variant_title
       return_lifecycle: return_lifecycle.variant_title
   - id: product_type
     display_name: Product Type / Category
+    description: >
+      Product Type: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     aliases: [category, product category, product type]
     views:
       product_performance: product_performance.product_type
   - id: vendor
     display_name: Vendor
+    description: >
+      Vendor: shared catalogue dimension for grouping and filters. Not a measure; empty/null
+      means unknown, never a separate bucket unless documented.
     aliases: [brand vendor, supplier, vendor name]
     views:
       product_performance: product_performance.vendor
@@ -530,6 +578,9 @@ dimensions:
       amazon_ad_performance: amazon_ad_performance.campaign_status
   - id: campaign_objective
     display_name: Campaign Objective (Meta)
+    description: >
+      Campaign objective as reported by the ads platform (e.g. OUTCOME_SALES). Not the
+      last-touch attribution objective.
     allowed_values: [OUTCOME_SALES, LINK_CLICKS, OUTCOME_LEADS, OUTCOME_ENGAGEMENT, OUTCOME_AWARENESS]
     views:
       meta_ad_performance: meta_ad_performance.campaign_objective
@@ -545,6 +596,8 @@ dimensions:
       amazon_ad_performance: amazon_ad_performance.campaign_type
   - id: adset_id
     display_name: Adset ID (Meta)
+    description: >
+      Meta ad set / Google ad group id. Opaque key; use adset_name for labels.
     views:
       session_funnel: session_funnel.adset_id
       meta_ad_performance: meta_ad_performance.adset_id
@@ -552,6 +605,8 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.adset_id
   - id: adset_name
     display_name: Adset Name (Meta)
+    description: >
+      Meta ad set / Google ad group name at extract time.
     views:
       session_funnel: session_funnel.adset_name
       meta_ad_performance: meta_ad_performance.adset_name
@@ -560,6 +615,9 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.adset_name
   - id: ad_id
     display_name: Ad ID (Meta)
+    description: >
+      Platform ad id. Opaque key — prefer ad_name when grouping for humans. May be empty when
+      the loader dropped creative/ad grain.
     views:
       session_funnel: session_funnel.ad_id
       meta_ad_performance: meta_ad_performance.ad_id
@@ -567,6 +625,8 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.ad_id
   - id: ad_name
     display_name: Ad Name (Meta)
+    description: >
+      Platform ad name at extract time. May lag live Ads Manager renames.
     views:
       session_funnel: session_funnel.ad_name
       meta_ad_performance: meta_ad_performance.ad_name
@@ -575,24 +635,36 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.ad_name
   - id: creative_id
     display_name: Creative ID (Meta)
+    description: >
+      Meta creative id on the ad-day row. Coverage collapsed from Aug 2026 — null means
+      unknown, not absent spend.
     views:
       meta_ad_performance: meta_ad_performance.creative_id
   - id: creative_type
     display_name: Creative Type (Meta)
+    description: >
+      Meta creative type (image/video/carousel). Same coverage warning as creative_id.
     views:
       meta_ad_performance: meta_ad_performance.creative_type
       meta_ad_performance_hourly: meta_ad_performance_hourly.creative_type
   - id: ad_account_id
     display_name: Ad Account (Meta)
+    description: >
+      Paid-media ad account id (Meta/Google/Amazon). Tenant-scoped with brand_id.
     views:
       meta_ad_performance: meta_ad_performance.ad_account_id
       meta_ad_performance_hourly: meta_ad_performance_hourly.ad_account_id
   - id: customer_account_id
     display_name: Customer Account (Google)
+    description: >
+      Google Ads customer id (account). Not a Shopify customer_id.
     views:
       google_ad_performance: google_ad_performance.customer_account_id
   - id: targeting_type
     display_name: Targeting Type (Amazon)
+    description: >
+      Targeting Type: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     allowed_values: [AUTO, MANUAL]
     views:
       amazon_ad_performance: amazon_ad_performance.targeting_type
@@ -685,14 +757,21 @@ dimensions:
       customer_data: customer_data.accepts_marketing
   - id: default_city
     display_name: Default City
+    description: >
+      Customer default city from the Shopify profile (CustomerData). Not shipping city on the
+      order.
     views:
       customer_data: customer_data.default_city
   - id: default_province
     display_name: Default Province
+    description: >
+      Customer default province/state from the Shopify profile.
     views:
       customer_data: customer_data.default_province
   - id: default_country
     display_name: Default Country
+    description: >
+      Customer default country from the Shopify profile. Not shipping country on the order.
     views:
       customer_data: customer_data.default_country
   - id: session_date
@@ -744,22 +823,37 @@ dimensions:
       refund_events: refund_events.payment_status
   - id: primary_return_status
     display_name: Primary Return Status
+    description: >
+      Primary Return Status: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
     views:
       refund_events: refund_events.primary_return_status
   - id: shopify_return_status
     display_name: Shopify Return Status
+    description: >
+      Shopify Return Status: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
     views:
       refund_events: refund_events.shopify_return_status
   - id: restock_type
     display_name: Restock Type
+    description: >
+      Restock Type: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       return_lifecycle: return_lifecycle.restock_type
   - id: restock
     display_name: Restock Flag
+    description: >
+      Restock: shared catalogue dimension for grouping and filters. Not a measure; empty/null
+      means unknown, never a separate bucket unless documented.
     views:
       refund_events: refund_events.restock
   - id: is_unprocessed
     display_name: Is Unprocessed Refund
+    description: >
+      Is Unprocessed: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
     views:
       refund_events: refund_events.is_unprocessed
   # ---- Web session / geo (Snowplow) ----
@@ -772,50 +866,74 @@ dimensions:
       web_events: web_events.geo_city
   - id: geo_region
     display_name: Geo Region (Session)
+    description: >
+      Session geo region (Snowplow). Sparse; empty is unknown.
     aliases: [session region, visitor region, geo region]
     views:
       session_funnel: session_funnel.geo_region
       web_events: web_events.geo_region
   - id: geo_country
     display_name: Geo Country (Session)
+    description: >
+      Session geo country (Snowplow). Sparse; empty is unknown.
     aliases: [session country, visitor country, geo country]
     views:
       session_funnel: session_funnel.geo_country
       web_events: web_events.geo_country
   - id: device_type
     display_name: Device Type
+    description: >
+      Session device type (Snowplow). Currently unpopulated on session_funnel — do not use for
+      conversion-by-device until coverage returns.
     views:
       session_funnel: session_funnel.device_type
   - id: browser_family
     display_name: Browser Family
+    description: >
+      Snowplow browser family on the session. Currently sparse/unpopulated on session_funnel —
+      treat empty as unknown, not 'other'.
     views:
       session_funnel: session_funnel.browser_family
   - id: os_family
     display_name: OS Family
+    description: >
+      Snowplow OS family. Currently unpopulated on session_funnel.
     views:
       session_funnel: session_funnel.os_family
   - id: landing_page_path
     display_name: Landing Page Path
+    description: >
+      First page path of the session. Prefer landing_page_resolved for labelled landings.
     views:
       session_funnel: session_funnel.landing_page_path
   - id: exit_page_path
     display_name: Exit Page Path
+    description: >
+      Path of the last page in the Snowplow session. May be empty.
     views:
       session_funnel: session_funnel.exit_page_path
   - id: page_path
     display_name: Page Path
+    description: >
+      Event page path on EventStream. Not a session landing page.
     views:
       web_events: web_events.page_path
   - id: page_title
     display_name: Page Title
+    description: >
+      Event page title on EventStream.
     views:
       web_events: web_events.page_title
   - id: collection
     display_name: Collection
+    description: >
+      Shopify collection path/title on the web event. EventStream only.
     views:
       web_events: web_events.collection
   - id: session_platform
     display_name: Session Platform
+    description: >
+      Snowplow platform on the event (web/app). Distinct from ads publisher_platform.
     views:
       web_events: web_events.session_platform
   - id: funnel_web_platform

@@ -87,6 +87,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Avg Seconds to Purchase last 30 days
+  request:
+    measures:
+    - session_avg_seconds_to_purchase
+    time_range:
+      preset: last_30d
 validation_tests:
 - session_avg_seconds_to_purchase resolves on session_funnel at ad/funnel/device grain
 currency_default: INR

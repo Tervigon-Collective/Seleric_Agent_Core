@@ -109,18 +109,6 @@ views:
     freshness:
       source: serve.commerce_performance_daily + gold.fct_amazon_sp_order_pnl
       expected_cadence: "hourly after gold sync, IST"
-  - name: product_performance
-    title: Product / SKU Performance (Serve)
-    date_dimension: order_date
-    freshness:
-      source: serve.product_performance (VIEW over gold.fct_order_items FINAL)
-      expected_cadence: "hourly after gold sync, IST"
-  - name: product_ad_spend
-    title: Product Ad Spend (SKU-attributed)
-    date_dimension: report_date
-    freshness:
-      source: serve.product_ad_spend_daily
-      expected_cadence: "hourly after gold sync + paid-media, IST"
   - name: refund_events
     title: Refund Events (Serve)
     date_dimension: refund_date
@@ -270,3 +258,66 @@ views:
     freshness:
       source: serve.amazon_orders (VIEW over gold.fct_amazon_sp_orders FINAL)
       expected_cadence: "daily after Amazon SP sync, IST"
+  - name: meta_ads_status_history
+    title: Meta Ads Status History (Serve)
+    date_dimension: changed_at
+    datetime_dimension: changed_at
+    freshness:
+      source: serve.meta_ads_status_history
+      expected_cadence: "hourly after gold sync, IST"
+  - name: google_ads_status_history
+    title: Google Ads Status History (Serve)
+    date_dimension: changed_at
+    datetime_dimension: changed_at
+    freshness:
+      source: serve.google_ads_status_history
+      expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_ads_ads
+    title: Amazon Ads Product-Ad Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_ads_ads_daily
+      expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_ads_ad_groups
+    title: Amazon Ads Ad-Group Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_ads_ad_groups_daily
+      expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_order_items
+    title: Amazon Order Items (Serve)
+    date_dimension: order_date
+    freshness:
+      source: serve.amazon_order_items
+      expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_returns_daily
+    title: Amazon Returns Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_returns_daily
+      expected_cadence: "hourly after gold sync, IST"
+  - name: finance_waterfall
+    title: Finance Waterfall Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.finance_waterfall_daily
+      expected_cadence: "hourly after gold sync, IST"
+  - name: payments
+    title: Shopify Payments (Serve)
+    date_dimension: transaction_date
+    datetime_dimension: transaction_created_at
+    freshness:
+      source: serve.payments
+      expected_cadence: "hourly after gold sync, IST"
+  - name: amazon_finance_charge_types_daily
+    title: Amazon Finance Charge Types Daily (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.amazon_finance_charge_types_daily
+      expected_cadence: "hourly after gold sync, IST"
+  - name: ad_channel_pnl
+    title: Ad / Channel P&L (Serve)
+    date_dimension: report_date
+    freshness:
+      source: serve.ad_channel_pnl_daily
+      expected_cadence: "hourly after gold sync, IST"

@@ -1,0 +1,45 @@
+id: amazon_actual_daily_gross_profit
+display_name: Amazon Actual Daily Gross Profit
+category: finance
+status: certified
+description: Settled AmazonAccounts daily gross profit. Not canonical_pnl net_profit_all_channels
+  and not Node pending-refund overlay.
+formula:
+  human_readable: gross_profit
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_daily_pnl_actual
+  measure: amazon_daily_pnl_actual.gross_profit
+aggregation: additive
+unit: currency
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Actual Daily Gross Profit last 30 days
+  request:
+    measures:
+    - amazon_actual_daily_gross_profit
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_actual_daily_gross_profit is defined on amazon_daily_pnl_actual
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

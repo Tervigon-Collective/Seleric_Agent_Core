@@ -2,7 +2,9 @@ id: amazon_ads_cpc
 display_name: Amazon Ads CPC
 category: paid_media
 status: certified
-description: Amazon Ads CPC recomputed from aggregated components.
+description: >
+  Amazon SP CPC recomputed as SUM(spend)/SUM(clicks) on report_date. Never AVG of row
+  CPCs. Delivery only; not attributed ACOS.
 formula:
   human_readable: SUM(spend) / SUM(clicks)
   authoritative_source: cube
@@ -37,6 +39,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Amazon Ads CPC last 30 days
+  request:
+    measures:
+    - amazon_ads_cpc
+    time_range:
+      preset: last_30d
 validation_tests:
 - amazon_ads_cpc equals amazon_ads_spend / amazon_ads_clicks recomputed on any slice
 ratio_components:

@@ -43,6 +43,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Return Refund Lines last 30 days
+  request:
+    measures:
+    - refund_lines
+    time_range:
+      preset: last_30d
 validation_tests:
 - refund_lines >= 0 for any slice
 deprecated_aliases: []

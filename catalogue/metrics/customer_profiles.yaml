@@ -33,6 +33,13 @@ data_owner: Growth / Retention
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Customer Profiles last 30 days
+  request:
+    measures:
+    - customer_profiles
+    time_range:
+      preset: last_30d
 validation_tests:
   - customer_profiles >= 0
 deprecated_aliases: []

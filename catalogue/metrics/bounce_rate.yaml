@@ -31,6 +31,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Bounce Rate last 30 days
+  request:
+    measures:
+    - bounce_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - bounce_rate between 0 and 1 on any slice
 ratio_components:

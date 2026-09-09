@@ -2,7 +2,9 @@ id: attributed_gross_revenue
 display_name: Attributed Gross Revenue
 category: attribution
 status: certified
-description: Gross revenue at order grain from the attribution oracle.
+description: >
+  Gross revenue at Shopify order grain from the last-touch attribution oracle (ex-GST,
+  first-party). Not Meta/Google platform purchase value and not Amazon incl-GST.
 formula:
   human_readable: SUM(gross_revenue)
   authoritative_source: cube

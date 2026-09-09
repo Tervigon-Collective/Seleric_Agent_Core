@@ -1,0 +1,46 @@
+id: amazon_close_exceptions
+display_name: Amazon Accounts Close Exceptions
+category: finance
+status: certified
+description: Count of AmazonAccounts ACTUAL close exceptions (unreconciled Finances vs settlement).
+  Diagnose breaks; do not treat as a P&L measure.
+formula:
+  human_readable: exceptions
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_accounts_exceptions
+  measure: amazon_accounts_exceptions.exceptions
+aggregation: additive
+unit: count
+grain: exception
+supported_dimensions:
+- brand_id
+- report_date
+- exception_type
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Accounts Close Exceptions last 30 days
+  request:
+    measures:
+    - amazon_close_exceptions
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_close_exceptions is defined on amazon_accounts_exceptions
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

@@ -33,6 +33,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Attribution Gross Sales last 30 days
+  request:
+    measures:
+    - google_attribution_gross_sales
+    time_range:
+      preset: last_30d
 deprecated_aliases: []
 dashboard_alignment:
   status: match

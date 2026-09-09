@@ -87,6 +87,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Session Conversion Rate last 30 days
+  request:
+    measures:
+    - session_conversion_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - session_conversion_rate resolves on session_funnel at ad/funnel/device grain
 currency_default: INR
@@ -94,7 +101,10 @@ dashboard_alignment:
   status: not_in_dashboard
   audited_on: '2026-07-31'
   source: serve.session_funnel (Snowplow journey OLAP)
-  note: Journey OLAP surface; no direct dashboard card. First-touch ad attribution.
+  note: >
+    Journey OLAP surface; no direct dashboard card. Channel-filter parity with
+    the dashboard funnel card is not live-proven — do not claim an exact
+    dashboard match when slicing by channel.
 ratio_components:
   numerator: session_funnel.purchased_sessions
   denominator: session_funnel.sessions

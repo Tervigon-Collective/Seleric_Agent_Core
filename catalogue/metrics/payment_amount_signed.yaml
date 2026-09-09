@@ -1,0 +1,38 @@
+id: payment_amount_signed
+display_name: Shopify Payment Amount (signed)
+category: finance
+status: certified
+description: >
+  Signed Shopify gateway transaction amount from payments (refunds negative, test excluded). Not commerce_orders.total_payment_orders (that is an order count) and not canonical_pnl.net_sales.
+formula:
+  human_readable: amount_signed
+  authoritative_source: cube
+cube_mapping:
+  view: payments
+  measure: payments.amount_signed
+aggregation: additive
+unit: INR
+grain: transaction
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Shopify Payment Amount (signed) last 30 days
+  request:
+    measures:
+    - payment_amount_signed
+    time_range:
+      preset: last_30d
+validation_tests:
+- payment_amount_signed is defined on view payments

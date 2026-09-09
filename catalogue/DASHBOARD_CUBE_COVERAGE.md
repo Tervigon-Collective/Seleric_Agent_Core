@@ -60,7 +60,7 @@ Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain f
 | Returns/Cancels count | `channel_pnl.*_returns_cancels` | **OK** | |
 | Ad Spend / Impressions / Clicks | `meta_ad_performance` / `google_ad_performance` | **OK** | |
 | Net COGS / Net Profit / ROAS | `channel_pnl.meta_*` / `google_*` | **OK** | FE lifecycle COGS + ads |
-| Session funnel | `session_funnel` / `funnel_daily` | **PARTIAL** | Channel filter parity not live-proven |
+| Session funnel | `session_funnel` / `funnel_daily` | **PARTIAL** (`unproven`) | Channel-filter parity with the dashboard is not live-proven. Do not claim a dashboard match. |
 
 **Do not use** `platform_attribution_commerce.*_net_sales` for Overview Net Sales (placement net). Catalogue points at `channel_pnl`.
 
@@ -73,7 +73,7 @@ Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain f
 | Gross / Net Sales / TOC / Net Profit | `canonical_pnl` all-channel measures | **OK** |
 | Product / Packaging / Shipping / Gateway / RTO | `canonical_pnl.*` | **OK** Shopify arms |
 | Amazon Fees | `canonical_pnl` / `amazon_attribution_overview.platform_fees` | **OK** for Attribution fees |
-| Taxes | `canonical_pnl.taxes_on_net_sales` | **PARTIAL** | Estimate (net × 18%), not full GST ledger |
+| Taxes | `canonical_pnl.taxes_on_net_sales` | **PARTIAL** (`drift_corrected`) | Cube = Shopify net × 18%, not GST ledger. Node-Backend strips Amazon then adds actual Amazon tax (`taxes_on_net_sales.yaml`). |
 | Meta/Google/Amazon Ads | `canonical_pnl.*_spend` | **OK** |
 
 ---
@@ -85,7 +85,7 @@ Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain f
 | Amazon Net Profit | `marketplace_net_payout` / `amazon_net_payout` | `amazon_attribution_overview.net_profit` → catalogue `amazon_net_profit` |
 | Meta/Google Attribution Net Sales | `platform_attribution_commerce.*_net_sales` | `channel_pnl.*_net_sales` → catalogue `meta_attribution_net_sales` / `google_attribution_net_sales` |
 | All-channel Gross ROAS | `canonical_pnl.gross_roas` (Shopify-only) | `canonical_pnl.gross_roas_all_channels` → catalogue `gross_roas_all_channels` |
-| Historical Net Profit | `canonical_pnl.net_profit` (blended Shopify) or `net_profit_shopify` | `canonical_pnl.net_profit_all_channels` |
+| Historical Net Profit | `canonical_pnl.net_profit` (Shopify-only Cube) | `canonical_pnl.net_profit_all_channels` — dashboard blended card; Amazon pending-refund overlay is Node-only and is **not** in certified Cube |
 | Returns/Cancels (All) | `commerce_orders.returns_cancels_orders` alone | `returns_cancels_all_channels.returns_cancels` |
 | New-customer LTV revenue | — | `ltv_cac.new_customer_revenue` (= attributed_net_revenue for is_new_customer=1; dashboard net incl. unpaid COD) |
 

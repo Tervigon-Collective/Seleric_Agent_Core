@@ -1,0 +1,38 @@
+id: ad_channel_net_sales
+display_name: Ad-grain Channel Net Sales
+category: attribution
+status: certified
+description: >
+  Event-date lifecycle net sales at campaign/adset/ad from ad_channel_pnl. Rolls up to channel_pnl via reconciliation residual. Distinct from platform_attribution_commerce placement net.
+formula:
+  human_readable: net_sales
+  authoritative_source: cube
+cube_mapping:
+  view: ad_channel_pnl
+  measure: ad_channel_pnl.net_sales
+aggregation: additive
+unit: INR
+grain: daily campaign/adset/ad
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Ad-grain Channel Net Sales last 30 days
+  request:
+    measures:
+    - ad_channel_net_sales
+    time_range:
+      preset: last_30d
+validation_tests:
+- ad_channel_net_sales is defined on view ad_channel_pnl

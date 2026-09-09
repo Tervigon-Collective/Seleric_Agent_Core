@@ -35,6 +35,13 @@ access_policy:
   - analyst
   scopes:
   - metrics:read
+examples:
+- question: Meta Net Profit last 30 days
+  request:
+    measures:
+    - meta_net_profit
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

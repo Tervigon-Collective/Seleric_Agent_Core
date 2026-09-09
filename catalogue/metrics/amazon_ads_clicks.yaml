@@ -2,7 +2,10 @@ id: amazon_ads_clicks
 display_name: Amazon Ads Clicks
 category: paid_media
 status: certified
-description: Amazon SP campaign clicks.
+description: >
+  Amazon Sponsored Products campaign clicks on report_date from amazon_ad_performance.
+  Platform delivery only — not attributed orders and not ACOS/ROAS (attribution
+  boundary).
 formula:
   human_readable: SUM(amazon_ads_clicks)
   authoritative_source: cube
@@ -37,6 +40,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Amazon Ads Clicks last 30 days
+  request:
+    measures:
+    - amazon_ads_clicks
+    time_range:
+      preset: last_30d
 validation_tests:
 - amazon_ads_clicks >= 0 for any slice
 dashboard_alignment:

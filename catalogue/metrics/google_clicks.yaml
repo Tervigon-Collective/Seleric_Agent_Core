@@ -2,7 +2,10 @@ id: google_clicks
 display_name: Google Clicks
 category: paid_media
 status: certified
-description: Google Ads clicks.
+description: >
+  Google Ads clicks on report_date from google_ad_performance (campaign-day). Platform
+  delivery only — not conversions, conversion value or platform ROAS (attribution
+  boundary).
 formula:
   human_readable: SUM(google_clicks)
   authoritative_source: cube
@@ -35,6 +38,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Clicks last 30 days
+  request:
+    measures:
+    - google_clicks
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_clicks >= 0 for any slice
 dashboard_alignment:

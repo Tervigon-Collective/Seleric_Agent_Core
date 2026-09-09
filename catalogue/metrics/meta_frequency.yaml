@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Frequency last 30 days
+  request:
+    measures:
+    - meta_frequency
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_frequency equals meta_impressions / meta_reach recomputed on any slice
 ratio_components:

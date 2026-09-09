@@ -38,6 +38,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Interactions last 30 days
+  request:
+    measures:
+    - google_interactions
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_interactions >= 0 for any slice
 dashboard_alignment:

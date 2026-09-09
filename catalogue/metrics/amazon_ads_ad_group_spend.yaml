@@ -1,0 +1,38 @@
+id: amazon_ads_ad_group_spend
+display_name: Amazon Ads Spend (ad-group grain)
+category: paid_media
+status: certified
+description: >
+  Amazon Sponsored Products spend at ad-group grain from amazon_ads_ad_groups. Delivery only — no ACOS or attributed sales. Distinct from campaign-day amazon_ads_spend.
+formula:
+  human_readable: amazon_ads_spend
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_ads_ad_groups
+  measure: amazon_ads_ad_groups.amazon_ads_spend
+aggregation: additive
+unit: INR
+grain: daily ad-group
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Ads Spend (ad-group grain) last 30 days
+  request:
+    measures:
+    - amazon_ads_ad_group_spend
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_ads_ad_group_spend is defined on view amazon_ads_ad_groups

@@ -1,0 +1,45 @@
+id: touch_distinct_orders
+display_name: Orders With Touches
+category: attribution
+status: certified
+description: Distinct Shopify orders that have at least one pre-purchase touch. Not attributed_orders
+  (last-touch credit) and not Total Orders.
+formula:
+  human_readable: distinct_orders
+  authoritative_source: cube
+cube_mapping:
+  view: touchpoints
+  measure: touchpoints.distinct_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions:
+- brand_id
+- order_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Orders With Touches last 30 days
+  request:
+    measures:
+    - touch_distinct_orders
+    time_range:
+      preset: last_30d
+validation_tests:
+- touch_distinct_orders is defined on touchpoints
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

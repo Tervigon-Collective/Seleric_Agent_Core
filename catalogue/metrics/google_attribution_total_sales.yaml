@@ -33,6 +33,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Attribution Total Sales last 30 days
+  request:
+    measures:
+    - google_attribution_total_sales
+    time_range:
+      preset: last_30d
 validation_tests:
 - June 2026 brand 20 ≈ ₹12,73,251.00
 deprecated_aliases: []

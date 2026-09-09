@@ -61,6 +61,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Video 95% Views last 30 days
+  request:
+    measures:
+    - meta_video_95_pct_views
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_video_95_pct_views >= 0 for any slice
 dashboard_alignment:

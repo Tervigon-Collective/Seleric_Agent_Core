@@ -63,6 +63,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Reach (diagnostic) last 30 days
+  request:
+    measures:
+    - meta_reach
+    time_range:
+      preset: last_30d
 validation_tests: []
 dashboard_alignment:
   status: not_implemented

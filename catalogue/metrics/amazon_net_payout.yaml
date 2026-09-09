@@ -34,6 +34,13 @@ access_policy:
   scopes:
   - metrics:read
 currency_default: INR
+examples:
+- question: Amazon Net Payout (settlement cash) last 30 days
+  request:
+    measures:
+    - amazon_net_payout
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

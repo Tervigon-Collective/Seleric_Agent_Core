@@ -25,6 +25,13 @@ access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
 currency_default: INR
+examples:
+- question: Amazon Gross Revenue (incl. GST) last 30 days
+  request:
+    measures:
+    - amazon_gross_revenue
+    time_range:
+      preset: last_30d
 validation_tests:
   - amazon_gross_revenue >= 0
 deprecated_aliases: []

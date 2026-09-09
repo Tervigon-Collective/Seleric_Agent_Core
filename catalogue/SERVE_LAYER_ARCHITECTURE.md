@@ -141,26 +141,17 @@ Fixed in this pass:
 
 ### 3.2 What still needs a decision (not a code change)
 
-**Eleven Cube views are served to clients but claimed by no data product.** Each
-needs an owning product before it can honestly be called certified:
+Closed 2026-09-09 (no longer a product-assignment decision):
 
-| View | Nature | Suggested home |
-|---|---|---|
-| `orders_all_channels`, `sales_all_channels`, `returns_cancels_all_channels` | cross-channel unions, mixed GST basis per row | a new `Commerce.CrossChannelCommerce` product — the mixed basis is a contract term, not a footnote |
-| `platform_attribution_commerce`, `channel_pnl`, `amazon_attribution_overview` | attribution roll-ups | `Attribution.ChannelAttribution`, or a new `Attribution.ChannelPnl` |
-| `daily_pnl` | historical alias of `canonical_pnl` | `Finance.CanonicalPnl` — or deprecate it |
-| `ltv_cac` | new-customer LTV/CAC with ad spend | `Customer.CustomerIntelligence`, or a new `Finance.UnitEconomics` |
-| `product_ad_spend` | directional SKU-day allocated spend | `Product.ProductPerformance`, flagged directional |
-| `web_events`, `web_events_daily` | event-grain stream | **`WebAnalytics.EventStream` — the agent registry and ontology already reference this product, but it does not exist in OpenMetadata.** Create it. |
+- `Commerce.CrossChannelCommerce` owns `orders_all_channels`, `sales_all_channels`, `returns_cancels_all_channels` (mixed GST is a contract term). Agent registry now exposes the product.
+- `Attribution.ChannelAttribution` owns `channel_pnl` and `platform_attribution_commerce`; `AmazonCommercePerformance` owns `amazon_attribution_overview`.
+- `daily_pnl` is an alias port of `Finance.CanonicalPnl`. Prefer `canonical_pnl` for new catalogue metrics.
+- `ltv_cac` is on `Customer.CustomerIntelligence`.
+- `WebAnalytics.EventStream` exists in OpenMetadata and the agent registry (`web_events`, `web_events_daily`).
+- `serve.amazon_orders` has a cube and is a certified `amazon_orders` view.
+- `product_ad_spend` was removed from Cube and `catalogue/views.yaml` — `serve.product_ad_spend_daily` does not exist. Restore only after the table is rebuilt.
 
-**Declared lineage does not match actual SQL** (26 findings). Most consequential:
-`canonical_pnl` — the P&L view — declares almost none of the nine gold tables it
-actually reads, and `commerce_orders` claims `gold.dim_customers`, which it does
-not read (which is also why it carries no customer attributes). A client shown
-this lineage is shown something untrue.
-
-**`serve.amazon_orders`** exists, is governed as an `AmazonCommercePerformance`
-output port, and has no cube — built, then never exposed.
+Declared lineage now matches ClickHouse gold-closure in `catalogue/openmetadata/registry.yaml` (verified 2026-09-09). `canonical_pnl` no longer claims `gold.fct_daily_pnl`; `commerce_orders` no longer claims `gold.dim_customers`.
 
 ---
 
@@ -386,18 +377,29 @@ numerator Cube did not expose. All six columns existed in serve; they were simpl
 never surfaced as measures. Added to the cubes and their views. The server's
 boot-time drift check now reports `"broken": []` for the first time.
 
-### 8.5 Still open
+### 8.5 Closed (2026-09-09)
 
-Blockers 53 → **44**. What remains is scope, not defects:
+`reconcile_layers.py` is **0 unwaived blockers**. Remaining findings are explicit
+waivers: unused/broken gold facts and marts (`fct_daily_pnl`, cost tables,
+settlement upstream, platform-reported Amazon ad-order attribution, unused
+growth/geo marts), join-only cubes (`serve_commerce_order_events`,
+`serve_product_ad_spend_daily`), 1:many `dim_adset_geo`, and status-history
+ports that must not join *current* dims onto snapshot change rows.
 
-- **26 gold facts/marts with no serve port** (§2.1). Each needs a serve relation,
-  a cube, a contract and an owning product — a design decision per table, not a
-  mechanical fix.
-- **9 Cube views with no owning data product** (§3.2) — a governance decision.
-- `serve.amazon_orders` has no cube.
-- 28 remaining `NOT_DENORMALISED` findings on other relations, the same pattern
-  as §8.2 applied to Google, Amazon, session and commerce relations.
-- ~950 Cube members still undescribed.
+New certified ports: Meta/Google status history; Amazon ads ad-group and
+product-ad grain; Amazon order items and returns-daily; finance waterfall and
+Shopify payments. Cube members and catalogue metrics are fully described.
+
+### 8.5 historically open (superseded)
+
+The 2026-09-07 snapshot below is kept as provenance. It is no longer the live gate:
+
+- **26 gold facts/marts with no serve port** — now ported or waived.
+- **9 Cube views with no owning data product** — products now claim them.
+- `serve.amazon_orders` has no cube — cube + view exist.
+- 28 remaining `NOT_DENORMALISED` — Google/Meta/session/purchase denormalised;
+  `dim_adset_geo` waived (1:many).
+- ~950 Cube members still undescribed — descriptions applied 2026-09-09.
 
 
 ---

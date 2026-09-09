@@ -33,6 +33,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Attribution Total Sales last 30 days
+  request:
+    measures:
+    - meta_attribution_total_sales
+    time_range:
+      preset: last_30d
 validation_tests:
 - June 2026 brand 20 ≈ ₹30,63,207.00
 deprecated_aliases: []

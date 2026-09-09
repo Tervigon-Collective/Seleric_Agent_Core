@@ -60,6 +60,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Video Completion Rate last 30 days
+  request:
+    measures:
+    - meta_video_completion_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_video_completion_rate equals (meta_video_100_pct_views / meta_video_plays)
   * 100 recomputed on any slice — per-ad only, no dashboard aggregate exists to

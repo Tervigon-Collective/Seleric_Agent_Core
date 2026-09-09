@@ -59,6 +59,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta CPC last 30 days
+  request:
+    measures:
+    - meta_cpc
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_cpc equals meta_spend / meta_clicks recomputed on any slice
 ratio_components:

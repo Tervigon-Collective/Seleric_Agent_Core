@@ -1,0 +1,46 @@
+id: pre_purchase_touches
+display_name: Pre-Purchase Touches
+category: attribution
+status: certified
+description: Count of session-level pre-purchase touches stitched to Shopify orders (touchpoints view,
+  order_date). Journey grain — not last-touch credited orders and not Amazon SP.
+formula:
+  human_readable: touches
+  authoritative_source: cube
+cube_mapping:
+  view: touchpoints
+  measure: touchpoints.touches
+aggregation: additive
+unit: count
+grain: touch
+supported_dimensions:
+- brand_id
+- order_date
+- lt_platform
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Pre-Purchase Touches last 30 days
+  request:
+    measures:
+    - pre_purchase_touches
+    time_range:
+      preset: last_30d
+validation_tests:
+- pre_purchase_touches is defined on touchpoints
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

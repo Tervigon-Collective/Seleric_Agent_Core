@@ -35,6 +35,13 @@ access_policy:
   - analyst
   scopes:
   - metrics:read
+examples:
+- question: New-customer first-order AOV (LTV card) last 30 days
+  request:
+    measures:
+    - ltv
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

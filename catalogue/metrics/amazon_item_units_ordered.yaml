@@ -1,0 +1,38 @@
+id: amazon_item_units_ordered
+display_name: Amazon Item Units Ordered
+category: commerce
+status: certified
+description: >
+  Quantity ordered at Amazon SP item grain from amazon_order_items. Marketplace-reported. Item price INCLUDES GST — never mix with Shopify ex-GST units on product_performance.
+formula:
+  human_readable: units_ordered
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_order_items
+  measure: amazon_order_items.units_ordered
+aggregation: additive
+unit: count
+grain: order item
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Item Units Ordered last 30 days
+  request:
+    measures:
+    - amazon_item_units_ordered
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_item_units_ordered is defined on view amazon_order_items

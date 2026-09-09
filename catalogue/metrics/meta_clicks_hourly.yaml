@@ -48,6 +48,13 @@ data_owner: Growth / Paid Media
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Meta Clicks (hourly) last 30 days
+  request:
+    measures:
+    - meta_clicks_hourly
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_clicks_hourly >= 0 for any slice
 - hourly sum equals daily counterpart for the same brand/date

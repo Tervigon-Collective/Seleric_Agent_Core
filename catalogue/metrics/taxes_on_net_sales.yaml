@@ -42,4 +42,6 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: services/pnlService.js:222-225
-  note: 'Catalogue: flat 18% of net_sales; code subtracts Amazon out first then adds Amazon actual tax back — different formula.'
+  note: >
+    Catalogue is flat 18% of Shopify net_sales. Node pnlService strips Amazon
+    then adds actual Amazon tax — different formula, not a GST ledger.

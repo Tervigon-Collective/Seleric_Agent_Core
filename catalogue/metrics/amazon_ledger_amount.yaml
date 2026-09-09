@@ -1,0 +1,38 @@
+id: amazon_ledger_amount
+display_name: Amazon Ledger Amount (signed)
+category: commerce
+status: certified
+description: >
+  Signed Amazon finance ledger amount at charge_type grain from amazon_finance_charge_types_daily. Revenue +, fees −. Not marketplace_net_payout and not canonical net profit.
+formula:
+  human_readable: amount
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_finance_charge_types_daily
+  measure: amazon_finance_charge_types_daily.amount
+aggregation: additive
+unit: INR
+grain: daily charge_type
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Ledger Amount (signed) last 30 days
+  request:
+    measures:
+    - amazon_ledger_amount
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_ledger_amount is defined on view amazon_finance_charge_types_daily

@@ -33,6 +33,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Total Payments last 30 days
+  request:
+    measures:
+    - total_payments
+    time_range:
+      preset: last_30d
 deprecated_aliases: []
 dashboard_alignment:
   status: match

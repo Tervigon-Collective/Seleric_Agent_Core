@@ -1,0 +1,45 @@
+id: amazon_sp_order_total
+display_name: Amazon SP Order Total (incl GST)
+category: commerce
+status: certified
+description: Marketplace-reported Amazon SP order value INCLUDING GST from amazon_orders (0 for cancelled).
+  Never add to Shopify ex-GST commerce_net_revenue without stating the basis.
+formula:
+  human_readable: order_total
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_orders
+  measure: amazon_orders.order_total
+aggregation: additive
+unit: currency
+grain: order
+supported_dimensions:
+- brand_id
+- order_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon SP Order Total (incl GST) last 30 days
+  request:
+    measures:
+    - amazon_sp_order_total
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_sp_order_total is defined on amazon_orders
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

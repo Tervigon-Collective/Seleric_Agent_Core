@@ -2,7 +2,9 @@ id: google_impressions
 display_name: Google Impressions
 category: paid_media
 status: certified
-description: Google Ads impressions.
+description: >
+  Google Ads impressions on report_date from google_ad_performance. Platform delivery
+  only — not conversions or platform ROAS (attribution boundary).
 formula:
   human_readable: SUM(google_impressions)
   authoritative_source: cube
@@ -35,6 +37,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Impressions last 30 days
+  request:
+    measures:
+    - google_impressions
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_impressions >= 0 for any slice
 dashboard_alignment:

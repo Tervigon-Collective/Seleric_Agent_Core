@@ -50,10 +50,11 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: src/services/dashboardService.js:132,136
-  note: 'Dashboard summary computes a blended number, but this catalogue metric is intentionally aligned
-    to canonical Cube semantic execution (`canonical_pnl.net_profit_shopify`) for agent consistency.
-
-    '
+  note: >
+    Catalogue metric is Shopify-only Cube (`canonical_pnl.net_profit_shopify`).
+    Dashboard P&L Forecast Net Profit is blended all-channels and may apply a
+    Node-Backend Amazon pending-refund + return-label overlay that Cube does not.
+    For all-channel cards use net_profit_all_channels and state the Cube basis.
 companion_measures:
 - net_profit_all_channels
 - net_profit_blended

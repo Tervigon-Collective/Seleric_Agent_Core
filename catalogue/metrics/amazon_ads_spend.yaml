@@ -40,6 +40,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Amazon Ads Spend (Amazon-ads-only) last 30 days
+  request:
+    measures:
+    - amazon_ads_spend
+    time_range:
+      preset: last_30d
 validation_tests:
 - amazon_ads_spend >= 0 for any slice
 currency_default: INR

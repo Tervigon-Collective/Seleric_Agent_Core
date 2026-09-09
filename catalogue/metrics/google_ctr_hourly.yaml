@@ -34,6 +34,13 @@ data_owner: Growth / Paid Media
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Google CTR (hourly) last 30 days
+  request:
+    measures:
+    - google_ctr_hourly
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_ctr_hourly equals numerator/denominator recomputed on any slice
 ratio_components:

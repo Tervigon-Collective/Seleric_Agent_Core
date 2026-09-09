@@ -87,6 +87,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Session PDP Rate last 30 days
+  request:
+    measures:
+    - session_pdp_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - session_pdp_rate resolves on session_funnel at ad/funnel/device grain
 currency_default: INR

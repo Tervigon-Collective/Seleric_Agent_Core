@@ -37,6 +37,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Spend (Google-only) last 30 days
+  request:
+    measures:
+    - google_spend
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_spend >= 0 for any slice
 currency_default: INR

@@ -1,0 +1,45 @@
+id: amazon_recon_settlements
+display_name: Amazon Reconciled Settlements
+category: finance
+status: certified
+description: Count of AmazonAccounts ACTUAL settlement keys on amazon_settlement_reconciliation. Posted
+  actuals only — not AmazonCommercePerformance placement estimates.
+formula:
+  human_readable: reconciled_settlements
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_settlement_reconciliation
+  measure: amazon_settlement_reconciliation.reconciled_settlements
+aggregation: additive
+unit: count
+grain: settlement
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Reconciled Settlements last 30 days
+  request:
+    measures:
+    - amazon_recon_settlements
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_recon_settlements is defined on amazon_settlement_reconciliation
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

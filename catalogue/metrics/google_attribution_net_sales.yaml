@@ -33,6 +33,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Attribution Net Sales last 30 days
+  request:
+    measures:
+    - google_attribution_net_sales
+    time_range:
+      preset: last_30d
 validation_tests:
 - June 2026 brand 20 ≈ ₹9,52,068.84 (dashboard)
 deprecated_aliases: []

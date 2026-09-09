@@ -1,0 +1,38 @@
+id: amazon_return_request_orders
+display_name: Amazon Return Request Orders (report day)
+category: commerce
+status: certified
+description: >
+  Distinct Amazon orders with a return request on the Returns Report day from amazon_returns_daily. Distinct from amazon_attribution_overview.returned_orders (coalesce delivery/request).
+formula:
+  human_readable: return_request_orders
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_returns_daily
+  measure: amazon_returns_daily.return_request_orders
+aggregation: additive
+unit: count
+grain: daily
+supported_dimensions:
+- brand_id
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Return Request Orders (report day) last 30 days
+  request:
+    measures:
+    - amazon_return_request_orders
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_return_request_orders is defined on view amazon_returns_daily

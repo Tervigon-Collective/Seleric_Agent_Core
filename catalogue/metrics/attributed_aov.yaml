@@ -2,7 +2,9 @@ id: attributed_aov
 display_name: Attributed AOV
 category: attribution
 status: certified
-description: Attributed net revenue divided by attributed orders.
+description: >
+  Last-touch attributed net revenue (ex-GST, first-party) divided by attributed Shopify
+  orders on order_date. Not platform-reported AOV and not all-channel AOV.
 formula:
   human_readable: attributed_net_revenue / attributed_orders
   authoritative_source: cube

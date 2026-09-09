@@ -31,6 +31,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Collection Views last 30 days
+  request:
+    measures:
+    - collection_views
+    time_range:
+      preset: last_30d
 validation_tests:
 - collection_views >= 0
 deprecated_aliases: []

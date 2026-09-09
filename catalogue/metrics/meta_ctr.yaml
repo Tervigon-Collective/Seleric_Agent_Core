@@ -53,6 +53,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta CTR last 30 days
+  request:
+    measures:
+    - meta_ctr
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_ctr equals (meta_clicks / meta_impressions) recomputed on any slice
 ratio_components:
@@ -67,6 +74,5 @@ dashboard_alignment:
   source: Seleric_Dashboard/Node-Backend
   evidence: historicalAnalytics/analyticsClickhouse.js:780
   note: >
-    Dashboard computes CTR as percentage (x100). Canonical Cube semantic is a
-    ratio-of-aggregates measure (no x100), which the catalogue now reflects for
-    agent query consistency.
+    Dashboard computes CTR as percentage (x100). Cube returns a 0-1
+    ratio-of-aggregates. Do not treat 0.02 as 2 without converting.

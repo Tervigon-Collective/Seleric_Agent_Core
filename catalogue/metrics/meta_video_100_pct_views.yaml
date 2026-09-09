@@ -2,7 +2,9 @@ id: meta_video_100_pct_views
 display_name: Meta Video Completions
 category: paid_media
 status: draft
-description: Views reaching 100% of video length.
+description: >
+  Meta video views reaching 100% of length on report_date. Platform delivery/engagement
+  only — not ThruPlay, not attributed conversions.
 formula:
   human_readable: SUM(meta_video_100_pct_views)
   authoritative_source: cube
@@ -59,6 +61,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Video Completions last 30 days
+  request:
+    measures:
+    - meta_video_100_pct_views
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_video_100_pct_views >= 0 for any slice
 dashboard_alignment:

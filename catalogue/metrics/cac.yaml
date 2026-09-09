@@ -34,6 +34,13 @@ access_policy:
   - analyst
   scopes:
   - metrics:read
+examples:
+- question: CAC (Customer Acquisition Cost) last 30 days
+  request:
+    measures:
+    - cac
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

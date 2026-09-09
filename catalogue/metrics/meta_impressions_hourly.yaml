@@ -48,6 +48,13 @@ data_owner: Growth / Paid Media
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Meta Impressions (hourly) last 30 days
+  request:
+    measures:
+    - meta_impressions_hourly
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_impressions_hourly >= 0 for any slice
 - hourly sum equals daily counterpart for the same brand/date

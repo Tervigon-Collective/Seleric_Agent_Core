@@ -1,0 +1,46 @@
+id: attribution_path_orders
+display_name: Attribution Path Orders
+category: attribution
+status: certified
+description: Shopify orders on attribution_paths (per attribution_model, order_date). Multi-touch
+  path grain; last-touch single-row credit is attributed_orders on order_attribution.
+formula:
+  human_readable: orders
+  authoritative_source: cube
+cube_mapping:
+  view: attribution_paths
+  measure: attribution_paths.orders
+aggregation: additive
+unit: count
+grain: order x model
+supported_dimensions:
+- brand_id
+- order_date
+- attribution_model
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Attribution Path Orders last 30 days
+  request:
+    measures:
+    - attribution_path_orders
+    time_range:
+      preset: last_30d
+validation_tests:
+- attribution_path_orders is defined on attribution_paths
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

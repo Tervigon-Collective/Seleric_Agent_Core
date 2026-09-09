@@ -38,6 +38,13 @@ access_policy:
   scopes:
   - metrics:read
 currency_default: INR
+examples:
+- question: Amazon Marketplace Fees last 30 days
+  request:
+    measures:
+    - amazon_marketplace_fees
+    time_range:
+      preset: last_30d
 validation_tests:
 - amazon_marketplace_fees >= 0 for any slice
 - daily grain non-zero when amazon_platform_fees is non-zero for the same day

@@ -31,6 +31,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Funnel Purchases last 30 days
+  request:
+    measures:
+    - funnel_purchases
+    time_range:
+      preset: last_30d
 validation_tests:
 - funnel_purchases >= 0
 deprecated_aliases: []

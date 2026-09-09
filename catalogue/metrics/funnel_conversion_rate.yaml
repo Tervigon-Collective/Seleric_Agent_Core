@@ -31,6 +31,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Funnel Conversion Rate last 30 days
+  request:
+    measures:
+    - funnel_conversion_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - funnel_conversion_rate equals funnel_purchases / web_sessions recomputed on any slice
 ratio_components:

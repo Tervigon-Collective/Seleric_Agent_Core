@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Link Clicks last 30 days
+  request:
+    measures:
+    - meta_link_clicks
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_link_clicks >= 0 for any slice
 dashboard_alignment:

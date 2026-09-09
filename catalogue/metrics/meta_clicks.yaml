@@ -2,7 +2,10 @@ id: meta_clicks
 display_name: Meta Clicks
 category: paid_media
 status: certified
-description: All clicks on Meta ads.
+description: >
+  All Meta ad clicks (link + other) on report_date from meta_ad_performance. Platform
+  delivery only — not landing-page views, not first-party attributed orders, not
+  platform-reported purchases.
 formula:
   human_readable: SUM(meta_clicks)
   authoritative_source: cube
@@ -59,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Clicks last 30 days
+  request:
+    measures:
+    - meta_clicks
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_clicks >= 0 for any slice
 dashboard_alignment:

@@ -31,6 +31,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Site Search Events last 30 days
+  request:
+    measures:
+    - site_search_events
+    time_range:
+      preset: last_30d
 validation_tests:
 - site_search_events >= 0
 deprecated_aliases: []

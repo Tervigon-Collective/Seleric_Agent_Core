@@ -1,0 +1,45 @@
+id: amazon_actual_daily_net_payout
+display_name: Amazon Actual Daily Net Payout
+category: finance
+status: certified
+description: Settled AmazonAccounts daily net payout on report_date. No provisional values. Not amazon_net_payout
+  on commerce_performance.
+formula:
+  human_readable: net_payout
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_daily_pnl_actual
+  measure: amazon_daily_pnl_actual.net_payout
+aggregation: additive
+unit: currency
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Actual Daily Net Payout last 30 days
+  request:
+    measures:
+    - amazon_actual_daily_net_payout
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_actual_daily_net_payout is defined on amazon_daily_pnl_actual
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

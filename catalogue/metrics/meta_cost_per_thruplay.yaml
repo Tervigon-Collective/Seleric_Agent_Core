@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Cost per ThruPlay last 30 days
+  request:
+    measures:
+    - meta_cost_per_thruplay
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_cost_per_thruplay equals meta_spend / meta_thruplays recomputed on any slice
 ratio_components:

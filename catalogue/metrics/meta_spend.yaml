@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Spend (Meta-only) last 30 days
+  request:
+    measures:
+    - meta_spend
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_spend >= 0 for any slice
 currency_default: INR

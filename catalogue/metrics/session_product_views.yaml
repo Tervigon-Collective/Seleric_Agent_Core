@@ -81,6 +81,13 @@ data_owner: Growth / Web Analytics
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Session Product Views last 30 days
+  request:
+    measures:
+    - session_product_views
+    time_range:
+      preset: last_30d
 validation_tests:
 - session_product_views resolves on session_funnel at ad/funnel/device grain
 currency_default: INR

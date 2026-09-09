@@ -25,6 +25,13 @@ data_owner: Growth
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst]
   scopes: [metrics:read]
+examples:
+- question: New Customers last 30 days
+  request:
+    measures:
+    - new_customers
+    time_range:
+      preset: last_30d
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:

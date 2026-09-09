@@ -32,6 +32,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Attribution Orders last 30 days
+  request:
+    measures:
+    - google_attribution_orders
+    time_range:
+      preset: last_30d
 validation_tests:
 - June 2026 brand 20 = 464
 deprecated_aliases: []

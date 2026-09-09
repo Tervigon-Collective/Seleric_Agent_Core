@@ -34,6 +34,13 @@ data_owner: Growth / Attribution
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Channel Net Revenue (ex-GST, channel attribution daily) last 30 days
+  request:
+    measures:
+    - channel_net_revenue
+    time_range:
+      preset: last_30d
 validation_tests:
   - channel_net_revenue is Shopify-basis only on meta/google/organic_shopify rows
   - June 2026 brand 20 meta channel ≈ ₹24,24,851.18

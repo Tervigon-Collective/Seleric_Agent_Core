@@ -36,6 +36,13 @@ data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Gross Sales (all channels, ex-GST) last 30 days
+  request:
+    measures:
+    - gross_sales_all_channels
+    time_range:
+      preset: last_30d
 validation_tests:
   - June 2026 brand 20 ≈ ₹41,44,768.43
   - gross_sales_all_channels >= shopify gross_sales for same slice

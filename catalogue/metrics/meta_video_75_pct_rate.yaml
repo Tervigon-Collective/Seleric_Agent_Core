@@ -62,6 +62,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta Video 75% Rate last 30 days
+  request:
+    measures:
+    - meta_video_75_pct_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_video_75_pct_rate equals meta_video_75_pct_views / meta_video_3s_views recomputed on
   any slice

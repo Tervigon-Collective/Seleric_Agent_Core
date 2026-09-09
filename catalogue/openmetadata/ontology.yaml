@@ -134,7 +134,7 @@ entity_clusters:
       and Returns cards. No Amazon "active_orders"/"new_customer_orders" catalogue
       metrics exist yet (amazon_commerce_performance.active_orders is Cube-exposed
       but not catalogued).
-    catalogue_metrics: [amazon_orders, amazon_cancelled_orders, amazon_returned_orders, amazon_returns_cancels]
+    catalogue_metrics: [amazon_orders, amazon_cancelled_orders, amazon_returned_orders, amazon_returns_cancels, amazon_sp_orders_grain]
   amazon_commerce_revenue:
     glossary: Commerce.CommerceOrder
     related: [Commerce.GrossSales, Commerce.ReturnCancelRevenue]
@@ -143,7 +143,21 @@ entity_clusters:
       marketplace convention) — never sum directly against Shopify's ex-GST
       commerce_revenue cluster without adjusting basis. No "cancelled
       revenue" exists for Amazon (CANCELED orders contribute ₹0 to P&L).
-    catalogue_metrics: [amazon_gross_revenue, amazon_gross_sales, amazon_net_sales, amazon_total_sales, amazon_net_payout, amazon_return_revenue]
+    catalogue_metrics: [amazon_gross_revenue, amazon_gross_sales, amazon_net_sales, amazon_total_sales, amazon_net_payout, amazon_return_revenue, amazon_sp_order_total]
+  amazon_accounts_actual:
+    glossary: Finance.AmazonAccountsActual
+    related: [Finance.AmazonSettlementReconciliation, Finance.AmazonSettledNetPayout]
+    notes: >
+      Finance.AmazonAccounts posted actuals — never mix with AmazonCommercePerformance
+      placement estimates or canonical_pnl net_profit.
+    catalogue_metrics:
+      - amazon_recon_settlements
+      - amazon_recon_header_variance
+      - amazon_actual_item_net_payout
+      - amazon_actual_item_gross_profit
+      - amazon_actual_daily_net_payout
+      - amazon_actual_daily_gross_profit
+      - amazon_close_exceptions
   product_line:
     glossary: Product.ProductOrder
     related: [Product.UnitsSold, Product.ProductNetRevenue, Product.ProductCOGS]
@@ -155,7 +169,7 @@ entity_clusters:
   paid_delivery:
     glossary: Paid Media.Spend
     related: [Paid Media.CTR, Paid Media.CPC, Paid Media.CPM, Paid Media.ReportDate, Paid Media.IsFinal]
-    catalogue_metrics: [meta_spend, google_spend, amazon_ads_spend]
+    catalogue_metrics: [meta_spend, google_spend, amazon_ads_spend, amazon_ads_ad_spend, amazon_ads_ad_group_spend, meta_status_changes, google_status_changes]
   pnl_spend:
     glossary: Finance.Canonical P&L
     related: [Paid Media.Spend, Paid Media.SponsoredProducts(SP)]
@@ -197,6 +211,10 @@ entity_clusters:
       - attribution_rate
       - avg_attribution_confidence
       - attributed_aov
+      - pre_purchase_touches
+      - touch_distinct_orders
+      - attribution_path_orders
+      - avg_touch_count
   meta_ad_attribution:
     glossary: Attribution.AttributedOrder
     related: [Attribution.AttributedNetRevenue, Attribution.LastTouch]
@@ -263,6 +281,13 @@ unclustered:
     customer_data: Profile/consent master data; lifetime metrics live on CustomerIntelligence.
     meta_ad_breakdown_performance: Placement/device/age breakdown of Meta delivery; parent cluster is paid_delivery.
     amazon_daily_pnl: Amazon daily P&L port; not mixed with Shopify finance_pnl.
+    amazon_orders: Amazon SP order grain (incl GST); not the all-channels amazon_orders metric.
+    amazon_settlement_reconciliation: AmazonAccounts ACTUAL settlements; not placement estimates.
+    amazon_order_item_pnl: AmazonAccounts ACTUAL item P&L; not canonical_pnl.
+    amazon_daily_pnl_actual: AmazonAccounts ACTUAL daily P&L; no provisional values.
+    amazon_accounts_exceptions: Close exceptions; not a P&L measure.
+    touchpoints: Pre-purchase journey touches; not last-touch credited orders.
+    attribution_paths: Per-model conversion paths; last-touch credit is order_attribution.
     orders_all_channels: Cross-channel order union; GST basis differs by row, not a single cluster.
   by_category:
     paid_media_meta: Delivery/engagement siblings of paid_delivery (spend + Meta video are clustered).

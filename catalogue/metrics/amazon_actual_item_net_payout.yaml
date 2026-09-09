@@ -1,0 +1,46 @@
+id: amazon_actual_item_net_payout
+display_name: Amazon Actual Item Net Payout
+category: finance
+status: certified
+description: Posted net payout on AmazonAccounts order-item P&L (incl GST). Not Attribution Net Profit
+  and not marketplace_net_payout placement estimates.
+formula:
+  human_readable: net_payout
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_order_item_pnl
+  measure: amazon_order_item_pnl.net_payout
+aggregation: additive
+unit: currency
+grain: order_item
+supported_dimensions:
+- brand_id
+- report_date
+- seller_sku
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Actual Item Net Payout last 30 days
+  request:
+    measures:
+    - amazon_actual_item_net_payout
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_actual_item_net_payout is defined on amazon_order_item_pnl
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

@@ -15,7 +15,7 @@ _sources:
 - http://127.0.0.1:4001/cubejs-api/v1/meta + /opt/seleric/mage-ai/infra/cube/model (view members + serve
   tables)
 - /opt/seleric/mage-ai/openmetadata/domains|products|contracts|slos (governance, grain, freshness)
-_fingerprint: e7b2657f928e4551
+_fingerprint: 5b091690cba63153
 domains:
   Attribution:
     owner_team: growth-attribution
@@ -26,6 +26,7 @@ domains:
     - ChannelAttribution
     - MarketingAttribution
     cube_views:
+    - ad_channel_pnl
     - attribution_paths
     - channel_attribution
     - channel_pnl
@@ -44,7 +45,10 @@ domains:
     - amazon_attribution_overview
     - amazon_commerce_performance
     - amazon_daily_pnl
+    - amazon_finance_charge_types_daily
+    - amazon_order_items
     - amazon_orders
+    - amazon_returns_daily
     - commerce_orders
     - commerce_performance
     - orders_all_channels
@@ -76,6 +80,8 @@ domains:
     - amazon_settlement_reconciliation
     - canonical_pnl
     - daily_pnl
+    - finance_waterfall
+    - payments
   Operations:
     owner_team: ops-team
     description: 'Returns and refunds operations: Shopify refund transactions, return lifecycle status,
@@ -97,11 +103,15 @@ domains:
     - MetaAdsPerformance
     cube_views:
     - amazon_ad_performance
+    - amazon_ads_ad_groups
+    - amazon_ads_ads
     - google_ad_performance
     - google_ad_performance_hourly
+    - google_ads_status_history
     - meta_ad_breakdown_performance
     - meta_ad_performance
     - meta_ad_performance_hourly
+    - meta_ads_status_history
   Product:
     owner_team: commerce-data-team
     description: 'Product / SKU / variant performance data: units, product revenue, product COGS and gross
@@ -158,13 +168,21 @@ data_products:
   agent_ready: true
   cube_views:
   - amazon_ad_performance
+  - amazon_ads_ad_groups
+  - amazon_ads_ads
   serve_tables:
+  - clickhouse.default.serve.amazon_ads_ad_groups_daily
+  - clickhouse.default.serve.amazon_ads_ads_daily
   - clickhouse.default.serve.amazon_ads_daily
   primary_serve_table: clickhouse.default.serve.amazon_ads_daily
   gold_inputs:
   - clickhouse.default.gold.dim_amazon_ads_campaigns
+  - clickhouse.default.gold.fct_amazon_ads_ad_groups_daily
+  - clickhouse.default.gold.fct_amazon_ads_ads_daily
   - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
   contracts:
+  - paid_media_amazon_ad_groups_contract_v1
+  - paid_media_amazon_ads_contract_v1
   - paid_media_amazon_contract_v1
   product_file: products/amazon_ads_performance.yml
 - name: AmazonCommercePerformance
@@ -176,18 +194,25 @@ data_products:
   - amazon_attribution_overview
   - amazon_commerce_performance
   - amazon_daily_pnl
+  - amazon_finance_charge_types_daily
+  - amazon_order_items
   - amazon_orders
+  - amazon_returns_daily
   serve_tables:
   - clickhouse.default.serve.amazon_attribution_overview
   - clickhouse.default.serve.amazon_commerce_daily
   - clickhouse.default.serve.amazon_finance_charge_types_daily
+  - clickhouse.default.serve.amazon_order_items
   - clickhouse.default.serve.amazon_orders
+  - clickhouse.default.serve.amazon_returns_daily
   primary_serve_table: clickhouse.default.serve.amazon_orders
   gold_inputs:
   - clickhouse.default.gold.dim_amazon_charge_type
   - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
   - clickhouse.default.gold.fct_amazon_daily_pnl
+  - clickhouse.default.gold.fct_amazon_order_items
   - clickhouse.default.gold.fct_amazon_return_items
+  - clickhouse.default.gold.fct_amazon_returns_daily
   - clickhouse.default.gold.fct_amazon_sp_finance_events
   - clickhouse.default.gold.fct_amazon_sp_order_pnl
   - clickhouse.default.gold.fct_amazon_sp_orders
@@ -196,7 +221,9 @@ data_products:
   - amazon_attribution_overview_contract_v1
   - amazon_commerce_daily_contract_v1
   - amazon_finance_charge_types_daily_contract_v1
+  - amazon_order_items_contract_v1
   - amazon_orders_contract_v1
+  - amazon_returns_daily_contract_v1
   product_file: products/amazon_commerce_performance.yml
 - name: CanonicalPnl
   domain: Finance
@@ -206,8 +233,12 @@ data_products:
   cube_views:
   - canonical_pnl
   - daily_pnl
+  - finance_waterfall
+  - payments
   serve_tables:
   - clickhouse.default.serve.canonical_pnl
+  - clickhouse.default.serve.finance_waterfall_daily
+  - clickhouse.default.serve.payments
   primary_serve_table: clickhouse.default.serve.canonical_pnl
   gold_inputs:
   - clickhouse.default.gold.dim_ad
@@ -220,12 +251,16 @@ data_products:
   - clickhouse.default.gold.fct_amazon_daily_pnl
   - clickhouse.default.gold.fct_amazon_sp_order_pnl
   - clickhouse.default.gold.fct_amazon_sp_settlement_order_pnl
+  - clickhouse.default.gold.fct_finance_waterfall_daily
   - clickhouse.default.gold.fct_google_ads_daily
   - clickhouse.default.gold.fct_meta_ads_daily
   - clickhouse.default.gold.fct_order_items
   - clickhouse.default.gold.fct_orders
+  - clickhouse.default.gold.fct_payments
   contracts:
   - canonical_pnl_contract_v1
+  - finance_waterfall_daily_contract_v1
+  - payments_contract_v1
   product_file: products/canonical_pnl.yml
 - name: ChannelAttribution
   domain: Attribution
@@ -381,16 +416,21 @@ data_products:
   cube_views:
   - google_ad_performance
   - google_ad_performance_hourly
+  - google_ads_status_history
   serve_tables:
   - clickhouse.default.serve.google_ads_daily
   - clickhouse.default.serve.google_ads_hourly
+  - clickhouse.default.serve.google_ads_status_history
   primary_serve_table: clickhouse.default.serve.google_ads_daily
   gold_inputs:
+  - clickhouse.default.gold.dim_campaign
   - clickhouse.default.gold.fct_google_ads_daily
+  - clickhouse.default.gold.fct_google_ads_status_history
   - clickhouse.default.gold.fct_google_campaigns_hourly
   contracts:
   - paid_media_google_contract_v1
   - paid_media_google_hourly_contract_v1
+  - paid_media_google_status_history_contract_v1
   product_file: products/google_ads_performance.yml
 - name: MarketingAttribution
   domain: Attribution
@@ -398,6 +438,7 @@ data_products:
   certification: Certified
   agent_ready: true
   cube_views:
+  - ad_channel_pnl
   - attribution_paths
   - meta_ad_attribution
   - order_attribution
@@ -442,10 +483,12 @@ data_products:
   - meta_ad_breakdown_performance
   - meta_ad_performance
   - meta_ad_performance_hourly
+  - meta_ads_status_history
   serve_tables:
   - clickhouse.default.serve.meta_ads_breakdown_daily
   - clickhouse.default.serve.meta_ads_daily
   - clickhouse.default.serve.meta_ads_hourly
+  - clickhouse.default.serve.meta_ads_status_history
   primary_serve_table: clickhouse.default.serve.meta_ads_daily
   gold_inputs:
   - clickhouse.default.gold.dim_ad
@@ -455,11 +498,13 @@ data_products:
   - clickhouse.default.gold.dim_creative
   - clickhouse.default.gold.fct_meta_ads_daily
   - clickhouse.default.gold.fct_meta_ads_hourly
+  - clickhouse.default.gold.fct_meta_ads_status_history
   - clickhouse.default.gold.mart_meta_ad_breakdown_daily
   contracts:
   - paid_media_meta_breakdown_contract_v1
   - paid_media_meta_contract_v1
   - paid_media_meta_hourly_contract_v1
+  - paid_media_meta_status_history_contract_v1
   product_file: products/meta_ads_performance.yml
 - name: ProductPerformance
   domain: Product
@@ -509,6 +554,8 @@ data_products:
   - clickhouse.default.serve.session_funnel
   primary_serve_table: clickhouse.default.serve.session_funnel
   gold_inputs:
+  - clickhouse.default.gold.dim_ad
+  - clickhouse.default.gold.dim_campaign
   - clickhouse.default.gold.fct_session_funnel
   - clickhouse.default.gold.mart_funnel_daily
   contracts:
@@ -516,6 +563,74 @@ data_products:
   - session_funnel_contract_v1
   product_file: products/session_funnel.yml
 views:
+  ad_channel_pnl:
+    data_product: MarketingAttribution
+    domain: Attribution
+    owner_team: growth-attribution
+    title: Ad / Channel P&L (Serve)
+    serve_table: clickhouse.default.serve.ad_channel_pnl_daily
+    serve_tables:
+    - clickhouse.default.serve.ad_channel_pnl_daily
+    gold_inputs:
+    - clickhouse.default.gold.dim_ad
+    - clickhouse.default.gold.dim_ad_neurohack_map
+    - clickhouse.default.gold.dim_adset
+    - clickhouse.default.gold.dim_campaign
+    - clickhouse.default.gold.dim_creative
+    - clickhouse.default.gold.fct_ad_channel_pnl_daily
+    - clickhouse.default.gold.fct_google_ads_daily
+    - clickhouse.default.gold.fct_meta_ads_daily
+    - clickhouse.default.gold.fct_order_attribution
+    - clickhouse.default.gold.fct_order_items
+    - clickhouse.default.gold.fct_orders
+    contract: attribution_ad_channel_pnl_contract_v1
+    date_dimension: report_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - report_date
+    grain_key: &id014
+    - brand_id
+    - report_date
+    - channel
+    - campaign_id
+    - adset_id
+    - ad_id
+    - row_type
+    freshness:
+      max_age_hours: 26
+      source_column: report_date
+      timezone: Asia/Kolkata
+      description: Campaign/adset/ad P&L must refresh within 26h. Reconciles to serve.channel_pnl.
+    measures:
+    - ad_spend
+    - cancel_revenue
+    - cancelled_orders
+    - clicks
+    - ctr
+    - discounts
+    - gross_sales
+    - impressions
+    - net_cogs
+    - net_profit
+    - net_roas
+    - net_sales
+    - orders
+    - product_cost
+    - return_revenue
+    - returned_orders
+    dimensions:
+    - ad_id
+    - ad_name
+    - adset_id
+    - adset_name
+    - brand_id
+    - campaign_id
+    - campaign_name
+    - channel
+    - is_unattributed
+    - report_date
+    - row_type
   amazon_accounts_exceptions:
     data_product: AmazonAccounts
     domain: Finance
@@ -572,7 +687,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id027
+    grain_key: &id034
     - brand_id
     - report_date
     - campaign_type
@@ -603,6 +718,90 @@ views:
     - report_date
     - source_basis
     - source_currency
+    - targeting_type
+  amazon_ads_ad_groups:
+    data_product: AmazonAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    title: Amazon Ads Ad-Group Daily (Serve)
+    serve_table: clickhouse.default.serve.amazon_ads_ad_groups_daily
+    serve_tables:
+    - clickhouse.default.serve.amazon_ads_ad_groups_daily
+    gold_inputs:
+    - clickhouse.default.gold.dim_amazon_ads_campaigns
+    - clickhouse.default.gold.fct_amazon_ads_ad_groups_daily
+    contract: paid_media_amazon_ad_groups_contract_v1
+    date_dimension: report_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - report_date
+    grain_key: &id032
+    - brand_id
+    - report_date
+    - campaign_id
+    - ad_group_id
+    freshness: null
+    measures:
+    - amazon_ads_clicks
+    - amazon_ads_ctr
+    - amazon_ads_impressions
+    - amazon_ads_spend
+    dimensions:
+    - ad_group_id
+    - ad_group_name
+    - bidding_strategy
+    - brand_id
+    - campaign_id
+    - campaign_name
+    - daily_budget
+    - is_final
+    - model_version
+    - report_date
+    - targeting_type
+  amazon_ads_ads:
+    data_product: AmazonAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    title: Amazon Ads Product-Ad Daily (Serve)
+    serve_table: clickhouse.default.serve.amazon_ads_ads_daily
+    serve_tables:
+    - clickhouse.default.serve.amazon_ads_ads_daily
+    gold_inputs:
+    - clickhouse.default.gold.dim_amazon_ads_campaigns
+    - clickhouse.default.gold.fct_amazon_ads_ads_daily
+    contract: paid_media_amazon_ads_contract_v1
+    date_dimension: report_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - report_date
+    grain_key: &id033
+    - brand_id
+    - report_date
+    - campaign_id
+    - ad_group_id
+    - ad_id
+    freshness: null
+    measures:
+    - amazon_ads_clicks
+    - amazon_ads_ctr
+    - amazon_ads_impressions
+    - amazon_ads_spend
+    dimensions:
+    - ad_group_id
+    - ad_group_name
+    - ad_id
+    - advertised_asin
+    - advertised_sku
+    - bidding_strategy
+    - brand_id
+    - campaign_id
+    - campaign_name
+    - daily_budget
+    - is_final
+    - model_version
+    - report_date
     - targeting_type
   amazon_attribution_overview:
     data_product: AmazonCommercePerformance
@@ -766,6 +965,47 @@ views:
     - brand_id
     - currency_code
     - report_date
+  amazon_finance_charge_types_daily:
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    owner_team: commerce-data-team
+    title: Amazon Finance Charge Types Daily (Serve)
+    serve_table: clickhouse.default.serve.amazon_finance_charge_types_daily
+    serve_tables:
+    - clickhouse.default.serve.amazon_finance_charge_types_daily
+    gold_inputs:
+    - clickhouse.default.gold.dim_amazon_charge_type
+    - clickhouse.default.gold.fct_amazon_sp_finance_events
+    contract: amazon_finance_charge_types_daily_contract_v1
+    date_dimension: report_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - report_date
+    grain_key: &id008
+    - brand_id
+    - report_date
+    - charge_type
+    - fee_family
+    - event_kind
+    - line_kind
+    freshness:
+      max_age_hours: 30
+      source_column: data_as_of
+      timezone: Asia/Kolkata
+      description: Charge-type daily cost breakdown must refresh within 30h of finance-event gold sync
+        (data_as_of = max(_gold_created_at) per charge-type day).
+    measures:
+    - amount
+    - cost_amount
+    - line_count
+    dimensions:
+    - brand_id
+    - charge_type
+    - event_kind
+    - fee_family
+    - line_kind
+    - report_date
   amazon_order_item_pnl:
     data_product: AmazonAccounts
     domain: Finance
@@ -782,7 +1022,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id008
+    grain_key: &id009
     - brand_id
     - amazon_order_id
     - order_item_id
@@ -813,6 +1053,45 @@ views:
     - order_item_id
     - report_date
     - seller_sku
+  amazon_order_items:
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    owner_team: commerce-data-team
+    title: Amazon Order Items (Serve)
+    serve_table: clickhouse.default.serve.amazon_order_items
+    serve_tables:
+    - clickhouse.default.serve.amazon_order_items
+    gold_inputs:
+    - clickhouse.default.gold.fct_amazon_order_items
+    contract: amazon_order_items_contract_v1
+    date_dimension: order_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - order_date
+    grain_key: &id010
+    - brand_id
+    - amazon_order_id
+    - order_item_id
+    freshness: null
+    measures:
+    - item_cogs
+    - item_price
+    - line_items
+    - units_ordered
+    dimensions:
+    - amazon_order_id
+    - asin
+    - brand_id
+    - fulfillment_channel
+    - is_cost_set
+    - is_final
+    - model_version
+    - order_date
+    - order_item_id
+    - order_status
+    - seller_sku
+    - title
   amazon_orders:
     data_product: AmazonCommercePerformance
     domain: Commerce
@@ -831,7 +1110,7 @@ views:
     - data_as_of
     - order_created_at
     - order_date
-    grain_key: &id009
+    grain_key: &id011
     - brand_id
     - amazon_order_id
     freshness:
@@ -867,6 +1146,36 @@ views:
     - ship_to_city
     - ship_to_country_code
     - ship_to_state
+  amazon_returns_daily:
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    owner_team: commerce-data-team
+    title: Amazon Returns Daily (Serve)
+    serve_table: clickhouse.default.serve.amazon_returns_daily
+    serve_tables:
+    - clickhouse.default.serve.amazon_returns_daily
+    gold_inputs:
+    - clickhouse.default.gold.fct_amazon_returns_daily
+    contract: amazon_returns_daily_contract_v1
+    date_dimension: report_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - report_date
+    grain_key: &id012
+    - brand_id
+    - report_date
+    freshness: null
+    measures:
+    - approved_return_lines
+    - report_refunded_amount
+    - return_request_lines
+    - return_request_orders
+    dimensions:
+    - brand_id
+    - is_final
+    - model_version
+    - report_date
   amazon_settlement_reconciliation:
     data_product: AmazonAccounts
     domain: Finance
@@ -883,7 +1192,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id010
+    grain_key: &id013
     - brand_id
     - account_id
     - settlement_key
@@ -929,7 +1238,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - order_date
-    grain_key: &id014
+    grain_key: &id018
     - brand_id
     - order_id
     - attribution_model
@@ -1057,7 +1366,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id017
+    grain_key: &id021
     - brand_id
     - report_date
     - channel
@@ -1106,7 +1415,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id011 []
+    grain_key: &id015 []
     freshness:
       max_age_hours: 26
       source_column: report_date
@@ -1185,7 +1494,7 @@ views:
     - event_date
     - order_created_at_ist
     - order_date
-    grain_key: &id018
+    grain_key: &id022
     - brand_id
     - order_id
     freshness:
@@ -1265,7 +1574,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id019
+    grain_key: &id023
     - brand_id
     - report_date
     freshness:
@@ -1301,7 +1610,7 @@ views:
     datetime_dimension: null
     date_axis_resolved: true
     time_dimensions: []
-    grain_key: &id023
+    grain_key: &id027
     - brand_id
     - customer_id
     freshness:
@@ -1341,7 +1650,7 @@ views:
     time_dimensions:
     - first_order_at
     - last_order_at
-    grain_key: &id025
+    grain_key: &id029
     - brand_id
     - customer_id
     freshness:
@@ -1425,6 +1734,39 @@ views:
     dimensions:
     - brand_id
     - report_date
+  finance_waterfall:
+    data_product: CanonicalPnl
+    domain: Finance
+    owner_team: finance-team
+    title: Finance Waterfall Daily (Serve)
+    serve_table: clickhouse.default.serve.finance_waterfall_daily
+    serve_tables:
+    - clickhouse.default.serve.finance_waterfall_daily
+    gold_inputs:
+    - clickhouse.default.gold.fct_finance_waterfall_daily
+    contract: finance_waterfall_daily_contract_v1
+    date_dimension: report_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - report_date
+    grain_key: &id030
+    - brand_id
+    - report_date
+    freshness: null
+    measures:
+    - line_gmv
+    - line_gross_profit
+    - line_marketing
+    - line_net_cogs
+    - line_net_profit
+    - line_net_revenue_excl_gst
+    dimensions:
+    - brand_id
+    - is_final
+    - model_version
+    - report_date
+    - waterfall_key
   funnel_daily:
     data_product: SessionFunnel
     domain: WebAnalytics
@@ -1441,7 +1783,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id026
+    grain_key: &id031
     - brand_id
     - report_date
     - channel
@@ -1478,6 +1820,7 @@ views:
     serve_tables:
     - clickhouse.default.serve.google_ads_daily
     gold_inputs:
+    - clickhouse.default.gold.dim_campaign
     - clickhouse.default.gold.fct_google_ads_daily
     contract: paid_media_google_contract_v1
     date_dimension: report_date
@@ -1485,7 +1828,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id028
+    grain_key: &id035
     - brand_id
     - customer_account_id
     - report_date
@@ -1506,8 +1849,13 @@ views:
     - google_spend
     dimensions:
     - brand_id
+    - campaign_bid_strategy
+    - campaign_daily_budget
     - campaign_id
+    - campaign_lifetime_budget
     - campaign_name
+    - campaign_objective
+    - campaign_status
     - campaign_type
     - customer_account_id
     - customer_name
@@ -1525,6 +1873,7 @@ views:
     serve_tables:
     - clickhouse.default.serve.google_ads_hourly
     gold_inputs:
+    - clickhouse.default.gold.dim_campaign
     - clickhouse.default.gold.fct_google_campaigns_hourly
     contract: paid_media_google_hourly_contract_v1
     date_dimension: report_date
@@ -1533,7 +1882,7 @@ views:
     time_dimensions:
     - report_date
     - report_hour_ts
-    grain_key: &id029
+    grain_key: &id036
     - brand_id
     - customer_id
     - report_date
@@ -1554,8 +1903,12 @@ views:
     - account_name
     - bidding_strategy_type
     - brand_id
+    - campaign_bid_strategy
+    - campaign_daily_budget
     - campaign_id
     - campaign_name
+    - campaign_objective
+    - campaign_status
     - campaign_type
     - customer_id
     - hour_of_day
@@ -1565,6 +1918,46 @@ views:
     - report_hour_ts
     - segment_ad_network_type
     - segment_device
+  google_ads_status_history:
+    data_product: GoogleAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    title: Google Ads Status History (Serve)
+    serve_table: clickhouse.default.serve.google_ads_status_history
+    serve_tables:
+    - clickhouse.default.serve.google_ads_status_history
+    gold_inputs:
+    - clickhouse.default.gold.fct_google_ads_status_history
+    contract: paid_media_google_status_history_contract_v1
+    date_dimension: changed_at
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - changed_at
+    grain_key: &id037
+    - brand_id
+    - entity_type
+    - entity_id
+    - changed_at
+    freshness: null
+    measures:
+    - budget_changes
+    - status_changes
+    - status_events
+    dimensions:
+    - ad_id
+    - adgroup_id
+    - bidding_strategy_type
+    - brand_id
+    - campaign_id
+    - changed_at
+    - entity_id
+    - entity_name
+    - entity_type
+    - is_final
+    - model_version
+    - prev_status
+    - status
   ltv_cac:
     data_product: CustomerIntelligence
     domain: Customer
@@ -1592,7 +1985,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id024 []
+    grain_key: &id028 []
     freshness: null
     measures:
     - cac
@@ -1613,6 +2006,10 @@ views:
     serve_tables:
     - clickhouse.default.serve.meta_ad_attribution_daily
     gold_inputs:
+    - clickhouse.default.gold.dim_ad
+    - clickhouse.default.gold.dim_ad_neurohack_map
+    - clickhouse.default.gold.dim_adset
+    - clickhouse.default.gold.dim_campaign
     - clickhouse.default.gold.fct_order_attribution
     - clickhouse.default.gold.fct_order_items
     - clickhouse.default.gold.fct_orders
@@ -1623,7 +2020,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id012
+    grain_key: &id016
     - brand_id
     - report_date
     - campaign_id
@@ -1643,16 +2040,21 @@ views:
     - new_customer_orders
     - new_customer_revenue
     dimensions:
+    - ad_format
     - ad_id
     - ad_name
     - adset_id
     - adset_name
+    - adset_optimization_goal
     - attribution_model
     - brand_id
     - campaign_id
     - campaign_name
+    - campaign_objective
+    - campaign_status
     - is_final
     - model_version
+    - neurohack_tag_codes
     - report_date
   meta_ad_breakdown_performance:
     data_product: MetaAdsPerformance
@@ -1663,6 +2065,11 @@ views:
     serve_tables:
     - clickhouse.default.serve.meta_ads_breakdown_daily
     gold_inputs:
+    - clickhouse.default.gold.dim_ad
+    - clickhouse.default.gold.dim_ad_neurohack_map
+    - clickhouse.default.gold.dim_adset
+    - clickhouse.default.gold.dim_campaign
+    - clickhouse.default.gold.dim_creative
     - clickhouse.default.gold.mart_meta_ad_breakdown_daily
     contract: paid_media_meta_breakdown_contract_v1
     date_dimension: report_date
@@ -1670,7 +2077,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id030
+    grain_key: &id038
     - brand_id
     - report_date
     - breakdown_type
@@ -1705,11 +2112,13 @@ views:
     dimensions:
     - account_name
     - ad_account_id
+    - ad_format
     - ad_id
     - ad_name
     - ad_status
     - adset_id
     - adset_name
+    - adset_optimization_goal
     - adset_status
     - age
     - brand_id
@@ -1721,13 +2130,16 @@ views:
     - campaign_objective
     - campaign_status
     - country
+    - creative_cta_type
     - creative_id
+    - creative_name
     - creative_type
     - device_platform
     - gender
     - impression_device
     - is_final
     - model_version
+    - neurohack_tag_codes
     - platform_position
     - publisher_platform
     - region
@@ -1757,7 +2169,7 @@ views:
     - campaign_end_date
     - campaign_start_date
     - report_date
-    grain_key: &id031
+    grain_key: &id039
     - brand_id
     - ad_account_id
     - report_date
@@ -1847,6 +2259,11 @@ views:
     serve_tables:
     - clickhouse.default.serve.meta_ads_hourly
     gold_inputs:
+    - clickhouse.default.gold.dim_ad
+    - clickhouse.default.gold.dim_ad_neurohack_map
+    - clickhouse.default.gold.dim_adset
+    - clickhouse.default.gold.dim_campaign
+    - clickhouse.default.gold.dim_creative
     - clickhouse.default.gold.fct_meta_ads_hourly
     contract: paid_media_meta_hourly_contract_v1
     date_dimension: report_date
@@ -1855,7 +2272,7 @@ views:
     time_dimensions:
     - report_date
     - report_hour_ts
-    grain_key: &id032
+    grain_key: &id040
     - brand_id
     - ad_account_id
     - report_date
@@ -1882,20 +2299,69 @@ views:
     dimensions:
     - account_name
     - ad_account_id
+    - ad_format
     - ad_id
     - ad_name
+    - ad_status
     - adset_id
     - adset_name
+    - adset_optimization_goal
+    - adset_status
     - brand_id
     - campaign_id
     - campaign_name
     - campaign_objective
+    - campaign_status
+    - creative_cta_type
+    - creative_id
+    - creative_name
     - creative_type
     - hour_of_day
     - is_final
     - model_version
+    - neurohack_tag_codes
     - report_date
     - report_hour_ts
+  meta_ads_status_history:
+    data_product: MetaAdsPerformance
+    domain: PaidMedia
+    owner_team: growth-paid-media
+    title: Meta Ads Status History (Serve)
+    serve_table: clickhouse.default.serve.meta_ads_status_history
+    serve_tables:
+    - clickhouse.default.serve.meta_ads_status_history
+    gold_inputs:
+    - clickhouse.default.gold.fct_meta_ads_status_history
+    contract: paid_media_meta_status_history_contract_v1
+    date_dimension: changed_at
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - changed_at
+    grain_key: &id041
+    - brand_id
+    - entity_type
+    - entity_id
+    - changed_at
+    freshness: null
+    measures:
+    - budget_changes
+    - status_changes
+    - status_events
+    dimensions:
+    - ad_id
+    - adset_id
+    - brand_id
+    - campaign_id
+    - changed_at
+    - effective_status
+    - entity_id
+    - entity_name
+    - entity_type
+    - is_final
+    - model_version
+    - prev_status
+    - status
   order_attribution:
     data_product: MarketingAttribution
     domain: Attribution
@@ -1914,7 +2380,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - order_date
-    grain_key: &id013
+    grain_key: &id017
     - brand_id
     - order_id
     - attribution_model
@@ -1987,7 +2453,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id020
+    grain_key: &id024
     - brand_id
     - report_date
     - order_key
@@ -2011,6 +2477,46 @@ views:
     - shipping_pincode
     - shipping_region
     - shipping_state_code
+  payments:
+    data_product: CanonicalPnl
+    domain: Finance
+    owner_team: finance-team
+    title: Shopify Payments (Serve)
+    serve_table: clickhouse.default.serve.payments
+    serve_tables:
+    - clickhouse.default.serve.payments
+    gold_inputs:
+    - clickhouse.default.gold.fct_payments
+    contract: payments_contract_v1
+    date_dimension: transaction_date
+    datetime_dimension: null
+    date_axis_resolved: true
+    time_dimensions:
+    - transaction_created_at
+    - transaction_date
+    grain_key: &id042
+    - brand_id
+    - transaction_id
+    freshness: null
+    measures:
+    - amount_signed
+    - payment_amount
+    - successful_transactions
+    - transactions
+    dimensions:
+    - brand_id
+    - is_cod
+    - is_final
+    - is_refund
+    - model_version
+    - order_id
+    - payment_gateway
+    - payment_method
+    - transaction_created_at
+    - transaction_date
+    - transaction_id
+    - transaction_kind
+    - transaction_status
   platform_attribution_commerce:
     data_product: ChannelAttribution
     domain: Attribution
@@ -2029,7 +2535,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id015
+    grain_key: &id019
     - brand_id
     - order_id
     - platform
@@ -2073,7 +2579,7 @@ views:
     time_dimensions:
     - created_at_ist
     - order_date
-    grain_key: &id033
+    grain_key: &id043
     - brand_id
     - order_id
     - line_item_id
@@ -2140,6 +2646,7 @@ views:
     serve_tables:
     - clickhouse.default.serve.purchase_sequence
     gold_inputs:
+    - clickhouse.default.gold.dim_customers
     - clickhouse.default.gold.fct_orders
     contract: purchase_sequence_contract_v1
     date_dimension: order_date
@@ -2148,7 +2655,7 @@ views:
     time_dimensions:
     - order_created_at_ist
     - order_date
-    grain_key: &id034
+    grain_key: &id044
     - brand_id
     - order_id
     freshness:
@@ -2165,8 +2672,15 @@ views:
     - repeat_order_share
     - repeat_orders
     dimensions:
+    - acquisition_campaign
+    - acquisition_channel
+    - acquisition_platform
     - brand_id
     - customer_id
+    - default_city
+    - default_country
+    - default_province
+    - email_hash
     - is_cod
     - is_first_order
     - is_prepaid
@@ -2180,6 +2694,7 @@ views:
     - payment_bucket
     - payment_gateway
     - payment_method
+    - profile_is_repeat_customer
     - shipping_city
     - shipping_country
     - shipping_pincode
@@ -2202,7 +2717,7 @@ views:
     time_dimensions:
     - order_date
     - refund_date
-    grain_key: &id035
+    grain_key: &id045
     - brand_id
     - refund_id
     freshness:
@@ -2263,7 +2778,7 @@ views:
     time_dimensions:
     - order_date
     - refund_date
-    grain_key: &id036
+    grain_key: &id046
     - brand_id
     - refund_line_item_id
     freshness:
@@ -2319,7 +2834,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id021 []
+    grain_key: &id025 []
     freshness: null
     measures:
     - amazon_return_cancel_revenue
@@ -2351,7 +2866,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id022 []
+    grain_key: &id026 []
     freshness: null
     measures:
     - amazon_gross_sales
@@ -2384,6 +2899,8 @@ views:
     serve_tables:
     - clickhouse.default.serve.session_funnel
     gold_inputs:
+    - clickhouse.default.gold.dim_ad
+    - clickhouse.default.gold.dim_campaign
     - clickhouse.default.gold.fct_session_funnel
     contract: session_funnel_contract_v1
     date_dimension: session_date
@@ -2391,7 +2908,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - session_date
-    grain_key: &id037
+    grain_key: &id047
     - brand_id
     - session_id
     freshness:
@@ -2435,6 +2952,7 @@ views:
     - total_page_views
     - total_session_seconds
     dimensions:
+    - ad_format
     - ad_id
     - ad_name
     - adset_id
@@ -2443,6 +2961,8 @@ views:
     - browser_family
     - campaign_id
     - campaign_name
+    - campaign_objective
+    - campaign_status
     - channel
     - converted
     - device_type
@@ -2484,7 +3004,7 @@ views:
     time_dimensions:
     - order_date
     - touch_ts
-    grain_key: &id016
+    grain_key: &id020
     - brand_id
     - order_id
     - touch_id
@@ -2525,7 +3045,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - event_date
-    grain_key: &id038
+    grain_key: &id048
     - brand_id
     - event_id
     freshness:
@@ -2584,7 +3104,7 @@ views:
     date_axis_resolved: true
     time_dimensions:
     - report_date
-    grain_key: &id039
+    grain_key: &id049
     - brand_id
     - report_date
     - event_type
@@ -2725,13 +3245,7 @@ contracts:
     serve_table: clickhouse.default.serve.amazon_finance_charge_types_daily
     data_product: AmazonCommercePerformance
     domain: Commerce
-    grain:
-    - brand_id
-    - report_date
-    - charge_type
-    - fee_family
-    - event_kind
-    - line_kind
+    grain: *id008
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2752,7 +3266,7 @@ contracts:
     serve_table: clickhouse.default.serve.amazon_order_item_pnl
     data_product: AmazonAccounts
     domain: Finance
-    grain: *id008
+    grain: *id009
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2775,11 +3289,32 @@ contracts:
     - freshness_within_sla
     attribution_boundary: null
     contract_file: contracts/amazon_order_item_pnl.yml
+  amazon_order_items_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_order_items
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    grain: *id010
+    time_dimension: order_date
+    currency: INR
+    required_columns:
+    - brand_id
+    - amazon_order_id
+    - order_item_id
+    - order_date
+    - quantity_ordered
+    - item_price_amount
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/amazon_order_items.yml
   amazon_orders_contract_v1:
     serve_table: clickhouse.default.serve.amazon_orders
     data_product: AmazonCommercePerformance
     domain: Commerce
-    grain: *id009
+    grain: *id011
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -2807,11 +3342,30 @@ contracts:
     attribution_boundary: attribution_channel is the ASIN-purchase-date match only (amazon vs organic_amazon);
       campaign/ad detail stays on PaidMedia.AmazonAdsPerformance.
     contract_file: contracts/amazon_orders.yml
+  amazon_returns_daily_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_returns_daily
+    data_product: AmazonCommercePerformance
+    domain: Commerce
+    grain: *id012
+    time_dimension: report_date
+    currency: INR
+    required_columns:
+    - brand_id
+    - report_date
+    - return_request_orders
+    - report_refunded_amount
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/amazon_returns_daily.yml
   amazon_settlement_reconciliation_contract_v1:
     serve_table: clickhouse.default.serve.amazon_settlement_reconciliation
     data_product: AmazonAccounts
     domain: Finance
-    grain: *id010
+    grain: *id013
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2841,14 +3395,7 @@ contracts:
     serve_table: clickhouse.default.serve.ad_channel_pnl_daily
     data_product: MarketingAttribution
     domain: Attribution
-    grain:
-    - brand_id
-    - report_date
-    - channel
-    - campaign_id
-    - adset_id
-    - ad_id
-    - row_type
+    grain: *id014
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2875,7 +3422,7 @@ contracts:
     serve_table: clickhouse.default.serve.channel_pnl
     data_product: ChannelAttribution
     domain: Attribution
-    grain: *id011
+    grain: *id015
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2899,7 +3446,7 @@ contracts:
     serve_table: clickhouse.default.serve.meta_ad_attribution_daily
     data_product: MarketingAttribution
     domain: Attribution
-    grain: *id012
+    grain: *id016
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2912,19 +3459,23 @@ contracts:
     - attributed_net_revenue_excl_tax
     - attribution_model
     - is_final
-    - model_version
+    - model_version    - campaign_status
+    - ad_format
+    - adset_optimization_goal
+    - neurohack_tag_codes
     quality_tests:
     - composite_key_unique
     - rollup_reconciles_to_order_attribution
     - first_party_revenue_only
     - freshness_within_sla
+    - grain_unchanged_by_dim_joins
     attribution_boundary: null
     contract_file: contracts/meta_ad_attribution_daily.yml
   attribution_order_contract_v2:
     serve_table: clickhouse.default.serve.order_attribution
     data_product: MarketingAttribution
     domain: Attribution
-    grain: *id013
+    grain: *id017
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -2955,7 +3506,7 @@ contracts:
     serve_table: clickhouse.default.serve.attribution_paths
     data_product: MarketingAttribution
     domain: Attribution
-    grain: *id014
+    grain: *id018
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -2975,7 +3526,7 @@ contracts:
     serve_table: clickhouse.default.serve.platform_attribution_commerce
     data_product: ChannelAttribution
     domain: Attribution
-    grain: *id015
+    grain: *id019
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -2998,7 +3549,7 @@ contracts:
     serve_table: clickhouse.default.serve.touchpoints
     data_product: MarketingAttribution
     domain: Attribution
-    grain: *id016
+    grain: *id020
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -3061,7 +3612,7 @@ contracts:
     serve_table: clickhouse.default.serve.channel_attribution_daily
     data_product: ChannelAttribution
     domain: Attribution
-    grain: *id017
+    grain: *id021
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3116,7 +3667,7 @@ contracts:
     serve_table: clickhouse.default.serve.commerce_orders
     data_product: CommercePerformance
     domain: Commerce
-    grain: *id018
+    grain: *id022
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -3143,7 +3694,7 @@ contracts:
     serve_table: clickhouse.default.serve.commerce_performance_daily
     data_product: CommercePerformance
     domain: Commerce
-    grain: *id019
+    grain: *id023
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3165,7 +3716,7 @@ contracts:
     serve_table: clickhouse.default.serve.orders_all_channels
     data_product: CrossChannelCommerce
     domain: Commerce
-    grain: *id020
+    grain: *id024
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3185,7 +3736,7 @@ contracts:
     serve_table: clickhouse.default.serve.returns_cancels_all_channels
     data_product: CrossChannelCommerce
     domain: Commerce
-    grain: *id021
+    grain: *id025
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3206,7 +3757,7 @@ contracts:
     serve_table: clickhouse.default.serve.sales_all_channels
     data_product: CrossChannelCommerce
     domain: Commerce
-    grain: *id022
+    grain: *id026
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3227,7 +3778,7 @@ contracts:
     serve_table: clickhouse.default.serve.customer_data
     data_product: CustomerData
     domain: Customer
-    grain: *id023
+    grain: *id027
     time_dimension: null
     currency: INR
     required_columns:
@@ -3260,7 +3811,7 @@ contracts:
     serve_table: clickhouse.default.serve.ltv_cac_daily
     data_product: CustomerIntelligence
     domain: Customer
-    grain: *id024
+    grain: *id028
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3283,7 +3834,7 @@ contracts:
     serve_table: clickhouse.default.serve.customer_ltv
     data_product: CustomerIntelligence
     domain: Customer
-    grain: *id025
+    grain: *id029
     time_dimension: last_order_at
     currency: INR
     required_columns:
@@ -3303,11 +3854,30 @@ contracts:
     - freshness_within_sla
     attribution_boundary: null
     contract_file: contracts/customer_ltv.yml
+  finance_waterfall_daily_contract_v1:
+    serve_table: clickhouse.default.serve.finance_waterfall_daily
+    data_product: CanonicalPnl
+    domain: Finance
+    grain: *id030
+    time_dimension: report_date
+    currency: INR
+    required_columns:
+    - brand_id
+    - report_date
+    - line_gmv
+    - line_net_profit
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/finance_waterfall_daily.yml
   funnel_daily_contract_v1:
     serve_table: clickhouse.default.serve.funnel_daily
     data_product: SessionFunnel
     domain: WebAnalytics
-    grain: *id026
+    grain: *id031
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3341,11 +3911,56 @@ contracts:
     - freshness_within_sla
     attribution_boundary: null
     contract_file: contracts/funnel_daily.yml
+  paid_media_amazon_ad_groups_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_ads_ad_groups_daily
+    data_product: AmazonAdsPerformance
+    domain: PaidMedia
+    grain: *id032
+    time_dimension: report_date
+    currency: INR
+    required_columns:
+    - brand_id
+    - report_date
+    - campaign_id
+    - ad_group_id
+    - amazon_ads_spend
+    - amazon_ads_impressions
+    - amazon_ads_clicks
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/amazon_ads_ad_groups_daily.yml
+  paid_media_amazon_ads_contract_v1:
+    serve_table: clickhouse.default.serve.amazon_ads_ads_daily
+    data_product: AmazonAdsPerformance
+    domain: PaidMedia
+    grain: *id033
+    time_dimension: report_date
+    currency: INR
+    required_columns:
+    - brand_id
+    - report_date
+    - campaign_id
+    - ad_group_id
+    - ad_id
+    - amazon_ads_spend
+    - amazon_ads_impressions
+    - amazon_ads_clicks
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/amazon_ads_ads_daily.yml
   paid_media_amazon_contract_v1:
     serve_table: clickhouse.default.serve.amazon_ads_daily
     data_product: AmazonAdsPerformance
     domain: PaidMedia
-    grain: *id027
+    grain: *id034
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3379,7 +3994,7 @@ contracts:
     serve_table: clickhouse.default.serve.google_ads_daily
     data_product: GoogleAdsPerformance
     domain: PaidMedia
-    grain: *id028
+    grain: *id035
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3397,7 +4012,11 @@ contracts:
     - is_final
     - source_basis
     - data_as_of
-    - model_version
+    - model_version    - campaign_status
+    - campaign_objective
+    - campaign_bid_strategy
+    - campaign_daily_budget
+    - campaign_lifetime_budget
     quality_tests:
     - composite_key_unique
     - key_columns_not_null
@@ -3408,13 +4027,14 @@ contracts:
     - ratios_recompute_from_components
     - no_lower_grain_dimensions_exposed
     - freshness_within_sla
+    - grain_unchanged_by_dim_joins
     attribution_boundary: No conversions, conversion_value, ROAS or cost_per_conversion.
     contract_file: contracts/google_ads_daily.yml
   paid_media_google_hourly_contract_v1:
     serve_table: clickhouse.default.serve.google_ads_hourly
     data_product: GoogleAdsPerformance
     domain: PaidMedia
-    grain: *id029
+    grain: *id036
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3433,7 +4053,10 @@ contracts:
     - is_final
     - source_basis
     - data_as_of
-    - model_version
+    - model_version    - campaign_status
+    - campaign_objective
+    - campaign_bid_strategy
+    - campaign_daily_budget
     quality_tests:
     - composite_key_unique
     - key_columns_not_null
@@ -3441,14 +4064,36 @@ contracts:
     - hourly_daily_reconciliation
     - ratios_recompute_from_components
     - freshness_within_sla
+    - grain_unchanged_by_dim_joins
     attribution_boundary: No platform-reported purchases, purchase_value, ROAS or conversion values. Intraday
       delivery only; attributed revenue is never hourly.
     contract_file: contracts/google_ads_hourly.yml
+  paid_media_google_status_history_contract_v1:
+    serve_table: clickhouse.default.serve.google_ads_status_history
+    data_product: GoogleAdsPerformance
+    domain: PaidMedia
+    grain: *id037
+    time_dimension: changed_at
+    currency: INR
+    required_columns:
+    - brand_id
+    - entity_type
+    - entity_id
+    - changed_at
+    - status
+    - is_status_change
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/google_ads_status_history.yml
   paid_media_meta_breakdown_contract_v1:
     serve_table: clickhouse.default.serve.meta_ads_breakdown_daily
     data_product: MetaAdsPerformance
     domain: PaidMedia
-    grain: *id030
+    grain: *id038
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3468,7 +4113,11 @@ contracts:
     - is_final
     - source_basis
     - data_as_of
-    - model_version
+    - model_version    - creative_name
+    - creative_cta_type
+    - ad_format
+    - adset_optimization_goal
+    - neurohack_tag_codes
     quality_tests:
     - composite_key_unique
     - key_columns_not_null
@@ -3476,6 +4125,7 @@ contracts:
     - each_breakdown_type_reconciles_to_ad_daily
     - ratios_recompute_from_components
     - freshness_within_sla
+    - grain_unchanged_by_dim_joins
     - no_hourly_columns_exposed
     attribution_boundary: No platform-reported purchases, purchase_value, ROAS or conversion values.
     contract_file: contracts/meta_ads_breakdown_daily.yml
@@ -3483,7 +4133,7 @@ contracts:
     serve_table: clickhouse.default.serve.meta_ads_daily
     data_product: MetaAdsPerformance
     domain: PaidMedia
-    grain: *id031
+    grain: *id039
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3529,7 +4179,7 @@ contracts:
     serve_table: clickhouse.default.serve.meta_ads_hourly
     data_product: MetaAdsPerformance
     domain: PaidMedia
-    grain: *id032
+    grain: *id040
     time_dimension: report_date
     currency: INR
     required_columns:
@@ -3549,7 +4199,11 @@ contracts:
     - is_final
     - source_basis
     - data_as_of
-    - model_version
+    - model_version    - creative_name
+    - creative_cta_type
+    - ad_format
+    - adset_optimization_goal
+    - neurohack_tag_codes
     quality_tests:
     - composite_key_unique
     - key_columns_not_null
@@ -3557,14 +4211,56 @@ contracts:
     - hourly_daily_reconciliation
     - ratios_recompute_from_components
     - freshness_within_sla
+    - grain_unchanged_by_dim_joins
     attribution_boundary: No platform-reported purchases, purchase_value, ROAS or conversion values. Intraday
       delivery only; attributed revenue is never hourly.
     contract_file: contracts/meta_ads_hourly.yml
+  paid_media_meta_status_history_contract_v1:
+    serve_table: clickhouse.default.serve.meta_ads_status_history
+    data_product: MetaAdsPerformance
+    domain: PaidMedia
+    grain: *id041
+    time_dimension: changed_at
+    currency: INR
+    required_columns:
+    - brand_id
+    - entity_type
+    - entity_id
+    - changed_at
+    - status
+    - is_status_change
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/meta_ads_status_history.yml
+  payments_contract_v1:
+    serve_table: clickhouse.default.serve.payments
+    data_product: CanonicalPnl
+    domain: Finance
+    grain: *id042
+    time_dimension: transaction_date
+    currency: INR
+    required_columns:
+    - brand_id
+    - transaction_id
+    - transaction_date
+    - amount
+    - amount_signed
+    - model_version
+    quality_tests:
+    - composite_key_unique
+    - key_columns_not_null
+    - freshness_within_sla
+    attribution_boundary: null
+    contract_file: contracts/payments.yml
   product_performance_contract_v1:
     serve_table: clickhouse.default.serve.product_performance
     data_product: ProductPerformance
     domain: Product
-    grain: *id033
+    grain: *id043
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -3596,7 +4292,7 @@ contracts:
     serve_table: clickhouse.default.serve.purchase_sequence
     data_product: CustomerIntelligence
     domain: Customer
-    grain: *id034
+    grain: *id044
     time_dimension: order_date
     currency: INR
     required_columns:
@@ -3608,8 +4304,11 @@ contracts:
     - is_first_order
     - days_since_prev_order
     - net_revenue_excl_tax
-    - model_version
+    - model_version    - email_hash
+    - acquisition_channel
+    - profile_is_repeat_customer
     quality_tests:
+    - grain_unchanged_by_dim_joins
     - composite_key_unique
     - order_seq_contiguous_per_customer
     - first_orders_equal_distinct_customers
@@ -3621,7 +4320,7 @@ contracts:
     serve_table: clickhouse.default.serve.refund_events
     data_product: ReturnsRefunds
     domain: Operations
-    grain: *id035
+    grain: *id045
     time_dimension: refund_date
     currency: INR
     required_columns:
@@ -3647,7 +4346,7 @@ contracts:
     serve_table: clickhouse.default.serve.return_lifecycle
     data_product: ReturnsRefunds
     domain: Operations
-    grain: *id036
+    grain: *id046
     time_dimension: refund_date
     currency: INR
     required_columns:
@@ -3675,7 +4374,7 @@ contracts:
     serve_table: clickhouse.default.serve.session_funnel
     data_product: SessionFunnel
     domain: WebAnalytics
-    grain: *id037
+    grain: *id047
     time_dimension: session_date
     currency: INR
     required_columns:
@@ -3700,7 +4399,9 @@ contracts:
     - purchase_revenue
     - is_final
     - data_as_of
-    - model_version
+    - model_version    - campaign_status
+    - campaign_objective
+    - ad_format
     quality_tests:
     - composite_key_unique
     - key_columns_not_null
@@ -3709,13 +4410,14 @@ contracts:
     - no_identity_columns_session_funnel
     - sessions_match_gold_session_funnel
     - freshness_within_sla
+    - grain_unchanged_by_dim_joins
     attribution_boundary: null
     contract_file: contracts/session_funnel.yml
   web_events_contract_v1:
     serve_table: clickhouse.default.serve.web_events
     data_product: EventStream
     domain: WebAnalytics
-    grain: *id038
+    grain: *id048
     time_dimension: event_date
     currency: INR
     required_columns:
@@ -3744,7 +4446,7 @@ contracts:
     serve_table: clickhouse.default.serve.web_events_daily
     data_product: EventStream
     domain: WebAnalytics
-    grain: *id039
+    grain: *id049
     time_dimension: report_date
     currency: INR
     required_columns:

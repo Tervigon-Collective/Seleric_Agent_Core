@@ -87,6 +87,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Avg Seconds to Checkout last 30 days
+  request:
+    measures:
+    - session_avg_seconds_to_checkout
+    time_range:
+      preset: last_30d
 validation_tests:
 - session_avg_seconds_to_checkout resolves on session_funnel at ad/funnel/device grain
 currency_default: INR

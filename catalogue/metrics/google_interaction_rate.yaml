@@ -38,6 +38,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google Interaction Rate last 30 days
+  request:
+    measures:
+    - google_interaction_rate
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_interaction_rate equals google_interactions / google_impressions recomputed on any
   slice

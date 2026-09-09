@@ -61,6 +61,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Meta ThruPlays last 30 days
+  request:
+    measures:
+    - meta_thruplays
+    time_range:
+      preset: last_30d
 validation_tests:
 - meta_thruplays >= 0 for any slice
 dashboard_alignment:

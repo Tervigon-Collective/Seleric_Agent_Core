@@ -34,6 +34,13 @@ data_owner: Growth / Paid Media
 access_policy:
   roles_allowed: [exec, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Google CPC (hourly) last 30 days
+  request:
+    measures:
+    - google_cpc_hourly
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_cpc_hourly equals numerator/denominator recomputed on any slice
 ratio_components:

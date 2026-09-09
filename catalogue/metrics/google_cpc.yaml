@@ -2,7 +2,9 @@ id: google_cpc
 display_name: Google CPC
 category: paid_media
 status: certified
-description: Google CPC recomputed from aggregated components.
+description: >
+  Google CPC recomputed as SUM(spend)/SUM(clicks) on report_date. Never AVG of row CPCs.
+  Delivery only; not cost-per-conversion.
 formula:
   human_readable: SUM(spend) / SUM(clicks)
   authoritative_source: cube
@@ -35,6 +37,13 @@ access_policy:
   - ops
   scopes:
   - metrics:read
+examples:
+- question: Google CPC last 30 days
+  request:
+    measures:
+    - google_cpc
+    time_range:
+      preset: last_30d
 validation_tests:
 - google_cpc equals google_spend / google_clicks recomputed on any slice
 ratio_components:

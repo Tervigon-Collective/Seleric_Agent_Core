@@ -1,0 +1,45 @@
+id: amazon_recon_header_variance
+display_name: Amazon Settlement Header Variance
+category: finance
+status: certified
+description: Finances API group total minus settlement report header (ACTUAL). Close-exception signal;
+  do not add into net_profit.
+formula:
+  human_readable: report_header_variance
+  authoritative_source: cube
+cube_mapping:
+  view: amazon_settlement_reconciliation
+  measure: amazon_settlement_reconciliation.report_header_variance
+aggregation: additive
+unit: currency
+grain: settlement
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Amazon Settlement Header Variance last 30 days
+  request:
+    measures:
+    - amazon_recon_header_variance
+    time_range:
+      preset: last_30d
+validation_tests:
+- amazon_recon_header_variance is defined on amazon_settlement_reconciliation
+dashboard_alignment:
+  status: not_in_dashboard
+  audited_on: '2026-09-09'
+  source: Seleric_Dashboard/Node-Backend
+  note: Certified Cube port; no single Historical Analytics card maps 1:1.

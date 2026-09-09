@@ -30,6 +30,13 @@ data_owner: Commerce Ops
 access_policy:
   roles_allowed: [exec, finance, growth_lead, analyst, ops]
   scopes: [metrics:read]
+examples:
+- question: Net Sales (Amazon-only — ex-GST, net of report returns) last 30 days
+  request:
+    measures:
+    - amazon_net_sales
+    time_range:
+      preset: last_30d
 validation_tests:
   - June 2026 brand 20 = ₹214,753.49
 deprecated_aliases: []
