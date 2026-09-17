@@ -4,8 +4,7 @@ category: commerce
 status: certified
 description: 'Coupon/discount value in taxable (ex-GST) terms on eligible placement orders (proportional
   GST strip per Commerce Metric Policy v1). Matches the dashboard Discounts card (Shopify-only). Placement
-  axis: order_date. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon
-  SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
+  axis: order_date. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
   use net_profit_blended.'
 formula:
   human_readable: 'Sum of total_discounts x ((gross_revenue - total_tax) / gross_revenue) per eligible

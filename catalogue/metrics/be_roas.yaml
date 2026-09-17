@@ -4,8 +4,7 @@ category: finance
 status: certified
 description: 'Historical Analytics BE ROAS (FE tooltip / attribution form): Net Sales / (Net Sales − Net
   COGS). Contribution-margin breakeven — the ad efficiency needed to cover COGS. Do not confuse with (net_cogs
-  + spend) / spend. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon
-  SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
+  + spend) / spend. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
   use net_profit_blended.'
 formula:
   human_readable: commerce_net_revenue_daily / (commerce_net_revenue_daily - net_cogs)

@@ -189,7 +189,7 @@ class AmbiguousDimension(BaseModel):
     guidance: str = (
         "Several catalogue dimensions share this grain language. Pick the "
         "candidate whose product and value space fit the user's intent "
-        "(channel vs last-touch lt_channel vs marketplace shopify|amazon), "
+        "(channel vs last-touch lt_channel vs marketplace shopify), "
         "or apply ontology grain_defaults when no measure is named. Never "
         "invent a dimension id or slice a metric that does not list it."
     )
@@ -208,16 +208,16 @@ class UnknownDimension(BaseModel):
 # Polymorphic `channel` value spaces by Cube view (from dimensions/core.yaml).
 _CHANNEL_VIEW_VALUE_SPACE: dict[str, str] = {
     "channel_attribution": (
-        "closed set (meta/google/organic_shopify/unattributed/amazon/organic_amazon)"
+        "closed set (meta/google/organic_shopify/unattributed)"
     ),
     "channel_pnl": "meta/google/organic/unattributed",
     "funnel_daily": "FINE channel (ig_feed, google_search, organic, ...)",
     "session_funnel": "FINE channel (ig_feed, google_search, organic, ...)",
     "web_events": "FINE channel (ig_feed, google_search, organic, ...)",
     "web_events_daily": "FINE channel (ig_feed, google_search, organic, ...)",
-    "orders_all_channels": "marketplace (shopify | amazon)",
-    "sales_all_channels": "marketplace (shopify | amazon)",
-    "returns_cancels_all_channels": "marketplace (shopify | amazon)",
+    "orders_all_channels": "marketplace (shopify)",
+    "sales_all_channels": "marketplace (shopify)",
+    "returns_cancels_all_channels": "marketplace (shopify)",
 }
 
 

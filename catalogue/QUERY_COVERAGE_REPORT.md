@@ -1,5 +1,7 @@
 # Query Coverage Report — vs. MCP Query Capability Catalogue
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Status: §5/Scenario B and the P0 metric batch are now IMPLEMENTED (2026-07-11) —
 see `CANONICAL_DATA_MODEL.md` §12 for exactly what was built and verified (63/63
 non-live tests passing, including 10 new acceptance tests). The "After design"

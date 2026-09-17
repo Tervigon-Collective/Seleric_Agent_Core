@@ -4,7 +4,7 @@ category: finance
 status: certified
 description: 'Historical Analytics LTV:CAC for first-time attributed customers in the period. "LTV" here
   is new-customer first-order AOV = new_customer_revenue / new_customers; CAC = total_ad_spend / new_customers;
-  ratio = LTV / CAC. Matches getNewCustomerMetrics + Meta+Google+Amazon spend. new_customer_revenue uses
+  ratio = LTV / CAC. Matches getNewCustomerMetrics + Meta+Google spend. new_customer_revenue uses
   fct_order_attribution.net_revenue_excl_tax (dashboard net sales: cancelled/voided → 0; paid → net ex-GST;
   unpaid COD → gross_excl − discounts) — same basis as attributed_net_revenue for is_new_customer=1.
 

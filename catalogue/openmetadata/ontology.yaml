@@ -14,15 +14,12 @@ domains:
   Commerce:
     om_glossary: Commerce
     owner_team: commerce-data-team
-    data_products: [CommercePerformance, AmazonCommercePerformance]
+    data_products: [CommercePerformance]
     cube_views:
       - commerce_orders
       - commerce_performance
-      - amazon_commerce_performance
-      - amazon_daily_pnl
-      - amazon_orders
       - orders_all_channels
-    grain: Order (+ Daily Amazon)
+    grain: Order
     date_axes: [placement, event]
   Product:
     om_glossary: Product
@@ -34,19 +31,17 @@ domains:
   PaidMedia:
     om_glossary: Paid Media
     owner_team: growth-paid-media
-    data_products: [MetaAdsPerformance, GoogleAdsPerformance, AmazonAdsPerformance]
+    data_products: [MetaAdsPerformance, GoogleAdsPerformance]
     cube_views:
       - meta_ad_performance
       - meta_ad_performance_hourly
       - meta_ad_breakdown_performance
       - google_ad_performance
       - google_ad_performance_hourly
-      - amazon_ad_performance
     grain: Daily (+ Meta/Google hourly)
     date_axes: [report_date]
     notes: >
       Delivery metrics only — platform attribution excluded from certified ports.
-      Amazon = Sponsored Products (SP) campaign daily only; SB/SD/DSP not ingested.
   Attribution:
     om_glossary: Attribution
     owner_team: growth-attribution
@@ -56,7 +51,7 @@ domains:
     date_axes: [order_date, report_date]
     notes: >
       Last-touch, first-party revenue, Shopify orders + Meta/Google touchpoints.
-      ChannelAttribution adds amazon/organic_amazon with mixed revenue basis.
+      ChannelAttribution adds the channel-day closed set (meta/google/organic_shopify/unattributed).
   Customer:
     om_glossary: Customer
     owner_team: growth-retention
@@ -65,8 +60,7 @@ domains:
     grain: Customer (+ Order sequence + profile)
     date_axes: [last_order_at, order_date]
     notes: >
-      Hashed PII only; Shopify customers only — Amazon SP-API exposes no durable
-      buyer identity (permanent boundary). CustomerData = profile only.
+      Hashed PII only; Shopify customers only. CustomerData = profile only.
   WebAnalytics:
     om_glossary: Web Analytics
     owner_team: growth-analytics
@@ -82,19 +76,13 @@ domains:
   Finance:
     om_glossary: Finance
     owner_team: finance-team
-    data_products: [CanonicalPnl, AmazonAccounts]
+    data_products: [CanonicalPnl]
     cube_views:
       - canonical_pnl
-      - amazon_settlement_reconciliation
-      - amazon_order_item_pnl
-      - amazon_daily_pnl_actual
-      - amazon_accounts_exceptions
-    grain: Daily (+ Settlement + OrderItem)
+    grain: Daily
     date_axes: [report_date]
     notes: >
-      CanonicalPnl InProgress. AmazonAccounts is ACTUAL_ONLY settlement/item/
-      daily P&L (OM-governed; Cube ports not in agent catalogue yet) — never
-      mix with AmazonCommercePerformance placement estimates.
+      CanonicalPnl InProgress.
   Operations:
     om_glossary: Operations
     owner_team: ops-team
@@ -103,13 +91,9 @@ domains:
     grain: RefundEvent (+ RefundLine port)
     date_axes: [refund_date]
     notes: >
-      Shopify refunds/returns only; Amazon's own line-item return detail in
-      gold (fct_amazon_return_items, fct_amazon_returns_daily) = V2 port.
-      Amazon's daily-grain cancelled/returned order counts and returned
-      revenue are certified, but live under Commerce.AmazonCommercePerformance
-      (amazon_commerce_performance cube view), not here — mirrors how
-      Shopify's own cancelled_orders/refunded_orders/returns_cancels live on
-      Commerce.commerce_orders rather than Operations.refund_events.
+      Shopify refunds/returns only. Shopify's cancelled_orders/refunded_orders/
+      returns_cancels live on Commerce.commerce_orders rather than
+      Operations.refund_events.
 
 entity_clusters:
   commerce_order:
@@ -124,40 +108,6 @@ entity_clusters:
     glossary: Commerce.EventAxis
     related: [Commerce.CancelledOrder, Commerce.ReturnedOrder, Commerce.returnsCancels]
     catalogue_metrics: [cancelled_orders, refunded_orders, returns_cancels]
-  amazon_commerce_order:
-    glossary: Commerce.TotalOrders
-    related: [Commerce.CancelledOrder, Commerce.ReturnedOrder, Commerce.returnsCancels]
-    notes: >
-      Amazon-only counterpart of commerce_order + commerce_events: amazon_orders
-      is the purchase_date placement count (excl. Canceled); amazon_cancelled_orders/
-      amazon_returned_orders/amazon_returns_cancels are the Amazon SP Cancellations
-      and Returns cards. No Amazon "active_orders"/"new_customer_orders" catalogue
-      metrics exist yet (amazon_commerce_performance.active_orders is Cube-exposed
-      but not catalogued).
-    catalogue_metrics: [amazon_orders, amazon_cancelled_orders, amazon_returned_orders, amazon_returns_cancels, amazon_sp_orders_grain]
-  amazon_commerce_revenue:
-    glossary: Commerce.CommerceOrder
-    related: [Commerce.GrossSales, Commerce.ReturnCancelRevenue]
-    notes: >
-      Amazon-only counterpart of commerce_revenue. All incl.-GST (Amazon
-      marketplace convention) — never sum directly against Shopify's ex-GST
-      commerce_revenue cluster without adjusting basis. No "cancelled
-      revenue" exists for Amazon (CANCELED orders contribute ₹0 to P&L).
-    catalogue_metrics: [amazon_gross_revenue, amazon_gross_sales, amazon_net_sales, amazon_total_sales, amazon_net_payout, amazon_return_revenue, amazon_sp_order_total]
-  amazon_accounts_actual:
-    glossary: Finance.AmazonAccountsActual
-    related: [Finance.AmazonSettlementReconciliation, Finance.AmazonSettledNetPayout]
-    notes: >
-      Finance.AmazonAccounts posted actuals — never mix with AmazonCommercePerformance
-      placement estimates or canonical_pnl net_profit.
-    catalogue_metrics:
-      - amazon_recon_settlements
-      - amazon_recon_header_variance
-      - amazon_actual_item_net_payout
-      - amazon_actual_item_gross_profit
-      - amazon_actual_daily_net_payout
-      - amazon_actual_daily_gross_profit
-      - amazon_close_exceptions
   product_line:
     glossary: Product.ProductOrder
     related: [Product.UnitsSold, Product.ProductNetRevenue, Product.ProductCOGS]
@@ -169,12 +119,11 @@ entity_clusters:
   paid_delivery:
     glossary: Paid Media.Spend
     related: [Paid Media.CTR, Paid Media.CPC, Paid Media.CPM, Paid Media.ReportDate, Paid Media.IsFinal]
-    catalogue_metrics: [meta_spend, google_spend, amazon_ads_spend, amazon_ads_ad_spend, amazon_ads_ad_group_spend, meta_status_changes, google_status_changes]
+    catalogue_metrics: [meta_spend, google_spend, meta_status_changes, google_status_changes]
   pnl_spend:
     glossary: Finance.Canonical P&L
-    related: [Paid Media.Spend, Paid Media.SponsoredProducts(SP)]
-    cube_members: [canonical_pnl.meta_spend, canonical_pnl.google_spend, canonical_pnl.amazon_spend, canonical_pnl.total_ad_spend]
-    notes: amazon_spend sources serve.amazon_ads_daily (SP delivery spend, INR).
+    related: [Paid Media.Spend]
+    cube_members: [canonical_pnl.meta_spend, canonical_pnl.google_spend, canonical_pnl.total_ad_spend]
   paid_video_meta:
     glossary: Paid Media.HookRate(Meta)
     related: [Paid Media.ThruPlay, Paid Media.HoldRate(Meta)]
@@ -255,13 +204,12 @@ attribution_boundary:
     - platform_reported_purchases
     - platform_reported_roas
     - platform_reported_conversion_value
-    - amazon_acos
   om_glossary_term: Paid Media.Platform-ReportedConversion
   agent_policy: >
     Never answer ROAS/CPA/attributed revenue from platform-reported fields.
     Use the certified MarketingAttribution product (order_attribution /
     meta_ad_attribution — first-party revenue, last-touch, Meta/Google only)
-    for attributed revenue; Amazon attributed sales/ACOS remain excluded.
+    for attributed revenue.
 
 # Grain-first defaults when an operator names a dimension and no measure.
 # Agents must not invent these; catalogue_resolve_dimension + this block are
@@ -272,7 +220,7 @@ grain_defaults:
     dimension_id: channel
     product: ChannelAttribution
     view: channel_attribution
-    value_space: closed set (meta/google/organic_shopify/unattributed/amazon/organic_amazon)
+    value_space: closed set (meta/google/organic_shopify/unattributed)
     default_measure: channel_orders
     revenue_companion: channel_net_revenue
     revenue_companion_status: draft
@@ -291,7 +239,7 @@ grain_defaults:
       - dimension_id: channel
         product: CrossChannelCommerce
         views: [orders_all_channels, sales_all_channels]
-        note: marketplace shopify | amazon
+        note: marketplace shopify
       - dimension_id: channel
         product: SessionFunnel
         views: [funnel_daily, session_funnel]
@@ -319,16 +267,9 @@ unclustered:
     channel_attribution: Channel-day attribution rollup with mixed GST basis; not last-touch order grain.
     customer_data: Profile/consent master data; lifetime metrics live on CustomerIntelligence.
     meta_ad_breakdown_performance: Placement/device/age breakdown of Meta delivery; parent cluster is paid_delivery.
-    amazon_daily_pnl: Amazon daily P&L port; not mixed with Shopify finance_pnl.
-    amazon_orders: Amazon SP order grain (incl GST); not the all-channels amazon_orders metric.
-    amazon_settlement_reconciliation: AmazonAccounts ACTUAL settlements; not placement estimates.
-    amazon_order_item_pnl: AmazonAccounts ACTUAL item P&L; not canonical_pnl.
-    amazon_daily_pnl_actual: AmazonAccounts ACTUAL daily P&L; no provisional values.
-    amazon_accounts_exceptions: Close exceptions; not a P&L measure.
     touchpoints: Pre-purchase journey touches; not last-touch credited orders.
     attribution_paths: Per-model conversion paths; last-touch credit is order_attribution.
-    orders_all_channels: Cross-channel order union; GST basis differs by row, not a single cluster.
+    orders_all_channels: All-channels placement orders (Shopify); not a single cluster.
   by_category:
     paid_media_meta: Delivery/engagement siblings of paid_delivery (spend + Meta video are clustered).
     paid_media_google: Delivery siblings of paid_delivery (google_spend is clustered).
-    paid_media_amazon: Delivery siblings of paid_delivery (amazon_ads_spend is clustered).

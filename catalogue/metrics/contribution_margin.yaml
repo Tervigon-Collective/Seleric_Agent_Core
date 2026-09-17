@@ -4,8 +4,7 @@ category: finance
 status: certified
 description: 'Net Sales − Net COGS for the period — the FE Net ROAS numerator and P&L contribution before
   advertising. Not gross_sales − gross_cogs − ad_spend (that is the dashboard "Gross Profit" / contribution-after-ads
-  form). Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
-  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+  form). Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: net_sales - net_cogs
   authoritative_source: cube

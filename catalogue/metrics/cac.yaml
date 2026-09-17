@@ -2,7 +2,7 @@ id: cac
 display_name: CAC (Customer Acquisition Cost)
 category: finance
 status: certified
-description: 'Period ad spend (Meta+Google+Amazon) per new attributed customer. CAC = total_ad_spend /
+description: 'Period ad spend (Meta+Google) per new attributed customer. CAC = total_ad_spend /
   new_customers. Component of LTV:CAC.
 
   '

@@ -5,8 +5,7 @@ status: certified
 description: 'Placement revenue excluding GST before discounts, on eligible placement orders — includes
   cancelled and voided orders (dashboard quirk kept per Commerce Metric Policy v1). Matches the dashboard
   Gross Sales card (Shopify-only). Placement axis: order_date. For the pre-discount value including GST
-  use total_sales. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon
-  SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
+  use total_sales. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
   use net_profit_blended.'
 formula:
   human_readable: 'Sum of (gross_excl_tax_derived + discount_excl_tax) per eligible order (is_test = 0,

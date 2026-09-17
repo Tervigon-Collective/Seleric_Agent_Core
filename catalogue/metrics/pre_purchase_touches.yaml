@@ -3,7 +3,7 @@ display_name: Pre-Purchase Touches
 category: attribution
 status: certified
 description: Count of session-level pre-purchase touches stitched to Shopify orders (touchpoints view,
-  order_date). Journey grain — not last-touch credited orders and not Amazon SP.
+  order_date). Journey grain — not last-touch credited orders.
 formula:
   human_readable: touches
   authoritative_source: cube

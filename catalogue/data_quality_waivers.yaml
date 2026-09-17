@@ -6,19 +6,6 @@
 # value is the correct state of the world.
 
 waivers:
-  # Amazon SP is onboarded for Tilting Heads (brand 20) only, so every Amazon
-  # relation is legitimately single-tenant today. These stop being waivers the
-  # moment a second brand is connected.
-  DEAD_DIMENSION:amazon_ad_performance.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_daily_pnl.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_commerce_performance.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_attribution_overview.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_order_item_pnl.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_daily_pnl_actual.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_accounts_exceptions.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_settlement_reconciliation.brand_id: Amazon SP onboarded for brand 20 only.
-  DEAD_DIMENSION:amazon_settlement_reconciliation.account_id: One Amazon seller account for brand 20.
-
   # Snowplow web tracking is deployed on the brand 20 storefront only.
   DEAD_DIMENSION:session_funnel.brand_id: Snowplow deployed on brand 20 storefront only.
   DEAD_DIMENSION:web_events.brand_id: Snowplow deployed on brand 20 storefront only.

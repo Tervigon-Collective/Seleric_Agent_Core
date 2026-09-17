@@ -4,8 +4,7 @@ category: finance
 status: certified
 description: 'Packaging cost arm of Shopify Net COGS (brand × day), including return-event packaging.
   FE §13 Packaging Cost. Part of Net COGS — do not subtract again when Net COGS / Total Operating Cost
-  is used. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
-  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+  is used. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: SUM(packaging_cost)
   authoritative_source: cube

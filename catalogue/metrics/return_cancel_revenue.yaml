@@ -4,8 +4,7 @@ category: commerce
 status: certified
 description: 'Revenue deducted from Gross Sales by return and cancellation events in the period, excluding GST, on the event
   date (Asia/Kolkata) — matches the dashboard Return / Cancel Rev card (Shopify-only; the dashboard displays it negated).
-  Event axis: event_date, not order_date. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon
-  SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+  Event axis: event_date, not order_date. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: 'Sum of per-line return/cancel revenue deductions (returned_revenue_excl_gst or cancelled_revenue_excl_gst,
     falling back to placement gross ex-GST) for events in period; gift cards excluded

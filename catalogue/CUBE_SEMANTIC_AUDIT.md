@@ -1,5 +1,7 @@
 # Cube Semantic Audit — vs. MCP Query Capability Catalogue
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Status: DRAFT FOR REVIEW — no production files modified.** This audit extends
 `CUBE_AUDIT_REPORT.md` (2026-07-11, cube-overlap audit — already implemented) with
 analysis specific to this goal: every cube's primary keys, pre-aggregations, and

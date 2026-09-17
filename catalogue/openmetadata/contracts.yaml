@@ -90,21 +90,6 @@ contracts:
       - google_clicks
       - is_final
 
-  paid_media_amazon_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_ads_daily
-    data_product: AmazonAdsPerformance
-    domain: PaidMedia
-    grain: [brand_id, report_date, campaign_id]
-    time_dimension: report_date
-    currency: INR
-    program: Sponsored Products (SP) only
-    required_columns:
-      - brand_id
-      - report_date
-      - amazon_ads_spend
-      - amazon_ads_impressions
-      - amazon_ads_clicks
-      - is_final
 
   attribution_order_contract_v1:
     serve_table: clickhouse.default.serve.order_attribution
@@ -115,8 +100,7 @@ contracts:
     currency: INR
     attribution_boundary: >
       Last-touch, first-party revenue only; Meta/Google touchpoints → Shopify
-      orders. Amazon ad→order attribution = V2 port; platform-attributed
-      sales/ACOS excluded.
+      orders. Platform-attributed sales/ACOS excluded.
     required_columns:
       - brand_id
       - order_id
@@ -173,8 +157,7 @@ contracts:
     currency: INR
     composition_rule: >
       fct_daily_pnl contributes COST columns only (its spend columns are
-      broken); spend comes from certified Meta/Google/Amazon Ads serve views;
-      net sales = Shopify commerce oracle (Amazon marketplace revenue = V2).
+      broken); spend comes from certified Meta/Google Ads serve views; net sales = Shopify commerce oracle.
     required_columns:
       - brand_id
       - report_date
@@ -184,7 +167,6 @@ contracts:
       - operating_cost
       - meta_spend
       - google_spend
-      - amazon_spend
       - total_ad_spend
       - gross_profit
       - contribution_margin
@@ -199,8 +181,7 @@ contracts:
     time_dimension: refund_date
     currency: INR
     notes: >
-      Shopify refunds only; Amazon returns (fct_amazon_return_items /
-      fct_amazon_returns_daily) = V2 port, separate grain.
+      Shopify refunds only.
     required_columns:
       - brand_id
       - refund_id
@@ -220,37 +201,7 @@ contracts:
     currency: INR
     notes: Secondary port; line-level returns with recovered cost components.
 
-  amazon_orders_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_orders
-    data_product: AmazonCommercePerformance
-    domain: Commerce
-    grain: [brand_id, amazon_order_id]
-    time_dimension: order_date
-    currency: INR
-    notes: Marketplace revenue INCLUDES GST.
 
-  amazon_commerce_daily_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_commerce_daily
-    data_product: AmazonCommercePerformance
-    domain: Commerce
-    grain: [brand_id, report_date]
-    time_dimension: report_date
-    currency: INR
-    required_columns:
-      - brand_id
-      - report_date
-      - total_orders
-      - active_orders
-      - cancelled_orders
-      - returned_orders
-      - gross_revenue
-      - returned_revenue
-      - is_final
-    notes: >
-      Secondary daily port of AmazonCommercePerformance. cancelled_orders is
-      purchase_date axis; returned_orders/returned_revenue are refund-posted
-      date axis (return/adjustment). No cancelled-revenue column — CANCELED
-      orders are excluded from P&L (₹0), not netted like Shopify cancels.
 
   channel_attribution_daily_contract_v1:
     serve_table: clickhouse.default.serve.channel_attribution_daily
@@ -259,7 +210,7 @@ contracts:
     grain: [brand_id, report_date, channel]
     time_dimension: report_date
     currency: INR
-    notes: Mixed revenue bases — Shopify ex-GST vs Amazon incl-GST.
+    notes: Shopify first-party ex-GST revenue basis.
 
   customer_data_contract_v1:
     serve_table: clickhouse.default.serve.customer_data
@@ -333,38 +284,6 @@ contracts:
       SUM/SUM; unique_visitors/unique_pages are per-row distinct counts and are
       NOT additive across rows. Unattributed buckets have sessions = 0.
 
-  amazon_settlement_reconciliation_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_settlement_reconciliation
-    data_product: AmazonAccounts
-    domain: Finance
-    grain: [brand_id, account_id, settlement_key, currency_code]
-    time_dimension: report_date
-    currency: INR
-    notes: ACTUAL_ONLY reconciled settlements — never mix with placement estimates.
 
-  amazon_order_item_pnl_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_order_item_pnl
-    data_product: AmazonAccounts
-    domain: Finance
-    grain: [brand_id, amazon_order_id, order_item_id]
-    time_dimension: report_date
-    currency: INR
-    notes: ACTUAL item P&L; flat 18% reverse-GST estimate only.
 
-  amazon_daily_pnl_actual_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_daily_pnl_actual
-    data_product: AmazonAccounts
-    domain: Finance
-    grain: [brand_id, report_date, currency_code]
-    time_dimension: report_date
-    currency: INR
-    notes: Secondary daily ACTUAL port of AmazonAccounts.
 
-  amazon_accounts_exceptions_contract_v1:
-    serve_table: clickhouse.default.serve.amazon_accounts_exceptions
-    data_product: AmazonAccounts
-    domain: Finance
-    grain: [brand_id, exception_domain, reference_key]
-    time_dimension: report_date
-    currency: INR
-    notes: Close-queue exceptions for ACTUAL settlements.

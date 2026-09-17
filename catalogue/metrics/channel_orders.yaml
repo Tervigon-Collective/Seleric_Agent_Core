@@ -3,12 +3,10 @@ display_name: Channel Orders
 category: attribution
 status: certified
 description: >
-  Orders by the closed channel set (meta / google / organic_shopify / unattributed /
-  amazon / organic_amazon) on serve.channel_attribution_daily. Reconciles to Total
-  Orders by construction: SUM over all channels == total_orders. Shopify last-touch
-  split: meta / google / organic_shopify (true organic search) / unattributed
-  (empty UTM / tracking failure — NOT labeled organic). Amazon arm excludes Canceled
-  to match the Total Orders amazon cohort.
+  Orders by the closed channel set (meta / google / organic_shopify / unattributed) on
+  serve.channel_attribution_daily. Reconciles to Total Orders by construction: SUM over all channels
+  == total_orders. Shopify last-touch split: meta / google / organic_shopify (true organic search) /
+  unattributed (empty UTM / tracking failure — NOT labeled organic).
 formula:
   human_readable: SUM(orders) by channel
   authoritative_source: cube

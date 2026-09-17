@@ -4,7 +4,7 @@ category: commerce
 status: certified
 description: 'Online (prepaid) payment bucket from serve.commerce_orders. Residual after COD, paytm card
   machine, and manual buckets. Excludes test, revenue-adjustment, draft. Scope: Shopify-only (Historical
-  Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform
+  Analytics / commerce oracle). For all-platform
   ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: Count of orders in online payment bucket

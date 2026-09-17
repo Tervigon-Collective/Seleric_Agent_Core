@@ -3,11 +3,10 @@ display_name: Total Ad Spend (all platforms)
 category: finance
 status: certified
 description: >
-  Total Ad Spend across all platforms = Total Performance Marketing =
-  Meta + Google + Amazon Ads. FE §13 identity. For Historical Analytics
-  Shopify-only Total Ad Spend (Meta+Google, no Amazon) use shopify_ad_spend.
+  Total Ad Spend across all platforms = Total Performance Marketing = Meta + Google Ads. FE §13
+  identity. Equals shopify_ad_spend.
 formula:
-  human_readable: SUM(meta_spend) + SUM(google_spend) + SUM(amazon_spend)
+  human_readable: SUM(meta_spend) + SUM(google_spend)
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
@@ -33,12 +32,14 @@ examples:
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
   - total_ad_spend >= 0 for any slice
-  - equals meta_spend + google_spend + amazon_spend for the same slice
-  - June 2026 brand 20 ≈ ₹19,22,687.25
+  - equals meta_spend + google_spend for the same slice
 deprecated_aliases:
   - total_performance_marketing
 dashboard_alignment:
-  status: match
+  status: unclear
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: src/integrations/historicalAnalytics/historicalQueryHelpers.js:369-370
+  note: >
+    Serve layer is Shopify-only (2026-09-17), so this equals the Shopify figure. A dashboard
+    All-channels card that also counts other marketplaces will not match.

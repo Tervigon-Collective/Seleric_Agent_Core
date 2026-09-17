@@ -4,7 +4,7 @@ category: commerce
 status: certified
 description: 'Shopify placement order count from serve.commerce_orders. Excludes test and revenue-adjustment
   orders; includes later-cancelled and voided placements. Scope: Shopify-only (Historical Analytics /
-  commerce oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use
+  commerce oracle). For all-platform ad spend use
   total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)

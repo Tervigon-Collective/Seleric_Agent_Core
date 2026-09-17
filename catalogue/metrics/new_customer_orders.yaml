@@ -3,7 +3,7 @@ display_name: New Customer Orders (Shopify-only)
 category: commerce
 status: approved
 description: 'Orders placed by first-time customers. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
+  oracle). For all-platform ad spend use total_ad_spend;
   for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: Count of orders where the customer has no prior order

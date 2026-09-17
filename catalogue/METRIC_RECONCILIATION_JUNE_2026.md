@@ -1,5 +1,7 @@
 # Metric Reconciliation — June 2026 Test Period
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Scope:** KPI / metric / analytics / attribution definitions across
 `Base_Agent` (agent catalogue + Cube semantic layer), `Seleric_Dashboard`
 (fe-dashboard + Node-Backend Gold engine), `data_platform/mage-ai`

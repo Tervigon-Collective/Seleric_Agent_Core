@@ -2,7 +2,7 @@ id: total_operating_cost
 display_name: Total Operating Cost (Shopify-only)
 category: finance
 status: certified
-description: 'FE §13 Total Operating Cost — identical to Net COGS (product + ship + pack + gateway + RTO). Prefer this id when the user says "Total Operating Cost"; net_cogs when they say Net COGS. Same underlying value; exposed as its own Cube measure so results include a total_operating_cost column. Scope: Shopify-only (does not include Amazon SP product cost or platform fees).
+description: 'FE §13 Total Operating Cost — identical to Net COGS (product + ship + pack + gateway + RTO). Prefer this id when the user says "Total Operating Cost"; net_cogs when they say Net COGS. Same underlying value; exposed as its own Cube measure so results include a total_operating_cost column. Scope: Shopify-only.
 
   '
 formula:
@@ -46,6 +46,6 @@ dashboard_alignment:
   source: Seleric_Dashboard/Node-Backend
   evidence: services/pnlService.js:207
   note: >
-    Dashboard summary may blend Amazon in a separate path. This metric is
+    Dashboard summary may blend other marketplace channels in a separate path. This metric is
     aligned to canonical Cube semantic execution (`canonical_pnl.total_operating_cost`),
     which equals Shopify Net COGS.

@@ -26,7 +26,6 @@ formulas for governance only — Cube executes.
 | `ProductPerformance` | Product | `clickhouse.default.serve.product_performance` | `product_performance` |
 | `MetaAdsPerformance` | PaidMedia | `clickhouse.default.serve.meta_ads_daily` | `meta_ad_performance`, `meta_ad_breakdown_performance` |
 | `GoogleAdsPerformance` | PaidMedia | `clickhouse.default.serve.google_ads_daily` | `google_ad_performance` |
-| `AmazonAdsPerformance` | PaidMedia | `clickhouse.default.serve.amazon_ads_daily` | `amazon_ad_performance` |
 | `MarketingAttribution` | Attribution | `clickhouse.default.serve.order_attribution` | `order_attribution`, `meta_ad_attribution` |
 | `CustomerIntelligence` | Customer | `clickhouse.default.serve.customer_ltv` | `customer_ltv`, `purchase_sequence` |
 | `CanonicalPnl` | Finance | `clickhouse.default.serve.canonical_pnl` | `canonical_pnl` |
@@ -86,7 +85,7 @@ OM_JWT_OR_PAT=<paste token>
 **Paid Media**
 
 - “Is `serve.meta_ads_daily` certified and what contract applies?”
-- “What glossary terms apply to `metaSpend` and `amazonAdsSpend`?”
+- “What glossary terms apply to `metaSpend` and `googleSpend`?”
 - “Why is platform ROAS excluded from MetaAdsPerformance?” (attribution boundary)
 
 **Customer**

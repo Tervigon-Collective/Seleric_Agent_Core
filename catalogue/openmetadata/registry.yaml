@@ -19,38 +19,7 @@ data_products:
   - commerce_performance
   platforms:
   - Shopify
-  notes: 'Shopify-only by frozen dashboard-oracle policy. Amazon marketplace orders are the sibling product
-    AmazonCommercePerformance (not unioned here).
-
-    '
-- name: AmazonCommercePerformance
-  domain: Commerce
-  owner_team: commerce-data-team
-  primary_serve_table: clickhouse.default.serve.amazon_orders
-  contract: amazon_orders_contract_v1
-  secondary_contracts:
-  - amazon_commerce_daily_contract_v1
-  cube_views:
-  - amazon_commerce_performance
-  - amazon_daily_pnl
-  - amazon_attribution_overview
-  - amazon_orders
-  - amazon_order_items
-  - amazon_returns_daily
-  - amazon_finance_charge_types_daily
-  platforms:
-  - AmazonSP
-  notes: 'Marketplace-reported revenue INCLUDES GST. Never mix with Shopify ex-GST CommercePerformance
-    without stating the basis. Ads stay on AmazonAdsPerformance. amazon_commerce_performance now also
-    carries Amazon''s own cancelled/returned order axis (cancelled_orders on purchase_date, returned_orders
-    + returned_revenue on refund-posted date; returns_cancels = the sum) — the Amazon-only counterpart
-    to CommercePerformance''s Shopify event-date cancelled_orders/refunded_orders/returns_cancels/return_revenue,
-    per the Seleric Dashboard Historical Analytics Amazon Seller Partner Returns / Cancellations cards.
-    Amazon has no "cancelled revenue" figure — CANCELED orders are excluded from P&L entirely (₹0), unlike
-    Shopify''s cancel_revenue. Pending customer refunds not yet posted to Amazon settlement (gold.int_amazon_return_reconciliation)
-    are a Seleric Dashboard Node-Backend accrual overlay, not reflected in the certified Cube measure.
-
-    '
+  notes: Shopify-only by frozen dashboard-oracle policy.
 - name: CrossChannelCommerce
   domain: Commerce
   owner_team: commerce-data-team
@@ -65,10 +34,9 @@ data_products:
   - returns_cancels_all_channels
   platforms:
   - Shopify
-  - AmazonSP
-  notes: 'Shopify + Amazon SP unions on a single placement axis. BASIS WARNING: Shopify rows are ex-GST;
-    Amazon SP rows INCLUDE GST. Never present a single cross-channel total as if one basis applied. Prefer
-    CommercePerformance or AmazonCommercePerformance when the question does not span channels.'
+  notes: >
+    All-channels placement-axis surfaces. Shopify is the only channel served (ex-GST basis). Prefer
+    CommercePerformance when the question does not need the all-channels view.
 - name: ProductPerformance
   domain: Product
   owner_team: commerce-data-team
@@ -78,10 +46,7 @@ data_products:
   - product_performance
   platforms:
   - Shopify
-  notes: 'Amazon SP order lines and listings (gold.fct_amazon_order_items, gold.dim_amazon_listings) =
-    V2 port.
-
-    '
+  notes: Shopify-only by frozen policy.
 - name: MetaAdsPerformance
   domain: PaidMedia
   owner_team: growth-paid-media
@@ -109,21 +74,6 @@ data_products:
   - google_ads_status_history
   platforms:
   - GoogleAds
-- name: AmazonAdsPerformance
-  domain: PaidMedia
-  owner_team: growth-paid-media
-  primary_serve_table: clickhouse.default.serve.amazon_ads_daily
-  contract: paid_media_amazon_contract_v1
-  cube_views:
-  - amazon_ad_performance
-  - amazon_ads_ads
-  - amazon_ads_ad_groups
-  platforms:
-  - AmazonAds
-  notes: 'Sponsored Products (SP) campaign daily grain only — SB/SD/DSP not ingested. No attributed sales/ACOS/ROAS
-    (attribution boundary).
-
-    '
 - name: MarketingAttribution
   domain: Attribution
   owner_team: growth-attribution
@@ -141,10 +91,9 @@ data_products:
   - Shopify
   - Meta
   - GoogleAds
-  notes: 'Last-touch, Shopify orders + Meta/Google touchpoints, first-party revenue only. Amazon ad→order
-    linkage (gold.fct_amazon_ads_ad_order_attribution) = V2 port; platform-attributed sales/ACOS excluded.
-
-    '
+  notes: >
+    Last-touch, Shopify orders + Meta/Google touchpoints, first-party revenue only;
+    platform-attributed sales/ACOS excluded.
 - name: ChannelAttribution
   domain: Attribution
   owner_team: growth-attribution
@@ -158,11 +107,9 @@ data_products:
   - Shopify
   - Meta
   - GoogleAds
-  - AmazonSP
-  notes: 'Closed channel set (meta/google/organic_shopify/amazon/organic_amazon). Shopify rows use first-party
-    ex-GST; Amazon rows use marketplace incl-GST.
-
-    '
+  notes: >
+    Closed channel set (meta/google/organic_shopify/unattributed). Shopify first-party ex-GST
+    revenue.
 - name: CustomerIntelligence
   domain: Customer
   owner_team: growth-retention
@@ -176,10 +123,7 @@ data_products:
   - ltv_cac
   platforms:
   - Shopify
-  notes: 'Hashed PII only. Amazon SP-API exposes no durable buyer identity — Amazon orders cannot join
-    LTV (permanent boundary, not V2).
-
-    '
+  notes: Hashed PII only. Shopify customers only.
 - name: CustomerData
   domain: Customer
   owner_team: growth-retention
@@ -243,32 +187,10 @@ data_products:
   - Shopify
   - Meta
   - GoogleAds
-  - AmazonAds
-  - AmazonSP
   agent_ready: false
-  notes: 'OM certification InProgress until cost-basis gates close. Net sales = Shopify oracle; additive
-    amazon_* block; spend from certified ads serve.
-
-    '
-- name: AmazonAccounts
-  domain: Finance
-  owner_team: finance-team
-  primary_serve_table: clickhouse.default.serve.amazon_settlement_reconciliation
-  contract: amazon_settlement_reconciliation_contract_v1
-  secondary_contracts:
-  - amazon_order_item_pnl_contract_v1
-  - amazon_daily_pnl_actual_contract_v1
-  - amazon_accounts_exceptions_contract_v1
-  cube_views:
-  - amazon_settlement_reconciliation
-  - amazon_order_item_pnl
-  - amazon_daily_pnl_actual
-  - amazon_accounts_exceptions
-  platforms:
-  - AmazonSP
-  notes: ACTUAL_ONLY Amazon Seller Central accounts — settlement reconciliation, item/daily P&L, close
-    exceptions. Never mix with AmazonCommercePerformance placement estimates. Flat 18% reverse-GST estimate
-    only; statutory GST report not modeled.
+  notes: >
+    OM certification InProgress until cost-basis gates close. Net sales = Shopify oracle; spend from
+    certified Meta/Google ads serve.
 - name: ReturnsRefunds
   domain: Operations
   owner_team: ops-team
@@ -281,76 +203,8 @@ data_products:
   - return_lifecycle
   platforms:
   - Shopify
-  notes: 'Return REVENUE oracle remains Commerce (commerce_order_events for Shopify; amazon_commerce_performance
-    for Amazon SP — see AmazonCommercePerformance). Amazon''s own line-item return detail (gold.fct_amazon_return_items,
-    gold.fct_amazon_returns_daily, gold.int_amazon_return_reconciliation at return/line grain, incl. pending-refund
-    and return-label-fee accruals) remains a V2 port — only the AmazonCommercePerformance daily-grain
-    rollup (cancelled_orders/returned_orders/returned_revenue) is certified today.
-
-    '
+  notes: Return REVENUE oracle remains Commerce (commerce_order_events).
 views:
-  amazon_accounts_exceptions:
-    data_product: AmazonAccounts
-    serve_table: clickhouse.default.serve.amazon_accounts_exceptions
-    gold_inputs:
-    - clickhouse.default.gold.int_amazon_sp_settlement_reconciliation
-    contract: amazon_accounts_exceptions_contract_v1
-  amazon_ad_performance:
-    data_product: AmazonAdsPerformance
-    serve_table: clickhouse.default.serve.amazon_ads_daily
-    gold_inputs:
-    - clickhouse.default.gold.dim_amazon_ads_campaigns
-    - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
-    contract: paid_media_amazon_contract_v1
-  amazon_attribution_overview:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_attribution_overview
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
-    - clickhouse.default.gold.fct_amazon_return_items
-    - clickhouse.default.gold.fct_amazon_sp_order_pnl
-    - clickhouse.default.gold.fct_amazon_sp_settlement_order_pnl
-    contract: amazon_attribution_overview_contract_v1
-  amazon_commerce_performance:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_commerce_daily
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_daily_pnl
-    - clickhouse.default.gold.fct_amazon_sp_order_pnl
-    - clickhouse.default.gold.fct_amazon_sp_settlement_order_pnl
-    contract: amazon_commerce_daily_contract_v1
-  amazon_daily_pnl:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_commerce_daily
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_daily_pnl
-    - clickhouse.default.gold.fct_amazon_sp_order_pnl
-    - clickhouse.default.gold.fct_amazon_sp_settlement_order_pnl
-    contract: amazon_commerce_daily_contract_v1
-  amazon_daily_pnl_actual:
-    data_product: AmazonAccounts
-    serve_table: clickhouse.default.serve.amazon_daily_pnl_actual
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_sp_order_pnl
-    contract: amazon_daily_pnl_actual_contract_v1
-  amazon_order_item_pnl:
-    data_product: AmazonAccounts
-    serve_table: clickhouse.default.serve.amazon_order_item_pnl
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_sp_finance_items
-    contract: amazon_order_item_pnl_contract_v1
-  amazon_orders:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_orders
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_sp_orders
-    contract: amazon_orders_contract_v1
-  amazon_settlement_reconciliation:
-    data_product: AmazonAccounts
-    serve_table: clickhouse.default.serve.amazon_settlement_reconciliation
-    gold_inputs:
-    - clickhouse.default.gold.int_amazon_sp_settlement_reconciliation
-    contract: amazon_settlement_reconciliation_contract_v1
   attribution_paths:
     data_product: MarketingAttribution
     serve_table: clickhouse.default.serve.attribution_paths
@@ -359,16 +213,15 @@ views:
     contract: attribution_paths_contract_v1
   canonical_pnl:
     data_product: CanonicalPnl
-    serve_table: clickhouse.default.serve.amazon_ads_daily
+    serve_table: clickhouse.default.serve.canonical_pnl
     gold_inputs:
-    - clickhouse.default.gold.dim_amazon_ads_campaigns
-    - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
-    contract: paid_media_amazon_contract_v1
+    - clickhouse.default.gold.fct_order_items
+    - clickhouse.default.gold.fct_orders
+    contract: canonical_pnl_contract_v1
   channel_attribution:
     data_product: ChannelAttribution
     serve_table: clickhouse.default.serve.channel_attribution_daily
     gold_inputs:
-    - clickhouse.default.gold.fct_amazon_sp_orders
     - clickhouse.default.gold.fct_order_attribution
     - clickhouse.default.gold.fct_order_items
     - clickhouse.default.gold.fct_orders
@@ -418,11 +271,11 @@ views:
     contract: customer_ltv_contract_v1
   daily_pnl:
     data_product: CanonicalPnl
-    serve_table: clickhouse.default.serve.amazon_ads_daily
+    serve_table: clickhouse.default.serve.canonical_pnl
     gold_inputs:
-    - clickhouse.default.gold.dim_amazon_ads_campaigns
-    - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
-    contract: paid_media_amazon_contract_v1
+    - clickhouse.default.gold.fct_order_items
+    - clickhouse.default.gold.fct_orders
+    contract: canonical_pnl_contract_v1
   funnel_daily:
     data_product: SessionFunnel
     serve_table: clickhouse.default.serve.funnel_daily
@@ -450,10 +303,8 @@ views:
     - clickhouse.default.gold.dim_ad
     - clickhouse.default.gold.dim_ad_neurohack_map
     - clickhouse.default.gold.dim_adset
-    - clickhouse.default.gold.dim_amazon_ads_campaigns
     - clickhouse.default.gold.dim_campaign
     - clickhouse.default.gold.dim_creative
-    - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
     - clickhouse.default.gold.fct_google_ads_daily
     - clickhouse.default.gold.fct_meta_ads_daily
     - clickhouse.default.gold.fct_order_attribution
@@ -525,7 +376,6 @@ views:
     data_product: CrossChannelCommerce
     serve_table: clickhouse.default.serve.orders_all_channels
     gold_inputs:
-    - clickhouse.default.gold.fct_amazon_sp_orders
     - clickhouse.default.gold.fct_order_items
     - clickhouse.default.gold.fct_orders
     contract: cross_channel_orders_contract_v1
@@ -567,18 +417,12 @@ views:
     data_product: CrossChannelCommerce
     serve_table: clickhouse.default.serve.returns_cancels_all_channels
     gold_inputs:
-    - clickhouse.default.gold.fct_amazon_ads_campaigns_daily
-    - clickhouse.default.gold.fct_amazon_return_items
-    - clickhouse.default.gold.fct_amazon_sp_order_pnl
-    - clickhouse.default.gold.fct_amazon_sp_settlement_order_pnl
     - clickhouse.default.gold.fct_order_items
     contract: cross_channel_returns_contract_v1
   sales_all_channels:
     data_product: CrossChannelCommerce
     serve_table: clickhouse.default.serve.sales_all_channels
     gold_inputs:
-    - clickhouse.default.gold.fct_amazon_return_items
-    - clickhouse.default.gold.fct_amazon_sp_order_pnl
     - clickhouse.default.gold.fct_order_items
     - clickhouse.default.gold.fct_orders
     contract: cross_channel_sales_contract_v1
@@ -620,32 +464,6 @@ views:
     gold_inputs:
     - clickhouse.default.gold.fct_google_ads_status_history
     contract: paid_media_google_status_history_contract_v1
-  amazon_ads_ads:
-    data_product: AmazonAdsPerformance
-    serve_table: clickhouse.default.serve.amazon_ads_ads_daily
-    gold_inputs:
-    - clickhouse.default.gold.dim_amazon_ads_campaigns
-    - clickhouse.default.gold.fct_amazon_ads_ads_daily
-    contract: paid_media_amazon_ads_contract_v1
-  amazon_ads_ad_groups:
-    data_product: AmazonAdsPerformance
-    serve_table: clickhouse.default.serve.amazon_ads_ad_groups_daily
-    gold_inputs:
-    - clickhouse.default.gold.dim_amazon_ads_campaigns
-    - clickhouse.default.gold.fct_amazon_ads_ad_groups_daily
-    contract: paid_media_amazon_ad_groups_contract_v1
-  amazon_order_items:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_order_items
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_order_items
-    contract: amazon_order_items_contract_v1
-  amazon_returns_daily:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_returns_daily
-    gold_inputs:
-    - clickhouse.default.gold.fct_amazon_returns_daily
-    contract: amazon_returns_daily_contract_v1
   finance_waterfall:
     data_product: CanonicalPnl
     serve_table: clickhouse.default.serve.finance_waterfall_daily
@@ -658,13 +476,6 @@ views:
     gold_inputs:
     - clickhouse.default.gold.fct_payments
     contract: payments_contract_v1
-  amazon_finance_charge_types_daily:
-    data_product: AmazonCommercePerformance
-    serve_table: clickhouse.default.serve.amazon_finance_charge_types_daily
-    gold_inputs:
-    - clickhouse.default.gold.dim_amazon_charge_type
-    - clickhouse.default.gold.fct_amazon_sp_finance_events
-    contract: amazon_finance_charge_types_daily_contract_v1
   ad_channel_pnl:
     data_product: MarketingAttribution
     serve_table: clickhouse.default.serve.ad_channel_pnl_daily
@@ -725,11 +536,6 @@ glossaries:
   - MER
   - CostCoverage
   - TotalAdSpend
-  - AmazonAccountsActual
-  - AmazonSettlementReconciliation
-  - AmazonSettledNetPayout
-  - AmazonSettledGrossProfit
-  - AmazonSettlementException
 - name: Operations
   domain: Operations
 - name: Web Analytics

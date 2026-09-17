@@ -58,8 +58,6 @@ dashboard_alignment:
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   note: >
-    Same root cause as attributed_refund_amount: total_refund_amount is
-    populated for Amazon attribution only, while Shopify/meta/google
-    attribution track separate return and cancel count/value pairs on event
-    date — no single per-ad refund-amount field is ever summed to
+    Same root cause as attributed_refund_amount: Shopify/meta/google attribution track separate
+    return and cancel count/value pairs on event date — no single per-ad refund-amount field is ever summed to
     campaign/adset/ad grain.

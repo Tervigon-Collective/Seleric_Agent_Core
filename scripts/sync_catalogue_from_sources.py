@@ -278,7 +278,7 @@ def build() -> dict:
         serve_tables = [t for t in referenced if t in declared] or referenced
         # Port resolution, most trustworthy signal first. An inline-SQL cube touches
         # every table it reads, so picking the first alphabetically is wrong: it gave
-        # daily_pnl the amazon_attribution_overview port instead of canonical_pnl.
+        # daily_pnl a sibling marketplace port instead of canonical_pnl.
         cube_named = [t for cu in v["_cubes"] for t in (cu.removeprefix("serve_"),) if t in serve_tables]
         primary = next(
             (t for t in serve_tables if t == vname),          # view named after its port

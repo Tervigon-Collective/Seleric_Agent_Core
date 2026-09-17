@@ -39,14 +39,14 @@ modules:
 
   paidmedia:
     display_name: Paid Media Delivery
-    description: Meta / Google / Amazon ad delivery metrics (spend, CTR, CPC, CPM).
+    description: Meta / Google ad delivery metrics (spend, CTR, CPC, CPM).
     domains: [PaidMedia]
 
   attribution:
     display_name: Attribution
     description: >
       Last-touch, first-party attributed orders and revenue across all channels
-      (Meta / Google / Amazon / Organic). Filter by lt_platform for a channel view.
+      (Meta / Google / Organic). Filter by lt_platform for a channel view.
     domains: [Attribution]
 
   customer:

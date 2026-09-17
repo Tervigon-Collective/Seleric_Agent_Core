@@ -15,14 +15,14 @@ def test_loads_seed(catalogue):
     assert "product_net_revenue" in catalogue.cat.metrics
     assert "meta_spend" in catalogue.cat.metrics
     assert "google_spend" in catalogue.cat.metrics
-    assert "amazon_ads_spend" in catalogue.cat.metrics
+    # Amazon was removed from the serve layer / Cube / catalogue (2026-09-17).
+    assert not [m for m in catalogue.cat.metrics if "amazon" in m]
     assert catalogue.version
     assert catalogue.cat.openmetadata is not None
     # Keep in step with openmetadata/product_registry.yml and
-    # catalogue/openmetadata/registry.yaml — includes AmazonCommerce,
-    # AmazonAccounts, ChannelAttribution, CustomerData, SessionFunnel,
-    # EventStream plus CanonicalPnl / ReturnsRefunds.
-    assert len(catalogue.cat.openmetadata.data_products) == 15
+    # catalogue/openmetadata/registry.yaml — includes ChannelAttribution,
+    # CustomerData, SessionFunnel, EventStream plus CanonicalPnl / ReturnsRefunds.
+    assert len(catalogue.cat.openmetadata.data_products) == 13
     assert len(catalogue.cat.openmetadata.metrics) == len(catalogue.cat.metrics)
     assert catalogue.cat.openmetadata.contracts
     assert catalogue.cat.openmetadata.ontology is not None
@@ -104,13 +104,9 @@ def test_resolve_total_orders_all_channels(catalogue):
 # Every phrase→id pair the prompt hand-maintains must resolve through the
 # catalogue glossary instead. Passing here means that prompt block is redundant
 # and can be deleted; a failure pinpoints the one glossary term still missing.
-# This is the proof-of-concept family: net_profit / ROAS / Net COGS / Amazon.
+# This is the proof-of-concept family: net_profit / ROAS / Net COGS.
 PROMPT_TRAP_GOLDEN = {
-    # §3f-bis hard meaning traps — bare/historical/all-channels defaults, and the
-    # Amazon net-profit-vs-payout trap (the single most cited confusion).
-    "Amazon Net Profit": "amazon_net_profit",
-    "amazon profit": "amazon_net_profit",
-    "amazon net payout": "amazon_net_payout",  # the trap's *wrong* side, resolved on purpose
+    # §3f-bis hard meaning traps — bare/historical/all-channels defaults.
     "Net Profit": "net_profit_all_channels",
     "Net COGS": "total_operating_cost_all_channels",
     "Gross ROAS": "gross_roas_all_channels",
@@ -125,8 +121,6 @@ PROMPT_TRAP_GOLDEN = {
     "shopify gross ROAS": "gross_roas",
     "shopify net ROAS": "net_roas",
     "shopify BE ROAS": "be_roas",
-    # Amazon-only finance.
-    "amazon platform fees": "amazon_platform_fees",
 }
 
 
@@ -139,19 +133,15 @@ def test_prompt_trap_table_resolves_via_glossary(catalogue):
 
 
 # Family 1 — §3c commerce channel scope (sales & orders). Bare term = all channels;
-# shopify/amazon need the explicit channel word. Guards deleting prompt §3c.
+# shopify needs the explicit channel word. Guards deleting prompt §3c.
 PROMPT_COMMERCE_SCOPE_GOLDEN = {
     "Total Sales": "total_sales_all_channels",
     "shopify total sales": "total_sales",
-    "amazon total sales": "amazon_total_sales",
     "Gross Sales": "gross_sales_all_channels",
     "shopify gross sales": "gross_sales",
-    "amazon gross sales": "amazon_gross_sales",
     "shopify net sales": "commerce_net_revenue_daily",
-    "amazon net sales": "amazon_net_sales",
     "total orders": "total_orders",
     "shopify orders": "orders",
-    "amazon orders": "amazon_orders",
     "returns and cancels": "returns_cancels_all_channels",
     "ltv:cac": "ltv_cac_ratio",
 }
@@ -170,8 +160,6 @@ PROMPT_ADS_SCOPE_GOLDEN = {
     "meta spend": "meta_spend",
     "google ads": "google_spend",
     "google spend": "google_spend",
-    "amazon ads": "amazon_ads_spend",
-    "amazon spend": "amazon_ads_spend",
     "shopify ad spend": "shopify_ad_spend",
     "ad spend": "total_ad_spend",
     "total ad spend": "total_ad_spend",
@@ -186,16 +174,14 @@ def test_prompt_ads_scope_resolves_via_glossary(catalogue):
         assert r.metric_id == expected, f"{term!r}: got {r.metric_id}, want {expected}"
 
 
-# Family 3 — §3f P&L vs Historical finance-line scope (product cost, TOC, and the
-# net_profit_incl_amazon "older card" that must resolve ONLY when named). Guards
-# deleting prompt §3f.
+# Family 3 — §3f P&L vs Historical finance-line scope (product cost, TOC).
+# Guards deleting prompt §3f.
 PROMPT_FINANCE_SCOPE_GOLDEN = {
     "product cost": "product_cost_all_channels",
     "shopify product cost": "product_cost",
     "total operating cost": "total_operating_cost_all_channels",
     "shopify total operating cost": "total_operating_cost",
     "pnl net profit": "net_profit_all_channels",
-    "net profit including amazon": "net_profit_incl_amazon",
 }
 
 
@@ -241,7 +227,6 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Net Sales (Ex-GST)": "net_sales_all_channels",
         "Taxes (18% on Shopify Net)": "taxes_on_net_sales",
         "Product Cost": "product_cost_all_channels",
-        "Amazon Platform Fees": "amazon_platform_fees",
         "Shipping Cost (Courier)": "shipping_cost",
         "RTO Logistics Cost": "rto_cost",
         "Total Operating Cost": "total_operating_cost_all_channels",
@@ -251,7 +236,6 @@ def test_resolve_pnl_metrics_glossary(catalogue):
         "Total Ad Spend": "total_ad_spend",
         "Meta Ads": "meta_spend",
         "Google Ads": "google_spend",
-        "Amazon Ads": "amazon_ads_spend",
         "P&L Net Profit": "net_profit_all_channels",
         "Net Profit (all channels)": "net_profit_all_channels",
         "Shopify-only Net Profit": "net_profit",
@@ -270,7 +254,7 @@ def test_resolve_unknown(catalogue):
 
 
 def test_resolve_normalized_exact_match(catalogue):
-    # Bare "total sales" = all channels (Shopify + Amazon) via glossary.
+    # Bare "total sales" = all channels via glossary.
     for variant in ("total sales", "Total Sales"):
         r = catalogue.resolve_term(variant)
         assert isinstance(r, ResolvedTerm), variant
@@ -287,16 +271,8 @@ def test_resolve_channel_scoped_sales(catalogue):
     cases = {
         "shopify total sales": "total_sales",
         "shopify only total sales": "total_sales",
-        "amazon total sales": "amazon_total_sales",
-        "amazon only total sales": "amazon_total_sales",
         "total sales all channels": "total_sales_all_channels",
         "shopify only orders": "orders",
-        "amazon only orders": "amazon_orders",
-        "amazon net sales": "amazon_net_sales",
-        "amazon gross sales": "amazon_gross_sales",
-        "amazon net profit": "amazon_net_profit",
-        "amazon return count": "amazon_return_count",
-        "amazon refunds": "amazon_return_revenue",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)
@@ -316,14 +292,10 @@ def test_resolve_ad_platform_scope(catalogue):
         "meta only ads": "meta_spend",
         "google only": "google_spend",
         "google only ads": "google_spend",
-        "amazon only ads": "amazon_ads_spend",
-        "amazon ads only": "amazon_ads_spend",
-        "amazon only spend": "amazon_ads_spend",
         "shopify only ad spend": "shopify_ad_spend",
         "shopify only ads": "shopify_ad_spend",
         "meta only impressions": "meta_impressions",
         "google only clicks": "google_clicks",
-        "amazon only CTR": "amazon_ads_ctr",
     }
     for term, expected in cases.items():
         r = catalogue.resolve_term(term)
@@ -519,7 +491,6 @@ def test_trap_metrics_have_depends_on_catalogue_ids(catalogue):
     # Near-dup Meta Overview vs ad-grain table stay linked
     assert "meta_attribution_orders" in catalogue.get_metric("meta_attr_orders").companion_measures
     assert "meta_attr_orders" in catalogue.get_metric("meta_attribution_orders").companion_measures
-    assert "amazon_net_payout" in catalogue.get_metric("amazon_net_profit").companion_measures
 
 
 
@@ -640,7 +611,7 @@ def test_metric_om_context_orders_cluster(catalogue):
 def test_related_metrics_are_catalogue_ids(catalogue):
     out = catalogue.related_metrics("meta_spend")
     assert out["entity_cluster"] == "paid_delivery"
-    assert set(out["related_metrics"]) == {"google_spend", "amazon_ads_spend"}
+    assert set(out["related_metrics"]) == {"google_spend", "meta_status_changes", "google_status_changes"}
     assert out["domain"] == "PaidMedia"
     assert all(mid in catalogue.cat.metrics for mid in out["related_metrics"])
 
@@ -702,12 +673,15 @@ def test_resolve_dimension_last_touch_channel(catalogue):
     assert "commerce_net_revenue_daily" not in supporting
 
 
-def test_resolve_dimension_shopify_vs_amazon_is_marketplace_channel(catalogue):
-    r = catalogue.resolve_dimension_term("shopify vs amazon")
-    assert isinstance(r, ResolvedDimension)
-    assert r.dimension_id == "channel"
-    views = {p.view for p in r.products}
-    assert "orders_all_channels" in views or "sales_all_channels" in views
+def test_amazon_terms_do_not_resolve_to_amazon_metrics(catalogue):
+    # Amazon was removed from the catalogue; its phrases must never resolve to an
+    # amazon_* metric (no silent revival via glossary or fuzzy match).
+    for term in ("amazon total sales", "amazon orders", "amazon ads", "amazon net profit"):
+        r = catalogue.resolve_term(term)
+        if isinstance(r, ResolvedTerm):
+            assert "amazon" not in r.metric_id, f"{term!r} -> {r.metric_id}"
+        for cand in getattr(r, "candidates", []) or []:
+            assert "amazon" not in cand.metric_id, f"{term!r} candidate {cand.metric_id}"
 
 
 def test_planner_exact_lookup_channel_unchanged(catalogue):

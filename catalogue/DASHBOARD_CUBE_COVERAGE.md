@@ -1,5 +1,7 @@
 # Dashboard ↔ Cube coverage matrix (brand 20, June 2026 live)
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 Audited 2026-07-27 (re-verified after gap closes). Cube = agent semantic layer; Dashboard = Node-Backend oracle.
 
 ## Legend

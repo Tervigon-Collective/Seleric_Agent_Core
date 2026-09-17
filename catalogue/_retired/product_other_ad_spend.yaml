@@ -5,9 +5,7 @@ status: broken   # serve.product_ad_spend_daily does not exist (2026-09-07)
 description: >
   Not implemented in the dashboard as of this audit — the catalogue itself
   admits this is unimplemented, and no SKU-attributed ad spend exists
-  anywhere in Node-Backend. Non-Meta/non-Google SKU-level ad spend (Amazon
-  product ads, influencers, etc.). Currently zero until Amazon SKU spend is
-  wired; use amazon_ads_spend at campaign grain for Amazon totals today.
+  anywhere in Node-Backend. Non-Meta/non-Google SKU-level ad spend (influencers, etc.). Currently zero.
 formula:
   human_readable: SUM(other_spend_attributed) at SKU grain
   authoritative_source: cube

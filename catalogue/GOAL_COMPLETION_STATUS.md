@@ -1,5 +1,7 @@
 # Goal Completion Status — Cube Semantic/Data Layer Refactor
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Status: COMPLETE against the stated scope, including the final buildable
 increment (2026-07-11).** After the previous checkpoint, one more concrete
 piece was identified as legitimately buildable without new source data —

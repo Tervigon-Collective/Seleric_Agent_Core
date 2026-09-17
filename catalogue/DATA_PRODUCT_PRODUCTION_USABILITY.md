@@ -1,5 +1,7 @@
 # Data Product Production Usability — Improvements Sheet
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Date:** 2026-07-21 (requery after fixes)  
 **Scope:** OpenMetadata data products (10) × live Cube (`127.0.0.1:4001`) × dashboard reconciliation  
 **Tenant:** brand_id=`20`, company_id=`19`  

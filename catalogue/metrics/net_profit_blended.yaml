@@ -2,8 +2,7 @@ id: net_profit_blended
 display_name: Net Profit (all-platform ads)
 category: finance
 status: certified
-description: 'Canonical P&L net profit using all-platform ad spend: Shopify net sales (ex-GST) − Shopify
-  Net COGS − (Meta+Google+Amazon ad spend). This maps to `canonical_pnl.net_profit` and differs from `net_profit`
+description: 'Canonical P&L net profit using all-platform ad spend: Shopify net sales (ex-GST) − Shopify Net COGS − (Meta+Google ad spend). This maps to `canonical_pnl.net_profit` and differs from `net_profit`
   (which uses Shopify-only ad spend).
 
   '

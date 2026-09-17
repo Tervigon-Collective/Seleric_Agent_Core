@@ -74,15 +74,12 @@ def main() -> int:
         f"const d=await a.getGoogleAttribution({b},'{s}','{e}',{{skipCache:true}});"
         f"process.stdout.write('JSON_START'+JSON.stringify(d.summary||d)+'JSON_END');process.exit(0);}})();"
     )
-    amaz = node(
-        f"require('dotenv').config();(async()=>{{const a=require('./src/integrations/amazonAttribution/analytics');"
-        f"const d=await a.getAmazonAttribution({b},'{s}','{e}',{{skipCache:true}});"
-        f"process.stdout.write('JSON_START'+JSON.stringify(d.summary||d)+'JSON_END');process.exit(0);}})();"
-    )
 
     sm = hist.get("sales_metrics") or {}
     rc = hist.get("returns_cancels") or {}
-    amz = hist.get("amazon") or {}
+    # The dashboard's all-channels payload still carries a marketplace block; subtract it
+    # to compare against the Shopify-only Cube surface.
+    mkt = hist.get("amazon") or {}
     ads = f(hist.get("total_ad_spend"))
     ns = f(hist.get("net_sales"))
     gs = f(hist.get("gross_sales"))
@@ -93,11 +90,11 @@ def main() -> int:
         ("H.discounts", f(sm.get("total_discounts")), ["commerce_orders.discount_amount_excl_tax"], "commerce_orders.order_date", "money", None),
         ("H.return_cancel_rev", f(rc.get("total_amount")), ["commerce_orders.event_revenue_deduction_excl_tax"], "commerce_orders.event_date", "money", "Shopify-only event rev"),
         ("H.cancel_rev", f(rc.get("cancelled_amount")), ["commerce_orders.cancel_revenue_excl_tax"], "commerce_orders.event_date", "money", "Shopify-only"),
-        ("H.return_rev", f(rc.get("returned_amount")), ["commerce_orders.return_revenue_excl_tax"], "commerce_orders.event_date", "money", "Shopify-only; Amazon on attr overview"),
+        ("H.return_rev", f(rc.get("returned_amount")), ["commerce_orders.return_revenue_excl_tax"], "commerce_orders.event_date", "money", "Shopify-only"),
         ("H.gross_roas_all", (gs / ads) if ads else float("nan"), ["canonical_pnl.gross_roas"], "canonical_pnl.report_date", "ratio", "Cube gross_roas uses Shopify spend denom"),
         ("H.net_roas_all", ((ns - cogs) / ads) if ads else float("nan"), ["canonical_pnl.net_roas"], "canonical_pnl.report_date", "ratio", "Cube net_roas uses Shopify-only arms"),
         ("H.be_roas_all", (ns / (ns - cogs)) if (ns - cogs) else float("nan"), ["canonical_pnl.be_roas"], "canonical_pnl.report_date", "ratio", "Cube be_roas Shopify-only"),
-        ("H.shopify_net_pnl", ns - f(amz.get("net_sales")), ["canonical_pnl.net_sales"], "canonical_pnl.report_date", "money", "commerce_performance residual"),
+        ("H.shopify_net_pnl", ns - f(mkt.get("net_sales")), ["canonical_pnl.net_sales"], "canonical_pnl.report_date", "money", "commerce_performance residual"),
         ("H.discounts_pnl", f(sm.get("total_discounts")), ["canonical_pnl.discounts"], "canonical_pnl.report_date", "money", None),
         ("H.cancel_rev_pnl", f(rc.get("cancelled_amount")), ["canonical_pnl.cancel_revenue"], "canonical_pnl.report_date", "money", "Shopify-only"),
         ("H.return_rev_pnl", f(rc.get("returned_amount")), ["canonical_pnl.return_revenue"], "canonical_pnl.report_date", "money", "Shopify-only"),
@@ -117,11 +114,6 @@ def main() -> int:
         ("G.spend", f(goog.get("total_spend")), ["google_ad_performance.google_spend"], "google_ad_performance.report_date", "money", None),
         ("G.impressions", f(goog.get("total_impressions")), ["google_ad_performance.google_impressions"], "google_ad_performance.report_date", "count", None),
         ("G.clicks", f(goog.get("total_clicks")), ["google_ad_performance.google_clicks"], "google_ad_performance.report_date", "count", None),
-        ("A.total_sales", f(amaz.get("total_order_total")), ["amazon_attribution_overview.total_sales"], "amazon_attribution_overview.report_date", "money", None),
-        ("A.net_profit", f(amaz.get("net_profit")), ["amazon_attribution_overview.net_profit"], "amazon_attribution_overview.report_date", "money", None),
-        ("A.mer", f(amaz.get("mer")), None, None, "ratio", None),  # computed
-        ("A.ctr", f(amaz.get("ctr")), ["amazon_ad_performance.amazon_ads_ctr"], "amazon_ad_performance.report_date", "ratio", None),
-        ("A.cpc", f(amaz.get("average_cpc")), ["amazon_ad_performance.amazon_ads_cpc"], "amazon_ad_performance.report_date", "money", None),
     ]
 
     print(f"\nExtended KPI audit — brand {b} {s}..{e}\n")
@@ -132,11 +124,7 @@ def main() -> int:
     findings = []
     for name, dv, measures, td, kind, known in rows:
         try:
-            if name == "A.mer":
-                ts = cube_load(args.cube, ["amazon_attribution_overview.total_sales"], "amazon_attribution_overview.report_date", b, s, e)
-                sp = cube_load(args.cube, ["amazon_attribution_overview.ad_spend"], "amazon_attribution_overview.report_date", b, s, e)
-                cv = round(ts / sp, 4) if sp else float("nan")
-            elif name == "M.discounts":
+            if name == "M.discounts":
                 # meta-only discounts via filtered measure not available; skip exact
                 cv = cube_load(args.cube, ["platform_attribution_commerce.meta_gross_sales"], td, b, s, e)  # placeholder unused
                 # Use SQL-less: discounts measure is unfiltered — mark SKIP
@@ -152,10 +140,6 @@ def main() -> int:
 
         delta = round(cv - dv, 4) if dv == dv and cv == cv else float("nan")
         tol = {"count": 0.0, "money": 1.0, "ratio": 0.05}.get(kind, 1.0)
-        # CTR stored as percent vs fraction
-        if name == "A.ctr" and abs(delta) > tol and abs(cv * 100 - dv) <= tol:
-            cv = round(cv * 100, 4)
-            delta = round(cv - dv, 4)
         matched = abs(delta) <= tol
         if matched:
             tag = "OK"
@@ -183,21 +167,18 @@ def main() -> int:
         ("Historical Ad Spend", "YES", "canonical_pnl.total_ad_spend", "OK"),
         ("Historical Net COGS", "YES", "canonical_pnl.total_operating_cost_all_channels", "Shopify COGS residual"),
         ("Historical Discounts", "YES", "commerce_orders.discount_amount_excl_tax / canonical_pnl.discounts", "check values"),
-        ("Historical Returns/Cancels count", "PARTIAL", "commerce_orders.returns_cancels + amazon_attribution_overview.returns_cancels", "no single all-channel measure"),
-        ("Historical Return/Cancel Rev", "PARTIAL", "commerce_orders.event_* + amazon return_revenue", "no single all-channel measure"),
+        ("Historical Returns/Cancels count", "YES", "returns_cancels_all_channels.returns_cancels", "Shopify-only"),
+        ("Historical Return/Cancel Rev", "YES", "returns_cancels_all_channels.return_cancel_revenue", "Shopify-only"),
         ("Historical Gross/Net/BE ROAS", "PARTIAL", "canonical_pnl.*_roas", "Shopify-only denom/numerators"),
         ("Historical Total Payments", "YES", "commerce_orders.total_payment_orders", "OK; catalogue may lack id"),
         ("Historical LTV:CAC", "NO", "—", "new_customer_metrics not in Cube as LTV:CAC"),
-        ("Amazon Attr Overview suite", "YES", "amazon_attribution_overview.*", "OK"),
-        ("Amazon MER/TACOS", "PARTIAL", "derive total_sales/ad_spend", "no dedicated MER measure on overview"),
-        ("Amazon ads CTR/CPC", "YES", "amazon_ad_performance.*", "check scale % vs fraction"),
         ("Meta Attr orders/total/gross", "YES", "platform_attribution_commerce.meta_*", "OK"),
         ("Meta Attr net sales", "DRIFT", "platform_attribution_commerce.meta_net_sales", "placement net != channel PnL net"),
         ("Meta Attr net profit / COGS / ROAS", "NO/WEAK", "no meta-channel PnL cube", "Attribution overlays getAttributionChannelPnl"),
         ("Meta ads impressions/clicks/spend", "YES", "meta_ad_performance.*", "OK"),
         ("Meta session funnel", "PARTIAL", "session_funnel / funnel_daily", "channel filter parity unverified"),
         ("Google Attr same as Meta", "same", "platform_attribution_commerce.google_*", "same net-sales drift"),
-        ("P&L taxes / packaging / shipping / gateway / RTO", "YES", "canonical_pnl.*", "Shopify arms; Amazon fees separate"),
+        ("P&L taxes / packaging / shipping / gateway / RTO", "YES", "canonical_pnl.*", "Shopify arms"),
         ("P&L Gross Margin %", "YES", "canonical_pnl.gross_margin_pct", "Shopify-only basis"),
         ("Performance Summary CPA/CVR/AOV", "PARTIAL", "derive from ads+orders / commerce aov", "no dedicated CPA/CVR measures"),
     ]

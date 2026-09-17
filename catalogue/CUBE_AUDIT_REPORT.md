@@ -1,5 +1,7 @@
 # Cube Model Audit — Overlap Analysis & Canonical View Design
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Status: IMPLEMENTED (2026-07-11).** §1–§6 are the original analysis (unchanged).
 §7 records the decisions you made and what was implemented for each. §8 has been
 updated to reflect the final state. Scope implemented: `Base_Agent/cube/model/cubes/*.yml`

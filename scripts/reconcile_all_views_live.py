@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Live multi-view reconcile: Historical + Amazon Attribution dashboard vs Cube.
+Live multi-view reconcile: Historical dashboard vs Cube.
 
 Compares brand/date-range KPIs from Node-Backend (oracle) to Cube views the
 agent catalogue uses. Exit 1 if any unexpected FAIL (KNOWN diffs don't fail).
@@ -43,22 +43,6 @@ require("dotenv").config();
   try {{
     const a = require("./src/integrations/historicalAnalytics/analytics");
     const d = await a.getHistoricalDashboard({brand}, "{start}", "{end}", {{ skipCache: true }});
-    process.stdout.write("JSON_START"+JSON.stringify(d)+"JSON_END");
-  }} catch (e) {{ process.stdout.write("ERR"+e.message); }}
-  process.exit(0);
-}})();
-"""
-    )
-
-
-def dash_amazon_attr(brand: int, start: str, end: str) -> dict:
-    return _node(
-        f"""
-require("dotenv").config();
-(async () => {{
-  try {{
-    const a = require("./src/integrations/amazonAttribution/analytics");
-    const d = await a.getAmazonAttribution({brand}, "{start}", "{end}", {{ skipCache: true }});
     process.stdout.write("JSON_START"+JSON.stringify(d)+"JSON_END");
   }} catch (e) {{ process.stdout.write("ERR"+e.message); }}
   process.exit(0);
@@ -114,16 +98,12 @@ def main() -> int:
     args = ap.parse_args()
     start, end = args.date, (args.end or args.date)
 
-    print(f"\nFetching LIVE dashboard (Historical + Amazon Attribution) brand={args.brand} {start}..{end} ...")
+    print(f"\nFetching LIVE dashboard (Historical) brand={args.brand} {start}..{end} ...")
     hist = dash_historical(args.brand, start, end)
-    try:
-        amaz = dash_amazon_attr(args.brand, start, end)
-    except Exception as e:
-        amaz = {}
-        print(f"  WARN amazon attribution fetch failed: {e}")
 
-    amaz_sum = dig(amaz, "summary") or {}
-    hist_amz = dig(hist, "amazon") or {}
+    # The dashboard's all-channels payload still carries a marketplace block; Cube serves
+    # Shopify only, so subtract that block for the Shopify split rows below.
+    hist_mkt = dig(hist, "amazon") or {}
     ad = dig(hist, "ad_spend_breakdown") or dig(hist, "ad_spend") or {}
     rc = dig(hist, "returns_cancels") or {}
     pay = dig(hist, "total_payments") or {}
@@ -134,31 +114,29 @@ def main() -> int:
                 return float(v)
         return float("nan")
 
-    amz_rc = fnum(amaz_sum.get("canceled_orders")) + fnum(amaz_sum.get("returned_orders"))
-    amz_ad = dig(ad, "amazon", "total") if isinstance(ad.get("amazon"), dict) else ad.get("amazon")
 
     checks = [
         # --- Historical all-channel spine ---
         ("hist.total_sales", num(hist.get("total_sales")),
-         ["sales_all_channels.total_sales"], "sales_all_channels.report_date", False, None),
+         ["sales_all_channels.total_sales"], "sales_all_channels.report_date", False, "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.gross_sales", num(hist.get("gross_sales")),
-         ["sales_all_channels.gross_sales"], "sales_all_channels.report_date", False, None),
+         ["sales_all_channels.gross_sales"], "sales_all_channels.report_date", False, "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.net_sales", num(hist.get("net_sales")),
          ["canonical_pnl.net_sales_all_channels_pnl"], "canonical_pnl.report_date", False,
-         "Shopify commerce_performance residual (~7k MTD)"),
+         "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.total_orders", num(hist.get("total_orders")),
-         ["orders_all_channels.orders"], "orders_all_channels.report_date", True, None),
+         ["orders_all_channels.orders"], "orders_all_channels.report_date", True, "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.total_ad_spend", num(hist.get("total_ad_spend")),
-         ["canonical_pnl.total_ad_spend"], "canonical_pnl.report_date", False, None),
+         ["canonical_pnl.total_ad_spend"], "canonical_pnl.report_date", False, "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.total_cogs", num(hist.get("total_cogs")),
          ["canonical_pnl.total_operating_cost_all_channels"], "canonical_pnl.report_date", False,
-         "Shopify FE COGS event-timing residual"),
+         "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.net_profit", num(hist.get("net_profit")),
          ["canonical_pnl.net_profit_all_channels"], "canonical_pnl.report_date", False,
-         "inherits Shopify net_sales + COGS residuals"),
+         "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.returns_cancels", num(rc.get("total_count")),
          ["returns_cancels_all_channels.returns_cancels"], "returns_cancels_all_channels.report_date", True,
-         "Shopify event-grain ±1 vs FE line-item event counts"),
+         "dashboard all-channels includes a marketplace block Cube no longer serves"),
         ("hist.payments_count", num(pay.get("total_count")),
          ["commerce_orders.total_payment_orders"],
          "commerce_orders.order_date", True, None),
@@ -166,38 +144,13 @@ def main() -> int:
          ["canonical_pnl.meta_spend"], "canonical_pnl.report_date", False, None),
         ("hist.google_spend", num(ad.get("google")),
          ["canonical_pnl.google_spend"], "canonical_pnl.report_date", False, None),
-        ("hist.amazon_ad_spend", num(amz_ad),
-         ["canonical_pnl.amazon_spend"], "canonical_pnl.report_date", False, None),
-
-        # --- Amazon Attribution Overview ---
-        ("amz_attr.total_sales", fnum(amaz_sum.get("total_order_total"), hist_amz.get("total_sales")),
-         ["amazon_attribution_overview.total_sales"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.gross_sales", fnum(amaz_sum.get("gross_sales"), amaz_sum.get("total_gross_sales"), hist_amz.get("gross_sales")),
-         ["amazon_attribution_overview.gross_sales"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.net_sales", fnum(amaz_sum.get("net_sales"), amaz_sum.get("total_net_sales"), hist_amz.get("net_sales")),
-         ["amazon_attribution_overview.net_sales"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.orders", fnum(amaz_sum.get("active_orders"), amaz_sum.get("total_orders"), hist_amz.get("orders")),
-         ["amazon_attribution_overview.orders"], "amazon_attribution_overview.report_date", True, None),
-        ("amz_attr.return_revenue", fnum(amaz_sum.get("returns"), amaz_sum.get("settled_refunds"),
-                                         abs(float(hist_amz.get("total_refunds") or 0))),
-         ["amazon_attribution_overview.return_revenue"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.returns_cancels", amz_rc if amz_rc == amz_rc else float("nan"),
-         ["amazon_attribution_overview.returns_cancels"], "amazon_attribution_overview.report_date", True, None),
-        ("amz_attr.platform_fees", fnum(amaz_sum.get("total_platform_fees_abs"), hist_amz.get("platform_fees_abs")),
-         ["amazon_attribution_overview.platform_fees"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.product_cost", fnum(amaz_sum.get("total_product_cost"), amaz_sum.get("cogs"), hist_amz.get("product_cost")),
-         ["amazon_attribution_overview.product_cost"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.ad_spend", fnum(amaz_sum.get("ad_spend"), amaz_sum.get("total_ad_spend"), amz_ad),
-         ["amazon_attribution_overview.ad_spend"], "amazon_attribution_overview.report_date", False, None),
-        ("amz_attr.net_profit", fnum(amaz_sum.get("net_profit"), amaz_sum.get("total_profit")),
-         ["amazon_attribution_overview.net_profit"], "amazon_attribution_overview.report_date", False, None),
 
         # --- Shopify split via all-channels ---
         ("hist.shopify_total_sales",
-         num(hist.get("total_sales")) - num(hist_amz.get("total_sales")),
+         num(hist.get("total_sales")) - num(hist_mkt.get("total_sales")),
          ["sales_all_channels.shopify_total_sales"], "sales_all_channels.report_date", False, None),
         ("hist.shopify_orders",
-         num(hist.get("total_orders")) - num(hist_amz.get("orders")),
+         num(hist.get("total_orders")) - num(hist_mkt.get("orders")),
          ["orders_all_channels.shopify_orders"], "orders_all_channels.report_date", True, None),
 
         # --- Platform ad delivery views ---
@@ -205,8 +158,6 @@ def main() -> int:
          ["meta_ad_performance.meta_spend"], "meta_ad_performance.report_date", False, None),
         ("google_ads.spend", num(ad.get("google")),
          ["google_ad_performance.google_spend"], "google_ad_performance.report_date", False, None),
-        ("amazon_ads.spend", num(amz_ad),
-         ["amazon_ad_performance.amazon_ads_spend"], "amazon_ad_performance.report_date", False, None),
 
         # --- Meta / Google placement sales (Historical breakdown uses raw lt_platform;
         # serve.order_attribution remaps Meta organic/link_in_bio → unattributed) ---
@@ -270,13 +221,6 @@ def main() -> int:
         print("FAIL: unexpected drift — see rows above\n")
     else:
         print("ALL CHECKED (within tolerance / known-diff / skip)\n")
-
-    # Dump amazon attribution keys briefly for debugging NP mapping
-    if amaz:
-        keys = list(amaz.keys())[:40] if isinstance(amaz, dict) else []
-        print(f"Amazon Attribution payload top keys: {keys}")
-        if isinstance(amaz_sum, dict) and amaz_sum is not amaz:
-            print(f"Amazon Attribution summary keys: {list(amaz_sum.keys())[:40]}")
 
     return 1 if failed else 0
 

@@ -44,7 +44,6 @@ HIST_EXPECT = {
     "BE ROAS": "be_roas_all_channels",
     "LTV:CAC": "ltv_cac_ratio",
     "Total Payments": "total_payments",
-    "amazon net profit": "amazon_net_profit",
 }
 
 ACCEPT = {
@@ -147,7 +146,6 @@ def main() -> int:
 
     print()
     print("Chat log actual metrics_query picks (from chat_web 2026-07-27):")
-    print("  amazon_net_profit              → Amazon Attribution Net Profit     (correct)")
     print("  net_profit                     → Shopify-only NP                   (MISROUTE vs Historical)")
     print("  net_profit_all_channels        → Historical / P&L all-channel NP   (correct recovery)")
     print("  (snapshot search started; chat_web exited before metrics_query)")
@@ -156,8 +154,6 @@ def main() -> int:
     hist = dash_hist()
     shopify_np = cube_one("canonical_pnl.net_profit")
     all_np = cube_one("canonical_pnl.net_profit_all_channels")
-    amz_np = cube_one("amazon_attribution_overview.net_profit")
-    amz_pay = cube_one("amazon_commerce_performance.marketplace_net_payout")
     g_shop = cube_one("canonical_pnl.gross_roas")
     g_all = cube_one("canonical_pnl.gross_roas_all_channels")
     meta_pl = cube_one("platform_attribution_commerce.meta_net_sales")
@@ -181,8 +177,6 @@ def main() -> int:
         ("Historical BE ROAS", hist["be_roas"], cube_one("canonical_pnl.be_roas_all_channels")),
         ("Historical LTV:CAC", hist["ltv_cac"], cube_one("ltv_cac.ltv_cac_ratio")),
         ("Historical Payments", hist["payments"], cube_one("commerce_orders.total_payment_orders")),
-        ("Amazon Attr Net Profit", amz_np, amz_np),
-        ("  trap: marketplace_net_payout", amz_np, amz_pay),
         ("Meta Overview Net Sales", meta_ov, meta_ov),
         ("  trap: placement meta_net_sales", meta_ov, meta_pl),
     ]

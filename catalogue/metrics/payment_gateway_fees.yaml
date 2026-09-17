@@ -4,8 +4,7 @@ category: finance
 status: certified
 description: 'Payment gateway/processing fees arm of Shopify Net COGS (brand × day), including cancel-
   and return-event gateway. FE §13 Payment Gateway Fees. Part of Net COGS — do not subtract again when
-  Net COGS is used. Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon
-  SP marketplace sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit
+  Net COGS is used. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
   use net_profit_blended.'
 formula:
   human_readable: SUM(payment_gateway_fees)

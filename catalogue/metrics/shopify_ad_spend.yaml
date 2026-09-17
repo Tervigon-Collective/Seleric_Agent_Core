@@ -3,9 +3,8 @@ display_name: Total Ad Spend (Shopify-only)
 category: finance
 status: certified
 description: 'Meta + Google ad spend only — Historical Analytics "Total Ad Spend" when Shopify-only is
-  selected. Excludes Amazon Ads. For all-platform Total Ad Spend (= Total Performance Marketing) use total_ad_spend.
-  Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace
-  sales or fees. For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+  selected. For all-platform Total Ad Spend (= Total Performance Marketing) use total_ad_spend.
+  Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: SUM(meta_spend) + SUM(google_spend)
   authoritative_source: cube

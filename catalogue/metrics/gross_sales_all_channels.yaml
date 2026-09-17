@@ -3,13 +3,10 @@ display_name: Gross Sales (all channels, ex-GST)
 category: commerce
 status: certified
 description: >
-  All-channels Gross Sales (ex-GST): Shopify gross_sales_excl_tax plus Amazon
-  ex-GST gross (effective_gross_revenue − revenue_tax, non-canceled placements —
-  see amazon_gross_sales). 2026-07-27 fix: Amazon leg was incl-GST; now ex-GST,
-  matching the Amazon Attribution Gross Sales card. Matches Historical Analytics
-  All channels Gross Sales. For Shopify-only use gross_sales.
+  All-channels Gross Sales (ex-GST): Shopify gross_sales_excl_tax. Shopify is the only channel
+  served, so this equals gross_sales.
 formula:
-  human_readable: SUM(shopify gross_sales_excl_tax) + SUM(amazon effective_gross_revenue - revenue_tax), ex-GST
+  human_readable: SUM(shopify gross_sales_excl_tax), ex-GST
   authoritative_source: cube
 cube_mapping:
   view: sales_all_channels
@@ -44,11 +41,13 @@ examples:
     time_range:
       preset: last_30d
 validation_tests:
-  - June 2026 brand 20 ≈ ₹41,44,768.43
-  - gross_sales_all_channels >= shopify gross_sales for same slice
+  - gross_sales_all_channels equals shopify gross_sales for the same slice
 deprecated_aliases: []
 dashboard_alignment:
-  status: match
+  status: unclear
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: lineItemHistoricalSql.js:586
+  note: >
+    Serve layer is Shopify-only (2026-09-17), so this equals the Shopify figure. A dashboard
+    All-channels card that also counts other marketplaces will not match.

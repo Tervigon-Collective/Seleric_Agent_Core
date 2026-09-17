@@ -5,7 +5,7 @@ status: certified
 description: 'Fully-loaded Shopify Net COGS for the period (brand × day), matching the FE lifecycle
   costing model in `serve_canonical_pnl`: ACTIVE placement (product + ship + pack + gateway on order
   date) + CANCELLATION (gateway on cancel date) + RETURN (ship + pack + gateway + RTO on return
-  event date, no product). Not product_cogs (SKU grain), and does not include Amazon COGS.'
+  event date, no product). Not product_cogs (SKU grain).'
 formula:
   human_readable: SUM(net_cogs)
   authoritative_source: cube
@@ -47,6 +47,6 @@ dashboard_alignment:
   source: Seleric_Dashboard/Node-Backend
   evidence: data_platform/mage-ai/infra/cube/model/cubes/serve_canonical_pnl.yml:66-72
   note: >
-    Dashboard summary may blend Amazon in a separate path. This metric is
+    Dashboard summary may blend other marketplace channels in a separate path. This metric is
     aligned to canonical Cube semantic execution (`canonical_pnl.net_cogs`),
     which is Shopify lifecycle Net COGS.

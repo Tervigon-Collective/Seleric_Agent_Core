@@ -11,7 +11,6 @@ dimensions:
       commerce_orders: commerce_orders.brand_id
       commerce_performance: commerce_performance.brand_id
       canonical_pnl: canonical_pnl.brand_id
-      amazon_daily_pnl: amazon_daily_pnl.brand_id
       orders_all_channels: orders_all_channels.brand_id
       sales_all_channels: sales_all_channels.brand_id
       order_attribution: order_attribution.brand_id
@@ -24,9 +23,6 @@ dimensions:
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
       google_ad_performance: google_ad_performance.brand_id
       google_ad_performance_hourly: google_ad_performance_hourly.brand_id
-      amazon_ad_performance: amazon_ad_performance.brand_id
-      amazon_commerce_performance: amazon_commerce_performance.brand_id
-      amazon_attribution_overview: amazon_attribution_overview.brand_id
       channel_pnl: channel_pnl.brand_id
       returns_cancels_all_channels: returns_cancels_all_channels.brand_id
       ltv_cac: ltv_cac.brand_id
@@ -40,16 +36,6 @@ dimensions:
       refund_events: refund_events.brand_id
       return_lifecycle: return_lifecycle.brand_id
       ad_channel_pnl: ad_channel_pnl.brand_id
-      amazon_daily_pnl_actual: amazon_daily_pnl_actual.brand_id
-      amazon_order_item_pnl: amazon_order_item_pnl.brand_id
-      amazon_ads_ad_groups: amazon_ads_ad_groups.brand_id
-      amazon_ads_ads: amazon_ads_ads.brand_id
-      amazon_accounts_exceptions: amazon_accounts_exceptions.brand_id
-      amazon_order_items: amazon_order_items.brand_id
-      amazon_finance_charge_types_daily: amazon_finance_charge_types_daily.brand_id
-      amazon_settlement_reconciliation: amazon_settlement_reconciliation.brand_id
-      amazon_returns_daily: amazon_returns_daily.brand_id
-      amazon_orders: amazon_orders.brand_id
       attribution_paths: attribution_paths.brand_id
       finance_waterfall: finance_waterfall.brand_id
       google_ads_status_history: google_ads_status_history.brand_id
@@ -67,7 +53,6 @@ dimensions:
       product_performance: product_performance.order_date
       refund_events: refund_events.order_date
       return_lifecycle: return_lifecycle.order_date
-      amazon_orders: amazon_orders.order_date
       attribution_paths: attribution_paths.order_date
       touchpoints: touchpoints.order_date
   - id: order_created_at_ist
@@ -287,7 +272,6 @@ dimensions:
       product_performance: product_performance.order_status
       purchase_sequence: purchase_sequence.order_status
       refund_events: refund_events.order_status
-      amazon_orders: amazon_orders.order_status
   - id: return_status
     display_name: Return Status
     description: Return lifecycle status on the order / line.
@@ -368,8 +352,7 @@ dimensions:
     display_name: Payment Bucket
     description: >
       Coarse payment mix bucket used by the Commerce dashboard
-      (cod, online/prepaid, paytm card machine, manual). Shopify-only on
-      all-channels views (Amazon rows are blank).
+      (cod, online/prepaid, paytm card machine, manual). Shopify-only.
     aliases: [cod vs prepaid, payment mix, prepaid vs cod, cod, online, prepaid, paytm, manual payment]
     allowed_values: [online, cod, paytm card machine, manual]
     views:
@@ -424,8 +407,7 @@ dimensions:
     display_name: Shipping Region / State / Province
     description: >
       Destination province/state/region on the order shipping address.
-      Shopify = shipping_address.province (as shipping_region); Amazon =
-      ship_to_state. Values are stored uppercased (e.g. MAHARASHTRA). Use this
+      Shopify = shipping_address.province (as shipping_region). Values are stored uppercased (e.g. MAHARASHTRA). Use this
       for "sales by state", "by province", or "by region".
     aliases:
       - region
@@ -539,7 +521,7 @@ dimensions:
     aliases: [brand vendor, supplier, vendor name]
     views:
       product_performance: product_performance.vendor
-  # ---- Paid media (2026-07-15): PaidMedia.{Meta,Google,Amazon}AdsPerformance ----
+  # ---- Paid media (2026-07-15): PaidMedia.{Meta,Google}AdsPerformance ----
   - id: report_date
     display_name: Report Date
     description: >
@@ -549,7 +531,6 @@ dimensions:
     views:
       commerce_performance: commerce_performance.report_date
       canonical_pnl: canonical_pnl.report_date
-      amazon_daily_pnl: amazon_daily_pnl.report_date
       orders_all_channels: orders_all_channels.report_date
       sales_all_channels: sales_all_channels.report_date
       meta_ad_attribution: meta_ad_attribution.report_date
@@ -558,9 +539,6 @@ dimensions:
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.report_date
       google_ad_performance: google_ad_performance.report_date
       google_ad_performance_hourly: google_ad_performance_hourly.report_date
-      amazon_ad_performance: amazon_ad_performance.report_date
-      amazon_commerce_performance: amazon_commerce_performance.report_date
-      amazon_attribution_overview: amazon_attribution_overview.report_date
       channel_pnl: channel_pnl.report_date
       returns_cancels_all_channels: returns_cancels_all_channels.report_date
       ltv_cac: ltv_cac.report_date
@@ -568,11 +546,6 @@ dimensions:
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
       platform_attribution_commerce: platform_attribution_commerce.report_date
-      amazon_daily_pnl_actual: amazon_daily_pnl_actual.report_date
-      amazon_order_item_pnl: amazon_order_item_pnl.report_date
-      amazon_accounts_exceptions: amazon_accounts_exceptions.report_date
-      amazon_settlement_reconciliation: amazon_settlement_reconciliation.report_date
-      amazon_returns_daily: amazon_returns_daily.report_date
   - id: platform
     display_name: Attribution Platform
     description: Last-touch platform bucket on platform_attribution_commerce (meta | google | organic).
@@ -589,7 +562,6 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.campaign_id
       google_ad_performance: google_ad_performance.campaign_id
       google_ad_performance_hourly: google_ad_performance_hourly.campaign_id
-      amazon_ad_performance: amazon_ad_performance.campaign_id
   - id: campaign_name
     display_name: Campaign Name
     description: >
@@ -603,14 +575,12 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.campaign_name
       google_ad_performance: google_ad_performance.campaign_name
       google_ad_performance_hourly: google_ad_performance_hourly.campaign_name
-      amazon_ad_performance: amazon_ad_performance.campaign_name
       session_funnel: session_funnel.campaign_name
   - id: campaign_status
     display_name: Campaign Status
     description: Platform campaign status (ACTIVE/PAUSED/... per platform).
     views:
       meta_ad_performance: meta_ad_performance.campaign_status
-      amazon_ad_performance: amazon_ad_performance.campaign_status
   - id: campaign_objective
     display_name: Campaign Objective (Meta)
     description: >
@@ -623,12 +593,10 @@ dimensions:
   - id: campaign_type
     display_name: Campaign Type
     description: >
-      Google channel (SEARCH/PERFORMANCE_MAX/DEMAND_GEN/SHOPPING/DISPLAY) or
-      Amazon ads program (SP only — SB/SD not ingested).
+      Google channel (SEARCH/PERFORMANCE_MAX/DEMAND_GEN/SHOPPING/DISPLAY).
     views:
       google_ad_performance: google_ad_performance.campaign_type
       google_ad_performance_hourly: google_ad_performance_hourly.campaign_type
-      amazon_ad_performance: amazon_ad_performance.campaign_type
   - id: adset_id
     display_name: Adset ID (Meta)
     description: >
@@ -685,7 +653,7 @@ dimensions:
   - id: ad_account_id
     display_name: Ad Account (Meta)
     description: >
-      Paid-media ad account id (Meta/Google/Amazon). Tenant-scoped with brand_id.
+      Paid-media ad account id (Meta/Google). Tenant-scoped with brand_id.
     views:
       meta_ad_performance: meta_ad_performance.ad_account_id
       meta_ad_performance_hourly: meta_ad_performance_hourly.ad_account_id
@@ -695,14 +663,6 @@ dimensions:
       Google Ads customer id (account). Not a Shopify customer_id.
     views:
       google_ad_performance: google_ad_performance.customer_account_id
-  - id: targeting_type
-    display_name: Targeting Type (Amazon)
-    description: >
-      Targeting Type: shared catalogue dimension for grouping and filters. Not a measure;
-      empty/null means unknown, never a separate bucket unless documented.
-    allowed_values: [AUTO, MANUAL]
-    views:
-      amazon_ad_performance: amazon_ad_performance.targeting_type
   - id: is_final
     display_name: Is Final
     description: 1 when the report day is outside the mutable restatement window.
@@ -711,7 +671,6 @@ dimensions:
       meta_ad_performance_hourly: meta_ad_performance_hourly.is_final
       google_ad_performance: google_ad_performance.is_final
       google_ad_performance_hourly: google_ad_performance_hourly.is_final
-      amazon_ad_performance: amazon_ad_performance.is_final
   # ---- Meta breakdown port (2026-07-15): serve.meta_ads_breakdown_daily ----
   - id: breakdown_type
     display_name: Breakdown Type (Meta)
@@ -751,18 +710,15 @@ dimensions:
   - id: channel
     display_name: Channel
     description: >
-      On channel_attribution: closed set (meta/google/organic_shopify/unattributed/
-      amazon/organic_amazon). On channel_pnl: meta/google/organic/unattributed.
+      On channel_attribution: closed set (meta/google/organic_shopify/unattributed). On channel_pnl: meta/google/organic/unattributed.
       On funnel_daily and session_funnel: FINE channel (ig_feed, google_search,
-      organic, ...). On orders_all_channels / sales_all_channels: marketplace
-      channel (shopify | amazon). Distinct from lt_channel (last-touch FINE on
+      organic, ...). On orders_all_channels / sales_all_channels: marketplace channel (shopify). Distinct from lt_channel (last-touch FINE on
       order_attribution). Unspecified "by channel" / "channel-wise" with no
       measure defaults to ChannelAttribution closed set — see ontology
       grain_defaults; do not slice Shopify commerce totals by this dim.
     aliases:
       - marketplace
       - marketplace channel
-      - shopify vs amazon
       - by channel
       - channel-wise
       - channel wise
@@ -780,14 +736,13 @@ dimensions:
       sales_all_channels: sales_all_channels.channel
   - id: source_platform
     display_name: Source Platform
-    description: Originating platform of the attribution row (shopify | amazon).
+    description: Originating platform of the attribution row (shopify).
     views:
       channel_attribution: channel_attribution.source_platform
   - id: revenue_basis
     display_name: Revenue Basis
     description: >
-      Revenue basis of the row — shopify_first_party_ex_gst vs
-      amazon_order_total_incl_tax; never sum across bases silently.
+      Revenue basis of the row (shopify_first_party_ex_gst).
     views:
       channel_attribution: channel_attribution.revenue_basis
   - id: customer_id
@@ -1072,22 +1027,6 @@ dimensions:
     aliases: [optimization goal, optimisation goal, delivery goal]
     views:
       meta_ad_performance: meta_ad_performance.adset_optimization_goal
-  - id: seller_sku
-    display_name: Seller SKU
-    description: >
-      Amazon seller SKU on actuals and order-item ports. Not Shopify variant_sku.
-    aliases: [sku, amazon sku, seller sku]
-    views:
-      amazon_order_item_pnl: amazon_order_item_pnl.seller_sku
-      amazon_order_items: amazon_order_items.seller_sku
-  - id: exception_type
-    display_name: Exception Type
-    description: >
-      Amazon Accounts close-exception class (Finances vs settlement mismatch).
-      Diagnose recon breaks; not a P&L dimension.
-    aliases: [close exception, exception class]
-    views:
-      amazon_accounts_exceptions: amazon_accounts_exceptions.exception_type
   - id: neurohack_tag_codes
     display_name: Neurohack Tags
     description: >

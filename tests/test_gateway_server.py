@@ -351,7 +351,7 @@ async def test_catalogue_get_ontology_scopes_to_module(built_server):
     assert "error" not in out
     assert out["module"] == "commerce"
     assert {d["name"] for d in out["domains"]} == {"Commerce"}
-    assert {dp["name"] for dp in out["data_products"]} >= {"CommercePerformance", "AmazonCommercePerformance"}
+    assert {dp["name"] for dp in out["data_products"]} >= {"CommercePerformance"}
     cluster_ids = {c["id"] for c in out["entity_clusters"]}
     assert "commerce_order" in cluster_ids
     assert "finance_pnl" not in cluster_ids

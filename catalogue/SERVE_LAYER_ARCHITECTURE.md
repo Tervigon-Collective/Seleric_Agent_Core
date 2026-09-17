@@ -1,5 +1,7 @@
 # Serve Layer Architecture & Cross-Layer Reconciliation
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 Status: baseline measured 2026-09-07. Enforced by `scripts/reconcile_layers.py`.
 
 This document covers three things that are really one thing: what the serve

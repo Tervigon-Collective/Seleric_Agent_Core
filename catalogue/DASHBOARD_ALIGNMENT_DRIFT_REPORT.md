@@ -1,5 +1,7 @@
 # Dashboard Alignment Drift Report — Catalogue vs. Node-Backend
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Status: DRAFT FOR REVIEW — no production files modified.** This report is the
 output of a full audit of all 190 metrics in `catalogue/metrics/*.yaml` (and by
 extension the auto-generated `catalogue/openmetadata/metrics.yaml` crosswalk, which

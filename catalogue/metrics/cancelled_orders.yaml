@@ -3,7 +3,7 @@ display_name: Cancelled Orders (Shopify-only)
 category: commerce
 status: certified
 description: 'Orders cancelled on event date (Asia/Kolkata) from serve.commerce_order_events. Filter on event_date — not order_date.
-  Scope: Shopify-only (Historical Analytics / commerce oracle). Does not include Amazon SP marketplace sales or fees. For
+  Scope: Shopify-only (Historical Analytics / commerce oracle). For
   all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: Distinct orders with cancellation event in period

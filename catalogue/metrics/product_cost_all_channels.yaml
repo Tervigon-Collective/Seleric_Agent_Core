@@ -3,10 +3,10 @@ display_name: Product Cost (all channels — P&L)
 category: finance
 status: certified
 description: >
-  P&L Forecast Product Cost: Shopify merchandise product_cost + Amazon SP
-  total_cogs. For Shopify-only Historical Product Cost use product_cost.
+  P&L Forecast Product Cost: Shopify merchandise product_cost. Shopify is the only channel served,
+  so this equals product_cost.
 formula:
-  human_readable: SUM(product_cost + amazon_cogs)
+  human_readable: SUM(product_cost)
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
@@ -31,10 +31,13 @@ examples:
       measures: [product_cost_all_channels]
       time_range: {start: "2026-06-01", end: "2026-06-30"}
 validation_tests:
-  - June 2026 brand 20 ≈ ₹12,05,663.60
+  - product_cost_all_channels equals product_cost for the same slice
 deprecated_aliases: []
 dashboard_alignment:
-  status: match
+  status: unclear
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: src/services/pnlService.js:212-218
+  note: >
+    Serve layer is Shopify-only (2026-09-17), so this equals the Shopify figure. A dashboard
+    All-channels card that also counts other marketplaces will not match.

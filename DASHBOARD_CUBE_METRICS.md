@@ -1,5 +1,7 @@
 # Dashboard (Gold) ↔ Cube Metric Audit
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Gold query = source of truth.** Every formula, field and Cube definition below is copied from code. Nothing is inferred.
 
 ## Scope

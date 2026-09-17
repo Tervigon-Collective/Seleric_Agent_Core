@@ -3,17 +3,13 @@ display_name: Net Sales (all channels)
 category: commerce
 status: certified
 description: >
-  All-channels Net Sales (ex-GST) from the canonical P&L spine — the SAME view
-  that produces net_profit_all_channels, so the agent's Net Sales and Net Profit
-  always reconcile. Matches the Historical Analytics / General Statistics
-  "Net Sales (All channels)" card (June 2026 brand 20 = ₹34,42,876.25).
-  2026-07-27 fix: was mapped to sales_all_channels.net_sales (₹37,25,305 —
-  the geography-breakdown view with the Amazon-Attribution net basis), which did
-  NOT match the General Statistics card and disagreed with net_profit. For the
-  geography/channel breakdown of all-channel sales use the sales_all_channels
-  view directly; for Shopify-only use commerce_net_revenue_daily.
+  All-channels Net Sales (ex-GST) from the canonical P&L spine — the SAME view that produces
+  net_profit_all_channels, so the agent's Net Sales and Net Profit always reconcile. Shopify is the
+  only channel served, so this equals Shopify net_sales_excl_tax. For the geography/channel
+  breakdown use the sales_all_channels view directly; for Shopify-only use
+  commerce_net_revenue_daily.
 formula:
-  human_readable: canonical_pnl net_sales_all_channels_pnl = Shopify net_sales_excl_tax + Amazon net (canonical P&L basis), ex-GST
+  human_readable: canonical_pnl net_sales_all_channels_pnl = Shopify net_sales_excl_tax, ex-GST
   authoritative_source: cube
 cube_mapping:
   view: canonical_pnl
@@ -40,16 +36,13 @@ examples:
     time_range:
       preset: last_30d
 validation_tests:
-  - net_sales_all_channels (June 2026 brand 20) = 3,442,876.25, matching the General Statistics card
   - net_profit_all_channels = net_sales_all_channels - net_cogs - total_ad_spend on the same slice (same view)
 deprecated_aliases: []
 dashboard_alignment:
-  status: match
+  status: unclear
   audited_on: '2026-07-27'
   source: Seleric_Dashboard/Node-Backend
   evidence: getHistoricalDashboard net_sales (All channels); canonical_pnl.net_sales_all_channels_pnl
   note: >
-    Repointed from sales_all_channels.net_sales to canonical_pnl.net_sales_all_channels_pnl.
-    2026-07-31: Amazon arm uses the same ex-GST rule as sales_all_channels
-    (revenue_tax when present, else gross/1.18) so unsettled Amazon rows no longer
-    leave GST in net_sales_all_channels (~₹594/day overstatement observed).
+    Serve layer is Shopify-only (2026-09-17), so this equals the Shopify figure. A dashboard
+    All-channels card that also counts other marketplaces will not match.

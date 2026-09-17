@@ -1,5 +1,7 @@
 # Canonical Data Model — Proposed Design
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 **Status: §§1–10 IMPLEMENTED (2026-07-11); §11's remaining items are follow-up
 work, listed at the end.** Companion docs: `CUBE_SEMANTIC_AUDIT.md` (findings this
 design responds to) and `QUERY_COVERAGE_REPORT.md` (630 query patterns scored

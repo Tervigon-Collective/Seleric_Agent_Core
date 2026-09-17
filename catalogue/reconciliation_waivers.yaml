@@ -22,17 +22,9 @@ waivers:
     table would duplicate grain. Keep gold-only.
   GOLD_NOT_SERVED:gold.fct_product_variant_cost_history: >
     Cost history is consumed into order-item COGS; serving both duplicates grain.
-  GOLD_NOT_SERVED:gold.fct_amazon_sp_settlements: >
-    Upstream of Finance.AmazonAccounts (amazon_settlement_reconciliation). Serving
-    both would duplicate the settlement grain.
-  GOLD_NOT_SERVED:gold.fct_amazon_sp_settlement_lines: >
-    Upstream of Finance.AmazonAccounts settlement reconciliation. Keep gold-only.
   GOLD_NOT_SERVED:gold.fct_order_attribution_credit: >
     Superseded by gold.fct_order_attribution last-touch; multi-touch already on
     serve.attribution_paths.
-  GOLD_NOT_SERVED:gold.fct_amazon_ads_ad_order_attribution: >
-    Platform-reported Amazon ad-order attribution. Attribution boundary — ACOS/ROAS
-    stay in gold, same as campaign-day.
   GOLD_NOT_SERVED:gold.mart_ad_funnel_daily: >
     Unused growth mart; session funnel is served from fct_session_funnel /
     mart_funnel_daily. No dashboard card.
@@ -94,10 +86,6 @@ waivers:
     Snapshot change log already has entity_name/status. Current dim_campaign would drift.
   GOLD_NOT_SERVED:gold.dim_adset_geo: >
     1:many geo targeting. Certified path does not explode ad-day grain. Keep gold-only.
-  GOLD_NOT_SERVED:gold.dim_amazon_listings: >
-    Listing master data; Amazon item grain is serve.amazon_order_items. Keep gold-only.
-  GOLD_NOT_SERVED:gold.dim_amazon_settlement_charge_type: >
-    Upstream taxonomy of AmazonAccounts settlement lines. Keep gold-only.
   GOLD_NOT_SERVED:gold.dim_neurohack: >
     Certified path uses dim_ad_neurohack_map arrays on Meta serve ports, not this dim.
   GOLD_NOT_SERVED:gold.dim_shopify_inventory_items: >
@@ -108,3 +96,26 @@ waivers:
     Unused geo discovery view. No dashboard card; do not port.
   GOLD_NOT_SERVED:gold.v_geo_region_rollup: >
     Unused geo region rollup. No dashboard card; do not port.
+
+  # Amazon was removed from the serve layer, Cube and the agent catalogue on
+  # 2026-09-17. Its gold tables are kept (ingestion continues) but are
+  # intentionally not served.
+  GOLD_NOT_SERVED:gold.dim_amazon_ads_campaigns: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.dim_amazon_charge_type: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.dim_amazon_listings: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.dim_amazon_settlement_charge_type: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_ads_ad_groups_daily: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_ads_ad_order_attribution: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_ads_ads_daily: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_ads_campaigns_daily: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_daily_pnl: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_order_items: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_return_items: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_returns_daily: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_finance_events: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_finance_items: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_order_pnl: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_orders: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_settlement_lines: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_settlement_order_pnl: Gold retained; Amazon intentionally not served (2026-09-17).
+  GOLD_NOT_SERVED:gold.fct_amazon_sp_settlements: Gold retained; Amazon intentionally not served (2026-09-17).

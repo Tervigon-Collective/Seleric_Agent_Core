@@ -47,14 +47,12 @@ terms:
   - term: orders
     canonical_id: total_orders
     definition: >
-      Defaults to Total Orders (all channels = Shopify + Amazon non-canceled).
+      Defaults to Total Orders (all channels = Shopify).
       For Shopify-only use "shopify orders".
   - term: shopify orders
     canonical_id: orders
   - term: shopify order count
     canonical_id: orders
-  - term: amazon orders
-    canonical_id: amazon_orders
   - term: units sold
     canonical_id: units_sold
   - term: units
@@ -201,10 +199,6 @@ terms:
     canonical_id: net_profit_blended
   - term: net profit (all platforms)
     canonical_id: net_profit_blended
-  - term: net profit including amazon
-    canonical_id: net_profit_incl_amazon
-  - term: net profit incl amazon
-    canonical_id: net_profit_incl_amazon
   - term: COGS
     canonical_id: total_operating_cost_all_channels
   - term: company COGS
@@ -246,8 +240,7 @@ terms:
   - term: operating cost
     canonical_id: total_operating_cost_all_channels
     definition: >
-      On the P&L Metrics page this means Total Operating Cost (= Shopify Net
-      COGS + Amazon product + marketplace fees). For Shopify-only say
+      On the P&L Metrics page this means Total Operating Cost (= Shopify Net COGS). For Shopify-only say
       "shopify only total operating cost". For the non-product breakdown only,
       use metric operating_cost.
   - term: packaging cost
@@ -266,16 +259,6 @@ terms:
     canonical_id: taxes_on_net_sales
   - term: gst on net sales
     canonical_id: taxes_on_net_sales
-  - term: amazon platform fees
-    canonical_id: amazon_platform_fees
-  - term: amazon fees
-    canonical_id: amazon_platform_fees
-  - term: amazon marketplace fees
-    canonical_id: amazon_marketplace_fees
-    definition: >
-      Non-negative abs(effective_*) fee components on amazon_commerce_performance
-      (same economic basis as amazon_platform_fees). Prefer "amazon platform fees"
-      for Attribution Total Fees questions.
   - term: gross margin
     canonical_id: gross_margin_pct
   - term: gross margin %
@@ -290,7 +273,7 @@ terms:
     canonical_id: net_roas_all_channels
     definition: >
       Defaults to All-channels Net ROAS. Shopify-only → net_roas.
-      Platform-reported Meta/Google/Amazon ROAS is not certified.
+      Platform-reported Meta/Google ROAS is not certified.
   - term: net ROAS
     canonical_id: net_roas_all_channels
   - term: net roas
@@ -304,8 +287,7 @@ terms:
   - term: gross ROAS
     canonical_id: gross_roas_all_channels
     definition: >
-      Defaults to All-channels Gross ROAS (Shopify + Amazon Attribution gross /
-      total ad spend). For Shopify-only use gross_roas.
+      Defaults to All-channels Gross ROAS (Shopify gross / total ad spend). For Shopify-only use gross_roas.
   - term: gross roas
     canonical_id: gross_roas_all_channels
     definition: >
@@ -386,8 +368,7 @@ terms:
     canonical_id: total_ad_spend
     definition: >
       Defaults to Total Ad Spend (all platforms) = Total Performance Marketing
-      (Meta+Google+Amazon). For Meta-only / Google-only / Amazon-ads-only say
-      that platform. For Shopify Historical card (Meta+Google) use shopify_ad_spend.
+      (Meta+Google). For Meta-only / Google-only say that platform. For Shopify Historical card (Meta+Google) use shopify_ad_spend.
   - term: total ad spend
     canonical_id: total_ad_spend
   - term: total ad spend (all platforms)
@@ -406,7 +387,7 @@ terms:
     canonical_id: total_ad_spend
     definition: >
       P&L Marketing & Sales section total = Total Ad Spend (all platforms) =
-      Total Performance Marketing (Meta+Google+Amazon).
+      Total Performance Marketing (Meta+Google).
   - term: total performance marketing
     canonical_id: total_ad_spend
   - term: performance marketing
@@ -497,35 +478,6 @@ terms:
     canonical_id: google_cpm
   - term: google only CPM
     canonical_id: google_cpm
-  - term: amazon ads
-    canonical_id: amazon_ads_spend
-  - term: amazon spend
-    canonical_id: amazon_ads_spend
-    definition: >
-      Amazon Ads spend (not marketplace sales). For Amazon commerce sales/orders
-      say "amazon total sales" / "amazon orders".
-  - term: amazon ads spend
-    canonical_id: amazon_ads_spend
-  - term: amazon only ads
-    canonical_id: amazon_ads_spend
-  - term: amazon ads only
-    canonical_id: amazon_ads_spend
-  - term: amazon only ad spend
-    canonical_id: amazon_ads_spend
-  - term: amazon only spend
-    canonical_id: amazon_ads_spend
-  - term: amazon clicks
-    canonical_id: amazon_ads_clicks
-  - term: amazon only clicks
-    canonical_id: amazon_ads_clicks
-  - term: amazon ads clicks
-    canonical_id: amazon_ads_clicks
-  - term: amazon CTR
-    canonical_id: amazon_ads_ctr
-  - term: amazon only CTR
-    canonical_id: amazon_ads_ctr
-  - term: amazon ads CTR
-    canonical_id: amazon_ads_ctr
   - term: meta purchases
     canonical_id: null
     definition: >
@@ -798,8 +750,8 @@ terms:
   - term: total sales
     canonical_id: total_sales_all_channels
     definition: >
-      Total Sales across Shopify + Amazon (incl. GST). For Shopify-only say
-      "shopify total sales"; for Amazon-only say "amazon total sales".
+      Total Sales across all served channels (Shopify, incl. GST). For Shopify-only say "shopify
+      total sales".
   - term: total sales (including gst)
     canonical_id: total_sales_all_channels
   - term: total sales including gst
@@ -816,55 +768,18 @@ terms:
     canonical_id: total_sales
   - term: shopify only total sales
     canonical_id: total_sales
-  - term: total sales (amazon-only)
-    canonical_id: amazon_total_sales
-  - term: amazon total sales
-    canonical_id: amazon_total_sales
-  - term: amazon only total sales
-    canonical_id: amazon_total_sales
   - term: gross sales (all channels)
     canonical_id: gross_sales_all_channels
   - term: gross sales all channels
     canonical_id: gross_sales_all_channels
   - term: all channels gross sales
     canonical_id: gross_sales_all_channels
-  - term: amazon gross sales
-    canonical_id: amazon_gross_sales
-  - term: amazon only gross sales
-    canonical_id: amazon_gross_sales
-  - term: gross sales (amazon-only)
-    canonical_id: amazon_gross_sales
   - term: net sales (all channels)
     canonical_id: net_sales_all_channels
   - term: net sales all channels
     canonical_id: net_sales_all_channels
   - term: all channels net sales
     canonical_id: net_sales_all_channels
-  - term: amazon net sales
-    canonical_id: amazon_net_sales
-  - term: amazon only net sales
-    canonical_id: amazon_net_sales
-  - term: net sales (amazon-only)
-    canonical_id: amazon_net_sales
-  - term: amazon net profit
-    canonical_id: amazon_net_profit
-  - term: amazon only net profit
-    canonical_id: amazon_net_profit
-  - term: net profit (amazon-only)
-    canonical_id: amazon_net_profit
-  - term: amazon profit
-    canonical_id: amazon_net_profit
-  - term: amazon net payout
-    canonical_id: amazon_net_payout
-    definition: >
-      Settlement cash to seller (marketplace_net_payout). NOT Amazon Net Profit —
-      for Net Profit use amazon_net_profit (Net Sales − Fees − Product Cost − Ads).
-  - term: amazon payout
-    canonical_id: amazon_net_payout
-    definition: >
-      Settlement cash ≠ net profit. Prefer amazon_net_profit for "amazon net profit".
-  - term: amazon only orders
-    canonical_id: amazon_orders
   - term: shopify only orders
     canonical_id: orders
   - term: gross units
@@ -883,26 +798,6 @@ terms:
     canonical_id: refunded_orders
   - term: multi-item orders
     canonical_id: orders
-  - term: amazon return count
-    canonical_id: amazon_return_count
-  - term: amazon returns count
-    canonical_id: amazon_return_count
-  - term: amazon total return count
-    canonical_id: amazon_return_count
-  - term: amazon returns / cancels
-    canonical_id: amazon_return_count
-  - term: amazon refunds
-    canonical_id: amazon_return_revenue
-  - term: amazon returned orders
-    canonical_id: amazon_returned_orders
-  - term: amazon cancelled orders
-    canonical_id: amazon_cancelled_orders
-  - term: amazon return revenue
-    canonical_id: amazon_return_revenue
-  - term: amazon refund amount
-    canonical_id: amazon_return_revenue
-  - term: amazon refunds amount
-    canonical_id: amazon_return_revenue
   - term: COD orders
     canonical_id: cod_orders
   - term: cash on delivery
@@ -917,7 +812,7 @@ terms:
     definition: >
       Break down Shopify orders by payment_bucket (online, cod, paytm card machine,
       manual) using total_sales, orders, commerce_net_revenue, or product_net_revenue
-      with dimension payment_bucket. Amazon has no COD/prepaid bucket.
+      with dimension payment_bucket.
   - term: sales by payment method
     definition: >
       Use total_sales or commerce_net_revenue with dimension payment_method or
@@ -943,7 +838,7 @@ terms:
     canonical_id: total_orders
     definition: >
       Use total_orders or commerce event metrics with dimension shipping_pincode
-      (Shopify shipping zip; blank on Amazon).
+      (Shopify shipping zip).
   - term: cancels by payment type
     canonical_id: event_cancel_revenue
     definition: >
@@ -1022,9 +917,3 @@ terms:
     canonical_id: google_interactions
   - term: google interaction rate
     canonical_id: google_interaction_rate
-  - term: amazon impressions
-    canonical_id: amazon_ads_impressions
-  - term: amazon CPC
-    canonical_id: amazon_ads_cpc
-  - term: amazon CPM
-    canonical_id: amazon_ads_cpm

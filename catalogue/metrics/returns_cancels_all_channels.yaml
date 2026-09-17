@@ -3,11 +3,10 @@ display_name: Returns / Cancels (All Channels)
 category: commerce
 status: certified
 description: >
-  Historical Analytics All-channels Returns/Cancels count: Shopify distinct
-  event-date return+cancel orders + Amazon cancelled (purchase_date) + Amazon
-  returned (return_delivery_date). For Shopify-only use returns_cancels.
+  Historical Analytics All-channels Returns/Cancels count: Shopify distinct event-date return+cancel
+  orders. Shopify is the only channel served, so this equals returns_cancels.
 formula:
-  human_readable: shopify event-date returns+cancels + amazon attribution returns_cancels
+  human_readable: shopify event-date returns+cancels
   authoritative_source: cube
 cube_mapping:
   view: returns_cancels_all_channels
@@ -37,6 +36,9 @@ examples:
 validation_tests: []
 deprecated_aliases: []
 dashboard_alignment:
-  status: match
+  status: unclear
   audited_on: '2026-07-27'
   source: Seleric_Dashboard Historical Analytics All-channels Returns/Cancels
+  note: >
+    Serve layer is Shopify-only (2026-09-17), so this equals the Shopify figure. A dashboard
+    All-channels card that also counts other marketplaces will not match.

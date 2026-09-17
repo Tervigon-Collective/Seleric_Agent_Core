@@ -52,8 +52,7 @@ dashboard_alignment:
   evidence: src/services/dashboardService.js:132,136
   note: >
     Catalogue metric is Shopify-only Cube (`canonical_pnl.net_profit_shopify`).
-    Dashboard P&L Forecast Net Profit is blended all-channels and may apply a
-    Node-Backend Amazon pending-refund + return-label overlay that Cube does not.
+    Dashboard P&L Forecast Net Profit is blended all-channels and may apply a Node-Backend marketplace pending-refund + return-label overlay that Cube does not.
     For all-channel cards use net_profit_all_channels and state the Cube basis.
 companion_measures:
 - net_profit_all_channels

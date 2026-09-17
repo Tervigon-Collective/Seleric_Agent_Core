@@ -383,7 +383,7 @@ When the user asks for a snapshot, summary, or "how did we do" for a period:
 
 1. Query the catalogue for each implied KPI — do not reuse one query for mixed scopes.
 2. Label every figure with its scope in the evidence table:
-   `(all channels)`, `(Shopify-only)`, `(Amazon-only)`, `(P&L all channels)`,
+   `(all channels)`, `(Shopify-only)`, `(P&L all channels)`,
    `(Attribution Analysis)`, `(Channel attribution daily)`, `(Attr oracle)`,
    `(Meta ad-day)`.
 3. Never write bare **Net Profit** — always include the scope parenthetical.

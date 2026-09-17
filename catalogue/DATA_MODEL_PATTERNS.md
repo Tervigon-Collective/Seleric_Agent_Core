@@ -1,5 +1,7 @@
 # Data models and design patterns
 
+> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
+
 What this stack actually does, measured — not what a style guide says it should.
 Every number here came from the live warehouse, Cube `/meta` and the catalogue on
 2026-09-07, and each pattern is enforced by `scripts/reconcile_layers.py`

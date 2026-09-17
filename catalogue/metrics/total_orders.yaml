@@ -2,13 +2,12 @@ id: total_orders
 display_name: Total Orders (all channels)
 category: commerce
 status: certified
-description: 'Historical Analytics Total Orders when All channels is selected: Shopify eligible placement orders (incl. later
-  cancelled/voided) + Amazon SP orders excluding Canceled. Date axis: Shopify order_date / Amazon purchase_date. For Shopify-only
-  use metric orders. Do not confuse with Total Payments.
-
-  '
+description: >
+  Historical Analytics Total Orders when All channels is selected: Shopify eligible placement orders
+  (incl. later cancelled/voided). Date axis: order_date. For Shopify-only use metric orders (same
+  cohort). Do not confuse with Total Payments.
 formula:
-  human_readable: countDistinct(shopify eligible order_id) + countDistinct(amazon non-canceled order_id)
+  human_readable: countDistinct(shopify eligible order_id)
   authoritative_source: cube
 cube_mapping:
   view: orders_all_channels
@@ -63,10 +62,13 @@ examples:
       start: '2025-11-11'
       end: '2026-07-16'
 validation_tests:
-- June+range brand 20 All channels ≈ dashboard Total Orders 13,212 for Nov 11–Jul 16
+- total_orders equals orders for the same slice
 deprecated_aliases: []
 dashboard_alignment:
-  status: match
+  status: unclear
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   evidence: lineItemHistoricalSql.js:613
+  note: >
+    Serve layer is Shopify-only (2026-09-17), so this equals the Shopify figure. A dashboard
+    All-channels card that also counts other marketplaces will not match.

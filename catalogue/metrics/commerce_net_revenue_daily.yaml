@@ -8,7 +8,7 @@ description: 'Brand x day Net Sales, ex-GST, from the serve.commerce_performance
   commerce_net_revenue instead when the query needs order-grain breakdowns (city, UTM, payment method)
   that only exist on commerce_orders; that metric is placement-axis and will not reconcile to the dashboard
   card for periods with cross-period returns/cancels. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). Does not include Amazon SP marketplace sales or fees. For all-platform ad spend use total_ad_spend;
+  oracle). For all-platform ad spend use total_ad_spend;
   for blended-ads net profit use net_profit_blended.'
 formula:
   human_readable: Sum of net_sales_excl_tax from the daily commerce performance rollup, by report_date
