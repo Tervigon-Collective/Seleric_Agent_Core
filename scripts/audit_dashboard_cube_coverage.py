@@ -77,9 +77,6 @@ def main() -> int:
 
     sm = hist.get("sales_metrics") or {}
     rc = hist.get("returns_cancels") or {}
-    # The dashboard's all-channels payload still carries a marketplace block; subtract it
-    # to compare against the Shopify-only Cube surface.
-    mkt = hist.get("amazon") or {}
     ads = f(hist.get("total_ad_spend"))
     ns = f(hist.get("net_sales"))
     gs = f(hist.get("gross_sales"))
@@ -94,7 +91,6 @@ def main() -> int:
         ("H.gross_roas_all", (gs / ads) if ads else float("nan"), ["canonical_pnl.gross_roas"], "canonical_pnl.report_date", "ratio", "Cube gross_roas uses Shopify spend denom"),
         ("H.net_roas_all", ((ns - cogs) / ads) if ads else float("nan"), ["canonical_pnl.net_roas"], "canonical_pnl.report_date", "ratio", "Cube net_roas uses Shopify-only arms"),
         ("H.be_roas_all", (ns / (ns - cogs)) if (ns - cogs) else float("nan"), ["canonical_pnl.be_roas"], "canonical_pnl.report_date", "ratio", "Cube be_roas Shopify-only"),
-        ("H.shopify_net_pnl", ns - f(mkt.get("net_sales")), ["canonical_pnl.net_sales"], "canonical_pnl.report_date", "money", "commerce_performance residual"),
         ("H.discounts_pnl", f(sm.get("total_discounts")), ["canonical_pnl.discounts"], "canonical_pnl.report_date", "money", None),
         ("H.cancel_rev_pnl", f(rc.get("cancelled_amount")), ["canonical_pnl.cancel_revenue"], "canonical_pnl.report_date", "money", "Shopify-only"),
         ("H.return_rev_pnl", f(rc.get("returned_amount")), ["canonical_pnl.return_revenue"], "canonical_pnl.report_date", "money", "Shopify-only"),

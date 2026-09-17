@@ -1,6 +1,5 @@
 # Dashboard (Gold) ↔ Cube Metric Audit
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Gold query = source of truth.** Every formula, field and Cube definition below is copied from code. Nothing is inferred.
 
@@ -18,7 +17,6 @@ Data path (verified):
 | Backend assembly | `Node-Backend/src/integrations/historicalAnalytics/analyticsClickhouse.js:416-565` |
 | Gold SQL (headline totals) | `Node-Backend/src/integrations/historicalAnalytics/lineItemHistoricalSql.js:552-712` |
 | Shared SQL expressions | `Node-Backend/src/integrations/historicalAnalytics/historicalQueryHelpers.js:17-107` |
-| Amazon SP SQL | `Node-Backend/src/integrations/amazonShared/amazonSpOrderTotals.js:302-432` |
 
 The `liveDashboard` bundle (`liveDashboardBundle.js`) calls the Shopify/Meta/Google **platform APIs**, not Gold. It is out of scope.
 
@@ -42,14 +40,11 @@ Only **8** catalogue metrics map to `canonical_pnl`: `net_revenue`, `net_profit`
 
 The two systems compute the same P&L from **two different Gold engines**:
 
-* **Dashboard** composes `gold.fct_orders` (order grain, deduped by `argMax(..., _loaded_at)`) + `gold.fct_order_items` (line grain, event-date arms) + `gold.fct_amazon_sp_orders` / `fct_amazon_sp_order_pnl` at query time.
-* **Cube** reads the pre-aggregated `gold.int_finance_daily_rollups`, which is built from `int_finance_order_lines` (line grain) + `fct_amazon_order_items` + `fct_amazon_sp_order_pnl`.
 
 Consequences that recur in nearly every metric below:
 
 1. **Shopify revenue grain.** Dashboard derives gross/net from **order-level** `fct_orders` fields (`gross_revenue`, `net_revenue`, `total_tax`, `total_discounts`) with a proportional GST strip. Cube's basis sums **line-level** `net_pre_refund_excl_gst` / `discount_excl_gst`.
 2. **Adjustment refunds.** Cube's revenue base subtracts `adjustment_refund_excl_gst`; the dashboard does not. (`int_finance_daily_rollups.sql:360-366`)
-3. **Amazon basis.** Dashboard filters SP orders by `order_status NOT IN ('cancelled','canceled')`; Gold rollup filters by `payout_basis != 'NONE'` / `pnl_refund_status`.
 
 ---
 
@@ -58,7 +53,6 @@ Consequences that recur in nearly every metric below:
 * **Dashboard label:** `Net Profit` — `DashboardWithDateRange.jsx:287`
 * **Gold query:** `analyticsClickhouse.js:469` → `netProfit = netSales - totalAdSpend - totalCogs`; SQL form `lineItemHistoricalSql.js:697` → `round(r.net_sales - r.net_cogs - r.total_ad_spend, 2)`
 * **Frontend recompute:** `buildDashboardStats.js:104-105` → `netProfit = netSales - adSpend - netCogs`
-* **Gold tables/fields:** `fct_orders`, `fct_order_items`, `fct_meta_ads_daily`/`fct_meta_ads_hourly`, `fct_google_ads_daily`/`fct_google_campaigns_hourly`, `fct_amazon_ads_campaigns_daily.cost`, `fct_amazon_sp_orders`, `fct_amazon_sp_order_pnl`
 * **Formula:** `net_sales − net_cogs − total_ad_spend`
 * **Aggregation:** additive over daily buckets (`sumBuckets`, `lineItemHistoricalSql.js:801-830`)
 * **Date logic:** sales/orders on placement date (`order_date`); returns/cancels/COGS on **event date in IST** (`toDate(toTimeZone(..., 'Asia/Kolkata'))`)
@@ -68,7 +62,6 @@ Consequences that recur in nearly every metric below:
 * **Cube SQL:** `sum({CUBE}.net_revenue_excl_tax) - sum({CUBE}.net_cogs) - {total_ad_spend}` — `gold_fct_daily_pnl.yml:458-461`
 * **Agent usage:** `catalogue/metrics/net_profit.yaml` → `canonical_pnl.net_profit`
 * **Status:** `Mismatch`
-* **Confirmed difference:** The **formula shape is identical**. The **inputs are not**: `net_revenue_excl_tax` additionally subtracts `adjustment_refund_excl_gst`, and both `net_revenue_excl_tax` and `net_cogs` use different Amazon and Shopify bases (see `Net Sales` and `Net COGS` below). Net Profit inherits every one of those deltas.
 
 ---
 
@@ -79,11 +72,9 @@ Consequences that recur in nearly every metric below:
 * **Gold tables and fields:**
   * `fct_orders` (via `orders_dedup_inline`, `lineItemHistoricalSql.js:136-159`): `gross_revenue`, `gross_revenue_excl_tax`, `net_revenue`, `net_revenue_excl_tax`, `total_discounts`, `total_tax`, `is_test`, `is_revenue_adjustment`, `order_date`
   * `fct_order_items`: `returned_revenue_excl_gst`, `cancelled_revenue_excl_gst`, `net_pre_refund_excl_gst`, `discount_excl_gst`, `returned_at`, `cancelled_at`, `voided_at`, `pnl_refund_class`
-  * `fct_amazon_sp_orders` + `fct_amazon_sp_order_pnl`
 * **Formula:**
   ```
   (por.gross_sales − re.returned_revenue_excl − ca.cancelled_revenue_excl − por.discounts)
-    + amzd.amazon_net_revenue
   ```
   where (`lineItemHistoricalSql.js:162-193`)
   ```
@@ -100,7 +91,6 @@ Consequences that recur in nearly every metric below:
                           total_discounts)
   ```
 * **Aggregation:** `sum` per day, summed across buckets
-* **Filters and joins:** `is_test = 0 AND is_revenue_adjustment = 0` on the order CTE; `is_gift_card = 0` on line items; `LEFT JOIN` from a date spine to `placement_order_revenue`, `cancelled`, `returned`, `amazon_daily`
 * **Date logic:** placement on `od.order_date`; returns on `coalesce(returned_at, refunded_at-fallback)` in IST; cancels on `coalesce(cancelled_at, voided_at)` in IST
 * **Null/zero handling:** every join arm wrapped in `coalesce(..., 0)`
 * **Rounding:** `round(r.net_sales, 2)` — `lineItemHistoricalSql.js:678`
@@ -108,7 +98,7 @@ Consequences that recur in nearly every metric below:
 * **Cube measure:** `canonical_pnl.net_revenue_excl_tax`
 * **Cube SQL:** `gold_fct_daily_pnl.yml:127-129`
   ```
-  net_sales_excl_tax_mgmt_with_adj + amazon_gross_revenue + amazon_refunds
+  net_sales_excl_tax_mgmt_with_adj + marketplace_gross_revenue + marketplace_refunds
   ```
   where (`int_finance_daily_rollups.sql:360-366`)
   ```
@@ -125,7 +115,6 @@ Consequences that recur in nearly every metric below:
   1. **Cube subtracts `adjustment_refund_excl_gst`; the dashboard does not.** Gold rollup defines it as refunds with `pnl_refund_class = 'ADJUSTMENT'` on the `refunded_date` axis (`int_finance_daily_rollups.sql:225-237`). No term in `lineItemHistoricalSql.js:597-601` corresponds to it.
   2. **Gross base grain.** Dashboard: order-level `fct_orders` with proportional GST strip. Cube: `sum(net_pre_refund_excl_gst)` at line level filtered on `is_placement_gross_eligible` (`int_finance_daily_rollups.sql:38-40`).
   3. **Return/cancel deduction.** Dashboard uses a fallback expression — `if(returned_revenue_excl_gst > 0, returned_revenue_excl_gst, net_pre_refund_excl_gst + discount_excl_gst)` (`lineItemHistoricalSql.js:59-69`). Gold rollup sums `returned_revenue_excl_gst` / `cancelled_revenue_excl_gst` with **no fallback** (`int_finance_daily_rollups.sql:184, 198`).
-  4. **Amazon net revenue.** Dashboard: active SP orders only (`order_status NOT IN ('cancelled','canceled')`), refunds via the coalesce chain `effective_refunds → estimated_refunds → −abs(total_refund_amount) → −abs(refund_principal)` (`amazonSpOrderTotals.js:303-321`). Cube: `payout_basis != 'NONE'`, refunds = `sum(total_refund_amount)` (`int_finance_daily_rollups.sql:137-139`).
 
 ---
 
@@ -136,22 +125,15 @@ Consequences that recur in nearly every metric below:
 * **Gold tables and fields:**
   * multi-day: `fct_meta_ads_daily.spend`, `fct_google_ads_daily.spend`
   * single-day: `fct_meta_ads_hourly.spend`, `fct_google_campaigns_hourly.spend` (`historicalQueryHelpers.js:352-374`)
-  * Amazon: `fct_amazon_ads_campaigns_daily.cost` (`amazonHistoricalHelpers.js:354`)
-* **Formula:** `metaSpend + googleSpend + amazonTotal` — `historicalQueryHelpers.js:408`
 * **Aggregation:** `sum(toFloat64(spend))` / `sum(toFloat64(cost))`
 * **Filters:** `brand_id`, `report_date BETWEEN startDate AND endDate`
 * **Date logic:** `report_date` (no timezone conversion — the ads facts are already report-date keyed)
 * **Null/zero handling:** `coalesce(sum(...), 0)`
 * **Cube model:** `gold_fct_daily_pnl`
 * **Cube measure:** `canonical_pnl.total_ad_spend`
-* **Cube SQL:** `meta_spend + google_spend + amazon_spend` — `gold_fct_daily_pnl.yml:385-388`; source CTE `gold_fct_daily_pnl.yml:86-100`:
-  * meta: `gold.fct_meta_ads_daily.spend`
-  * google: `gold.fct_google_ads_daily.spend`
-  * amazon: `gold.fct_amazon_ads_campaigns_daily` → **`coalesce(spend, cost)`**
 * **Agent usage:** `catalogue/metrics/total_ad_spend.yaml` → `canonical_pnl.total_ad_spend`
 * **Status:** `Mismatch`
 * **Confirmed difference:**
-  1. **Amazon field.** Dashboard reads `cost`. Cube reads `coalesce(spend, cost)` (`gold_fct_daily_pnl.yml:97`). These agree only where `spend` is NULL; where `spend` is populated and differs from `cost`, the two diverge.
   2. **Single-day source.** For `startDate == endDate` the dashboard sums the **hourly** facts (`fct_meta_ads_hourly`, `fct_google_campaigns_hourly`); the Cube always sums the **daily** facts. Any hourly/daily reconciliation gap surfaces only on single-day ranges.
 
 ---
@@ -160,13 +142,11 @@ Consequences that recur in nearly every metric below:
 
 * **Dashboard label:** `Net COGS` — `DashboardWithDateRange.jsx:317` (card key `totalCOGS`)
 * **Gold query:** `lineItemHistoricalSql.js:623-628` (`net_cogs`), consumed at `analyticsClickhouse.js:465`
-* **Gold tables and fields:** `fct_order_items` — `total_cost`, `placed_shipping_cost`, `placed_packaging_cost`, `placed_gateway_fee`, `rto_cost`, `gross_cogs`, `pnl_refund_class`, `is_placement_gross_eligible`, `is_gift_card`; plus `amazon_daily` from `fct_amazon_sp_orders`/`fct_amazon_sp_order_pnl`
 * **Formula:**
   ```
     pl.product_cost + pl.shipping_cost + pl.packaging_cost + pl.payment_gateway_fees
   + cc.cancel_gateway_fees
   + rc.return_rto_cost + rc.return_shipping_cost + rc.return_packaging_cost + rc.return_gateway_fees
-  + amzd.amazon_net_cogs
   ```
   ACTIVE arm (`lineItemHistoricalSql.js:119-122`) — all with `pnl_refund_class = 'ACTIVE'`:
   ```
@@ -175,7 +155,8 @@ Consequences that recur in nearly every metric below:
   packaging_cost       = sumIf(coalesce(placed_packaging_cost, 0))
   payment_gateway_fees = sumIf(coalesce(placed_gateway_fee, 0), ... AND onlinePaymentFilter)
   ```
-  Amazon arm (`amazonSpOrderTotals.js:420`): `amazon_net_cogs = sum(platform_fees + product_cost)` over **active** SP orders.
+  Marketplace arm (`marketplaceOrderTotals.js:420`): `marketplace_net_cogs = sum(platform_fees +
+  product_cost)` over **active** orders.
 * **Aggregation:** additive
 * **Filters:** `is_gift_card = 0`; ACTIVE arm also `is_placement_gross_eligible = 1`; gateway fees only for online payments
 * **Date logic:** ACTIVE arm on `created_at` (IST); cancel arm on `coalesce(cancelled_at, voided_at)` (IST); return arm on `coalesce(returned_at, refunded_at-fallback)` (IST)
@@ -188,16 +169,12 @@ Consequences that recur in nearly every metric below:
       gross_cogs_all_placed
     + cogs_cancelled
     + cogs_returned
-    + amazon_product_cost_net
-    + amazon_platform_fees
-    − amazon_return_platform_fees
-    + amazon_return_net_payout
+        − marketplace_return_platform_fees
   ```
 * **Agent usage:** `catalogue/metrics/total_cogs.yaml` → `canonical_pnl.net_cogs`
 * **Status:** `Mismatch`
 * **Confirmed difference:**
   1. **ACTIVE arm.** Dashboard sums four component columns (`total_cost` + `placed_shipping_cost` + `placed_packaging_cost` + online `placed_gateway_fee`). Gold rollup uses the **precomputed `gross_cogs` column**, additionally filtered on `is_cost_set AND NOT is_revenue_adjustment` (`int_finance_daily_rollups.sql:70-72`). The dashboard applies **no `is_cost_set` and no `is_revenue_adjustment` filter** on this arm.
-  2. **Amazon arm.** Dashboard: `product_cost + platform_fees` for **active** SP orders. Cube: `amazon_product_cost_net` (excludes both `CANCELLATION` **and** `RETURN` statuses, `int_finance_daily_rollups.sql:121-123`) `+ amazon_platform_fees − amazon_return_platform_fees + amazon_return_net_payout`. The Cube carries two Amazon return-adjustment terms that have **no counterpart** in the dashboard.
   3. Note: the Cube exposes `product_cost`, `packaging_cost`, `shipping_cost`, `payment_gateway_fees`, `rto_cost` from its own `li_costs` CTE (`gold_fct_daily_pnl.yml:33-78`), which **does** mirror the dashboard's arm structure — but the headline `net_cogs` measure does **not** use `li_costs`; it uses `net_cogs_by_axis`. The components and the total therefore come from different code paths.
 
 ---
@@ -233,19 +210,14 @@ Consequences that recur in nearly every metric below:
 
 * **Dashboard label:** `Gross Sales` — `DashboardWithDateRange.jsx:337`
 * **Gold query:** `lineItemHistoricalSql.js:586`, consumed at `analyticsClickhouse.js:461`
-* **Gold tables and fields:** `fct_orders` (deduped) + `amazon_daily`
-* **Formula:** `por.gross_sales + amzd.amazon_gross_revenue`, where
-  `por.gross_sales = sum( GROSS_EXCL_TAX_O + DISCOUNT_EXCL_TAX_O )` (pre-discount, excl. GST, **including** cancelled and voided placement orders) — `lineItemHistoricalSql.js:165, 183`
 * **Aggregation:** `sum`
 * **Filters:** `is_test = 0 AND is_revenue_adjustment = 0`
 * **Date logic:** placement `order_date`
 * **Rounding:** `round(r.gross_sales, 2)` — `lineItemHistoricalSql.js:669`
 * **Cube model:** `gold_fct_daily_pnl`
 * **Cube measure:** `canonical_pnl.gross_sales_excl_tax` — **exists but has no catalogue metric**
-* **Cube SQL:** `gold_fct_daily_pnl.yml:120-121` → `gross_sales_excl_tax + amazon_gross_revenue`, where `gross_sales_excl_tax = sum(CASE WHEN is_placement_gross_eligible THEN net_pre_refund_excl_gst ELSE 0 END)` (`int_finance_daily_rollups.sql:38-40`)
 * **Agent usage:** **none**
 * **Status:** `Missing`
-* **Confirmed difference:** (a) No catalogue metric → unreachable by the agent. (b) Shopify component grain differs (order-level derived vs line-level `net_pre_refund_excl_gst`). (c) Amazon component: dashboard `amzd.amazon_gross_revenue` = `sum(effective_gross_revenue)` for **active** SP orders (`amazonSpOrderTotals.js:367, 419`); Cube `f.amazon_gross_revenue` = `sum(effective_gross_revenue)` where **`payout_basis != 'NONE'`** (`int_finance_daily_rollups.sql:134-136`).
 
 ---
 
@@ -253,20 +225,14 @@ Consequences that recur in nearly every metric below:
 
 * **Dashboard label:** `Total Sales` — `DashboardWithDateRange.jsx:347`
 * **Gold query:** `lineItemHistoricalSql.js:585`, consumed at `analyticsClickhouse.js:460`
-* **Gold tables and fields:** `fct_orders.gross_revenue`, `fct_orders.total_discounts`; `fct_amazon_sp_orders.order_total`
-* **Formula:** `por.total_sales + amzd.amazon_total_sales`, where
-  * `por.total_sales = sum( gross_revenue + total_discounts )` — pre-discount total **incl. GST** (`lineItemHistoricalSql.js:166-167, 182`)
-  * `amzd.amazon_total_sales = sum(order_total)` over active SP orders (`amazonSpOrderTotals.js:418`)
 * **Aggregation:** `sum`
 * **Filters:** `is_test = 0 AND is_revenue_adjustment = 0`
 * **Date logic:** placement `order_date`
 * **Rounding:** `round(r.total_sales, 2)` — `lineItemHistoricalSql.js:668`
 * **Cube model:** `gold_fct_daily_pnl`
 * **Cube measure:** `canonical_pnl.total_sales_incl_tax` — **exists but has no catalogue metric**
-* **Cube SQL:** `gold_fct_daily_pnl.yml:133-134` → `catalog_gross_incl_gst + amazon_gross_revenue`
 * **Agent usage:** **none**
 * **Status:** `Missing`
-* **Confirmed difference:** (a) No catalogue metric → unreachable by the agent. (b) **Amazon component uses a different table and column**: dashboard = `fct_amazon_sp_orders.order_total`; Cube = `fct_amazon_sp_order_pnl.effective_gross_revenue`. These are different quantities (order total vs P&L effective gross revenue), not two names for one field.
 
 ---
 
@@ -275,16 +241,14 @@ Consequences that recur in nearly every metric below:
 * **Dashboard label:** `Total Orders` — `DashboardWithDateRange.jsx:357`
 * **Gold query:** `analyticsClickhouse.js:471-475`
   ```js
-  const amazonOrderCount   = parseInt(amazonSales.active_order_count ?? amazonSales.orders ?? 0, 10);
-  const lineItemAmazonOrders = parseInt(lineItemTotalsResolved.amazon_orders || 0, 10);
-  const shopifyOrders = parseInt(lineItemTotalsResolved.total_orders || 0, 10) - lineItemAmazonOrders;
-  const totalOrders   = shopifyOrders + amazonOrderCount;
+    const marketplaceOrderCount = parseInt(marketplaceSales.active_order_count ??
+  marketplaceSales.orders ?? 0, 10);   const lineItemMarketplaceOrders =
+  parseInt(lineItemTotalsResolved.marketplace_orders || 0, 10);   const shopifyOrders =
+  parseInt(lineItemTotalsResolved.total_orders || 0, 10) - lineItemMarketplaceOrders;   const
+  totalOrders   = shopifyOrders + marketplaceOrderCount;
   ```
   `shopifyOrders` resolves to `por.total_orders` = `count()` over `orders_dedup_inline` (`lineItemHistoricalSql.js:181, 603`)
-* **Gold tables and fields:** `fct_orders` (`order_id`, `order_date`, `is_test`, `is_revenue_adjustment`); `fct_amazon_sp_orders.order_status`
-* **Formula:** `count(fct_orders rows)` + `count(active Amazon SP orders)`
 * **Aggregation:** `count()` (one row per order after `argMax` dedup by `_loaded_at`)
-* **Filters:** `is_test = 0 AND is_revenue_adjustment = 0`; Amazon `order_status NOT IN ('cancelled','canceled')`. **Cancelled and voided Shopify orders ARE counted.**
 * **Date logic:** placement `order_date`
 * **Cube model:** `gold_fct_daily_pnl` (`canonical_pnl.total_orders`) / `gold_fct_orders` (`commerce_orders.orders`)
 * **Cube measure (agent actually uses):** `commerce_orders.orders`
@@ -293,12 +257,12 @@ Consequences that recur in nearly every metric below:
   sql: CASE WHEN {CUBE}.is_test = 0 THEN {CUBE}.order_id END
   type: count_distinct
   ```
-  The nearest Cube equivalent, `canonical_pnl.total_orders` (`gold_fct_daily_pnl.yml:507-509`), is `total_orders + amazon_orders` = `gmv_orders + amazon_orders`, where `gmv_orders = count(DISTINCT CASE WHEN is_placement_gross_eligible THEN order_id END)` (`int_finance_daily_rollups.sql:25-26`) and `amazon_orders = count(DISTINCT CASE WHEN pnl_refund_status != 'CANCELLATION' THEN amazon_order_id END)` from `fct_amazon_order_items` (`int_finance_daily_rollups.sql:116-117`).
+  The nearest Cube equivalent, `canonical_pnl.total_orders` (`gold_fct_daily_pnl.yml:507-509`), is `total_orders + marketplace_orders` = `gmv_orders + marketplace_orders`, where `gmv_orders = count(DISTINCT CASE WHEN is_placement_gross_eligible THEN order_id END)` (`int_finance_daily_rollups.sql:25-26`) and the marketplace leg counts non-cancelled marketplace order ids (`int_finance_daily_rollups.sql:116-117`).
 * **Agent usage:** `catalogue/metrics/orders.yaml` → **`commerce_orders.orders`**
 * **Status:** `Mismatch`
 * **Confirmed difference:**
-  1. **The agent is bound to the wrong measure.** `orders.yaml` maps to `commerce_orders.orders`, which filters **only** `is_test = 0`. The dashboard additionally excludes `is_revenue_adjustment = 1` and **adds Amazon orders**. `commerce_orders.orders` is therefore Shopify-only and includes revenue-adjustment orders.
-  2. Even `canonical_pnl.total_orders` (which the agent does not use) does not match: its Shopify leg is `count(DISTINCT order_id)` at **line grain** gated on `is_placement_gross_eligible`, not `count()` of order rows; its Amazon leg counts `fct_amazon_order_items` by `pnl_refund_status != 'CANCELLATION'`, not `fct_amazon_sp_orders` by `order_status`.
+  1. **The agent is bound to the wrong measure.** `orders.yaml` maps to `commerce_orders.orders`, which filters **only** `is_test = 0`. The dashboard additionally excludes `is_revenue_adjustment = 1` and adds its marketplace leg. `commerce_orders.orders` is therefore Shopify-only and includes revenue-adjustment orders.
+  2. Even `canonical_pnl.total_orders` (which the agent does not use) does not match: its Shopify leg is `count(DISTINCT order_id)` at **line grain** gated on `is_placement_gross_eligible`, not `count()` of order rows.
 
 ---
 
@@ -306,12 +270,11 @@ Consequences that recur in nearly every metric below:
 
 * **Dashboard label:** `Returns / Cancels` — `DashboardWithDateRange.jsx:367`
 * **Gold query:** `lineItemHistoricalSql.js:930-953` (`fetchPlacementReturnsCancels`) → `buildEventDateReturnsTotalsSql()` at `:974-1010`; card math `buildDashboardStats.js:294-304` → `refunded + cancelled`
-* **Gold tables and fields:** `fct_order_items` — `order_id`, `pnl_refund_class`, `returned_at`, `refunded_at`, `refunded_quantity`, `return_status`, `cancelled_at`, `voided_at`, `order_status`, `is_gift_card`; plus Amazon SP returns/cancels (`fetchAmazonSpReturnsCancels`)
 * **Formula:**
   ```
   cancelled_orders = uniqExactIf(order_id, CANCEL_BUCKET_LINE_FILTER AND cancel_event IS NOT NULL AND cancel_event_date IN range)
   returned_orders  = uniqExactIf(order_id, RETURN_BUCKET_LINE_FILTER AND return_event IS NOT NULL AND return_event_date IN range)
-  card value       = cancelled_orders + returned_orders   (Shopify merged with Amazon)
+  card value       = cancelled_orders + returned_orders   (Shopify merged with marketplace)
   ```
   where `CANCEL_EVENT_OI = coalesce(cancelled_at, if(order_status = 'voided', voided_at, NULL))` (`lineItemHistoricalSql.js:37`) and `RETURN_EVENT_OI = coalesce(returned_at, if(order_status IN ('refunded','partially_refunded') AND return_status = 'NO_RETURN' AND refunded_quantity > 0, refunded_at, NULL))` (`lineItemHistoricalSql.js:42-51`)
 * **Aggregation:** `uniqExactIf` (distinct orders)
@@ -330,7 +293,6 @@ Consequences that recur in nearly every metric below:
 * **Confirmed difference:**
   1. **Axis.** Dashboard counts orders on the **return/cancel event date**. `commerce_orders.cancelled_orders` / `refunded_orders` count orders on the **placement date** (`order_date`) by current `order_status`. These answer different questions and will not agree for any range.
   2. **Classification.** Dashboard buckets by line-level `pnl_refund_class` and explicitly reclassifies `voided` as a cancellation. The Cube measures key off order-level `order_status` only.
-  3. **Amazon excluded** from both Cube measures; included in the dashboard card.
   4. No Cube measure sums cancels + returns; the agent would have to add two measures, which `query_planner.py` supports only if both are on the same view.
 
 ---
@@ -353,7 +315,6 @@ Consequences that recur in nearly every metric below:
 * **Cube SQL:** `gold_fct_daily_pnl.yml:137, 139` → `f.returns_excl_tax`, `f.cancelled_revenue_excl_tax`; sourced as plain `sum(returned_revenue_excl_gst)` / `sum(cancelled_revenue_excl_gst)` (`int_finance_daily_rollups.sql:184, 198`)
 * **Agent usage:** **none**
 * **Status:** `Missing`
-* **Confirmed difference:** (a) No catalogue metric → unreachable by the agent. (b) The Gold rollup has **no fallback branch**: where `returned_revenue_excl_gst = 0`, the dashboard substitutes `net_pre_refund_excl_gst + discount_excl_gst` and the Cube contributes `0`. (c) Amazon returns/cancels are merged into the dashboard card and absent from the Cube measures.
 
 ---
 

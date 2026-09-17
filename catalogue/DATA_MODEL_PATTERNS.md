@@ -1,6 +1,5 @@
 # Data models and design patterns
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 What this stack actually does, measured — not what a style guide says it should.
 Every number here came from the live warehouse, Cube `/meta` and the catalogue on
@@ -58,7 +57,7 @@ FROM gold.fct_order_attribution GROUP BY brand_id, order_id
 
 Form B is used where the view already aggregates. Both are correct; **neither is
 optional**. Audited across all 43 serve SQL files — one violation found and
-fixed (`amazon_finance_charge_types_daily`, §8.1 of the architecture doc).
+fixed (a marketplace charge-types view, §8.1 of the architecture doc).
 
 ### 2.3 The provenance quartet
 
@@ -123,9 +122,9 @@ three or more certified views. Measured over the same 30 days and brand:
 | `orders` | 11 | 70 … 1,963 | **28×** |
 
 That is not a defect. `orders` on `commerce_orders` (Shopify placements, 1,847),
-on `channel_attribution` (adds Amazon, 1,963), on `attribution_paths`
-(attribution-matched only, 1,319) and on `amazon_order_item_pnl` (Amazon items,
-70) are four genuinely different business questions.
+on `channel_attribution` (added the marketplace leg, 1,963), on `attribution_paths`
+(attribution-matched only, 1,319) and on a marketplace item-P&L port (70) were four genuinely
+different business questions.
 
 The safety comes one layer up: each is a **separate catalogue metric with its own
 id and a description that states the basis, the axis, the cohort, and what it is
@@ -184,8 +183,7 @@ SQL now, never written by hand.
 ### 3.4 Picking a port alphabetically
 
 An inline-SQL cube touches every table it reads, so "first table referenced" is
-not the output port. This gave `daily_pnl` the `amazon_attribution_overview`
-port instead of `canonical_pnl`, and with it the wrong contract. Resolution
+not the output port. This gave `daily_pnl` a sibling marketplace port instead of `canonical_pnl`, and with it the wrong contract. Resolution
 order is now: view name → the product's declared port → the cube's own name.
 
 ### 3.5 Conflating grain with the serving axis

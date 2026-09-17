@@ -1,6 +1,5 @@
 # Dashboard Alignment Drift Report — Catalogue vs. Node-Backend
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Status: DRAFT FOR REVIEW — no production files modified.** This report is the
 output of a full audit of all 190 metrics in `catalogue/metrics/*.yaml` (and by
@@ -54,29 +53,24 @@ categories, largely never implemented at all).
 
 ## Cross-cutting findings (fix these patterns first — they explain most of the drift)
 
-1. **CTR is a unit mismatch across all 3 ad platforms.** `amazon_ads_ctr`,
-   `google_ctr`, `meta_ctr` catalogue formula is `SUM(clicks)/SUM(impressions)`
-   (`unit: ratio`). The dashboard multiplies by 100 everywhere (e.g.
-   `historicalAnalytics/analyticsClickhouse.js:1015`). Every catalogued CTR's
-   `validation_tests` would fail by exactly 100x against real dashboard output.
 
 2. **Finance metrics are mislabeled "Shopify-only."** Nearly every finance metric's
-   description says Amazon is excluded. In reality `pnlService.js` and
-   `lineItemHistoricalSql.js` blend Amazon into `net_sales`, `net_cogs`,
+   description says the marketplace leg is excluded. In reality `pnlService.js` and
+   `lineItemHistoricalSql.js` blend it into `net_sales`, `net_cogs`,
    `total_ad_spend`, `net_profit`, `gross_roas`, `net_roas`, and `taxes_on_net_sales`
    on the primary `/api/v1/dashboard/summary` endpoint — confirmed by an explicit code
    comment (`pnlService.js:207`): *"Total Operating Cost == Historical Analytics 'Net
-   COGS' (Shopify + Amazon)."* A second, genuinely Shopify-only implementation of some
+   COGS' (Shopify + marketplace)."* A second, genuinely Shopify-only implementation of some
    of the same formulas exists but only feeds the separate per-platform Attribution
    routes (`attributionPnLHelpers.js`), not the main dashboard. The catalogue picked
    the wrong one to describe for ~11 metrics.
 
 3. **`channel_attribution` (channel_gross_revenue / channel_net_revenue /
    channel_orders) doesn't exist.** The catalogued 5-way channel split
-   (meta/google/organic_shopify/amazon/organic_amazon) and its `channel_attribution_daily`
+   (meta/google/organic_shopify plus two marketplace channels) and its `channel_attribution_daily`
    source have zero references anywhere in Node-Backend. The nearest real endpoint
    uses a different channel definition, excludes cancelled orders (opposite of every
-   other attribution metric's rule), and never merges in Amazon.
+   other attribution metric's rule), and never merges in the marketplace leg.
 
 4. **`meta_breakdown_*` (10 metrics) is an aspirational Cube-only concept.** No
    `breakdown_type` gating, no single-select filter, nothing resembling this cube view
@@ -125,12 +119,6 @@ categories, largely never implemented at all).
 
 | id | verdict | evidence file:line | note |
 |---|---|---|---|
-| amazon_ads_clicks | MATCH | `historicalAnalytics/analyticsClickhouse.js:1012` | `SUM(clicks)` from `fct_amazon_ads_campaigns_daily` |
-| amazon_ads_impressions | MATCH | `historicalAnalytics/analyticsClickhouse.js:1011` | `SUM(impressions)` |
-| amazon_ads_spend | MATCH | `historicalAnalytics/amazonHistoricalHelpers.js:372-380` | `SUM(cost)` |
-| amazon_ads_cpc | MATCH | `historicalAnalytics/analyticsClickhouse.js:1013` | `sum(cost)/sum(clicks)` |
-| amazon_ads_cpm | MATCH | `historicalAnalytics/analyticsClickhouse.js:1014` | `(sum(cost)/sum(impressions))*1000` |
-| amazon_ads_ctr | **DRIFT** | `historicalAnalytics/analyticsClickhouse.js:1015` | ×100 percentage vs. catalogue's bare ratio — see cross-cutting #1 |
 | google_clicks | MATCH | `historicalAnalytics/analyticsClickhouse.js:898` | `SUM(clicks)` |
 | google_impressions | MATCH | `historicalAnalytics/analyticsClickhouse.js:897` | `SUM(impressions)` |
 | google_spend | MATCH | `historicalAnalytics/analyticsClickhouse.js:896` | `SUM(spend)` |
@@ -169,8 +157,8 @@ categories, largely never implemented at all).
 | meta_cost_per_landing_page_view | **DRIFT** | `meta/analytics.js:773,782` | same grain caveat |
 | meta_breakdown_* (10 ids: clicks, cpc, cpm, ctr, impressions, spend, hook_rate, thruplays, landing_page_views, link_clicks, video_completion_rate) | NOT_FOUND | — | entire `meta_ad_breakdown_performance` cube view has no dashboard analog — see cross-cutting #4 |
 
-**Dimension/grain caveats (not separately scored, but real):** Amazon's catalogued
-`campaign_type`/`campaign_status`/`targeting_type` dims don't match the live query
+**Dimension/grain caveats (not separately scored, but real):** the marketplace connector's
+catalogued `campaign_type`/`campaign_status`/`targeting_type` dims don't match the live query
 (groups only by `campaign_id`); Google's catalogued `customer_account_id` dim has
 zero hits in Node-Backend; Meta's catalogued `campaign_status`/`campaign_objective`/
 `creative_id`/`creative_type` dims aren't present in the live `fct_meta_ads_daily`
@@ -181,17 +169,6 @@ query (`analyticsClickhouse.js:739-771`).
 | id | verdict | evidence file:line | note |
 |---|---|---|---|
 | active_orders | NOT_FOUND | — | no standalone active-orders count anywhere |
-| amazon_cancelled_orders | MATCH | `amazonShared/amazonSpOrderTotals.js:364-370` | matches catalogue's exclusion logic |
-| amazon_gross_revenue | MATCH | `amazonSpOrderTotals.js:429,471` | |
-| amazon_gross_sales | MATCH | `amazonAttribution/buildAmazonAttributionPayload.js:131-133` | |
-| amazon_marketplace_fees | UNCLEAR | `amazonSpOrderTotals.js:478-479` | catalogue's stated composition (incl. shipping) actually matches what code calls `amazon_platform_fees`, not `amazon_marketplace_fees` |
-| amazon_net_payout | MATCH | `amazonShared/amazonOrderPnl.js:98-99` | |
-| amazon_net_sales | **DRIFT** | `amazonShared/amazonOrderPnl.js:6-9` | catalogue says incl-GST; code's own header comment says `revenue_principal`/`refund_principal` are ex-tax |
-| amazon_orders | MATCH | `amazonSpOrderTotals.js:469` | |
-| amazon_return_revenue | **DRIFT** | `amazonSpOrderTotals.js:393,430,472` | catalogued fallback chain (`effective_refunds`→`estimated_refunds`→...) is unreachable dead code; live path only ever uses `refund_principal` |
-| amazon_returned_orders | **DRIFT** | `amazonSpOrderTotals.js:473` | same root cause as amazon_return_revenue |
-| amazon_returns_cancels | MATCH | `amazonSpOrderTotals.js:318-324` | |
-| amazon_total_sales | **DRIFT** | `amazonSpOrderTotals.js:470` | catalogue says canceled orders included at order_total; code zeroes them out |
 | aov | **DRIFT** | `services/dashboardService.js:141` | catalogue says Shopify-only Total Sales ÷ Orders; live dashboard uses blended net_sales/orders; a 3rd unrelated implementation also exists in `shopify/analytics.js:1278-1322` |
 | cancel_revenue | MATCH | `historicalAnalytics/lineItemHistoricalSql.js:279-305` | |
 | cancelled_orders | MATCH | `lineItemHistoricalSql.js:279-305` | |
@@ -203,7 +180,6 @@ query (`analyticsClickhouse.js:739-771`).
 | event_return_revenue | MATCH | `lineItemHistoricalSql.js:307-333` | |
 | gross_sales | MATCH | `historicalQueryHelpers.js:28-29,57-58` | |
 | gross_sales_all_channels | MATCH | `lineItemHistoricalSql.js:586` | |
-| net_sales_all_channels | **DRIFT** | `amazonOrderPnl.js:6-9` | inherits amazon_net_sales tax-basis issue |
 | new_customer_orders | MATCH | `historicalAnalytics/analyticsClickhouse.js:309-345` | |
 | orders | MATCH | `lineItemHistoricalSql.js:186-190` | |
 | prepaid_orders | MATCH | `lineItemHistoricalSql.js:445-456` | |
@@ -213,37 +189,28 @@ query (`analyticsClickhouse.js:739-771`).
 | returns_cancels | MATCH | `lineItemHistoricalSql.js:998-1021` | |
 | total_orders | MATCH | `lineItemHistoricalSql.js:613` | |
 | total_sales | MATCH | `historicalQueryHelpers.js:90` | |
-| total_sales_all_channels | **DRIFT** | `amazonSpOrderTotals.js:470` | same root cause as amazon_total_sales |
 
 ### finance (28 metrics)
 
 | id | verdict | evidence file:line | note |
 |---|---|---|---|
-| amazon_platform_fees | **DRIFT** | `amazonShared/amazonOrderPnl.js:47-60` | `abs(sum(total_amazon_fees))` used instead of `sum(abs(component))` per component — mathematically different whenever signs differ within an order |
 | be_roas | MATCH | `integrations/attributionPnLHelpers.js:195-196` | |
 | contribution_margin | MATCH | `attributionPnLHelpers.js:195` | correct but only an internal var, not a returned field |
 | contribution_margin_pct | NOT_FOUND | — | no percent-of-sales field anywhere |
 | cost_coverage_pct | NOT_FOUND | — | no "coverage" concept exists (catalogue itself marks draft) |
-| gross_margin_pct | **DRIFT** | `services/pnlService.js:127` | computed from blended Shopify+Amazon totals, not Shopify-only as catalogued — see cross-cutting #2 |
 | gross_profit | **DRIFT** | `historicalAnalytics/analyticsClickhouse.js:543` | no dashboard code computes catalogue's exact `net_sales - net_cogs` in the claimed Shopify-only scope |
-| gross_roas | **DRIFT** | `services/dashboardService.js:142` | uses blended (Amazon-inclusive) figures on the primary dashboard summary — see cross-cutting #2 |
 | mer | NOT_FOUND | — | no media-efficiency-ratio field anywhere |
-| net_cogs | **DRIFT** | `services/pnlService.js:207`; `lineItemHistoricalSql.js:634-639` | code comment explicitly: "Net COGS (Shopify + Amazon)" — catalogue says Amazon excluded |
 | net_margin_pct | **DRIFT** | `services/pnlService.js:137` | same blended-basis issue as gross_margin_pct |
 | net_profit | **DRIFT** | `services/dashboardService.js:132,136` | fully blended; no code path computes the catalogue's claimed Shopify-only-minus-Meta/Google-spend formula |
-| net_profit_all_channels | UNCLEAR | `services/pnlService.js:136,222-227` | formula shape is plausible but the catalogued `/1.18` GST adjustment for Amazon revenue doesn't appear in code |
 | net_profit_blended | **DRIFT** | `services/pnlService.js:207,227` | catalogue claims only ad-spend is blended; in reality sales/COGS are already blended too |
-| net_profit_incl_amazon | NOT_FOUND | — | no field/computation of this name; actual `net_profit` is already Amazon-inclusive, so this formula would double-count if built literally |
 | net_roas | **DRIFT** | `services/dashboardService.js:143` | same blended-basis issue |
 | operating_cost | MATCH | `lineItemHistoricalSql.js:616-621` | genuinely Shopify-only, correctly matches |
 | packaging_cost | MATCH | `lineItemHistoricalSql.js:617` | |
 | payment_gateway_fees | MATCH | `lineItemHistoricalSql.js:618-620` | |
-| product_cost | **DRIFT** | `lineItemHistoricalSql.js:615,639` | value itself correct, but catalogue's own validation_test (`product_cost+shipping+packaging+gateway+rto=net_cogs`) is falsified since net_cogs also includes Amazon |
 | product_cost_all_channels | MATCH | `services/pnlService.js:212-218` | |
 | rto_cost | MATCH | `lineItemHistoricalSql.js:621` | |
 | shipping_cost | MATCH | `lineItemHistoricalSql.js:616` | |
 | shopify_ad_spend | MATCH | `lineItemHistoricalSql.js:647-648` | |
-| taxes_on_net_sales | **DRIFT** | `services/pnlService.js:222-225` | catalogue: flat 18% of net_sales; code: subtracts Amazon out first, then adds Amazon's *actual* tax back — different formula, confirms blended-basis issue |
 | total_ad_spend | MATCH | `historicalAnalytics/historicalQueryHelpers.js:369-370` | |
 | total_operating_cost | **DRIFT** | (same as net_cogs) | same blended-basis drift |
 | total_operating_cost_all_channels | UNCLEAR | `services/pnlService.js:208` | end value plausibly matches but is a single pre-blended field, not composed the way the catalogue's formula literally states (risk of double-counting if implemented literally) |
@@ -257,7 +224,6 @@ query (`analyticsClickhouse.js:739-771`).
 | attributed_net_revenue | MATCH | `attributionPnLHelpers.js:158-167` | |
 | attributed_new_customer_orders | MATCH | `historicalAnalytics/analyticsClickhouse.js:309-345` | |
 | attributed_aov | MATCH | `attributionPnLHelpers.js:220,236` | derived client-side from matching components |
-| attributed_refund_amount | **DRIFT** | — | `total_refund_amount` only used by Amazon modules; Shopify/meta/google attribution instead tracks separate return/cancel count+value pairs on event date, not one refund-amount column |
 | attribution_rate | NOT_FOUND | — | no `attribution_method` field / "unattributed" bucket exists — every order is exhaustively bucketed meta/google/organic/other |
 | avg_attribution_confidence | NOT_FOUND | — | no confidence-scoring field anywhere |
 | touch_attributed_orders | NOT_FOUND | — | depends on attribution_method, which doesn't exist |

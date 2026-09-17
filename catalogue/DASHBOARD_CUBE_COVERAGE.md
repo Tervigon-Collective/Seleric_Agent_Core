@@ -1,6 +1,5 @@
 # Dashboard ↔ Cube coverage matrix (brand 20, June 2026 live)
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 Audited 2026-07-27 (re-verified after gap closes). Cube = agent semantic layer; Dashboard = Node-Backend oracle.
 
@@ -21,14 +20,10 @@ Audited 2026-07-27 (re-verified after gap closes). Cube = agent semantic layer; 
 |---|---|---|---|
 | Total Sales | `sales_all_channels.total_sales` | **OK** | |
 | Gross Sales | `sales_all_channels.gross_sales` | **OK** | |
-| Net Sales | `canonical_pnl.net_sales_all_channels_pnl` | **OK** | Shopify events + Amazon Attribution net |
 | Total Orders | `orders_all_channels.orders` | **OK** | |
-| Total Ad Spend | `canonical_pnl.total_ad_spend` | **OK** | Meta+Google+Amazon |
 | Net COGS / TOC | `canonical_pnl.total_operating_cost_all_channels` | **OK** | ACTIVE_OR_KEPT + retained product cost |
 | Net Profit | `canonical_pnl.net_profit_all_channels` | **OK** | |
 | Discounts | `commerce_orders.discount_amount_excl_tax` / `canonical_pnl.discounts` | **OK** | Shopify |
-| Returns/Cancels count | `returns_cancels_all_channels.returns_cancels` | **OK** | Shopify events + Amazon delivery-date |
-| Return/Cancel revenue | `commerce_orders.event_*` + `amazon_attribution_overview.return_revenue` | **PARTIAL** | No single all-channel revenue measure |
 | Gross ROAS | `canonical_pnl.gross_roas_all_channels` | **OK** | New all-channel measure |
 | Net ROAS | `canonical_pnl.net_roas_all_channels` | **OK** | |
 | BE ROAS | `canonical_pnl.be_roas_all_channels` | **OK** | |
@@ -36,19 +31,6 @@ Audited 2026-07-27 (re-verified after gap closes). Cube = agent semantic layer; 
 | LTV:CAC | `ltv_cac.ltv_cac_ratio` | **OK** | First-order AOV / CAC; revenue = dashboard net (incl. unpaid COD) |
 
 Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain for Shopify cards.
-
----
-
-## Amazon Attribution Overview
-
-| Card | Cube path | Status |
-|---|---|---|
-| Total / Gross / Net Sales | `amazon_attribution_overview.*` | **OK** |
-| Orders / Returns/Cancels / Refunds | same | **OK** |
-| Fees / Product Cost / Ad Spend / Net Profit | same | **OK** |
-| MER / TACOS | `amazon_attribution_overview.mer` / `.tacos` | **OK** |
-| CTR / CPC | `amazon_ad_performance.*` | **OK** |
-| Settlement Net Payout | `amazon_commerce_performance.marketplace_net_payout` | **OK meaning** — **not** Net Profit |
 
 ---
 
@@ -74,9 +56,6 @@ Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain f
 |---|---|---|
 | Gross / Net Sales / TOC / Net Profit | `canonical_pnl` all-channel measures | **OK** |
 | Product / Packaging / Shipping / Gateway / RTO | `canonical_pnl.*` | **OK** Shopify arms |
-| Amazon Fees | `canonical_pnl` / `amazon_attribution_overview.platform_fees` | **OK** for Attribution fees |
-| Taxes | `canonical_pnl.taxes_on_net_sales` | **PARTIAL** (`drift_corrected`) | Cube = Shopify net × 18%, not GST ledger. Node-Backend strips Amazon then adds actual Amazon tax (`taxes_on_net_sales.yaml`). |
-| Meta/Google/Amazon Ads | `canonical_pnl.*_spend` | **OK** |
 
 ---
 
@@ -84,16 +63,13 @@ Shopify-only ROAS (`canonical_pnl.gross_roas` / `net_roas` / `be_roas`) remain f
 
 | If you ask for… | Wrong Cube measure | Correct |
 |---|---|---|
-| Amazon Net Profit | `marketplace_net_payout` / `amazon_net_payout` | `amazon_attribution_overview.net_profit` → catalogue `amazon_net_profit` |
 | Meta/Google Attribution Net Sales | `platform_attribution_commerce.*_net_sales` | `channel_pnl.*_net_sales` → catalogue `meta_attribution_net_sales` / `google_attribution_net_sales` |
 | All-channel Gross ROAS | `canonical_pnl.gross_roas` (Shopify-only) | `canonical_pnl.gross_roas_all_channels` → catalogue `gross_roas_all_channels` |
-| Historical Net Profit | `canonical_pnl.net_profit` (Shopify-only Cube) | `canonical_pnl.net_profit_all_channels` — dashboard blended card; Amazon pending-refund overlay is Node-only and is **not** in certified Cube |
 | Returns/Cancels (All) | `commerce_orders.returns_cancels_orders` alone | `returns_cancels_all_channels.returns_cancels` |
 | New-customer LTV revenue | — | `ltv_cac.new_customer_revenue` (= attributed_net_revenue for is_new_customer=1; dashboard net incl. unpaid COD) |
 
 **How these are fixed (routing, not value rewrite):**
 1. Catalogue ids already map to the Correct column.
-2. Glossary defaults bare "Gross ROAS" / "Amazon Net Profit" to the Correct id.
 3. Cube measure *titles* label the Wrong side as NOT Overview / NOT Net Profit / Shopify-only.
 4. Agent prompt §3f-bis lists the traps so `catalogue_resolve_term` mistakes get overridden.
 

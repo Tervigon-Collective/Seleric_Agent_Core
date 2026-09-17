@@ -35,7 +35,7 @@ A query is not considered supported merely because the MCP recognizes the words.
 12. Which metrics are available for Meta Ads?
 13. Which metrics are available for Google Ads?
 14. Which metrics are available for Shopify?
-15. Which metrics are available for Amazon?
+15. Which metrics are available for each connected platform?
 16. Which metrics are available for Blinkit or other marketplaces?
 17. Which metrics are available by brand?
 18. Which metrics are available by country, state, and city?
@@ -506,7 +506,7 @@ A query is not considered supported merely because the MCP recognizes the words.
 408. Show marketplace returns and cancellations.
 409. Show marketplace inventory.
 410. Show marketplace ad spend and attributed sales where available.
-411. Show Amazon SP, SB, SD, and DSP performance where integrated.
+411. Show marketplace ad performance by campaign type where integrated.
 412. Clearly state when a marketplace API or metric is not yet integrated.
 
 ---

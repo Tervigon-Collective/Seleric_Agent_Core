@@ -101,9 +101,6 @@ def main() -> int:
     print(f"\nFetching LIVE dashboard (Historical) brand={args.brand} {start}..{end} ...")
     hist = dash_historical(args.brand, start, end)
 
-    # The dashboard's all-channels payload still carries a marketplace block; Cube serves
-    # Shopify only, so subtract that block for the Shopify split rows below.
-    hist_mkt = dig(hist, "amazon") or {}
     ad = dig(hist, "ad_spend_breakdown") or dig(hist, "ad_spend") or {}
     rc = dig(hist, "returns_cancels") or {}
     pay = dig(hist, "total_payments") or {}
@@ -144,14 +141,6 @@ def main() -> int:
          ["canonical_pnl.meta_spend"], "canonical_pnl.report_date", False, None),
         ("hist.google_spend", num(ad.get("google")),
          ["canonical_pnl.google_spend"], "canonical_pnl.report_date", False, None),
-
-        # --- Shopify split via all-channels ---
-        ("hist.shopify_total_sales",
-         num(hist.get("total_sales")) - num(hist_mkt.get("total_sales")),
-         ["sales_all_channels.shopify_total_sales"], "sales_all_channels.report_date", False, None),
-        ("hist.shopify_orders",
-         num(hist.get("total_orders")) - num(hist_mkt.get("orders")),
-         ["orders_all_channels.shopify_orders"], "orders_all_channels.report_date", True, None),
 
         # --- Platform ad delivery views ---
         ("meta_ads.spend", num(ad.get("meta")),

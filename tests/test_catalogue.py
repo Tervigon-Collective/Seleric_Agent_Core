@@ -1,3 +1,4 @@
+import re
 from seleric_mcp.catalogue_service.service import (
     AmbiguousDimension,
     AmbiguousTerm,
@@ -7,6 +8,10 @@ from seleric_mcp.catalogue_service.service import (
     UnknownTerm,
 )
 
+# Platforms that are not connected to the serve layer; none may appear as a
+# catalogue id, glossary term, dimension or view name.
+_DISCONNECTED = re.compile(r"amazon", re.I)
+
 
 def test_loads_seed(catalogue):
     # Commerce + Product + Paid Media certified surfaces — pin to baseline minimum.
@@ -15,8 +20,8 @@ def test_loads_seed(catalogue):
     assert "product_net_revenue" in catalogue.cat.metrics
     assert "meta_spend" in catalogue.cat.metrics
     assert "google_spend" in catalogue.cat.metrics
-    # Amazon was removed from the serve layer / Cube / catalogue (2026-09-17).
-    assert not [m for m in catalogue.cat.metrics if "amazon" in m]
+    # Only connected platforms may appear: Shopify commerce + Meta/Google ads.
+    assert not [m for m in catalogue.cat.metrics if _DISCONNECTED.search(m)]
     assert catalogue.version
     assert catalogue.cat.openmetadata is not None
     # Keep in step with openmetadata/product_registry.yml and
@@ -673,15 +678,20 @@ def test_resolve_dimension_last_touch_channel(catalogue):
     assert "commerce_net_revenue_daily" not in supporting
 
 
-def test_amazon_terms_do_not_resolve_to_amazon_metrics(catalogue):
-    # Amazon was removed from the catalogue; its phrases must never resolve to an
-    # amazon_* metric (no silent revival via glossary or fuzzy match).
-    for term in ("amazon total sales", "amazon orders", "amazon ads", "amazon net profit"):
-        r = catalogue.resolve_term(term)
-        if isinstance(r, ResolvedTerm):
-            assert "amazon" not in r.metric_id, f"{term!r} -> {r.metric_id}"
-        for cand in getattr(r, "candidates", []) or []:
-            assert "amazon" not in cand.metric_id, f"{term!r} candidate {cand.metric_id}"
+def test_no_disconnected_platform_leaks_into_the_catalogue(catalogue):
+    """Only connected platforms may appear on the agent surface: Shopify commerce
+    plus Meta/Google ads. A retired connector must leave no metric, glossary term,
+    dimension or view behind, or the agent can answer for a channel it cannot see."""
+    cat = catalogue.cat
+    leaks = [f"metric:{m}" for m in cat.metrics if _DISCONNECTED.search(m)]
+    leaks += [f"view:{v}" for v in cat.views if _DISCONNECTED.search(v)]
+    leaks += [f"dimension:{d}" for d in cat.dimensions if _DISCONNECTED.search(d)]
+    leaks += [
+        f"glossary:{e.term}"
+        for e in cat.glossary
+        if _DISCONNECTED.search(e.term) or _DISCONNECTED.search(e.canonical_id or "")
+    ]
+    assert not leaks, f"retired-platform references still on the agent surface: {leaks}"
 
 
 def test_planner_exact_lookup_channel_unchanged(catalogue):

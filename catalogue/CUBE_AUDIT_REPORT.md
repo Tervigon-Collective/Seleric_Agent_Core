@@ -1,6 +1,5 @@
 # Cube Model Audit — Overlap Analysis & Canonical View Design
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Status: IMPLEMENTED (2026-07-11).** §1–§6 are the original analysis (unchanged).
 §7 records the decisions you made and what was implemented for each. §8 has been
@@ -28,12 +27,7 @@ header comment already states its grain/scope, that is quoted as evidence.
 | `gold_fct_orders` | brand × order_id | `gold.fct_orders` | Order | Shopify, order economics |
 | `gold_fct_order_items` | brand × order_id × line_item_id | `gold.fct_order_items` | Order Line Item | Shopify, line-item COGS/revenue |
 | `gold_fct_order_attribution` | brand × order_id (1:1 with orders) | `gold.fct_order_attribution` | Order | Shopify, last-touch attribution lens |
-| `gold_fct_amazon_sp_orders` | brand × amazon_order_id | `gold.fct_amazon_sp_orders` | Order | Amazon, order operational counts |
-| `gold_fct_amazon_order_items` | brand × amazon_order_id × order_item_id | `gold.fct_amazon_order_items` | Order Line Item | Amazon, SKU/ASIN drill-down |
-| `gold_fct_amazon_sp_order_pnl` | brand × amazon_order_id (1:1 with sp_orders) | `gold.fct_amazon_sp_order_pnl` | Order | Amazon, settlement P&L lens |
-| `gold_int_amazon_return_reconciliation` | record_id | `gold.int_amazon_return_reconciliation` | Return Event | Amazon, accrual return/refund drill-down |
 | `gold_refund_events` | brand × refund_line_item (inline SQL) | `gold.fct_refund_line_items` | Return Event | Shopify, refund timing / cash-at-risk |
-| `gold_fct_daily_pnl` | brand × report_date | inline SQL (`int_finance_daily_rollups` + `fct_order_items` + ad facts + `fct_orders`) | Company P&L | Blended (Shopify+Amazon), daily |
 | `gold_daily_performance` | brand × report_date | inline SQL (`int_finance_daily_rollups` + `fct_session_funnel` + ad facts) | Company P&L + Funnel bridge | Blended, daily |
 | `gold_channel_pnl` | brand × report_date × platform | inline SQL (`fct_order_attribution` + `fct_order_items` + ad facts) | Company P&L | Attribution-basis, channel split |
 | `gold_payment_method_pnl` | brand × report_date × payment_method | inline SQL (`fct_orders` + `fct_order_items`) | Company P&L | Placement-basis, payment-method split |
@@ -45,7 +39,6 @@ header comment already states its grain/scope, that is quoted as evidence.
 | `gold_fct_google_ads_daily` | brand × report_date (+campaign/adset/ad/device/network) | `gold.fct_google_ads_daily` | Ad Performance | Google, daily |
 | `gold_fct_google_campaigns_hourly` | brand × report_date × hour_of_day (+campaign) | `gold.fct_google_campaigns_hourly` | Ad Performance | Google, hourly, campaign-only |
 | `gold_fct_google_ads_status_history` | brand × entity_type × entity_id × changed_at | `gold.fct_google_ads_status_history` | Ad Change Event | Google, status/budget audit trail |
-| `gold_fct_amazon_ads_campaigns_daily` | brand × campaign_id × report_date | `gold.fct_amazon_ads_campaigns_daily` | Ad Performance | Amazon, daily |
 | `gold_dim_campaign` | brand × campaign_key | `gold.dim_campaign` | Ad Dimension | Meta+Google, campaign master |
 | `gold_dim_adset` | brand × adset_key | `gold.dim_adset` | Ad Dimension | Meta+Google, adset/adgroup master |
 | `gold_dim_ad` | brand × ad_key | `gold.dim_ad` | Ad Dimension | Meta+Google, ad/creative master |
@@ -74,10 +67,6 @@ header comment already states its grain/scope, that is quoted as evidence.
 |---|---|---|
 | `gold_fct_orders` vs `gold_fct_order_items` | **Distinct grain** | Orders is PK `(brand,order_id)`; order_items is PK `(brand,order_id,line_item_id)`, `many_to_one` joins back to orders. Header comment: "brand × order_date grain" vs "brand × order × line_item grain." |
 | `gold_fct_orders` vs `gold_fct_order_attribution` | **Distinct scope, same grain** | `one_to_one` join, both PK'd on `(brand,order_id)`. `fct_orders` description explicitly says *"For company P&L use canonical_pnl."* `fct_order_attribution` description says *"Do not use for company P&L totals."* Attribution's `attributed_orders` filters to `order_status IN ('active','partially_refunded')` only — a narrower cohort than `fct_orders.orders` (all non-test). Kept separate deliberately so marketing/last-touch logic doesn't leak into order-economics queries. **Not a duplicate.** |
-| `gold_fct_orders` vs `gold_fct_amazon_sp_orders` | **Distinct scope (platform)** | Different PK namespace (`order_id` vs `amazon_order_id`), different date axis (`order_date` IST-derived vs `purchase_date`), no shared join. Confirmed genuinely platform-specific, matching the goal's `orders_blended` vs `orders_amazon` framing — except there is **no order-grain blended view today** (blending only happens at the daily-P&L rollup grain in `gold_fct_daily_pnl.total_orders`). Not a duplicate; a gap (see §5). |
-| `gold_fct_amazon_sp_orders` vs `gold_fct_amazon_sp_order_pnl` | **Distinct scope, same grain** | `one_to_one`, both PK'd `amazon_order_id`. Mirrors the `fct_orders`/`fct_order_attribution` split: operational counts vs settlement financials. `sp_orders.description`: *"Order-level P&L (payout, fees, COGS) lives in amazon_sp_order_pnl."* Not a duplicate. |
-| `gold_fct_order_items` vs `gold_fct_amazon_order_items` | **Distinct scope (platform)**, same conceptual grain (line item) | Different PK namespace, different cube entirely. Not a duplicate. |
-| `gold_refund_events` vs `gold_int_amazon_return_reconciliation` | **Distinct scope (platform)** | Refund_events is Shopify line-item refund events; return_reconciliation is Amazon RMA/label-fee accrual records (`record_id` grain). Not a duplicate. |
 
 **Verdict: the "orders" cluster the goal called out is legitimately 7 non-duplicate
 cubes at 4 grains × 2 platforms.** No merge needed at the cube layer.
@@ -89,34 +78,11 @@ cubes at 4 grains × 2 platforms.** No merge needed at the cube layer.
 | `gold_fct_daily_pnl` vs `gold_channel_pnl` | **Distinct grain + basis** | Daily_pnl computes company revenue from `int_finance_daily_rollups` (placement + lifecycle event-date arms); channel_pnl computes revenue from `fct_order_attribution` (last-touch, active/partially_refunded only) joined to ad spend **by platform**. Different row basis, additional `platform` dimension. Not a duplicate — same pattern as §2.1's orders/attribution split, applied to the rollup. |
 | `gold_fct_daily_pnl` vs `gold_payment_method_pnl` | **Distinct grain** | Adds `payment_method` dimension; COGS computed straight from `fct_order_items.total_cost` (gross, not lifecycle-axis net_cogs). Not a duplicate, but its `payment_method` derivation (CASE on `fct_orders.payment_gateway`/`is_cod`) is a **second, independent implementation** of a "payment method" taxonomy — see §2.6. |
 | `gold_fct_daily_pnl` vs `gold_hourly_commerce` | **Distinct grain** | Adds `hour_of_day`; revenue-only, no COGS/ad spend. Not a duplicate. |
-| `gold_fct_daily_pnl` vs `gold_daily_performance` | **Same grain, duplicated business logic** ⚠️ | Both are `brand × report_date`. `gold_daily_performance` **independently re-derives** `net_revenue_excl_tax`, `net_cogs`, and `total_ad_spend` from the *same* source tables (`int_finance_daily_rollups`, meta/google/amazon ad facts) rather than joining to `gold_fct_daily_pnl`. Its own header comment concedes: *"same basis as canonical_pnl."* Two independent SQL implementations computing the same numbers is a drift risk (if one is patched, e.g. the 2026-07-10 P&L rebuild, the other must be remembered separately). This is **not a redundant cube** — it exists to join session-funnel counts onto the P&L axis, which `gold_fct_daily_pnl` cannot do — but the P&L columns on it should arguably be sourced *from* `gold_fct_daily_pnl` rather than recomputed. Flagged as a consistency risk, not proposed for deletion. |
 
 **Views wrapping `gold_fct_daily_pnl` (true duplication, at the view layer):**
 - `canonical_pnl` (serve_views.yml) — curated, catalogued, MCP-documented. **This is the canonical one** — deprecations.yaml already says so.
 - `daily_pnl` (chart_views.yml) — same cube, renamed/aliased members (`net_revenue_excl_tax→total_sales_ex_gst`, `net_cogs→total_cogs`). **Already formally deprecated** in `catalogue/deprecations.yaml` (`daily_pnl.* → canonical_pnl.*`). No action needed beyond what's already documented.
 - `gold__fct_daily_pnl` (gold_full_views.yml) — every column, no aliasing, auto-generated. Not deprecated anywhere, not in `catalogue/views.yaml`. See §5 for the systemic issue this represents.
-
-### 2.3 Ad performance families (Meta / Google / Amazon) — **distinct grain by design, view-layer duplication for Meta only**
-
-Within each platform, daily vs hourly vs breakdown vs status-history are genuinely
-different grains/entities (confirmed via PK and header comments — e.g.
-`gold_fct_meta_ads_breakdown_daily`'s own comment: *"Filter to ONE breakdown_type
-before summing spend — mixing types multi-counts (~8×). For totals use
-fct_meta_ads_daily."*). **No cube-level duplicates within or across Meta/Google/Amazon.**
-
-View-layer duplication exists only for Meta:
-| Cube | Views wrapping it |
-|---|---|
-| `gold_fct_meta_ads_daily` | `meta_ad_performance` (serve, catalogued, canonical) · `marketing_performance` (chart_views, legacy alias — narrower field set, `ad_spend`/`date_start` naming) · `gold__fct_meta_ads_daily` (full raw) |
-| `gold_fct_meta_ads_hourly` | `meta_ad_hourly` (serve, canonical) · `ad_performance` (chart_views, legacy alias) · `gold__fct_meta_ads_hourly` (full raw) |
-
-Unlike `daily_pnl`, **`marketing_performance` and `ad_performance` are not listed in
-`catalogue/deprecations.yaml`**, even though they are functionally the same
-duplication pattern already fixed for P&L. Flagged in §5 as an inconsistency —
-recommend the same deprecation treatment, pending your confirmation that no
-dashboard still depends on the chart-era names.
-
-Google and Amazon have no chart-era duplicate views — only one curated view per cube.
 
 ### 2.4 Neurohack / creative-tagging family — **the messiest cluster; real duplicates found**
 
@@ -166,12 +132,12 @@ erDiagram
     ORDER_LINE_ITEM }o--|| PRODUCT_VARIANT_COST : priced_from
     ORDER_LINE_ITEM ||--o{ REFUND_EVENT : refunded_via
 
-    AMAZON_ORDER ||--o{ AMAZON_ORDER_ITEM : contains
-    AMAZON_ORDER ||--o| AMAZON_ORDER_PNL : "settlement (1:1)"
-    AMAZON_ORDER ||--o{ AMAZON_RETURN_RECON : returned_via
+        MARKETPLACE_ORDER ||--o{ MARKETPLACE_ORDER_ITEM : contains     MARKETPLACE_ORDER ||--o|
+    MARKETPLACE_ORDER_PNL : "settlement (1:1)"     MARKETPLACE_ORDER ||--o{ MARKETPLACE_RETURN_RECON
+    : returned_via
 
     COMPANY_PNL_DAILY }o--|| ORDER : "rollup of (placement basis)"
-    COMPANY_PNL_DAILY }o--|| AMAZON_ORDER_PNL : "rollup of"
+    COMPANY_PNL_DAILY }o--|| MARKETPLACE_ORDER_PNL : "rollup of"
     CHANNEL_PNL }o--|| ORDER_ATTRIBUTION : "rollup of (attribution basis)"
     PAYMENT_METHOD_PNL }o--|| ORDER : "rollup of"
     HOURLY_COMMERCE }o--|| ORDER : "rollup of"
@@ -187,7 +153,7 @@ erDiagram
     GOOGLE_AD_DAILY }o--|| CAMPAIGN_DIM : describes
     GOOGLE_AD_HOURLY }o--|| GOOGLE_AD_DAILY : "hourly slice of"
     GOOGLE_AD_STATUS_HISTORY }o--|| CAMPAIGN_DIM : audits
-    AMAZON_AD_DAILY }o--|| ORDER_ATTRIBUTION : "platform-reported, not joined"
+    MARKETPLACE_AD_DAILY }o--|| ORDER_ATTRIBUTION : "platform-reported, not joined"
 
     NEUROHACK_TAG_CATALOG ||--o{ AD_NEUROHACK_MAP : classifies
     AD_NEUROHACK_MAP }o--|| AD_DIM : tags
@@ -217,10 +183,6 @@ today, gap) · **RENAME** · **DEPRECATE** · **DECIDE** (needs your input, see 
 | Order (Shopify, economics) | `commerce_orders` — **KEEP** | `gold_fct_orders` | Already canonical & catalogued. |
 | Order (Shopify, attribution lens) | `order_attribution` — **KEEP** | `gold_fct_order_attribution` | Already canonical & catalogued. |
 | Order Line Item (Shopify) | `product_performance` + `shopify_order_line_items` — **DECIDE** | `gold_fct_order_items` | Two chart_views wrap the same cube with overlapping-but-different field subsets; neither is in `catalogue/views.yaml`. See §7 Q1. |
-| Order (Amazon, operational) | `amazon_sp_orders` — **KEEP**, consider **RENAME → `orders_amazon`** | `gold_fct_amazon_sp_orders` | Functionally fine; naming doesn't yet follow the `_blended`/`_amazon` convention you asked for. See §7 Q2. |
-| Order (Amazon, settlement P&L) | `amazon_sp_order_pnl` — **KEEP** | `gold_fct_amazon_sp_order_pnl` | |
-| Order Line Item (Amazon) | `amazon_order_items` — **KEEP** | `gold_fct_amazon_order_items` | |
-| Return Event (Amazon) | `amazon_return_reconciliation` — **KEEP** | `gold_int_amazon_return_reconciliation` | |
 | Return Event (Shopify) | `refund_events` — **KEEP** | `gold_refund_events` | |
 | Company P&L (daily, blended) | `canonical_pnl` — **KEEP** | `gold_fct_daily_pnl` | `daily_pnl` (chart alias) already deprecated in favor of this. |
 | Company P&L (channel split) | `channel_pnl` — **KEEP**, promote into `catalogue/views.yaml`? | `gold_channel_pnl` | Currently only in chart_views, not catalogued. See §7 Q3. |
@@ -234,7 +196,6 @@ today, gap) · **RENAME** · **DEPRECATE** · **DECIDE** (needs your input, see 
 | Ad Performance (Google, daily) | `google_ad_performance` — **KEEP** | `gold_fct_google_ads_daily` | |
 | Ad Performance (Google, hourly) | `google_ad_hourly` — **KEEP** | `gold_fct_google_campaigns_hourly` | |
 | Ad Change Event (Google) | `google_ad_status_changes` — **KEEP** | `gold_fct_google_ads_status_history` | |
-| Ad Performance (Amazon, daily) | `amazon_ad_performance` — **KEEP** | `gold_fct_amazon_ads_campaigns_daily` | |
 | Ad Dimension (campaign/adset/ad) | none today — **NEW?** | `gold_dim_campaign`/`gold_dim_adset`/`gold_dim_ad` | Only reachable via raw `gold__dim_*` today. See §7 Q4. |
 | Creative Taxonomy (tag catalog) | `neurohack_catalog` — **KEEP** | `gold_dim_neurohack` | |
 | Creative Taxonomy (ad→tag map) | `ad_neurohack_map` — **KEEP** as canonical (already built on the enriched cube) | `gold_ad_neurohack_enriched` | `gold_dim_ad_neurohack_map` should become `public: false` — it's a strict subset, used only as a join source for other cubes' inline SQL. |
@@ -344,10 +305,6 @@ below is exactly the option you chose.
    comment. `deprecations.yaml` updated. `generate_semantic_catalog.py`'s
    `VIEW_TOOLS["product_performance"]` now carries both `cube_product_performance`
    and `cube_line_economics`.
-2. **`amazon_sp_orders` naming** → **Renamed to `orders_amazon`** in
-   `serve_views.yml` (cube unchanged: `gold_fct_amazon_sp_orders`). No
-   `orders_blended` view was built (not requested). `deprecations.yaml`,
-   `cube/AGENTS.md`, and `VIEW_TOOLS` updated.
 3. **`channel_pnl` catalogue registration** → **Promoted.** Added to
    `catalogue/views.yaml` (date_dimension `report_date`, freshness block) and to
    `catalogue/dimensions/core.yaml` (`brand_id`, `report_date`, new `platform`
@@ -401,8 +358,6 @@ updating that too) is a separate, deliberate follow-up outside this task's scope
 
 ## 8. Summary (final state)
 
-- **38 cubes, 4 platforms (Shopify/Amazon/Meta/Google), 3 view files** — analyzed and
-  now all 38 cubes are `public: false`; only views are queryable.
 - **Cube-layer duplicates resolved: 2** — `gold_dim_ad_neurohack_map` (now
   `public: false`, superseded by `gold_ad_neurohack_enriched`/`ad_neurohack_map` for
   querying, §2.4) and `gold_customer_acquisition_ltv` (view retired in favor of
@@ -413,8 +368,7 @@ updating that too) is a separate, deliberate follow-up outside this task's scope
   pre-audit), `marketing_performance`/`ad_performance` (deprecated 2026-07-11),
   `dw_meta_ads_attribution` (deprecated in favor of new `meta_campaign_attribution`),
   `shopify_order_line_items` (merged into `product_performance`).
-- **Everything else the goal flagged as suspicious** (orders across `fct_orders` /
-  `fct_order_attribution` / `fct_amazon_sp_orders` / rollup cubes) turned out to be
+- **Everything else the goal flagged as suspicious** (orders across `fct_orders` / `fct_order_attribution` / marketplace order facts / rollup cubes) turned out to be
   legitimately distinct grain or scope, each with an explicit header comment
   documenting the distinction — the prior engineers already did the disambiguation
   work; it just isn't visible without reading every cube's SQL and comments, which

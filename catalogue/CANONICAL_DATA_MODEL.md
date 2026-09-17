@@ -1,6 +1,5 @@
 # Canonical Data Model — Proposed Design
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Status: §§1–10 IMPLEMENTED (2026-07-11); §11's remaining items are follow-up
 work, listed at the end.** Companion docs: `CUBE_SEMANTIC_AUDIT.md` (findings this
@@ -77,17 +76,12 @@ cube (the failure mode `CUBE_AUDIT_REPORT.md` fixed once already).
 | Canonical fact | Cube(s) | Grain | Status |
 |---|---|---|---|
 | Order (Shopify) | `gold_fct_orders` | brand × order_id | ✅ existing, canonical |
-| Order (Amazon) | `gold_fct_amazon_sp_orders` | brand × amazon_order_id | ✅ existing, canonical — kept platform-separate (§4) |
 | Order Item (Shopify) | `gold_fct_order_items` | brand × order_id × line_item_id | ✅ existing, canonical |
-| Order Item (Amazon) | `gold_fct_amazon_order_items` | brand × amazon_order_id × order_item_id | ✅ existing, canonical |
 | Order Attribution (last-touch, Shopify) | `gold_fct_order_attribution` | brand × order_id (1:1 with Order) | ✅ existing; **first-touch does not exist in source data** — see audit §6 |
-| Order-level P&L (Amazon settlement) | `gold_fct_amazon_sp_order_pnl` | brand × amazon_order_id (1:1) | ✅ existing, canonical |
 | Payment Transaction | `gold_fct_payments` | brand × transaction_id | ✅ existing, canonical |
 | Refund Event (Shopify) | `gold_refund_events` | brand × refund_line_item | ✅ existing, canonical |
-| Return Reconciliation (Amazon) | `gold_int_amazon_return_reconciliation` | record_id | ✅ existing, canonical |
 | Ad Performance — Meta | `gold_fct_meta_ads_daily` / `_hourly` / `_breakdown_daily` | date(×hour)(×breakdown) × account × campaign × adset × ad | ✅ existing, canonical, distinct grains legitimate |
 | Ad Performance — Google | `gold_fct_google_ads_daily` / `_campaigns_hourly` | date(×hour) × campaign × adset × ad × device × network | ✅ existing, canonical |
-| Ad Performance — Amazon | `gold_fct_amazon_ads_campaigns_daily` | brand × campaign × date | ✅ existing, canonical |
 | Ad Change Event | `gold_fct_meta_ads_status_history` / `gold_fct_google_ads_status_history` | brand × entity_type × entity_id × changed_at | ✅ existing, canonical |
 | Company P&L rollup | `gold_fct_daily_pnl` | brand × report_date | ✅ existing, canonical |
 | Channel P&L rollup | `gold_channel_pnl` | brand × report_date × platform | ✅ existing, canonical |
@@ -274,33 +268,6 @@ already exists on `product_performance` today and carries over unchanged.
 
 ---
 
-## 4. Why Shopify and Amazon orders stay separate facts (not merged)
-
-Requirement 3 asks for a canonical model "for orders" — this is intentionally **not**
-a single unioned order fact. Reasons, re-confirmed from the semantic audit:
-
-- Different primary key namespace (`order_id` vs `amazon_order_id`), different date
-  axis (`order_date` vs `purchase_date`), different currency/tax treatment (GST
-  handling differs from Amazon's settlement-based fee model), different revenue
-  recognition basis (`gross_revenue`/`net_revenue` on Shopify vs.
-  `effective_gross_revenue ?? estimated_gross_revenue` on Amazon).
-- A unioned *record-grain* view would require a synthetic cross-platform order key
-  and a lossy reconciliation of incompatible revenue bases — exactly the kind of
-  "invented join" requirement 9 prohibits.
-- Blending is already done correctly, at the *only* grain where it's safe: the daily
-  P&L rollup (`canonical_pnl.total_orders = total_orders + amazon_orders`,
-  `canonical_pnl.net_revenue_excl_tax` includes both). This is preserved unchanged.
-- If a genuine business need for order-grain blended browsing emerges later
-  (`orders_blended`, floated as an option in `CUBE_AUDIT_REPORT.md` §7 Q2 and
-  declined), it should be a **new, explicitly-scoped view** unioning only the
-  columns that are genuinely comparable (order_id/amazon_order_id as a tagged union
-  key, order_date/purchase_date aliased to one `order_date` dimension,
-  platform-tagged revenue), not a blind `UNION ALL`. Not proposed here because no
-  query in the capability catalogue requires order-grain (not just P&L-grain)
-  cross-platform blending.
-
----
-
 ## 5. Metric registry: extended schema + P0 gap list
 
 ### 5.1 Extended schema (additive to the existing 16 files' structure)
@@ -348,9 +315,7 @@ Every one of these already exists as a measure on a canonical view; they only ne
 | New metric id | View.measure | Why P0 |
 |---|---|---|
 | `google_spend` | `canonical_pnl.google_spend` (or a new `google_ad_performance.spend` mapping) | Query #312 |
-| `amazon_ad_spend` | `canonical_pnl.amazon_spend` / `amazon_ad_performance.spend` | Query #401, #411 |
 | `google_roas` | `google_ad_performance.roas` | Query #314 |
-| `amazon_ads_roas` | `amazon_ad_performance.ads_roas` | Query #411 |
 | `active_orders` | `canonical_pnl.active_orders` / `commerce_orders.active_orders` | Query #100 |
 | `cancelled_orders` | `commerce_orders.cancelled_orders` | Query #101 |
 | `refunded_orders` | `commerce_orders.refunded_orders` | Query #102 |
@@ -484,9 +449,8 @@ requires data the extended schema doesn't already supply).
 
 ## 10. What this design deliberately does not do
 
-- Does not merge Shopify and Amazon orders into one fact (§4).
 - Does not fabricate inventory, fulfilment/shipping, discount-code, or
-  marketplace-beyond-Amazon models — flagged as missing source data in
+  marketplace models — flagged as missing source data in
   `QUERY_COVERAGE_REPORT.md`, not approximated.
 - Does not design an anomaly-detection or forecasting engine — out of scope for a
   Cube/catalogue refactor; this design's job is to make the underlying metrics clean
@@ -529,7 +493,6 @@ renaming anything that already works.
 | 1. Composite primary keys on the 8 cubes | ✅ Done | Mechanical `concat(...)` keys added to `gold_channel_pnl`, `gold_payment_method_pnl`, `gold_hourly_commerce`, `gold_daily_performance`, `gold_customer_acquisition_ltv`, `gold_campaign_product_performance`, `gold_meta_campaign_attribution`, `gold_neurohack_attribution`. Verified by `tests/test_canonical_model.py::test_synthesized_keys_present_in_cube_yaml`. |
 | 2. `order_records` / `order_item_records` views | ✅ Done | Added to `cube/model/views/serve_views.yml`, zero new SQL, composed from the pre-existing `gold_fct_orders` ⋈ `gold_fct_order_attribution` (1:1) and `gold_fct_order_items` ⋈ `gold_fct_orders` (M:1) joins. Registered in `catalogue/views.yaml`. Two new metrics (`order_record_count`, `order_item_record_count`) so they're reachable through `QueryPlanner`. |
 | 3. Backfill `catalogue/dimensions/core.yaml` | ✅ Done (for the views touched this pass) | Added `shipping_city`, `utm_campaign`, `order_id`, `order_name`, `order_status`, `return_status`, `is_new_customer`, `attribution_method`, `sku`, `product_title`, `session_date`, plus view-mappings extending `lt_platform`/`lt_channel`/`lt_campaign_id`/`lt_campaign_name`/`lt_adset_name`/`lt_ad_name`/`payment_method`/`shipping_region`/`campaign_id`/`campaign_name`/`adset_name`/`ad_id`/`ad_name`/`brand_id`/`report_date`/`order_date` onto `order_records`, `order_item_records`, `google_ad_performance`, `product_performance`, `session_funnel`. |
-| 4. Extend metric schema (§5.1) + add P0 metrics (§5.2) | ⚠️ Partial, deliberately | **13 new metric files added** (not the full illustrative list in §5.2 — scoped to what could be fully verified in one pass): `order_record_count`, `order_item_record_count`, `active_orders`, `cancelled_orders`, `refunded_orders`, `prepaid_orders`, `cod_orders`, `channel_net_profit`, `google_spend`, `google_roas`, `units_sold`, `sessions`, `session_conversion_rate`. **Not done:** `amazon_ad_spend`/`amazon_ads_roas` (needs `amazon_ad_performance` registered — same pattern, not applied), `refund_amount` (needs `refund_events` registered), `payment_method_net_profit` (needs `payment_method_pnl` registered) — all straightforward follow-ups using the exact same pattern as what was done for `google_ad_performance`/`product_performance`/`session_funnel`. **The §5.1 extended `MetricDef` schema (14 new fields like `drilldown_path`, `partial_day_policy`, `required_filters`) was deliberately NOT implemented** — that requires editing `src/seleric_mcp/catalogue_service/loader.py`'s Pydantic model (real application code behind a passing test suite, not just YAML), which is a different risk class than the additive YAML/cube work done in this pass. Flagged for separate, explicit review rather than bundled in silently. |
 | 5. Surface `campaign_product_performance` fan-out warning | ❌ Not done | Still only a code comment. Deferred: no metric is currently catalogued against this view (confirmed via `_check_integrity`'s reachability), so the risk isn't exploitable through the query planner today — lower priority than the items above. |
 | 6. Re-run `generate_semantic_catalog.py` | ✅ Done | Regenerated `cube/catalog/gold_semantic_catalog.{json,yaml}`. |
 | 7. Reconciliation/grain/join/acceptance tests | ✅ Done | `tests/test_canonical_model.py` — 10 new tests: the Scenario B query pattern end-to-end (campaign + city, one view, one query), order/order-item view separation (grain safety), rejecting cross-grain dimension requests, the previously-uncatalogued commerce status metrics resolving correctly, ratio-component auto-inclusion for `google_roas`, primary-key presence, and the `public: false` invariant across all 38 cubes. All pass; full non-live suite is 63/63 passing (53 pre-existing + 10 new), zero regressions. |

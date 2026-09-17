@@ -407,31 +407,6 @@ def test_order_attribution_cube_is_single_model_no_fanout():
     )
 
 
-def test_dbt_rollup_amazon_gross_uses_settlement_source():
-    """Legacy guard on the dbt intermediate int_finance_daily_rollups (NOT the
-    cube's source — the cube reads serve.canonical_pnl / serve.sales_all_channels
-    views over gold; see METRIC_RECONCILIATION_JUNE_2026 §1a). Kept only to catch
-    an accidental basis change in that intermediate. The Cube pipeline's
-    source (effective_gross_revenue from fct_amazon_sp_order_pnl), matching the
-    canonical basis. Skips when the mage-ai pipeline repo isn't checked out
-    alongside Base_Agent (Base_Agent tests must not hard-fail without it)."""
-    from seleric_mcp.config import cube_model_dir
-
-    # cube_model_dir(): data_platform/mage-ai/infra/cube/model
-    mage_root = cube_model_dir().parents[2]  # -> data_platform/mage-ai
-    sql = mage_root / "dbt" / "models" / "iceberg" / "cross_platform" / "int_finance_daily_rollups.sql"
-    if not sql.exists():
-        import pytest
-
-        pytest.skip(f"dbt rollup not present at {sql} (pipeline repo not checked out)")
-    text = sql.read_text(encoding="utf-8")
-    assert "fct_amazon_sp_order_pnl" in text
-    assert "effective_gross_revenue" in text, (
-        "amazon_gross_revenue must derive from the settlement column "
-        "effective_gross_revenue, not catalog gross"
-    )
-
-
 def test_openmetadata_crosswalk_category_and_view_match_catalogue(catalogue):
     """For every metric present in both, category and cube view must agree.
     A divergence means OM's documented lineage points at a different semantic

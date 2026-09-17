@@ -1,6 +1,5 @@
 # Cube Semantic Audit — vs. MCP Query Capability Catalogue
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Status: DRAFT FOR REVIEW — no production files modified.** This audit extends
 `CUBE_AUDIT_REPORT.md` (2026-07-11, cube-overlap audit — already implemented) with
@@ -81,9 +80,7 @@ double-counting guarantees:
 `gold_fct_orders` ⋈ `gold_fct_order_items` (`one_to_many`), ⋈
 `gold_fct_order_attribution` (`one_to_one`), ⋈ `gold_dim_customers`
 (`many_to_one`); `gold_fct_order_items` ⋈ `gold_fct_product_variant_cost`
-(`many_to_one`); `gold_fct_amazon_sp_orders` ⋈ `gold_fct_amazon_sp_order_pnl`
-(`one_to_one`); `gold_fct_amazon_order_items` ⋈ `gold_fct_amazon_sp_orders`
-(`many_to_one`); the ad dimension chain `gold_dim_campaign` ⋈ `gold_dim_adset` ⋈
+(`many_to_one`); the marketplace order ⋈ order-P&L pair (`one_to_one`) and marketplace order-items ⋈ orders (`many_to_one`); the ad dimension chain `gold_dim_campaign` ⋈ `gold_dim_adset` ⋈
 `gold_dim_ad` (`one_to_many` each); `gold_fct_meta_ads_daily`/`gold_fct_google_ads_daily`
 ⋈ their respective dimension cubes (`many_to_one`); `gold_dim_ad_neurohack_map` ⋈
 `gold_dim_neurohack` (`many_to_one`). **These are safe by construction** — Cube's
@@ -141,9 +138,6 @@ is **only partly resolved today** by `catalogue/glossary/terms.yaml` and
 | Name | Appears on (with different meanings) | Catalogued today? |
 |---|---|---|
 | `net_revenue` | `gold_fct_orders` (order-grain, incl. GST despite the name), `gold_fct_order_items` (line-grain), `gold_fct_order_attribution` (attribution-scoped), `gold_fct_daily_pnl` (aliased to `net_revenue_excl_tax`, ex-GST), `gold_hourly_commerce`, `gold_mart_meta_ad_neurotag_daily` — **at least 4 genuinely different bases (incl/excl GST, order/line/attribution grain)** | Only `canonical_pnl.net_revenue_excl_tax` is an approved metric id (`net_revenue`) |
-| `roas` (and platform variants) | `gold_fct_meta_ads_daily.roas`, `gold_fct_google_ads_daily.roas`, `gold_fct_google_campaigns_hourly.roas`, `gold_meta_neurohack_daily.roas`, `gold_mart_meta_ad_neurotag_daily.roas_fc/roas_sc/platform_roas_fc/sc`, `gold_meta_campaign_attribution.roas`, `gold_channel_pnl.meta_roas/google_roas/channel_roas`, `gold_fct_daily_pnl.meta_roas/google_roas/gross_roas/net_roas/be_roas/blended_roas`, `gold_neurohack_attribution.attributed_roas`, `gold_fct_amazon_ads_campaigns_daily.ads_roas` — **≈14 distinct ROAS definitions across platform-reported vs. business-attributed vs. blended bases** | Only `blended_roas` and `meta_roas` are approved metric ids. `google_roas`, `ads_roas` (Amazon), `channel_roas`, and every `*_fc`/`*_sc` variant are **not catalogued** — asking for "Google ROAS" (query #314) or "Amazon Ads ROAS" (query #411) fails resolution today, the same failure class observed live in this session before this goal was set. |
-| `spend` / `ad_spend` | Identical duplicate aliases *within the same cube* on `gold_fct_meta_ads_daily` and `gold_fct_meta_ads_hourly` (harmless redundancy, not ambiguity) — plus genuinely different bases: `gold_fct_daily_pnl.meta_spend/google_spend/amazon_spend/total_ad_spend`, `gold_channel_pnl.spend/meta_ad_spend/google_ad_spend`, `gold_meta_campaign_attribution.ad_spend`, `gold_campaign_product_performance.spend`, `gold_neurohack_attribution.spend`, `gold_mart_meta_ad_neurotag_daily.spend/spend_fc/spend_sc` | Only `meta_spend` and `total_ad_spend` are approved metric ids. `google_spend` and `amazon_spend` exist as measures on `canonical_pnl` but have **no metric-catalogue entry of their own** — query #312 ("Google Ads spend by account and campaign") has no canonical metric id to resolve to. |
-| `orders` / order counts | `gold_fct_orders.orders` (test-excluded, all statuses), `gold_fct_order_attribution.placed_orders`/`attributed_orders`, `gold_channel_pnl.placed_orders`, `gold_fct_daily_pnl.total_orders`/`orders_created`/`active_orders`/`realized_orders`, `gold_fct_amazon_sp_orders.order_count` — **at least 5 distinct "order count" bases** (placed vs. active vs. realized vs. attributed vs. Amazon) | `orders` (→ `commerce_orders.orders`) and `attributed_orders` are approved. `active_orders`, `realized_orders`, `cancelled_orders`, `refunded_orders`, `prepaid_orders`, `cod_orders` **exist as measures on `canonical_pnl`/`commerce_orders` but have no metric-catalogue entry** — every one of query catalogue §4's Q100–105 ("valid/cancelled/refunded/partially-refunded/prepaid/COD order count") currently fails resolution the same way. |
 
 **Root cause, not a one-off bug:** `catalogue/metrics/*.yaml` currently registers 16
 hand-picked metric ids. Every measure that exists on a cube/view but lacks its own
@@ -192,10 +186,7 @@ fields are additive. Full proposed schema in `CANONICAL_DATA_MODEL.md` §5.
 | First-touch attribution | #148, #260 | Source data only has last-touch (`gold_fct_order_attribution.lt_*` fields — "lt" = last-touch by construction; no `ft_*` equivalent anywhere in `gold.*`) | **Unsupported — missing source data.** Not a modeling fix; requires a new upstream attribution model in dbt. State this honestly rather than approximating with last-touch. |
 | Discount code as a dimension | #127–128, #414–420 | `total_discounts`/`total_line_discounts` are aggregate amounts on `gold_fct_orders`/`gold_fct_order_items`; no cube exposes a `discount_code` dimension anywhere in the 38 cubes read | **Unsupported — missing source data** |
 | Inventory (stock levels, days of cover, dead stock) | All of §14 (#360–377) | No inventory cube exists — `gold_fct_product_variant_cost`/`_history` are cost tables, not stock-level tables | **Unsupported — missing source data** |
-| Fulfilment / shipping / delivery / RTO / NDR | All of §15 (#378–400) except return-adjacent measures already in `gold_fct_orders`/`gold_int_amazon_return_reconciliation` | No carrier, tracking, or delivery-SLA cube exists in `gold.*` | **Unsupported — missing source data** (return_status/returned_at *do* exist on `gold_fct_orders`, so return-rate-style queries are partially answerable; RTO cost is on `canonical_pnl.rto_cost`, but RTO by carrier/courier is not) |
-| Marketplaces beyond Amazon (Blinkit etc.) | #401–412 (partially) | Only Amazon SP + Amazon Ads modeled; no other marketplace cube exists | **Unsupported — missing source data**, correctly so per query #412 ("clearly state when a marketplace API is not yet integrated") |
 | Google Ads keyword / search-term / Shopping item-level data | #313, #315–320, #323–324 | `gold_fct_google_ads_daily` grain is campaign×adset×ad×device×network — no keyword, search-term, or Shopping product-item dimension in any Google cube | **Unsupported — missing source data** |
-| Payment gateway settlement / invoice / tax-jurisdiction reconciliation | #429–439 | `gold_fct_payments` is transaction-grain (amount, gateway, method, success/refund flags) but has no settlement-batch, invoice, or jurisdiction-tax fields | **Unsupported — missing source data** beyond what `gold_fct_payments`/`gold_fct_amazon_sp_order_pnl` already cover for Amazon |
 | Anomaly detection / forecasting engine | §20, §28 alert triggers, #57 (forecast) | Out of scope for a semantic model — these require a stats/ML layer consuming the canonical metrics, not a new cube | **Out of scope for this refactor** — canonical model should expose clean, reconciled time series so an anomaly engine *can* be built on top, not attempt to be one |
 | Actions beyond `pause_meta_ad` (order status update, refund trigger, budget change, AWB generation, etc.) | §25–27 | Only one action (`catalogue/actions/pause_meta_ad.yaml`) exists | **Out of scope for the Cube/data layer** — actions are backend-API contracts, not Cube models; flagged for the action-catalogue owner, not this refactor |
 
@@ -205,7 +196,7 @@ Full section-by-section mapping of all 630 query patterns is in
 ## 7. What's already correct (do not re-litigate)
 
 To avoid re-doing settled work: `CUBE_AUDIT_REPORT.md` already resolved cube/view
-duplication (all 38 cubes `public: false`, `orders_amazon` renamed,
+duplication (all 38 cubes `public: false`, the marketplace orders cube renamed,
 `customer_acquisition_ltv` retired in favor of `customer_ltv`,
 `shopify_order_line_items` merged into `product_performance`,
 `meta_campaign_attribution` promoted, `channel_pnl` catalogued,

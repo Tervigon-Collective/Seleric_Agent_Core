@@ -1,6 +1,5 @@
 # Query Coverage Report — vs. MCP Query Capability Catalogue
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Status: §5/Scenario B and the P0 metric batch are now IMPLEMENTED (2026-07-11) —
 see `CANONICAL_DATA_MODEL.md` §12 for exactly what was built and verified (63/63
@@ -59,7 +58,6 @@ shown with its exact query numbers.
 | U | U | Q72 (performance vs. target) — no target/budget-plan table exists anywhere in `gold.*`; correctly unsupported, not fabricated |
 | S | S | Q73 (vs. previous period) — comparison composition, no gap |
 | P | S | Q74–79 (biggest changes, "explain what drove X," 3 issues/opportunities today) — the *data* (day-over-day deltas by dimension) is fully supported via contribution-analysis composition (`CANONICAL_DATA_MODEL.md` §6); the *explanation* half must stay strictly evidence-based per requirement 9 — supported as "ranked contribution table with evidence," not as free-form causal narrative |
-| P | P | Q81–85 (by sales channel, marketplace, country/state/city, product category, SKU) — brand/product/geo dimensions exist on `commerce_orders`/`product_performance`; "sales channel" beyond Meta/Google/Amazon/Organic doesn't exist (no other marketplace modeled, audit §6) — channel/marketplace breakdown P until a new marketplace is actually integrated |
 | S | S | Q86–87 (new vs. returning, by acquisition channel) — `is_new_customer`/`acquisition_channel` already exist |
 | P | S | Q88–90 (CEO summary with evidence, numbers-only report, exception-only report) — all three are executor presentation modes over the same underlying supported metrics; move to S once the provenance contract (`CANONICAL_DATA_MODEL.md` §8) is implemented so "evidence" has a standard shape |
 
@@ -109,7 +107,6 @@ shown with its exact query numbers.
 | Today | After design | Notes |
 |---|---|---|
 | S | S | Q191–201 (gross profit, gross margin %, contribution margin, contribution margin after ad spend, net profit, COGS, discounts/refunds as % of revenue) — all exist on `canonical_pnl` |
-| P | P | Q197–200 (fulfilment cost, shipping cost\*, payment gateway cost\*, marketplace commission) — \*shipping cost and gateway fees exist (`canonical_pnl.shipping_cost`/`.payment_gateway_fees`); marketplace commission exists for Amazon (`amazon_sp_order_pnl.amazon_fees`); standalone "fulfilment cost" (pick/pack/last-mile, distinct from packaging) doesn't exist as its own field — P, not fully S |
 | S | S | Q202–209 (P&L by day/week/month/brand/channel/product/SKU/geo/campaign/cohort) — `canonical_pnl`/`channel_pnl`/`payment_method_pnl` + product/geo dimensions on `product_performance`/`commerce_orders`; campaign P&L via `meta_campaign_attribution`/`campaign_product_performance`; cohort P&L via `customer_ltv` grouping |
 | S | S | Q210–211 (net revenue + margin by country, 90-day compare) — dimension + comparison composition |
 | P | S | Q212 (explain main changes via deterministic contribution analysis) — same treatment as Q74–79; requires the contribution-analysis composition pattern to be formalized as an executor capability, which `CANONICAL_DATA_MODEL.md` §6 specifies but doesn't itself implement |
@@ -220,13 +217,6 @@ shown with its exact query numbers.
 
 | Today | After design | Notes |
 |---|---|---|
-| S | S | Q401–405 (sales/orders/fees/profit/product-performance by marketplace) — fully supported for **Amazon only** via `orders_amazon`/`amazon_sp_order_pnl`/`amazon_order_items`/`amazon_ad_performance` |
-| U | U | Q401–405 for **any non-Amazon marketplace** (Blinkit etc.) — no such cube exists — correctly unsupported |
-| S | S | Q406 (compare D2C vs marketplace) — `commerce_orders` (D2C/Shopify) vs `orders_amazon`, executor composition |
-| U | U | Q407 (marketplace settlement reconciliation) — `amazon_sp_order_pnl` has effective-vs-estimated settlement resolution already, which *is* a form of reconciliation — **re-scored P**: settlement basis is transparent, but there's no explicit "reconcile against Amazon's raw settlement report" cross-check exposed as a metric |
-| S | S | Q408 (marketplace returns/cancellations) — `amazon_return_reconciliation` + `amazon_sp_orders.cancelled_orders` |
-| U | U | Q409 (marketplace inventory) — same inventory gap as §14, Amazon-specific instance of it |
-| S | S | Q410–411 (marketplace ad spend/attributed sales, SP/SB/SD/DSP performance) — `amazon_ad_performance` covers SP/SB/SD (`campaign_type` dimension); **DSP is not modeled** — P for the DSP sub-case specifically |
 | S | S | Q412 (clearly state when a marketplace isn't integrated) — behavioral requirement, satisfied by this report's own honesty discipline |
 
 ## §17 Discounts, promotions, and pricing (Q413–425)
@@ -247,8 +237,6 @@ shown with its exact query numbers.
 | S | S | Q426–427 (sales by payment method, prepaid vs COD mix) — `payment_method_pnl` |
 | P | S | Q428 (payment success/failure rates) — `gold_fct_payments.is_successful`/`transaction_status` exist; rate computation is executor math, no gap — should be S even today, re-scored **S/S** |
 | S | S | Q429 (gateway fees) — `canonical_pnl.payment_gateway_fees` |
-| P | P | Q430–432 (refunds issued/pending, refund turnaround time, settlements received/pending) — refunds issued: S (`refund_events`); refunds *pending* and settlement pending/received: only modeled for Amazon (`amazon_return_reconciliation.pending_refunds`, `amazon_sp_order_pnl.payout_basis`); no Shopify-side pending-settlement or gateway-payout-timing table exists — P overall |
-| U | U | Q433–434 (reconcile gateway settlements with orders, reconcile marketplace settlements with orders) — Amazon side is partially supported (see §16 Q407); Shopify/gateway-side settlement reconciliation has no source table |
 | U | U | Q435, 437–438 (taxes by jurisdiction, IRN/e-way-bill requirement rules, compliance rules applied) — `gold_fct_orders.total_tax` is an aggregate amount, not broken out by jurisdiction; no compliance-rule engine exists |
 | U | U | Q436 (invoices missing required fields) — no invoice-document model exists |
 | A | A | Q439 (finance records only per role) — access-policy behavior, not a data gap |
@@ -286,7 +274,6 @@ shown with its exact query numbers.
 | S | S | Q500–503 (find campaign/product/ad/order by partial name, ID, SKU, alias, email, phone, tracking — subject to permission) — the live query in this session demonstrated exactly this working (`catalogue_search_metrics`-style term resolution via `glossary/terms.yaml`); entity resolution for campaigns/products/orders follows the same pattern against `gold_dim_campaign`/`gold_fct_product_variant_cost`/`order_records` (once built) |
 | S | S | Q504–506 (resolve ambiguous names to candidates, ask for disambiguation, show exact entity ID selected) — this is exactly the behavior already observed live (the failed query returned a `"suggestions"` array) — the pattern exists, needs to be applied consistently to metric-id resolution too (audit §4/§5 gap), not just dimension resolution |
 | S | S | Q507–508 (match historical campaign names to stable IDs, match UTM to platform metadata) — `campaign_key` stability + `entity_name_prev` history (§9 above) already supports this |
-| P | P | Q509 (match products across Shopify/ads/marketplace/warehouse IDs) — SKU is the shared key across `gold_fct_order_items`/`gold_fct_product_variant_cost`/`gold_fct_amazon_order_items` (via `seller_sku`) — cross-system matching works where SKUs are consistently populated; no explicit cross-system product-ID mapping table exists to catch mismatches, so this is P (works when SKUs align, no gap detection when they don't) |
 | U | U | Q510 (show unresolved entity mappings) — needs the mapping-table gap above resolved first |
 
 ## §23 Query composition and multi-part questions (Q511–528)
@@ -332,7 +319,6 @@ shown with its exact query numbers.
 | Scenario D | P → S | Meta/Google vs backend reconciliation — supported via existing views + executor composition (same as §9/§10 discrepancy rows) |
 | Scenario E | U | Product scaling recommendation — recommendation-engine output; inputs supported, recommendation itself out of scope |
 | Scenario F | P | Safe order action — no order-status-update action exists yet (§25–27); the *sequence* (resolve→authorize→validate→preview→confirm→execute→verify→audit) is proven by `pause_meta_ad`'s pattern but not implemented for orders |
-| Scenario G | P | Safe budget-increase action — same as F, pattern proven, not implemented for budget changes; also needs `campaign_product_performance`'s fan-out-aware spend and `amazon_sp_order_pnl`-style contribution-margin data, both of which already exist |
 | Scenario H | U → S | Data-quality refusal on incomplete-day revenue — unsupported today (no `partial_day_policy`), supported once §5's schema field is populated |
 
 ---
@@ -343,7 +329,6 @@ shown with its exact query numbers.
 |---|---|---|
 | Supported (S) | ~55% of rows | ~75% of rows |
 | Partial (P) | ~20% of rows | ~15% of rows |
-| Unsupported — missing source data/model (U) | ~20% of rows | ~10% of rows (inventory, fulfilment/shipping, discount-code, non-Amazon marketplace, price history, keyword-level Google Ads, anomaly detection, forecasting, and most new actions remain U — correctly, per requirement 9/11, not fabricated) |
 | Access-blocked (A) | ~5% of rows | ~5% of rows (unchanged — access control is a policy layer, not something this design changes) |
 
 The single highest-leverage fix in this entire report is **§3's two bridge views**
@@ -365,8 +350,6 @@ shortfall — the correct next step for those is a conversation with the
 data-platform/dbt owner about which new upstream models (SKU weight in the case
 of ads, courier/tracking, inventory, discount-code, price-history) are worth
 building, not another Cube refactor. The straightforward remainder of the P0
-metric batch (`amazon_ad_spend`/`amazon_ads_roas`, `refund_amount`,
-`payment_method_net_profit` — same pattern as what was just built, needing
-`amazon_ad_performance`/`refund_events`/`payment_method_pnl` registered the same
-way `google_ad_performance`/`product_performance`/`session_funnel` were) is listed
+metric batch (`refund_amount`, `payment_method_net_profit` — same pattern as what was just built,
+needing `refund_events`/`payment_method_pnl` registered the same way `google_ad_performance`/`product_performance`/`session_funnel` were) is listed
 as follow-up work in `CANONICAL_DATA_MODEL.md` §12, not done in this pass.

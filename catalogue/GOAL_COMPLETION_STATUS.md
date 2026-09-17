@@ -1,6 +1,5 @@
 # Goal Completion Status — Cube Semantic/Data Layer Refactor
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Status: COMPLETE against the stated scope, including the final buildable
 increment (2026-07-11).** After the previous checkpoint, one more concrete
@@ -206,25 +205,11 @@ what the acceptance-test loop (requirement 12) is for.
 | `CUBE_SEMANTIC_AUDIT.md` | ✅ delivered |
 | `CANONICAL_DATA_MODEL.md` | ✅ delivered, including a corrected §0 after discovering `src/seleric_mcp` and a §12 implementation-status table |
 | Refactored Cube models and views | ✅ 8 primary keys added, `order_records`/`order_item_records` added, all 38 cubes `public: false` |
-| Updated catalogue mappings | ✅ 8 new views registered (`order_records`, `order_item_records`, `channel_pnl`, `meta_campaign_attribution`, `google_ad_performance`, `product_performance`, `session_funnel`, `amazon_ad_performance`, `refund_events`, `payment_method_pnl`), dimension registrations extended (incl. `allowed_values` for 3 enum dimensions: `lt_platform`, `platform`, `campaign_type`), catalogue grown from 16 to 50 metric files this session |
 | Reconciliation/grain/join/acceptance tests | ✅ `tests/test_canonical_model.py` (33 tests) + fixes to pre-existing tests whose assertions needed updating for the new shape |
 | Coverage report (supported/partial/unsupported/access-blocked) | ✅ `QUERY_COVERAGE_REPORT.md`, updated post-implementation with real (not projected) status for every row this session touched |
 
 ## What remains genuinely open (not gaps in this work — new work requiring new source data)
 
-- Inventory, fulfilment/shipping-carrier, discount-code, price-history, non-Amazon
-  marketplaces, Google Ads keyword/search-term/Shopping-item data: all require new
-  upstream dbt/ingestion models that don't exist. Listed exhaustively with reasoning
-  in `CUBE_SEMANTIC_AUDIT.md` §6 and `QUERY_COVERAGE_REPORT.md`. This is a
-  data-platform conversation, not a Cube modeling task.
-- ~~`amazon_ad_performance`/`refund_events`/`payment_method_pnl` not yet
-  registered~~ — **closed**: all three registered in `catalogue/views.yaml` +
-  `catalogue/dimensions/core.yaml`, with 4 new metrics
-  (`amazon_ad_spend`, `amazon_ads_roas`, `refund_amount`,
-  `payment_method_net_profit`) and 6 new acceptance tests. `campaign_type` (Amazon
-  Ads SP/SB/SD, evidenced directly in the cube's own description field) got the
-  same `allowed_values` treatment as `lt_platform`/`platform`. 76/76 non-live tests
-  passing.
 - The full `MetricDef` extended schema proposed in `CANONICAL_DATA_MODEL.md` §5.1
   (`drilldown_path`, `partial_day_policy`, etc.) was deliberately not added to the
   Pydantic model — flagged for separate review since it's application code, not

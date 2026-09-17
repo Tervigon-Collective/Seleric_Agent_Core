@@ -75,9 +75,9 @@ SUITE: list[dict] = [
     {"id": "B46", "cat": "funnel", "q": "Show cart and checkout abandonment rates, and the largest funnel drop-off, for the last 30 days.", "expect": "S"},
     {"id": "B47", "cat": "fulfilment", "q": "Show fulfilled, unfulfilled, cancelled, and returned order counts for the last 30 days.", "expect": "S"},
     {"id": "B48", "cat": "fulfilment", "q": "Show RTO rate by city, product, and payment method for the last 90 days.", "expect": "S"},
-    # Amazon removed from the serve layer / catalogue (2026-09-17): must fail closed.
-    {"id": "B49", "cat": "marketplace", "q": "Compare D2C (Shopify) versus Amazon marketplace sales, orders, fees, and profit for the last 30 days.", "expect": "U"},
-    {"id": "B50", "cat": "marketplace", "q": "Show Amazon ad spend and attributed sales by campaign type (SP/SB/SD) for the last 30 days.", "expect": "U"},
+    # No marketplace connector is served — both must fail closed, not answer with Shopify.
+    {"id": "B49", "cat": "marketplace", "q": "Compare D2C (Shopify) versus marketplace sales, orders, fees, and profit for the last 30 days.", "expect": "U"},
+    {"id": "B50", "cat": "marketplace", "q": "Show marketplace ad spend and attributed sales by campaign type for the last 30 days.", "expect": "U"},
     {"id": "B51", "cat": "discounts", "q": "Show discount amount and discount rate, and full-price versus discounted sales, for the last 30 days.", "expect": "S"},
     {"id": "B52", "cat": "payments", "q": "Show sales by payment method and prepaid versus COD mix for the last 30 days.", "expect": "S"},
     {"id": "B53", "cat": "payments", "q": "Show payment gateway fees and refunds issued for the last 30 days.", "expect": "S"},

@@ -1,6 +1,5 @@
 # Serve Layer Architecture & Cross-Layer Reconciliation
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 Status: baseline measured 2026-09-07. Enforced by `scripts/reconcile_layers.py`.
 
@@ -69,7 +68,6 @@ and the group determines the fix:
 | Group | Tables | Verdict |
 |---|---|---|
 | **Finance depth** | `fct_daily_pnl` (145 cols), `fct_finance_waterfall_daily`, `fct_payments`, `fct_product_variant_cost`, `fct_product_variant_cost_history` | Real gap. The waterfall and payment-level detail behind the P&L cannot be reached, so the agent can state net profit but cannot decompose it. |
-| **Amazon depth** | `fct_amazon_ads_ads_daily`, `fct_amazon_ads_ad_groups_daily`, `fct_amazon_ads_ad_order_attribution`, `fct_amazon_order_items`, `fct_amazon_returns_daily`, `fct_amazon_sp_settlements`, `fct_amazon_sp_settlement_lines` | Real gap. Amazon ads stop at campaign grain while Meta reaches ad grain — the asymmetry is invisible to a client. |
 | **Growth marts** | `mart_ad_funnel_daily`, `mart_landing_page_daily`, `mart_meta_ad_neurotag_daily` (123 cols), `mart_meta_ad_daily_combined`, `mart_meta_ad_daily_performance`, `mart_geo_*`, `mart_city_*`, `fct_city_weather_day` | Built and populated, served to nobody. Either port them or retire them — a mart with 29k rows and no consumer is a maintenance liability. |
 | **Change history** | `fct_meta_ads_status_history`, `fct_google_ads_status_history`, `fct_order_attribution_credit` | Real gap, and the highest-value one: without status history the agent cannot answer "what changed before performance moved", which is the question clients actually ask. |
 
@@ -86,9 +84,8 @@ attributes behind it, so a client can filter by an opaque id and nothing else:
   no `dim_adset` bid strategy or budget, no `dim_adset_geo` targeting.
 - `serve.google_ads_daily` and `google_ads_hourly` carry `campaign_id` but no
   `campaign_status`, `campaign_objective`, budget or bid strategy — while
-  `serve.meta_ads_daily` and `serve.amazon_ads_daily` do carry
-  `campaign_status`. This is exactly why `catalogue/dimensions/core.yaml`
-  can map `campaign_status` for Meta and Amazon but not Google.
+  `serve.meta_ads_daily` does carry `campaign_status`. This is exactly why
+  `catalogue/dimensions/core.yaml` can map `campaign_status` for Meta but not Google.
 - `serve.session_funnel` carries the ad key set but no campaign/adset/ad names.
 - `serve.purchase_sequence` carries `customer_id` but no customer attributes.
 
@@ -102,11 +99,10 @@ A serve relation is an **output port**, not a query convenience. It should be:
   attribute of the dimensions it keys into. If a client would want to group or
   filter by it, it is a column here — not a join they cannot express.
 - **Basis-explicit in the column name** where two bases coexist
-  (`gross_sales_excl_tax` vs `amazon_gross_revenue` incl. GST). The GST boundary
-  between Shopify and Amazon is the single largest source of wrong answers, and
-  naming is the cheapest defence.
+  (`gross_sales_excl_tax` ex-GST vs a marketplace `gross_revenue` incl. GST). A GST boundary between
+  two channels is the single largest source of wrong answers, and naming is the cheapest defence.
 - **Carrying its own provenance columns**: `is_final`, `source_basis`,
-  `data_as_of`, `model_version` — the Meta/Google/Amazon ads relations already
+  `data_as_of`, `model_version` — the Meta/Google ads relations already
   do this and it should be the standard, not the exception.
 
 ### 2.4 Materialisation
@@ -126,16 +122,13 @@ gold sync cadence, and expose `data_as_of` so the freshness gate keeps working.
 
 Fixed in this pass:
 
-- Four data products (`SessionFunnel`, `CustomerData`, `ChannelAttribution`,
-  `AmazonCommercePerformance`) declared **zero** Cube output ports, so their
-  certified views were governed by nothing. Cube ports added and
+- Three data products (`SessionFunnel`, `CustomerData`, `ChannelAttribution`) declared **zero** Cube
+output ports, so their certified views were governed by nothing. Cube ports added and
   `product_registry.yml` regenerated.
-- `AmazonCommercePerformance` resolved to `amazon_finance_charge_types_daily`,
-  a serve table name that is not a Cube view. Corrected.
 - The Meta and Google **hourly** views belonged to no product and no domain.
   Assigned to their existing platform products.
-- Six views certified in OpenMetadata (`touchpoints`, `attribution_paths`, and
-  the four `AmazonAccounts` ports) were absent from `catalogue/views.yaml`, so
+- Two views certified in OpenMetadata (`touchpoints`, `attribution_paths`) were absent from
+`catalogue/views.yaml`, so
   the agent had no date axis for them and the staleness gate could not fail
   closed. Registered with date axis and freshness.
 - Eight views belonged to no ontology domain, so no module could scope them and
@@ -146,11 +139,9 @@ Fixed in this pass:
 Closed 2026-09-09 (no longer a product-assignment decision):
 
 - `Commerce.CrossChannelCommerce` owns `orders_all_channels`, `sales_all_channels`, `returns_cancels_all_channels` (mixed GST is a contract term). Agent registry now exposes the product.
-- `Attribution.ChannelAttribution` owns `channel_pnl` and `platform_attribution_commerce`; `AmazonCommercePerformance` owns `amazon_attribution_overview`.
 - `daily_pnl` is an alias port of `Finance.CanonicalPnl`. Prefer `canonical_pnl` for new catalogue metrics.
 - `ltv_cac` is on `Customer.CustomerIntelligence`.
 - `WebAnalytics.EventStream` exists in OpenMetadata and the agent registry (`web_events`, `web_events_daily`).
-- `serve.amazon_orders` has a cube and is a certified `amazon_orders` view.
 - `product_ad_spend` was removed from Cube and `catalogue/views.yaml` — `serve.product_ad_spend_daily` does not exist. Restore only after the table is rebuilt.
 
 Declared lineage now matches ClickHouse gold-closure in `catalogue/openmetadata/registry.yaml` (verified 2026-09-09). `canonical_pnl` no longer claims `gold.fct_daily_pnl`; `commerce_orders` no longer claims `gold.dim_customers`.
@@ -164,12 +155,12 @@ the default in `ontology.yaml` `grain_defaults.by_channel` (also returned by
 
 | When | Product | Dimension | Measure |
 |---|---|---|---|
-| Unspecified by-channel / channel-wise, no measure | **ChannelAttribution** | `channel` (closed set: meta / google / organic_shopify / unattributed / amazon / organic_amazon) on `channel_attribution` | **`channel_orders`** (certified). Named revenue companion is `channel_net_revenue` (draft — glossary still maps “sales by channel” here; do not `metrics_query` until certified). |
+| Unspecified by-channel / channel-wise, no measure | **ChannelAttribution** | `channel` (closed set: meta / google / organic_shopify / unattributed) on `channel_attribution` | `channel_orders` |
 
 Alternates — pick only when the user names them, never by regex:
 
 - Last-touch FINE: `lt_channel` + `attributed_net_revenue` / `attributed_orders` (MarketingAttribution / `order_attribution`).
-- Marketplace shopify \| amazon: `channel` on `orders_all_channels` / `sales_all_channels` (CrossChannelCommerce).
+- All-channels commerce: `channel` on `orders_all_channels` / `sales_all_channels` (CrossChannelCommerce).
 - Funnel/web FINE: `channel` on `funnel_daily` / `session_funnel`.
 - P&L Overview: `channel` on `channel_pnl` (`meta_attribution_net_sales` / `google_attribution_net_sales`).
 
@@ -204,9 +195,7 @@ Improved in this pass — `catalogue://cubes/{view}` now renders, per view:
 
 Standards the gate now enforces:
 
-- A **view description** must state grain, date axis, scope and boundary. Seven
-  are still one-liners (all four `AmazonAccounts` ports, `touchpoints`,
-  `attribution_paths`, `return_lifecycle`).
+- A **view description** must state grain, date axis, scope and boundary. Three are still one-liners (`touchpoints`, `attribution_paths`, `return_lifecycle`).
 - A **metric description** must state basis, scope, date axis and what it is
   *not*, so the agent cannot silently substitute a sibling. Seventeen are still
   under 60 characters — mostly raw platform counters (`google_clicks` at 18
@@ -237,8 +226,7 @@ Standards the gate now enforces:
 3. **Denormalisation** — creative attributes onto the Meta relations, campaign
    status/objective/budget onto Google, then the dimension attributes listed in
    §2.2. This is what unblocks questions clients already ask.
-4. **Coverage** — status history first (change-vs-performance questions), then
-   Amazon ad/ad-group grain, then finance depth. Retire the geo/weather/neurotag
+4. **Coverage** — status history first (change-vs-performance questions), then ad-group grain, then finance depth. Retire the geo/weather/neurotag
    marts or port them; do not leave them in limbo.
 5. **Materialisation** — once the wide relations exist, move them off `VIEW`.
 
@@ -338,16 +326,7 @@ storage problem: a query without `FINAL` sees every unmerged version.
 - **Reads:** all 43 serve view definitions were audited alias-aware
   (`FROM gold.t AS x FINAL`, not just `FROM gold.t FINAL`). Five relations read
   without `FINAL` but dedupe explicitly with `argMax(...) ... GROUP BY key`,
-  which is equivalent and correct: `order_attribution`, `channel_pnl`,
-  `amazon_attribution_overview`, `amazon_commerce_daily`,
-  `amazon_return_items_delivered`.
-- **One genuine bug**, now fixed: `serve.amazon_finance_charge_types_daily` did
-  `sum(e.amount)` / `sum(1)` over `gold.fct_amazon_sp_finance_events` and
-  LEFT JOINed `gold.dim_amazon_charge_type` with **no `FINAL` on either side**,
-  while its own header comment claimed `FINAL`. Latent, not active — both
-  sources happen to be merged — but `fct_amazon_sp_finance_events` carries 12
-  active parts, so any re-ingest inflates every charge amount until a background
-  merge catches up. Totals unchanged after the fix (₹456,548.39 / 33,326 lines).
+  which is equivalent and correct: `order_attribution` and `channel_pnl`.
 
 Note `gold.fct_order_items` runs **81 active parts** and `fct_orders` 63. Nothing
 reads them without `FINAL` today, so this is safe — but it is the reason `FINAL`
@@ -411,14 +390,12 @@ boot-time drift check now reports `"broken": []` for the first time.
 
 `reconcile_layers.py` is **0 unwaived blockers**. Remaining findings are explicit
 waivers: unused/broken gold facts and marts (`fct_daily_pnl`, cost tables,
-settlement upstream, platform-reported Amazon ad-order attribution, unused
+settlement upstream, platform-reported marketplace ad-order attribution, unused
 growth/geo marts), join-only cubes (`serve_commerce_order_events`,
 `serve_product_ad_spend_daily`), 1:many `dim_adset_geo`, and status-history
 ports that must not join *current* dims onto snapshot change rows.
 
-New certified ports: Meta/Google status history; Amazon ads ad-group and
-product-ad grain; Amazon order items and returns-daily; finance waterfall and
-Shopify payments. Cube members and catalogue metrics are fully described.
+New certified ports: Meta/Google status history; finance waterfall and Shopify payments. Cube members and catalogue metrics are fully described.
 
 ### 8.5 historically open (superseded)
 
@@ -426,7 +403,6 @@ The 2026-09-07 snapshot below is kept as provenance. It is no longer the live ga
 
 - **26 gold facts/marts with no serve port** — now ported or waived.
 - **9 Cube views with no owning data product** — products now claim them.
-- `serve.amazon_orders` has no cube — cube + view exist.
 - 28 remaining `NOT_DENORMALISED` — Google/Meta/session/purchase denormalised;
   `dim_adset_geo` waived (1:many).
 - ~950 Cube members still undescribed — descriptions applied 2026-09-09.
@@ -447,7 +423,6 @@ Codified as `scripts/check_data_quality.py` (data-level, slow) alongside
 | Serve relations unique on their contract grain | **29 / 29 clean** |
 | Catalogue `aggregation` vs Cube measure type | **0 mismatches** (238 metrics vs 990 measures) |
 | Non-additive quantities exposed as `sum` (reach, distinct, rates) | **0** |
-| Ad spend: platform view vs `canonical_pnl` | **exact**, Meta / Google / Amazon |
 | Hourly vs daily spend + impressions | **exact**, Meta and Google |
 | P&L accounting identities | **all hold exactly** |
 
@@ -496,8 +471,6 @@ Worst offenders:
   breakdowns live in `breakdown_type` (region, age_and_gender, placement,
   platform_device, publisher_platform); these two columns are modelling
   leftovers.
-- `amazon_ad_performance.campaign_status / campaign_type / bidding_strategy /
-  portfolio_id / daily_budget` — all constant or empty.
 - `customer_data.accepts_marketing` — constant `0` for all 29,105 customers.
   Nobody is marked opted-in; treat as unusable for consent decisions.
 
@@ -512,7 +485,6 @@ gates cross-checking each other.
 
 ### 9.3 Waivers
 
-19 `brand_id` / account findings are waived with reasons: Amazon SP, Snowplow and
-hourly ad ingest are onboarded for brand 20 only, so single-tenancy is the correct
-state of the world there. Each waiver stops being valid the moment a second brand
+The `brand_id` / account findings are waived with reasons: Snowplow and hourly ad ingest are
+onboarded for brand 20 only, so single-tenancy is the correct state of the world there. Each waiver stops being valid the moment a second brand
 is connected, and the finding reappears automatically.

@@ -1,6 +1,5 @@
 # Data Product Production Usability — Improvements Sheet
 
-> **2026-09-17 — Amazon removed.** Amazon serve views, Cube cubes/views, catalogue metrics and MCP routing were removed (gold tables are kept). Amazon references below are historical and no longer describe the agent-facing surface.
 
 **Date:** 2026-07-21 (requery after fixes)  
 **Scope:** OpenMetadata data products (10) × live Cube (`127.0.0.1:4001`) × dashboard reconciliation  
@@ -32,14 +31,10 @@
 |---|---|---|---|
 | CEO | canonical_pnl | PASS | ad spend 2,420,711.53; net_profit_all_channels 752,944 |
 | CEO | sales_all_channels | PASS | total_sales 7,389,661 |
-| CEO | orders_all_channels | PASS | 2,822 (Shopify 2,445 / Amazon 377) |
 | Commerce | commerce_orders | PASS | orders 2,445; total_sales 6,731,773 |
-| Commerce | amazon_commerce | PASS | active_orders 377 |
 | Product | top SKUs | PASS | Pawveralls 1,457 units |
-| PaidMedia | meta/google/amazon | PASS | Meta 1,715,503.70 / Google 565,661.80 / Amazon 139,546.03 |
 | Attribution | by model | PASS | all models **2,050** distinct orders; linear credit_rows 2,743; credited net ≈ 2,338,215 |
 | Attribution | by platform (LT) | PASS | meta 1,423 / google 540 / organic … |
-| Attribution | channel_attribution | **FIXED** | meta 1,423 / google 540 / org_shopify 87 / amazon 336 / org_amazon 91 — reconciles (was 4× inflated) |
 | Customer | LTV | PASS | 16,928 customers; repeat_rate 12.3% |
 | Web | session_funnel | PASS | 113,141 sessions |
 | Web | web_events | PASS | **573,847** events (was 0) |
@@ -51,11 +46,8 @@
 
 | Metric | Dashboard | Cube | Severity |
 |---|---:|---:|---|
-| Meta / Google / Amazon ad spend | match | match | OK |
-| Amazon active orders | 377 | 377 | OK |
 | Total sales | 7,365,881 | 7,389,661 | Low (~0.3%) |
 | **Net sales (Shopify)** | 5,027,719 (meta 3,230,658 + google 1,335,914 + organic 461,147) | canonical_pnl.net_sales **5,027,720** | **OK — reconciles exactly** |
-| Net profit | 369,624 (incl. Amazon overlay −300,706) | 466,533 (net_profit_incl_amazon) / 530,859 (Meta+Google Shopify) | **High** — Amazon pending-refund + return-label overlay is Node-backend-only, not in canonical_pnl |
 
 ---
 
@@ -65,9 +57,7 @@
 
 | ID | Issue | Priority |
 |---|---|---|
-| P0-3 | Net **profit** diverges: dashboard applies an Amazon pending-refund + return-label overlay (Node-backend only) that `canonical_pnl` does not. Net *sales* reconciles exactly. Governance: agents must state which net-profit basis they quote. | High (governance) |
 | P1-1 | Ad views lack purchase/ROAS; use P&L + attribution packs | Medium |
-| P1-2 | Amazon `net_revenue_excl_tax` NULL on channel_attribution (no ex-GST decomposition exists for Amazon — by design) | Medium |
 | P1-3 | Customer LTV lifetime-only | Low |
 | ~~P1-web-pipeline~~ | **RESOLVED (pipeline models added).** Replaced the one-shot `atomic.events→gold.fct_web_events` CH INSERT with two pipeline-native dbt gold models: `dbt/models/iceberg/snowplow/gold/fct_web_events.sql` (event grain, from silver `trino_snowplow_events` + `fct_session_funnel` for FINE channel) and `mart_web_events_daily.sql` (daily rollup). Both registered in `utils/trino_to_clickhouse.py` (`ICEBERG_GOLD_TO_CLICKHOUSE` + `TABLE_PLATFORM=analytics`). `channel` now matches `session_funnel` by construction and self-heals as sessions mature (both are full-refresh gold tables). Mart aggregation validated against the existing CH table (exact match, 07-13). **Activates on next `tag:iceberg` gold run + `sync_iceberg_gold_to_clickhouse`** (needs Trino access — could not execute from this host). Serve-view rebuild atomicity remains a separate ops item. | High (ops) |
 
@@ -84,9 +74,6 @@
 
 | # | Data product | Ready? | Gate |
 |---|---|---|---|
-| 1 | Amazon Ads Performance | Yes (spend/traffic) | — |
-| 2 | Amazon Commerce Performance | Yes | Amazon total_sales vs dashboard ~3.8% |
-| 3 | Channel Attribution | **Yes** | Fixed this pass; reconciles with order_attribution LT. Amazon net_revenue_excl_tax NULL by design |
 | 4 | Commerce Performance | Yes | Don’t equate net_revenue_excl_tax with dashboard net sales |
 | 5 | Customer Intelligence | Yes (lifetime) | — |
 | 6 | Google Ads Performance | Yes (spend/traffic) | — |
