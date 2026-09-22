@@ -425,6 +425,84 @@ def build_server(settings: Settings) -> FastMCP:
             unknown = _unknown_module(effective)
             if unknown:
                 return unknown
+        return _metric_definition(metric_id, effective)
+
+    # Keys a fields= projection on catalogue_get_metrics always keeps.
+    _ALWAYS_KEPT_FIELDS = ("id", "queryable", "query_as", "resolved_from", "resolution_notice")
+    _MAX_BATCH_METRICS = 10
+
+    @mcp.tool()
+    def catalogue_get_metrics(
+        metric_ids: list[str],
+        module: str | None = None,
+        fields: list[str] | None = None,
+    ) -> dict:
+        """Batch form of catalogue_get_metric: full definitions for up to 10
+        metric ids in ONE call. Use this whenever a question needs more than
+        one metric's dimensions/filters/formula/caveats — do not chain
+        catalogue_get_metric, and do not dump the whole catalogue.
+
+        Returns {metrics: {canonical_id: definition}, errors: {id: error}}.
+        One unknown or out-of-module id does not fail the batch. Aliases and
+        Cube members are remapped (resolved_from is set) and duplicates are
+        collapsed.
+
+        Pass fields=[...] to keep only those top-level keys per metric, e.g.
+        fields=["supported_dimensions", "supported_filters", "formula", "unit"]
+        for query planning. id, queryable and query_as are always kept.
+        """
+        _log_call("catalogue_get_metrics", metric_ids=metric_ids, module=module, fields=fields)
+        effective, refusal = _resolve_module(module)
+        if refusal:
+            return refusal
+        if effective is not None:
+            unknown = _unknown_module(effective)
+            if unknown:
+                return unknown
+        ids = list(dict.fromkeys(mid for mid in (metric_ids or []) if mid))
+        if not ids:
+            return {"error": "metric_ids must contain at least one metric id."}
+        if len(ids) > _MAX_BATCH_METRICS:
+            return {
+                "error": (
+                    f"Too many metric ids ({len(ids)}); at most {_MAX_BATCH_METRICS} "
+                    "per call. Split the request."
+                ),
+            }
+        metrics: dict[str, dict] = {}
+        errors: dict[str, dict] = {}
+        warnings: list[str] = []
+        for mid in ids:
+            out = _metric_definition(mid, effective)
+            if "error" in out:
+                errors[mid] = out
+                continue
+            canonical = out["id"]
+            if canonical in metrics:
+                continue
+            out.pop("catalogue_version", None)
+            if fields:
+                missing = [f for f in fields if f not in out and f not in _ALWAYS_KEPT_FIELDS]
+                for f in missing:
+                    msg = f"Unknown field '{f}' ignored."
+                    if msg not in warnings:
+                        warnings.append(msg)
+                keep = set(fields) | set(_ALWAYS_KEPT_FIELDS)
+                out = {k: v for k, v in out.items() if k in keep}
+            metrics[canonical] = out
+        result: dict[str, Any] = {
+            "metrics": metrics,
+            "errors": errors,
+            "catalogue_version": ctx.catalogue.version,
+        }
+        if warnings:
+            result["warnings"] = warnings
+        return result
+
+    def _metric_definition(metric_id: str, effective: str | None) -> dict:
+        """Full definition for one metric id (shared by catalogue_get_metric
+        and catalogue_get_metrics). Returns an error dict for unknown or
+        out-of-module ids."""
         looked_up = ctx.catalogue.lookup_metric(metric_id)
         if looked_up is None:
             result = ctx.catalogue.search(metric_id)

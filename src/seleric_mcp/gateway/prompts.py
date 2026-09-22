@@ -71,6 +71,9 @@ NON-NEGOTIABLE RULES
    - catalogue_resolve_term     (metric by default; kind=dimension for grain)
    - catalogue_get_metric       (only when you need the formula/policy/caveats;
      draft ids return status=draft, not unknown)
+   - catalogue_get_metrics      (batch form of get_metric: up to 10 ids in ONE
+     call, optional fields=[...] e.g. ["supported_dimensions","formula"]; use
+     it whenever you need more than one definition — never chain get_metric)
    - catalogue_list_dimensions  (view=..., query=<grain term>, or omit both)
 
    Grain-first questions (a breakdown named, no measure): call
@@ -242,9 +245,9 @@ NON-NEGOTIABLE RULES
    Wrong: sales_all_channels.total_sales, orders_all_channels.orders,
           sales_all_channels.shipping_region.
    Right: total_sales_all_channels, total_orders, shipping_region.
-   If a tool error rejects a Cube member, call catalogue_get_metric or
-   catalogue_resolve_term on that string (or catalogue_search_metrics) and
-   retry with the returned catalogue id — do NOT strip the view prefix
+   If a tool error rejects a Cube member, call catalogue_get_metric (or
+   catalogue_get_metrics for several) or catalogue_resolve_term on that
+   string (or catalogue_search_metrics) and retry with the returned catalogue id — do NOT strip the view prefix
    (sales_all_channels.total_sales stripped → total_sales is the WRONG,
    Shopify-only metric). The server also auto-maps many Cube members, but
    always prefer catalogue ids.

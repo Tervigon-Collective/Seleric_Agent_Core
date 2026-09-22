@@ -39,6 +39,15 @@ def test_malformed_block_is_stripped_not_rendered():
     assert "```" not in out["answer"]
 
 
+def test_inject_scope_forces_module_on_batch_metric_definitions():
+    a = A.inject_scope(
+        "catalogue_get_metrics", {"metric_ids": ["orders"], "module": "paidmedia"},
+        module="commerce", brand_id="20",
+    )
+    assert a["module"] == "commerce"
+    assert "catalogue_get_metrics" in A.ANALYST_TOOLS
+
+
 def test_inject_scope_forces_module_and_brand_filter():
     a = A.inject_scope("metrics_query", {"measures": ["x"]}, module="commerce", brand_id="20")
     assert a["module"] == "commerce"

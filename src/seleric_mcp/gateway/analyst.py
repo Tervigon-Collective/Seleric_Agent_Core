@@ -54,6 +54,7 @@ ANALYST_TOOLS = frozenset(
         "modules_list",
         "catalogue_search_metrics",
         "catalogue_get_metric",
+        "catalogue_get_metrics",
         "catalogue_get_ontology",
         "catalogue_related_metrics",
         "catalogue_list_dimensions",
@@ -75,6 +76,7 @@ MODULE_SCOPED_TOOLS = frozenset(
         "catalogue_search_metrics",
         "catalogue_get_ontology",
         "catalogue_get_metric",
+        "catalogue_get_metrics",
         "catalogue_related_metrics",
         "catalogue_list_metrics",
         "catalogue_bootstrap",
@@ -288,6 +290,8 @@ def _step_label(name: str, args: dict[str, Any]) -> str:
         return f"{name}: {q}" if q else name
     if name == "catalogue_get_metric" and a.get("metric_id"):
         return f"{name}: {a['metric_id']}"
+    if name == "catalogue_get_metrics" and a.get("metric_ids"):
+        return f"{name}: {', '.join(a['metric_ids'])}"
     return name
 
 

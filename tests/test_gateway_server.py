@@ -105,6 +105,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "catalogue_list_metrics",
         "catalogue_bootstrap",
         "catalogue_get_metric",
+        "catalogue_get_metrics",
         "catalogue_get_ontology",
         "catalogue_related_metrics",
         "catalogue_list_dimensions",
@@ -319,6 +320,64 @@ async def test_catalogue_get_metric_aliases_cube_member(built_server):
     assert out["id"] == "total_sales_all_channels"
     assert out["query_as"] == {"measures": ["total_sales_all_channels"]}
     assert out.get("resolved_from") == "sales_all_channels.total_sales"
+
+
+async def test_catalogue_get_metrics_batches_with_per_id_errors(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metrics")
+    out = fn(["orders", "sales_all_channels.total_sales", "nope_metric"])
+    assert set(out["metrics"]) == {"orders", "total_sales_all_channels"}
+    assert out["metrics"]["total_sales_all_channels"]["resolved_from"] == (
+        "sales_all_channels.total_sales"
+    )
+    assert "suggestions" in out["errors"]["nope_metric"]
+    assert out["catalogue_version"] == ctx.catalogue.version
+
+
+async def test_catalogue_get_metrics_matches_single_get_metric(built_server):
+    mcp, ctx = built_server
+    single = _tool_fn(mcp, "catalogue_get_metric")
+    batch = _tool_fn(mcp, "catalogue_get_metrics")(["orders", "aov"])
+    for mid in ("orders", "aov"):
+        expected = single(mid)
+        expected.pop("catalogue_version")
+        assert batch["metrics"][mid] == expected
+
+
+async def test_catalogue_get_metrics_fields_projection(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metrics")
+    out = fn(["orders"], fields=["supported_dimensions", "not_a_field"])
+    assert set(out["metrics"]["orders"]) == {
+        "id", "queryable", "query_as", "supported_dimensions"
+    }
+    assert out["warnings"] == ["Unknown field 'not_a_field' ignored."]
+
+
+async def test_catalogue_get_metrics_dedupes_aliases_and_caps_batch(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metrics")
+    out = fn([
+        "total_sales_all_channels",
+        "sales_all_channels.total_sales",
+        "total_sales_all_channels",
+    ])
+    assert list(out["metrics"]) == ["total_sales_all_channels"]
+    assert "error" in fn([f"m{i}" for i in range(11)])
+    assert "error" in fn([])
+
+
+async def test_catalogue_get_metrics_module_scope_is_per_id(built_server):
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_get_metrics")
+    out_of_module = next(
+        mid for mid in sorted(ctx.catalogue.cat.metrics)
+        if ctx.catalogue.cat.metrics[mid].is_queryable
+        and not ctx.catalogue.is_metric_in_module(mid, "commerce")
+    )
+    out = fn(["orders", out_of_module], module="commerce")
+    assert "orders" in out["metrics"]
+    assert "out_of_module_metrics" in out["errors"][out_of_module]
 
 
 async def test_catalogue_get_metric_includes_openmetadata_block(built_server):
