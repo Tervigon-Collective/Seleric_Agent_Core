@@ -1458,6 +1458,15 @@ metrics:
     om_name: productViews
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  returned_units:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.Product
+    om_name: returnedUnits
+    dashboard_status: not_implemented
+    dashboard_audited_on: '2026-09-22'
   refund_count:
     category: operations
     cube_view: refund_events

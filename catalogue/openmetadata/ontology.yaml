@@ -111,7 +111,7 @@ entity_clusters:
   product_line:
     glossary: Product.ProductOrder
     related: [Product.UnitsSold, Product.ProductNetRevenue, Product.ProductCOGS]
-    catalogue_metrics: [product_orders, units_sold, product_net_revenue, product_cogs]
+    catalogue_metrics: [product_orders, units_sold, product_net_revenue, product_cogs, returned_units, product_return_revenue]
   product_margin:
     glossary: Product.ProductGrossProfit
     related: [Product.ProductGrossMargin, Product.AverageSellingPrice]

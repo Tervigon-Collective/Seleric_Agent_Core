@@ -1,0 +1,85 @@
+id: returned_units
+display_name: Returned Units
+category: product
+status: certified
+description: 'Units returned on eligible placement lines from serve.product_performance (line / order-item grain). Canonical measure for "top returned products" (SEM-01): rank product_title / sku / variant_title by returned_units desc, with product_return_revenue as the companion value column. Returns attach to the placement period (order_date), same cohort basis as product_return_revenue. Order-grain return metrics (refunded_orders, return_revenue, event_return_revenue) cannot be broken down by product — do not use them for product rankings.
+
+  '
+formula:
+  human_readable: SUM(returned quantity) on eligible lines
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.returned_units
+aggregation: additive
+companion_measures:
+- product_return_revenue
+unit: count
+grain: order_item
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- variant_title
+- sku
+- product_type
+- vendor
+- product_id
+- variant_id
+- shipping_city
+- shipping_region
+- shipping_country
+- order_status
+- return_status
+- pnl_refund_class
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- product_type
+- vendor
+- product_id
+- variant_id
+- shipping_country
+- shipping_region
+- shipping_city
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- pnl_refund_class
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Top returned products last month
+  request:
+    measures:
+    - returned_units
+    - product_return_revenue
+    dimensions:
+    - product_title
+    sort:
+    - field: returned_units
+      direction: desc
+    limit: 10
+    time_range:
+      preset: last_month
+validation_tests: []
+deprecated_aliases: []

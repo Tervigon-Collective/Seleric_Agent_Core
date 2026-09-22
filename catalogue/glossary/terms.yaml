@@ -871,6 +871,29 @@ terms:
     canonical_id: product_cancel_revenue
   - term: product return revenue
     canonical_id: product_return_revenue
+  - term: top returned products
+    canonical_id: returned_units
+    definition: >
+      SEM-01 canonical: rank product_title (or sku / variant_title) by
+      returned_units desc, with product_return_revenue as the value column.
+      Order-grain return metrics (refunded_orders, return_revenue,
+      event_return_revenue) cannot be broken down by product.
+  - term: most returned products
+    canonical_id: returned_units
+  - term: returned products
+    canonical_id: returned_units
+  - term: returns by product
+    canonical_id: returned_units
+  - term: product returns
+    canonical_id: returned_units
+  - term: most returned sku
+    canonical_id: returned_units
+  - term: returns by sku
+    canonical_id: returned_units
+  - term: returned units
+    canonical_id: returned_units
+  - term: units returned
+    canonical_id: returned_units
   - term: refund count
     canonical_id: refund_count
   - term: refunds issued
