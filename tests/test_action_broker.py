@@ -22,9 +22,9 @@ AD_ROWS = [
 ]
 STATUS_ROWS = [
     {
-        "meta_ad_status_changes.status": "ACTIVE",
-        "meta_ad_status_changes.changed_at": "2026-07-01T10:00:00",
-        "meta_ad_status_changes.entity_name": "UGC Hook v3",
+        "meta_ads_status_history.status": "ACTIVE",
+        "meta_ads_status_history.changed_at": "2026-07-01T10:00:00",
+        "meta_ads_status_history.entity_name": "UGC Hook v3",
     }
 ]
 
@@ -61,7 +61,7 @@ def broker(settings, catalogue, fake_cube, fake_executor, action_store, idempote
 
     catalogue.cat.actions["pause_meta_ad"] = ActionContractDef.model_validate(_TEST_ACTION)
     fake_cube.by_prefix["meta_ad_performance"] = AD_ROWS
-    fake_cube.by_prefix["meta_ad_status_changes"] = STATUS_ROWS
+    fake_cube.by_prefix["meta_ads_status_history"] = STATUS_ROWS
     return ActionBroker(
         settings=settings,
         catalogue=catalogue,
@@ -123,8 +123,8 @@ async def test_propose_blocks_missing_ad(broker, settings, fake_cube):
 
 
 async def test_propose_already_paused_blocks(broker, settings, fake_cube):
-    fake_cube.by_prefix["meta_ad_status_changes"] = [
-        {**STATUS_ROWS[0], "meta_ad_status_changes.status": "PAUSED"}
+    fake_cube.by_prefix["meta_ads_status_history"] = [
+        {**STATUS_ROWS[0], "meta_ads_status_history.status": "PAUSED"}
     ]
     preview = await broker.propose("pause_meta_ad", PAYLOAD, settings.caller_scopes, "tester")
     # not_already_paused is non-blocking in the contract, so still eligible…
@@ -134,7 +134,7 @@ async def test_propose_already_paused_blocks(broker, settings, fake_cube):
 
 
 async def test_propose_unverifiable_status_does_not_block(broker, settings, fake_cube):
-    fake_cube.by_prefix["meta_ad_status_changes"] = []
+    fake_cube.by_prefix["meta_ads_status_history"] = []
     preview = await broker.propose("pause_meta_ad", PAYLOAD, settings.caller_scopes, "tester")
     rules = {r.rule: r for r in preview.business_rule_results}
     assert rules["not_already_paused"].passed is None
