@@ -2,10 +2,10 @@ id: avg_ltv
 display_name: Average LTV
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no lifetime-value calc
-  exists anywhere in Node-Backend. Lifetime net revenue divided by customer
-  count (ex-GST).
+description: >-
+  Average lifetime net sales per customer (ex-GST), all-time: lifetime net revenue ÷ customers on
+  serve.customer_ltv. The real lifetime value — unlike ltv, which is first-order value. Draft: not
+  exposed to search.
 formula:
   human_readable: lifetime_net_revenue / customers
   authoritative_source: cube

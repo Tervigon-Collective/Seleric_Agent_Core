@@ -2,9 +2,9 @@ id: google_impressions
 display_name: Google Impressions
 category: paid_media
 status: certified
-description: >
-  Google Ads impressions on report_date from google_ad_performance. Platform delivery
-  only — not conversions or platform ROAS (attribution boundary).
+description: >-
+  Google Ads impressions, per campaign per day on serve.google_ads_daily. Slice by customer account,
+  campaign, campaign_type.
 formula:
   human_readable: SUM(google_impressions)
   authoritative_source: cube

@@ -2,9 +2,9 @@ id: returns_excl_tax
 display_name: Returns (ex-GST, refund events)
 category: operations
 status: certified
-description: 'Return-class refund revenue ex-GST from serve.refund_events (P&L Returns card companion at refund-event grain). Distinct from return_revenue on canonical_pnl (daily rollup).
-
-  '
+description: >-
+  Return-class refund amount (ex-GST) on the refund date, from serve.refund_events. Refund-transaction
+  view; for the P&L return deduction use return_revenue.
 formula:
   human_readable: SUM(returns_excl_tax)
   authoritative_source: cube

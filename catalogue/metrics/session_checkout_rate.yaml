@@ -2,11 +2,10 @@ id: session_checkout_rate
 display_name: Session Checkout Rate
 category: web_analytics
 status: certified
-description: 'Session Checkout Rate on serve.session_funnel — the session-grain customer-journey OLAP
-  fact. Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session
-  hour/day, channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Share of sessions with a tracked checkout event ÷ all sessions, on serve.session_funnel. Caution:
+  Shopify checkout is only partly tracked — most purchasing sessions record no checkout event — so
+  this understates real checkout reach.
 formula:
   human_readable: checkout_sessions / sessions
   authoritative_source: cube

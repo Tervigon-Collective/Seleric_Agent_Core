@@ -2,12 +2,14 @@ id: net_sales_all_channels
 display_name: Net Sales (all channels)
 category: commerce
 status: certified
-description: >
-  All-channels Net Sales (ex-GST) from the canonical P&L spine — the SAME view that produces
-  net_profit_all_channels, so the agent's Net Sales and Net Profit always reconcile. Shopify is the
-  only channel served, so this equals Shopify net_sales_excl_tax. For the geography/channel
-  breakdown use the sales_all_channels view directly; for Shopify-only use
-  commerce_net_revenue_daily.
+description: >-
+  Business net sales for the period — the default answer to "net sales", "revenue", "sales",
+  "topline". = gross sales − discounts on the order date, minus returns and cancellations on the date
+  they happen, ex-GST, per brand-day on serve.canonical_pnl (the dashboard Net Sales card). Reconciles
+  with net_profit_all_channels. Shopify is the only sales channel, so this equals
+  commerce_net_revenue_daily. Brand × day only — no channel, geo or product slices. Not this: by ad
+  channel → meta_attribution_net_sales / google_attribution_net_sales (or ad_channel_net_sales by
+  channel); by city/UTM/payment → commerce_net_revenue; by product → product_net_revenue.
 formula:
   human_readable: canonical_pnl net_sales_all_channels_pnl = Shopify net_sales_excl_tax, ex-GST
   authoritative_source: cube

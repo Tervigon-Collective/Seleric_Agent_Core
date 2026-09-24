@@ -2,9 +2,10 @@ id: refund_count
 display_name: Refund Count (Shopify)
 category: operations
 status: certified
-description: 'Count of Shopify refund transactions from serve.refund_events. Event axis is refund_date (not order_date). For return order counts use refunded_orders.
-
-  '
+description: >-
+  Refund transactions issued in the period, counted on the REFUND date, from serve.refund_events.
+  Slice by refund class, return status, restock. For returned orders counted on the return date use
+  refunded_orders.
 formula:
   human_readable: COUNT(refund_id)
   authoritative_source: cube

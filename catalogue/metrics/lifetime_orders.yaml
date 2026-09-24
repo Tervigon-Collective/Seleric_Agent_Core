@@ -2,11 +2,9 @@ id: lifetime_orders
 display_name: Lifetime Orders
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no all-time
-  order-count-per-customer aggregation exists in Node-Backend. Sum of
-  customers' lifetime order counts. A cumulative snapshot — do not filter by
-  date_range.
+description: >-
+  Total all-time orders of the customers in the slice, from serve.customer_ltv. All-time snapshot.
+  Draft: not exposed to search.
 formula:
   human_readable: SUM(lifetime_order_count)
   authoritative_source: cube

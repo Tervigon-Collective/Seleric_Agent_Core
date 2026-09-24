@@ -2,10 +2,9 @@ id: repeat_orders
 display_name: Repeat Orders
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no order-grain
-  "order_seq > 1" flag exists in Node-Backend. Count of orders that are not a
-  customer's first (order_seq > 1).
+description: >-
+  Orders placed in the period that were NOT the customer's first order (order number > 1), from
+  serve.purchase_sequence (order date). Draft: not exposed to search.
 formula:
   human_readable: COUNT(order_id) WHERE order_seq > 1
   authoritative_source: cube

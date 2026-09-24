@@ -2,9 +2,8 @@ id: collection_views
 display_name: Collection Views
 category: web_analytics
 status: certified
-description: 'Snowplow collection_view events (collection / category page views) on the event-type × channel day rollup.
-
-  '
+description: >-
+  Collection/category page view events per day and channel on serve.web_events_daily.
 formula:
   human_readable: SUM(events WHERE event_type = 'collection_view')
   authoritative_source: cube

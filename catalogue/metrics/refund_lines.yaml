@@ -2,9 +2,9 @@ id: refund_lines
 display_name: Return Refund Lines
 category: operations
 status: certified
-description: 'Line-level Shopify return/refund rows from serve.return_lifecycle with SKU and recovered cost components.
-
-  '
+description: >-
+  Refunded/returned line items (product lines) on the refund date, from serve.return_lifecycle, with
+  SKU and restock type.
 formula:
   human_readable: COUNT(refund_line_item_id)
   authoritative_source: cube

@@ -2,9 +2,9 @@ id: web_page_views
 display_name: Page Views
 category: web_analytics
 status: certified
-description: 'Snowplow page_view events (one rendered page each) on the event-type × channel day rollup. Page identity on serve is the URL path.
-
-  '
+description: >-
+  Website page views (event_type='page_view') per day and channel on serve.web_events_daily — "page
+  views", "pageviews".
 formula:
   human_readable: SUM(events WHERE event_type = 'page_view')
   authoritative_source: cube

@@ -2,9 +2,10 @@ id: packaging_cost
 display_name: Packaging Cost (Shopify-only)
 category: finance
 status: certified
-description: 'Packaging cost arm of Shopify Net COGS (brand × day), including return-event packaging.
-  FE §13 Packaging Cost. Part of Net COGS — do not subtract again when Net COGS / Total Operating Cost
-  is used. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Packaging cost component of Net COGS, per brand-day on serve.canonical_pnl (INR): placement
+  packaging on the order date plus packaging on fully-returned orders on the return date. Part of
+  net_cogs — do not add it again.
 formula:
   human_readable: SUM(packaging_cost)
   authoritative_source: cube

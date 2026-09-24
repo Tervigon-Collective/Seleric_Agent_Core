@@ -2,11 +2,10 @@ id: operating_cost
 display_name: Operating Cost non-product (Shopify-only)
 category: finance
 status: certified
-description: 'Non-product cost arms already inside Net COGS: shipping + packaging + gateway + RTO. For
-  FE §13 "Total Operating Cost" use total_operating_cost (or net_cogs) — that includes product_cost. Do
-  not subtract operating_cost again when Net COGS is used. Scope: Shopify-only (Historical Analytics /
-  commerce oracle). For all-platform ad spend use
-  total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Non-product fulfilment costs inside Net COGS: shipping + packaging + payment-gateway fees + RTO (=
+  net_cogs − product_cost), per brand-day on serve.canonical_pnl (INR). Use for "fulfilment /
+  logistics cost excluding product". Already included in Net COGS — never add it to net_cogs.
 formula:
   human_readable: SUM(operating_cost)
   authoritative_source: cube

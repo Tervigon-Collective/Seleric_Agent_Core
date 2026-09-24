@@ -2,8 +2,9 @@ id: meta_video_completion_rate
 display_name: Meta Video Completion Rate
 category: paid_media
 status: certified
-description: Meta Video Completion Rate recomputed from aggregated components — never SUM/AVG
-  of row ratios.
+description: >-
+  Meta video completion rate: 100%-watched views ÷ 3-second views, recomputed from sums on
+  serve.meta_ads_daily.
 formula:
   human_readable: (SUM(100% views) / SUM(video_play_actions)) * 100
   authoritative_source: cube

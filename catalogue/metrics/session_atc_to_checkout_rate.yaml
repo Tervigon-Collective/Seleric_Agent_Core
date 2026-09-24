@@ -2,11 +2,9 @@ id: session_atc_to_checkout_rate
 display_name: ATC to Checkout Rate
 category: web_analytics
 status: certified
-description: 'ATC to Checkout Rate on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session hour/day,
-  channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Sessions with a tracked checkout ÷ sessions with an add-to-cart, on serve.session_funnel.
+  Understated because Shopify checkout events are only partly tracked.
 formula:
   human_readable: checkout_sessions / atc_sessions
   authoritative_source: cube

@@ -2,8 +2,9 @@ id: net_margin_pct
 display_name: Net Margin % (Shopify-only)
 category: finance
 status: certified
-description: 'Net profit as a share of Shopify net sales, computed as a ratio of aggregates:
-  net_profit_shopify / net_sales.'
+description: >-
+  Net margin %: net profit ÷ net sales for the period, recomputed from sums on serve.canonical_pnl
+  (0–1 ratio; negative when the business loses money after ads).
 formula:
   human_readable: 100 x SUM(net_profit_shopify) / SUM(net_sales)
   authoritative_source: cube

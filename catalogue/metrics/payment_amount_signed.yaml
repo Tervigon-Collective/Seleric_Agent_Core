@@ -2,8 +2,10 @@ id: payment_amount_signed
 display_name: Shopify Payment Amount (signed)
 category: finance
 status: certified
-description: >
-  Signed Shopify gateway transaction amount from payments (refunds negative, test excluded). Not commerce_orders.total_payment_orders (that is an order count) and not canonical_pnl.net_sales.
+description: >-
+  Net Shopify payment-gateway amount: captures minus refunds (refunds negative), per transaction on
+  serve.payments (INR, test transactions excluded). Use for cash collected via the gateway. Not net
+  sales and not an order count (total_payments).
 formula:
   human_readable: amount_signed
   authoritative_source: cube

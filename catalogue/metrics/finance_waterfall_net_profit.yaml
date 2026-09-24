@@ -2,8 +2,10 @@ id: finance_waterfall_net_profit
 display_name: Finance Waterfall Net Profit
 category: finance
 status: certified
-description: >
-  Waterfall line_net_profit from serve.finance_waterfall_daily (gold.fct_finance_waterfall_daily). NOT canonical_pnl.net_profit and NOT gold.fct_daily_pnl (broken cost basis). Use only for waterfall questions.
+description: >-
+  Net profit line of the management P&L waterfall (serve.finance_waterfall_daily), per brand-day
+  (INR). Use only when the user asks about the finance waterfall; it is a separate model and will not
+  match net_profit_all_channels.
 formula:
   human_readable: line_net_profit
   authoritative_source: cube

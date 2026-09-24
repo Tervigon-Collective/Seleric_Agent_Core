@@ -2,9 +2,10 @@ id: mer
 display_name: MER (Media Efficiency Ratio)
 category: finance
 status: certified
-description: 'First-party net sales divided by blended (Meta+Google) ad spend. NOT Net ROAS — Net ROAS is (Net Sales − Net COGS) / Shopify ad spend (catalogue id net_roas). Never answer "Net ROAS" with this metric.
-
-  '
+description: >-
+  Marketing efficiency ratio (MER): business net sales ÷ total ad spend (Meta + Google), recomputed
+  from period sums on serve.canonical_pnl. Use for "MER", "blended ROAS", "sales per rupee of ads".
+  Not net ROAS (which subtracts COGS) and not per-campaign ROAS (ad_channel_roas).
 formula:
   human_readable: SUM(net_sales) / SUM(total_ad_spend)
   authoritative_source: cube

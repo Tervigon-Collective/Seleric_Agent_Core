@@ -2,10 +2,11 @@ id: new_customers
 display_name: New Customers
 category: customer
 status: certified
-description: >
-  Count of first-time attributed customers (is_new_customer=1) with order_date
-  in range from gold.fct_order_attribution argMax. Matches Historical
-  getNewCustomerMetrics.
+description: >-
+  New customers acquired in the period = customers whose first order falls in the period (last-touch
+  order cohort), per brand-day on serve.ltv_cac_daily — default for "new customers", "customers
+  acquired". Denominator of cac and ltv. Same count as first_orders. By marketing source →
+  attributed_new_customer_orders.
 formula:
   human_readable: COUNT(new customers where is_new_customer = 1)
   authoritative_source: cube

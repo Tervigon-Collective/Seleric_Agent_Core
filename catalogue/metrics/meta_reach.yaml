@@ -2,11 +2,10 @@ id: meta_reach
 display_name: Meta Reach (diagnostic)
 category: paid_media_diagnostic
 status: draft
-description: >
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. CAVEAT: reach is deduplicated per
-  ad-day only; summing across days/ads overcounts unique people. Diagnostic
-  only — prefer meta_frequency.
+description: >-
+  Unique people reached by Meta ads, deduplicated only within one ad on one day — summing across days
+  or ads overcounts people. Diagnostic only; use meta_frequency for "how often people see ads". Draft:
+  not exposed to search.
 formula:
   human_readable: SUM(daily ad-level reach) — non-deduplicated above ad-day grain
   authoritative_source: cube

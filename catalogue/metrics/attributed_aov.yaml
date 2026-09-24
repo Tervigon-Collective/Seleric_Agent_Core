@@ -2,9 +2,10 @@ id: attributed_aov
 display_name: Attributed AOV
 category: attribution
 status: certified
-description: >
-  Last-touch attributed net revenue (ex-GST, first-party) divided by attributed Shopify
-  orders on order_date. Not platform-reported AOV and not all-channel AOV.
+description: >-
+  Average order value of orders by last-touch marketing source: attributed net sales ÷ distinct orders
+  (ex-GST) on serve.order_attribution, recomputed for any slice. Use for "AOV by platform / campaign /
+  UTM". Ex-GST net basis, so it is lower than the store AOV card (aov uses Total Sales incl. GST).
 formula:
   human_readable: attributed_net_revenue / attributed_orders
   authoritative_source: cube

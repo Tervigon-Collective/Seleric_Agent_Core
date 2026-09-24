@@ -2,9 +2,9 @@ id: units_per_order
 display_name: Average Units per Order
 category: product
 status: certified
-description: 'Net units per distinct eligible order from serve.product_performance. A ratio — never sum or average daily units_per_order rows; recompute from units_sold / product_orders. Basis corrected 2026-07-14 (was gross quantity).
-
-  '
+description: >-
+  Net units per order: units_sold ÷ distinct orders, recomputed from sums on serve.product_performance
+  for any slice.
 formula:
   human_readable: Units sold (net) / distinct eligible orders
   authoritative_source: cube

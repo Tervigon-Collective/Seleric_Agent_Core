@@ -2,10 +2,12 @@ id: meta_net_profit
 display_name: Meta Net Profit
 category: attribution
 status: certified
-description: 'Meta channel Net Profit from channel_pnl: Meta Net Sales − Meta Net COGS − Meta ad spend.
-  Matches Attribution / Historical Meta Overview.
-
-  '
+description: >-
+  Profit from Meta ads after product costs and Meta spend — the answer to "is Meta profitable", "Meta
+  net profit". = Meta net sales (meta_attribution_net_sales) − Meta net COGS (meta_net_cogs) − Meta ad
+  spend, all from serve.channel_pnl (Meta Overview "Net Profit" card). Ex-GST, INR; can be negative.
+  Not this: per-campaign/adset/ad profit → ad_channel_net_profit with channel=meta; whole-business
+  profit → net_profit_all_channels.
 formula:
   human_readable: meta_attribution_net_sales - meta_net_cogs - meta_spend
   authoritative_source: cube

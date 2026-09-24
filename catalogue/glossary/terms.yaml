@@ -64,15 +64,18 @@ terms:
   - term: sales by product
     canonical_id: product_net_revenue
   - term: most profitable product
-    canonical_id: product_gross_profit
+    canonical_id: product_gross_margin_pct
+    definition: "Only margin % is queryable per product (product_gross_margin_pct, 0–100 scale); a rupee gross-profit-per-SKU metric is not available. Rank by margin and show product_net_revenue beside it."
   - term: product margin
     canonical_id: product_gross_margin_pct
   - term: gross margin by SKU
     canonical_id: product_gross_margin_pct
   - term: ASP
-    canonical_id: average_selling_price
+    canonical_id: product_net_revenue
+    definition: "Average selling price = product_net_revenue ÷ units_sold; query both and divide."
   - term: average selling price
-    canonical_id: average_selling_price
+    canonical_id: product_net_revenue
+    definition: "Average selling price = product_net_revenue ÷ units_sold; query both and divide."
   - term: best selling product
     canonical_id: null
     definition: >
@@ -595,36 +598,34 @@ terms:
   - term: channel orders
     canonical_id: channel_orders
   - term: channel sales
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
     canonical_dimension_id: channel
-    definition: >
-      Channel attribution daily — first-party Shopify net by channel (meta/google/
-      organic_shopify). NOT Meta/Google Attribution Analysis Overview Net Sales;
-      for dashboard parity use meta_attribution_net_sales / google_attribution_net_sales.
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
   - term: channel revenue
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
     canonical_dimension_id: channel
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
   - term: channel net revenue
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
   - term: channel attribution sales
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
   - term: channel attribution daily sales
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
   - term: channel gross revenue
-    canonical_id: channel_gross_revenue
+    canonical_id: attributed_gross_revenue
+    definition: "Gross sales by last-touch source: attributed_gross_revenue grouped by lt_platform."
   - term: orders by channel
     canonical_id: channel_orders
     canonical_dimension_id: channel
   - term: sales by channel
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
     canonical_dimension_id: channel
-    definition: >
-      Channel attribution daily rollup. For Meta/Google Attribution Analysis
-      dashboard numbers use "meta attribution net sales" / "google attribution
-      net sales" instead.
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
   - term: revenue by channel
-    canonical_id: channel_net_revenue
+    canonical_id: ad_channel_net_sales
     canonical_dimension_id: channel
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
   - term: by channel
     canonical_dimension_id: channel
     definition: >
@@ -951,3 +952,97 @@ terms:
     canonical_id: ad_channel_net_profit
   - term: orders by campaign
     canonical_id: ad_channel_orders
+
+  # Channel-qualified terms (2026-09-25). Search matches a term when all of its
+  # words appear in the question, and longer terms rank ahead of shorter ones.
+  - term: meta net sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta revenue
+    canonical_id: meta_attribution_net_sales
+  - term: facebook sales
+    canonical_id: meta_attribution_net_sales
+  - term: facebook revenue
+    canonical_id: meta_attribution_net_sales
+  - term: instagram sales
+    canonical_id: meta_attribution_net_sales
+  - term: instagram revenue
+    canonical_id: meta_attribution_net_sales
+  - term: google net sales
+    canonical_id: google_attribution_net_sales
+  - term: google sales
+    canonical_id: google_attribution_net_sales
+  - term: google revenue
+    canonical_id: google_attribution_net_sales
+  - term: meta profit
+    canonical_id: meta_net_profit
+  - term: facebook profit
+    canonical_id: meta_net_profit
+  - term: google profit
+    canonical_id: google_net_profit
+  - term: meta cogs
+    canonical_id: meta_net_cogs
+  - term: google cogs
+    canonical_id: google_net_cogs
+  - term: meta roas
+    canonical_id: ad_channel_roas
+    definition: "Meta ROAS = ad_channel_roas filtered channel=meta (first-party net sales ÷ Meta spend). Not Meta Ads Manager reported ROAS."
+  - term: facebook roas
+    canonical_id: ad_channel_roas
+    definition: "Meta ROAS = ad_channel_roas filtered channel=meta."
+  - term: google roas
+    canonical_id: ad_channel_roas
+    definition: "Google ROAS = ad_channel_roas filtered channel=google (first-party net sales ÷ Google spend)."
+  - term: meta orders
+    canonical_id: channel_orders
+    definition: "Orders from Meta = channel_orders filtered channel=meta (order date)."
+  - term: google orders
+    canonical_id: channel_orders
+    definition: "Orders from Google = channel_orders filtered channel=google (order date)."
+  - term: meta sessions
+    canonical_id: web_sessions
+    definition: "Meta traffic = web_sessions filtered channel in (ig_feed, fb_feed, audience_network)."
+  - term: meta traffic
+    canonical_id: web_sessions
+    definition: "Meta traffic = web_sessions filtered channel in (ig_feed, fb_feed, audience_network)."
+  - term: google sessions
+    canonical_id: web_sessions
+    definition: "Google traffic = web_sessions filtered channel in (google_pmax, google_search, google_shopping)."
+  - term: google traffic
+    canonical_id: web_sessions
+    definition: "Google traffic = web_sessions filtered channel in (google_pmax, google_search, google_shopping)."
+  - term: meta new customers
+    canonical_id: attributed_new_customer_orders
+    definition: "New customers from Meta = attributed_new_customer_orders filtered lt_platform=meta."
+  - term: google new customers
+    canonical_id: attributed_new_customer_orders
+    definition: "New customers from Google = attributed_new_customer_orders filtered lt_platform=google."
+  - term: net sales by campaign
+    canonical_id: ad_channel_net_sales
+  - term: sales by campaign
+    canonical_id: ad_channel_net_sales
+  - term: revenue by campaign
+    canonical_id: ad_channel_net_sales
+  - term: sales by ad
+    canonical_id: ad_channel_net_sales
+  - term: profit by ad
+    canonical_id: ad_channel_net_profit
+  - term: roas by ad
+    canonical_id: ad_channel_roas
+  - term: net sales by city
+    canonical_id: commerce_net_revenue
+    definition: "Order-date net sales by city = commerce_net_revenue grouped by shipping_city (later returns not deducted)."
+  - term: net sales by state
+    canonical_id: commerce_net_revenue
+    definition: "Order-date net sales by state = commerce_net_revenue grouped by shipping_region."
+  - term: conversion rate
+    canonical_id: session_conversion_rate
+  - term: website conversion rate
+    canonical_id: session_conversion_rate
+  - term: add to cart rate
+    canonical_id: session_atc_rate
+  - term: traffic
+    canonical_id: web_sessions
+  - term: visits
+    canonical_id: web_sessions

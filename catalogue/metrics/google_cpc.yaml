@@ -2,9 +2,9 @@ id: google_cpc
 display_name: Google CPC
 category: paid_media
 status: certified
-description: >
-  Google CPC recomputed as SUM(spend)/SUM(clicks) on report_date. Never AVG of row CPCs.
-  Delivery only; not cost-per-conversion.
+description: >-
+  Google cost per click: spend ÷ clicks, recomputed from sums for any slice on serve.google_ads_daily
+  (INR).
 formula:
   human_readable: SUM(spend) / SUM(clicks)
   authoritative_source: cube

@@ -2,10 +2,10 @@ id: channel_gross_revenue
 display_name: Channel Gross Revenue
 category: attribution
 status: draft
-description: >
-  Not implemented in the dashboard — Node-Backend has no equivalent live calculation. Gross revenue
-  by closed channel set (meta / google / organic_shopify / unattributed), Shopify first-party basis.
-  For net by channel prefer channel_net_revenue.
+description: >-
+  Gross sales (before discounts, ex-GST) of orders placed in the period by acquisition channel (meta |
+  google | organic_shopify | unattributed), from serve.channel_attribution_daily (order date). For net
+  by channel use channel_net_revenue. Draft: not exposed to search.
 formula:
   human_readable: SUM(gross_revenue) by channel
   authoritative_source: cube

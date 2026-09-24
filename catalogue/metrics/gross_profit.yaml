@@ -2,8 +2,11 @@ id: gross_profit
 display_name: Gross Profit (Shopify-only)
 category: finance
 status: certified
-description: 'Canonical gross profit in `serve_canonical_pnl`: Shopify Net Sales − Shopify Net COGS (before
-  ads).'
+description: >-
+  Net sales − Net COGS (before ad spend) for the period, per brand-day on serve.canonical_pnl (ex-GST,
+  INR). Identical to contribution_margin. Note: Net COGS here already includes shipping, packaging,
+  gateway and RTO, not just product cost. Not this: per product/SKU → product_gross_margin_pct; after
+  ads → net_profit_all_channels.
 formula:
   human_readable: commerce_net_revenue_daily - net_cogs
   authoritative_source: cube

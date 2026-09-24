@@ -2,11 +2,9 @@ id: meta_clicks_hourly
 display_name: Meta Clicks (hourly)
 category: paid_media
 status: certified
-description: >
-  Meta Clicks (hourly). Intraday grain from serve.meta_ad_performance_hourly; hourly
-  totals reconcile exactly to the daily metric (meta_clicks).
-  Use hour_of_day (IST 0-23) or report_hour_ts (granularity hour). Platform delivery
-  only (attribution boundary).
+description: >-
+  Meta clicks by hour of day (IST 0–23) or hourly timestamp, on serve.meta_ads_hourly — intraday
+  questions. Hours add up to meta_clicks.
 formula:
   human_readable: SUM(meta_clicks)
   authoritative_source: cube

@@ -2,8 +2,10 @@ id: touch_distinct_orders
 display_name: Orders With Touches
 category: attribution
 status: certified
-description: Distinct Shopify orders that have at least one pre-purchase touch. Not attributed_orders
-  (last-touch credit) and not Total Orders.
+description: >-
+  Orders placed in the period that have at least one linked pre-purchase session (touch), from
+  serve.touchpoints (order date). Measures journey-tracking coverage. Not attributed_orders (all
+  orders) and not total_orders.
 formula:
   human_readable: distinct_orders
   authoritative_source: cube

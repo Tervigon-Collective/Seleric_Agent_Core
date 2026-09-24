@@ -2,11 +2,14 @@ id: net_profit_all_channels
 display_name: Net Profit (all channels — P&L Forecast)
 category: finance
 status: certified
-description: >
-  P&L Forecast Net Profit: all-channel net sales (ex-GST) − all-channels TOC − Total Ad Spend
-  (Meta+Google). Shopify is the only channel served, so this equals net sales − Net COGS − total ad
-  spend. Distinct from Shopify-only net_profit (which uses the same inputs on the Shopify-only
-  card).
+description: >-
+  Business net profit for the period — the default answer to "net profit", "profit", "P&L bottom
+  line". = net sales (ex-GST, returns/cancels deducted on their event date) − Net COGS (product +
+  shipping + packaging + gateway + RTO) − total ad spend (Meta + Google), per brand-day on
+  serve.canonical_pnl. INR; can be negative. Shopify is the only sales channel, so net_profit and
+  net_profit_blended return the identical number — prefer this id. Not this: profit from one ad
+  channel → meta_net_profit / google_net_profit; per campaign → ad_channel_net_profit; profit before
+  ads → contribution_margin.
 formula:
   human_readable: net_sales_all_channels - total_operating_cost_all_channels - total_ad_spend
   authoritative_source: cube

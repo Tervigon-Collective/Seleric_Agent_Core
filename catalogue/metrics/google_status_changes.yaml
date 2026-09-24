@@ -2,8 +2,9 @@ id: google_status_changes
 display_name: Google Ads Status Changes
 category: paid_media
 status: certified
-description: >
-  Count of Google entity snapshot rows where status actually changed. From serve.google_ads_status_history on the changed_at axis. Not delivery spend — use google_ad_performance.
+description: >-
+  Number of times a Google campaign/ad group/ad status actually changed, on the change date, from
+  serve.google_ads_status_history. Not delivery.
 formula:
   human_readable: status_changes
   authoritative_source: cube

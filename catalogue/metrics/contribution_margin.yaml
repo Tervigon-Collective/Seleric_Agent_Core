@@ -2,9 +2,11 @@ id: contribution_margin
 display_name: Contribution Margin (Shopify-only)
 category: finance
 status: certified
-description: 'Net Sales − Net COGS for the period — the FE Net ROAS numerator and P&L contribution before
-  advertising. Not gross_sales − gross_cogs − ad_spend (that is the dashboard "Gross Profit" / contribution-after-ads
-  form). Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Profit before advertising: net sales − Net COGS for the period, per brand-day on serve.canonical_pnl
+  (ex-GST, INR). Use for "contribution margin", "profit before ads", "how much can we spend on ads".
+  Same number as gross_profit. Not this: after ad spend → net_profit_all_channels; as a % of sales →
+  contribution_margin_pct.
 formula:
   human_readable: net_sales - net_cogs
   authoritative_source: cube

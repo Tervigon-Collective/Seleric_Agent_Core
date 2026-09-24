@@ -2,11 +2,8 @@ id: session_avg_seconds_to_purchase
 display_name: Avg Seconds to Purchase
 category: web_analytics
 status: certified
-description: 'Avg Seconds to Purchase on serve.session_funnel — the session-grain customer-journey OLAP
-  fact. Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session
-  hour/day, channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Average seconds from session start to purchase, over purchasing sessions, on serve.session_funnel.
 formula:
   human_readable: SUM(seconds_to_purchase)/purchased_sessions
   authoritative_source: cube

@@ -106,9 +106,12 @@ def test_search_unknown_returns_suggestions_not_guesses(catalogue):
 
 
 def test_resolve_term_asp(catalogue):
+    # average_selling_price is draft (resolve_metric_id refuses it), so the
+    # glossary points at the queryable numerator and its definition says how
+    # to derive ASP (product_net_revenue / units_sold).
     r = catalogue.resolve_term("ASP")
     assert isinstance(r, ResolvedTerm)
-    assert r.metric_id == "average_selling_price"
+    assert r.metric_id == "product_net_revenue"
 
 
 def test_resolve_deprecated_alias(catalogue):
@@ -237,7 +240,7 @@ PROMPT_ATTRIBUTION_GOLDEN = {
     "ad performance": "ad_channel_roas",
     "ad spend by platform": "ad_channel_spend",
     # D) channel attribution daily
-    "channel net revenue": "channel_net_revenue",
+    "channel net revenue": "ad_channel_net_sales",  # channel_net_revenue is draft (not queryable)
 }
 
 
@@ -354,11 +357,13 @@ def test_resolve_attribution_scope(catalogue):
         "meta attribution net sales": "meta_attribution_net_sales",
         "meta attribution sales": "meta_attribution_net_sales",
         "google attribution net sales": "google_attribution_net_sales",
-        "channel attribution daily sales": "channel_net_revenue",
+        # channel_net_revenue is draft (not queryable); channel sales resolve to
+        # the certified channel-P&L surface, which has the channel dimension.
+        "channel attribution daily sales": "ad_channel_net_sales",
         "channel orders": "channel_orders",
-        "channel sales": "channel_net_revenue",
-        "sales by channel": "channel_net_revenue",
-        "channel gross revenue": "channel_gross_revenue",
+        "channel sales": "ad_channel_net_sales",
+        "sales by channel": "ad_channel_net_sales",
+        "channel gross revenue": "attributed_gross_revenue",  # channel_gross_revenue is draft
         "shopify only net profit": "net_profit",
         "historical all channels net profit": "net_profit_all_channels",
     }
@@ -772,10 +777,14 @@ def test_grain_only_search_does_not_return_commerce_net_revenue_daily(catalogue)
             assert "commerce_net_revenue_daily" not in str(r.model_dump())
 
 
-def test_sales_by_channel_glossary_still_resolves_channel_net_revenue(catalogue):
+def test_sales_by_channel_glossary_resolves_queryable_channel_metric(catalogue):
+    # Was channel_net_revenue, a draft metric resolve_metric_id refuses — the
+    # agent got an id it could not query. ad_channel_net_sales is certified and
+    # sliceable by channel.
     r = catalogue.resolve_term("sales by channel")
     assert isinstance(r, ResolvedTerm)
-    assert r.metric_id == "channel_net_revenue"
+    assert r.metric_id == "ad_channel_net_sales"
+    assert catalogue.resolve_metric_id(r.metric_id) == ("ad_channel_net_sales", None)
 
 
 def test_bare_grain_glossary_is_definition_only_not_a_metric(catalogue):
@@ -822,3 +831,29 @@ def test_resolve_term_kind_dimension_does_not_return_a_metric(catalogue):
     ids = {c.dimension_id for c in r.candidates}
     assert "channel" in ids
     assert "lt_channel" in ids
+
+
+def test_search_ranks_channel_qualified_net_sales_first(catalogue):
+    # Live 2026-09-24: "net sales from meta channel last week" returned 76
+    # unranked matches and meta_attribution_net_sales fell outside the agent's
+    # 8-item shortlist, so the model looped on search until it failed.
+    for query in ("net sales from meta channel last week", "meta channel net sales", "facebook sales"):
+        assert catalogue.search(query).matches[0].id == "meta_attribution_net_sales", query
+    assert catalogue.search("google net sales").matches[0].id == "google_attribution_net_sales"
+
+
+def test_search_glossary_matches_words_in_any_order(catalogue):
+    top = catalogue.search("what were orders from meta").matches[0]
+    assert top.id == "channel_orders"
+    assert top.matched_on == "glossary:meta orders"
+
+
+def test_search_platform_conflict_sinks_other_platform(catalogue):
+    ids = [m.id for m in catalogue.search("meta net sales").matches]
+    assert ids.index("meta_attribution_net_sales") < ids.index("google_attribution_net_sales")
+    assert ids.index("google_attribution_net_sales") > len(ids) // 2
+
+
+def test_glossary_terms_point_at_queryable_metrics_for_channel_sales(catalogue):
+    # "sales by channel" used to map to a draft metric, which search skips.
+    assert catalogue.search("sales by channel").matches[0].id == "ad_channel_net_sales"

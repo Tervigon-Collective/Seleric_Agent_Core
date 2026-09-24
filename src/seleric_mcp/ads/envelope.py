@@ -3,8 +3,9 @@ read/write guard wrappers shared by every ads tool.
 
 The tool functions themselves only build the platform call + success payload;
 scope checks, the ``write_enabled`` kill switch, hard budget policy, idempotency,
-``validate_only`` short-circuit, audit/operation logging, and error normalisation
-all live here so every tool behaves identically.
+``validate_only`` handling (server-side validate for platforms that support it,
+schema-only short-circuit otherwise), audit/operation logging, and error
+normalisation all live here so every tool behaves identically.
 """
 
 from __future__ import annotations
@@ -190,17 +191,25 @@ async def execute_write(
     budget_cap: int | None = None,
     platform: str = "meta",
     write_scope: str = "meta_ads:write",
+    server_side_validate: bool = False,
     action: Callable[[], Awaitable[dict]],
 ) -> dict:
     """Write wrapper. Order (blueprint §5/§11/§12/§13/§16):
     scope -> kill switch -> hard budget policy -> idempotency -> validate_only
-    short-circuit -> execute -> store idempotency + audit + op-log.
+    -> execute -> store idempotency + audit + op-log.
 
     ``action`` performs the platform call and returns a success envelope (via
     ``ok``); ``operation_id`` is injected here. ``payload`` is the canonical
     request used for the idempotency hash and audit (already validated by the
     caller). ``budget_cap`` is the platform's hard cap (defaults to the Meta cap
     for back-compat); Google passes its micros cap explicitly.
+
+    validate_only with ``server_side_validate`` (Google) runs ``action`` against
+    the platform's validate-only mode — a real server-side check that mutates
+    nothing, so it is allowed even when the kill switch is off. Without
+    ``server_side_validate`` (Meta) it short-circuits to a schema-only check and
+    no platform call is made — the envelope's warning then truthfully says the
+    platform call was not performed.
     """
     started = time.monotonic()
     op_id = new_operation_id()
@@ -229,15 +238,42 @@ async def execute_write(
             field="budget",
         )
 
-    # 3. validate_only short-circuit — no kill switch, no idempotency, no mutation.
+    # 3. validate_only — kill switch / idempotency skipped in both paths below
+    #    (a validate must never mutate, and its outcome is not replayable. The
+    #    budget-policy check above still runs so previews surface the cap).
     if validate_only:
+        if server_side_validate:
+            try:
+                result = await action()
+            except AdsApiError as exc:
+                env_out = error_from_exc(operation, exc)
+                env_out["operation_id"] = op_id
+                ctx.ads_ops.write(
+                    op_id, tool_name, account_id=account_id, status="REJECTED",
+                    request_id=exc.request_id, error_code=env_out["error"]["code"],
+                    idempotency_key=idempotency_key,
+                    duration_ms=int((time.monotonic() - started) * 1000),
+                )
+                return env_out
+            result.setdefault("operation_id", op_id)
+            result["validated"] = True
+            warnings = list(result.setdefault("warnings", []))
+            warnings.append("validate_only: server-side validation by the platform — no mutation.")
+            result["warnings"] = warnings
+            ctx.ads_ops.write(
+                op_id, tool_name, account_id=account_id, status="VALIDATED",
+                idempotency_key=idempotency_key,
+                duration_ms=int((time.monotonic() - started) * 1000),
+            )
+            return result
         ctx.ads_ops.write(
             op_id, tool_name, account_id=account_id, status="VALIDATED",
             idempotency_key=idempotency_key,
             duration_ms=int((time.monotonic() - started) * 1000),
         )
         return ok(operation, platform=platform, validated=True,
-                  warnings=["validate_only: no mutation performed."]) | {"operation_id": op_id}
+                  warnings=["validate_only: schema checked locally; no platform "
+                            "call was made and no mutation performed."]) | {"operation_id": op_id}
 
     # 4. kill switch
     if not ctx.settings.write_enabled:

@@ -2,9 +2,11 @@ id: total_ad_spend
 display_name: Total Ad Spend (all platforms)
 category: finance
 status: certified
-description: >
-  Total Ad Spend across all platforms = Total Performance Marketing = Meta + Google Ads. FE §13
-  identity. Equals shopify_ad_spend.
+description: >-
+  Total advertising spend = Meta + Google ad spend for the period, per brand-day on
+  serve.canonical_pnl (INR) — default for "ad spend", "marketing spend", "performance marketing". Same
+  number as shopify_ad_spend. Not this: Meta only → meta_spend; Google only → google_spend; by
+  campaign/ad → ad_channel_spend.
 formula:
   human_readable: SUM(meta_spend) + SUM(google_spend)
   authoritative_source: cube

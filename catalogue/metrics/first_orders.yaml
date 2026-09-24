@@ -2,11 +2,9 @@ id: first_orders
 display_name: First Orders
 category: customer
 status: certified
-description: >
-  Dashboard basis: a customer-grain "is this customer's first order" check
-  built on Shopify REST customer lookups, capped at 100 customers/request —
-  not an order-grain count over the full per-customer-sequenced order set.
-  See dashboard_alignment.
+description: >-
+  Orders placed in the period that were the customer's first-ever order (order date), from
+  serve.purchase_sequence. Same count as new_customers; filterable by payment and COD.
 formula:
   human_readable: COUNT(customer_id) WHERE first_order_in_window = true, capped
     at 100 customers/request

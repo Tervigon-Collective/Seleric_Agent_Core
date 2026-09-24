@@ -296,11 +296,13 @@ class LLMRouter:
                     continue
                 attempts.append(name)
                 emitted = False
+                usage_tokens = 0
                 try:
-                    stream = self._client.chat.completions.create(
-                        model=name, messages=messages, stream=True
-                    )
+                    stream = self._create_stream(name, messages)
                     for chunk in stream:
+                        reported = getattr(chunk, "usage", None)
+                        if reported is not None and getattr(reported, "total_tokens", None):
+                            usage_tokens = int(reported.total_tokens)
                         choices = getattr(chunk, "choices", None) or []
                         if not choices:
                             continue
@@ -308,6 +310,8 @@ class LLMRouter:
                         if piece:
                             emitted = True
                             yield piece
+                    if usage_tokens:
+                        self._limiters[name].reconcile(est, usage_tokens)
                     return
                 except Exception as exc:  # noqa: BLE001
                     if not emitted and self._is_rate_limit(exc):
@@ -332,6 +336,29 @@ class LLMRouter:
                     f"no model in tier {tier!r} can satisfy a {est}-token request"
                 )
             self._sleep(min(wait, self._max_sleep_seconds))
+
+    def _create_stream(
+        self,
+        model: str,
+        messages: Sequence[Mapping[str, Any]],
+    ) -> Any:
+        """Open a streaming completion, requesting a final usage chunk so the
+        token estimate can be reconciled against real usage. Falls back to plain
+        streaming when a provider rejects ``include_usage``."""
+        try:
+            return self._client.chat.completions.create(
+                model=model,
+                messages=messages,
+                stream=True,
+                stream_options={"include_usage": True},
+            )
+        except Exception as exc:  # noqa: BLE001 - param-rejection fallback
+            text = str(exc).lower()
+            if "stream_options" in text or "include_usage" in text:
+                return self._client.chat.completions.create(
+                    model=model, messages=messages, stream=True
+                )
+            raise
 
     def _invoke(
         self,

@@ -2,13 +2,10 @@ id: ltv_cac_ratio
 display_name: LTV:CAC
 category: finance
 status: certified
-description: 'Historical Analytics LTV:CAC for first-time attributed customers in the period. "LTV" here
-  is new-customer first-order AOV = new_customer_revenue / new_customers; CAC = total_ad_spend / new_customers;
-  ratio = LTV / CAC. Matches getNewCustomerMetrics + Meta+Google spend. new_customer_revenue uses
-  fct_order_attribution.net_revenue_excl_tax (dashboard net sales: cancelled/voided → 0; paid → net ex-GST;
-  unpaid COD → gross_excl − discounts) — same basis as attributed_net_revenue for is_new_customer=1.
-
-  '
+description: >-
+  LTV:CAC ratio as shown on the dashboard = (first-order net sales per new customer) ÷ (ad spend per
+  new customer), from period sums on serve.ltv_cac_daily. Because "LTV" here is first-order value, a
+  ratio below 1 means the first order does not pay back acquisition cost. Components: ltv and cac.
 formula:
   human_readable: ltv / cac
   authoritative_source: cube

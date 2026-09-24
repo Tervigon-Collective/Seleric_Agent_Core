@@ -30,6 +30,21 @@ def _normalize(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
 
 
+# Words that carry no metric meaning; ignored when scoring name overlap so
+# "net sales from meta channel last week" is judged on {net, sales, meta, channel}.
+_SEARCH_STOPWORDS = frozenset(
+    "a an and are as at by did do does for from how i in is it last me much many my "
+    "of on our per show the this to vs was week weeks were what which with month "
+    "months year years day days today yesterday quarter give tell".split()
+)
+# Platform words: a metric scoped to one ad platform sinks when the question
+# names the other one (a Meta question must not surface google_* first).
+_PLATFORM_TOKENS = {
+    "meta": frozenset({"meta", "facebook", "fb", "instagram", "ig"}),
+    "google": frozenset({"google", "adwords", "pmax"}),
+}
+
+
 class MetricSummary(BaseModel):
     id: str
     display_name: str
@@ -387,12 +402,18 @@ class CatalogueService:
         dim_matches: dict[str, DimensionSummary] = {}
         allowed = self._module_metrics.get(module) if module else None
 
-        def add(m: MetricDef, matched_on: str) -> None:
-            if not m.is_queryable or m.id in matches:
+        scores: dict[str, float] = {}
+
+        def add(m: MetricDef, matched_on: str, score: float = 0.0) -> None:
+            # Keep the strongest evidence per metric: the result list is sorted
+            # by score, so a weak early hit must not pin a metric's rank.
+            if not m.is_queryable:
                 return
             if allowed is not None and m.id not in allowed:
                 return
-            matches[m.id] = self._metric_summary(m, matched_on)
+            if m.id not in matches or score > scores[m.id]:
+                matches[m.id] = self._metric_summary(m, matched_on)
+                scores[m.id] = score
 
         def add_dim(d: DimensionDef, matched_on: str) -> None:
             if d.id in dim_matches:
@@ -400,16 +421,26 @@ class CatalogueService:
             dim_matches[d.id] = self._dimension_summary(d, matched_on)
 
         q_tokens = set(q.replace(",", " ").split())
+        q_content = q_tokens - _SEARCH_STOPWORDS
+        q_platforms = {p for p, words in _PLATFORM_TOKENS.items() if q_tokens & words}
 
-        # 1. Glossary hits rank first (metric shortcuts and grain language).
+        # 1. Glossary hits rank first (metric shortcuts and grain language). A
+        # term matches when it is a substring of the query OR all of its words
+        # appear in it ("meta net sales" matches "net sales from meta channel");
+        # longer terms are more specific and outrank shorter ones ("net sales").
         for term, entry in self._glossary_index.items():
             nterm = _normalize(term)
-            if not nterm or nterm not in q:
+            if not nterm:
                 continue
+            term_tokens = set(nterm.split())
+            if nterm not in q and not term_tokens <= q_tokens:
+                continue
+            specificity = len(term_tokens - _SEARCH_STOPWORDS) or len(term_tokens)
+            glossary_score = 100 + 10 * specificity + (50 if nterm == q else 0)
             if entry.canonical_id:
                 m = self.cat.metrics.get(entry.canonical_id)
                 if m:
-                    add(m, f"glossary:{term}")
+                    add(m, f"glossary:{term}", glossary_score)
             if entry.canonical_dimension_id:
                 d = self.cat.dimensions.get(entry.canonical_dimension_id)
                 if d:
@@ -439,14 +470,16 @@ class CatalogueService:
                     add_dim(d, f"alias:{alias}")
                     break
 
-        # 3. Token overlap on metric id / display_name / description.
+        # 3. Token overlap on metric id / display_name / description, scored by
+        # how many of the question's content words the id/name covers.
         for m in self._searchable_metrics():
             hay_id = set(m.id.lower().replace("_", " ").split())
-            hay_name = set(m.display_name.lower().split())
+            hay_name = set(_normalize(m.display_name).split())
+            overlap = q_content & (hay_id | hay_name)
             if q_tokens & hay_id or q_tokens & hay_name:
-                add(m, "name")
-            elif any(tok in m.description.lower() for tok in q_tokens if len(tok) > 3):
-                add(m, "description")
+                add(m, "name", 20 + 15 * len(overlap) + (10 if q_content and q_content <= hay_id | hay_name else 0))
+            elif any(tok in m.description.lower() for tok in q_content if len(tok) > 3):
+                add(m, "description", 5)
 
         # Grain hits: drop description-only metrics that do not support those
         # dimensions (stops "report" in a commerce blurb winning a channel-wise
@@ -462,15 +495,25 @@ class CatalogueService:
                 for rec in self._supporting_metric_records(did, queryable_only=True):
                     m = self.cat.metrics.get(rec.id)
                     if m:
-                        add(m, f"dimension:{did}")
+                        add(m, f"dimension:{did}", 10)
 
         suggestions: list[str] = []
         if not matches and not dim_matches:
             suggestions = difflib.get_close_matches(
                 q, self._vocabulary() + self._dimension_vocabulary(), n=5, cutoff=0.5
             )
+        # Platform conflict: a question naming Meta ranks google-only metrics
+        # last (and vice versa); both-platform metrics are untouched.
+        for mid in scores:
+            hay = set(mid.split("_"))
+            named = {p for p, words in _PLATFORM_TOKENS.items() if hay & words}
+            if q_platforms and named and not (named & q_platforms):
+                scores[mid] -= 60
+
+        # Stable sort: ties keep catalogue order, so behaviour is deterministic.
+        ranked = sorted(matches.values(), key=lambda summary: -scores[summary.id])
         return SearchResult(
-            matches=list(matches.values()),
+            matches=ranked,
             suggestions=suggestions,
             catalogue_version=self.version,
             dimensions=list(dim_matches.values()),

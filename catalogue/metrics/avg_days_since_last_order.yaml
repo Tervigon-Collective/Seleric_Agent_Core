@@ -2,10 +2,9 @@ id: avg_days_since_last_order
 display_name: Average Days Since Last Order
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no recency field exists
-  anywhere in Node-Backend. Average recency (days since last order) across
-  customers. A live snapshot as of query time.
+description: >-
+  Average days since each customer's last order, measured from today (recency), on serve.customer_ltv.
+  Draft: not exposed to search.
 formula:
   human_readable: AVG(days_since_last_order)
   authoritative_source: cube

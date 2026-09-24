@@ -2,9 +2,9 @@ id: meta_impressions
 display_name: Meta Impressions
 category: paid_media
 status: certified
-description: >
-  Meta ad impressions delivered on report_date from meta_ad_performance. Platform
-  delivery only — not reach (non-additive) and not platform-reported purchase value.
+description: >-
+  Meta ad impressions (times ads were shown), per ad per day on serve.meta_ads_daily. Additive across
+  ads and days. Not reach (unique people).
 formula:
   human_readable: SUM(meta_impressions)
   authoritative_source: cube

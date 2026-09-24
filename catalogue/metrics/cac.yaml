@@ -2,10 +2,10 @@ id: cac
 display_name: CAC (Customer Acquisition Cost)
 category: finance
 status: certified
-description: 'Period ad spend (Meta+Google) per new attributed customer. CAC = total_ad_spend /
-  new_customers. Component of LTV:CAC.
-
-  '
+description: >-
+  Customer acquisition cost: total ad spend (Meta + Google) ÷ new customers in the period, recomputed
+  from sums on serve.ltv_cac_daily (INR per new customer). New customer = a customer's first order
+  (last-touch cohort) with order date in the period. Use for "CAC", "cost per new customer".
 formula:
   human_readable: total_ad_spend / new_customers
   authoritative_source: cube

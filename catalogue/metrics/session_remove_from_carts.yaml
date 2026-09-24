@@ -2,10 +2,8 @@ id: session_remove_from_carts
 display_name: Session Remove-from-Carts
 category: web_analytics
 status: certified
-description: >
-  Session Remove-from-Carts on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing
-  page, session hour/day, channel. First-touch ad attribution on the session.
+description: >-
+  Total remove-from-cart actions within sessions, summed on serve.session_funnel.
 formula:
   human_readable: SUM(remove_from_cart_count)
   authoritative_source: cube

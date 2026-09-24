@@ -2,9 +2,9 @@ id: funnel_revenue
 display_name: Funnel Revenue
 category: web_analytics
 status: certified
-description: 'First-party attributed net revenue (ex-GST) on the channel-day funnel — order-grain last-touch attribution, never platform-reported.
-
-  '
+description: >-
+  Net sales (ex-GST) of orders per day and fine channel on serve.funnel_daily, assigned by last-touch
+  order attribution. First-party, never platform-reported.
 formula:
   human_readable: SUM(revenue)
   authoritative_source: cube

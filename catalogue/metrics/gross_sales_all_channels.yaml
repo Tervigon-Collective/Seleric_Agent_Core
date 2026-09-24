@@ -2,9 +2,10 @@ id: gross_sales_all_channels
 display_name: Gross Sales (all channels, ex-GST)
 category: commerce
 status: certified
-description: >
-  All-channels Gross Sales (ex-GST): Shopify gross_sales_excl_tax. Shopify is the only channel
-  served, so this equals gross_sales.
+description: >-
+  Gross sales for the business: order value before discounts, ex-GST, on the order date, from
+  serve.sales_all_channels — default for "gross sales". Includes later-cancelled orders. Same total as
+  gross_sales. Slice by shipping region/country/city.
 formula:
   human_readable: SUM(shopify gross_sales_excl_tax), ex-GST
   authoritative_source: cube

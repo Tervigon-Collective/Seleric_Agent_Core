@@ -2,9 +2,10 @@ id: returns_cancels_all_channels
 display_name: Returns / Cancels (All Channels)
 category: commerce
 status: certified
-description: >
-  Historical Analytics All-channels Returns/Cancels count: Shopify distinct event-date return+cancel
-  orders. Shopify is the only channel served, so this equals returns_cancels.
+description: >-
+  Orders with a return or cancellation in the period, counted on the event date, from
+  serve.returns_cancels_all_channels — default for "returns and cancellations". Same total as
+  returns_cancels.
 formula:
   human_readable: shopify event-date returns+cancels
   authoritative_source: cube

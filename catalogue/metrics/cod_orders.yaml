@@ -2,9 +2,9 @@ id: cod_orders
 display_name: COD Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'COD bucket orders from serve.commerce_orders (dashboard payment_bucket = cod). Excludes
-  test, revenue-adjustment, and draft orders. Payment mix uses order_created_at_ist date axis in dashboard
-  SQL. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Cash-on-delivery orders placed in the period (payment_bucket='cod', excluding draft orders), from
+  serve.commerce_orders (order date). Use for COD share: cod_orders ÷ total_payments.
 formula:
   human_readable: Count of orders in COD payment bucket
   authoritative_source: cube

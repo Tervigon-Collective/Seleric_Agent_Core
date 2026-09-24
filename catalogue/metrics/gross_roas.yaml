@@ -2,10 +2,9 @@ id: gross_roas
 display_name: Gross ROAS (Shopify-only)
 category: finance
 status: certified
-description: >
-  Shopify-only Gross ROAS: Shopify Gross Sales / Shopify ad spend (Meta + Google).
-  Maps to canonical_pnl.gross_roas. For All-channels Gross ROAS use
-  gross_roas_all_channels (Shopify gross / total ad spend).
+description: >-
+  Gross ROAS: gross sales (ex-GST) ÷ Meta+Google ad spend, from period sums on serve.canonical_pnl.
+  Same number as gross_roas_all_channels — prefer that id unless the user says "Shopify-only".
 formula:
   human_readable: SUM(gross_sales) / SUM(shopify_ad_spend)
   authoritative_source: cube

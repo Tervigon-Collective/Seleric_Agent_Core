@@ -2,11 +2,9 @@ id: session_atc_rate
 display_name: Session ATC Rate
 category: web_analytics
 status: certified
-description: 'Session ATC Rate on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session hour/day,
-  channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Add-to-cart rate: sessions with at least one add-to-cart ÷ all sessions, recomputed from sums on
+  serve.session_funnel. Slice like web_sessions (channel, device, landing page, campaign/ad).
 formula:
   human_readable: atc_sessions / sessions
   authoritative_source: cube

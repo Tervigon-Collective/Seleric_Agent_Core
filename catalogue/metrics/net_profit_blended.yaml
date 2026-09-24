@@ -2,10 +2,10 @@ id: net_profit_blended
 display_name: Net Profit (all-platform ads)
 category: finance
 status: certified
-description: 'Canonical P&L net profit using all-platform ad spend: Shopify net sales (ex-GST) − Shopify Net COGS − (Meta+Google ad spend). This maps to `canonical_pnl.net_profit` and differs from `net_profit`
-  (which uses Shopify-only ad spend).
-
-  '
+description: >-
+  Business net profit using all-platform ad spend = net sales − Net COGS − (Meta + Google spend), per
+  brand-day on serve.canonical_pnl. INR. Returns exactly the same number as net_profit_all_channels
+  and net_profit (all ad spend is Meta+Google); prefer net_profit_all_channels.
 formula:
   human_readable: commerce_net_revenue_daily - net_cogs - total_ad_spend
   authoritative_source: cube

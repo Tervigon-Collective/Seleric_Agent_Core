@@ -2,10 +2,10 @@ id: event_return_revenue
 display_name: Return Revenue by Event (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: >
-  Return revenue deducted on the return event date (ex-GST), order-grain with full
-  shipping geo and payment mix. Use this — not return_revenue on canonical_pnl — for
-  "return revenue by state/region/COD/prepaid". Event axis: event_date.
+description: >-
+  Revenue deducted by returns in the period, ex-GST, on the return date, per order from
+  serve.commerce_order_events — use for "return revenue by state / region / COD vs prepaid / UTM".
+  Same total as return_revenue.
 formula:
   human_readable: SUM(return_revenue_excl_tax) WHERE event_type = return
   authoritative_source: cube

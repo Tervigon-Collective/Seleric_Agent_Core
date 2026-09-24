@@ -2,11 +2,9 @@ id: meta_impressions_hourly
 display_name: Meta Impressions (hourly)
 category: paid_media
 status: certified
-description: >
-  Meta Impressions (hourly). Intraday grain from serve.meta_ad_performance_hourly; hourly
-  totals reconcile exactly to the daily metric (meta_impressions).
-  Use hour_of_day (IST 0-23) or report_hour_ts (granularity hour). Platform delivery
-  only (attribution boundary).
+description: >-
+  Meta impressions by hour of day (IST 0–23) or hourly timestamp, on serve.meta_ads_hourly — intraday
+  questions. Hours add up to meta_impressions.
 formula:
   human_readable: SUM(meta_impressions)
   authoritative_source: cube

@@ -2,11 +2,9 @@ id: session_pdp_rate
 display_name: Session PDP Rate
 category: web_analytics
 status: certified
-description: 'Session PDP Rate on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session hour/day,
-  channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Share of sessions that viewed at least one product page: sessions with a product view ÷ all
+  sessions, recomputed from sums on serve.session_funnel. Slice like web_sessions.
 formula:
   human_readable: pdp_sessions / sessions
   authoritative_source: cube

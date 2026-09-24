@@ -2,10 +2,13 @@ id: net_cogs
 display_name: Net COGS (Shopify-only FE lifecycle)
 category: finance
 status: certified
-description: 'Fully-loaded Shopify Net COGS for the period (brand × day), matching the FE lifecycle
-  costing model in `serve_canonical_pnl`: ACTIVE placement (product + ship + pack + gateway on order
-  date) + CANCELLATION (gateway on cancel date) + RETURN (ship + pack + gateway + RTO on return
-  event date, no product). Not product_cogs (SKU grain).'
+description: >-
+  Total cost of goods and fulfilment (Net COGS) for the period = product cost + shipping + packaging +
+  payment-gateway fees + RTO, per brand-day on serve.canonical_pnl (INR). Placement costs land on the
+  order date; cancellations add gateway cost and returns add RTO (and shipping/packaging/gateway when
+  fully returned) on the event date. Same number as total_operating_cost and
+  total_operating_cost_all_channels. For product cost alone use product_cost. There is no queryable
+  SKU-level COGS metric; for per-SKU profitability use product_gross_margin_pct.
 formula:
   human_readable: SUM(net_cogs)
   authoritative_source: cube

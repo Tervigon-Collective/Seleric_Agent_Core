@@ -2,9 +2,11 @@ id: funnel_conversion_rate
 display_name: Funnel Conversion Rate
 category: web_analytics
 status: certified
-description: 'Purchases / sessions on the channel-day funnel, recomputed from aggregated components on any slice. Purchases are last-touch attributed orders.
-
-  '
+description: >-
+  Orders ÷ sessions per day and fine channel on serve.funnel_daily, recomputed from sums. Orders are
+  assigned to a channel by last-touch order attribution, sessions by session tracking — so a channel
+  can show orders with few or no sessions. Use for channel-level CVR matching the funnel dashboard;
+  for session-linked conversion use session_conversion_rate.
 formula:
   human_readable: SUM(purchases) / SUM(sessions)
   authoritative_source: cube

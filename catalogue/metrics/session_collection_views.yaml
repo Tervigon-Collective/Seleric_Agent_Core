@@ -2,10 +2,8 @@ id: session_collection_views
 display_name: Session Collection Views
 category: web_analytics
 status: certified
-description: >
-  Session Collection Views on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing
-  page, session hour/day, channel. First-touch ad attribution on the session.
+description: >-
+  Total collection/category page views within sessions, summed on serve.session_funnel.
 formula:
   human_readable: SUM(collection_view_count)
   authoritative_source: cube

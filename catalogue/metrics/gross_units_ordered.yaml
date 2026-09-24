@@ -2,12 +2,9 @@ id: gross_units_ordered
 display_name: Gross Units Ordered
 category: product
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — only net quantity
-  exists in Node-Backend, no gross-before-refunds figure. Gross ordered
-  quantity (before refunds) on eligible placement lines from
-  serve.product_performance. The net basis (after refunds) is units_sold —
-  one metric name is never used for both.
+description: >-
+  Units ordered before any returns/refunds per product/SKU, order date, from
+  serve.product_performance. Draft: not exposed to search.
 formula:
   human_readable: Sum of ordered quantity on eligible lines
   authoritative_source: cube

@@ -2,9 +2,10 @@ id: web_events
 display_name: Website Events
 category: web_analytics
 status: certified
-description: 'All Snowplow website events (page/product/collection views, cart interactions, checkout steps, searches, purchases) on the event-type × channel day rollup (serve.web_events_daily).
-
-  '
+description: >-
+  All tracked website events per day, event type and channel on serve.web_events_daily. event_type
+  values: page_view, product_view, collection_view, add_to_cart, remove_from_cart, checkout,
+  checkout_step, site_search, purchase, refund, client_event, unstruct.
 formula:
   human_readable: SUM(events)
   authoritative_source: cube

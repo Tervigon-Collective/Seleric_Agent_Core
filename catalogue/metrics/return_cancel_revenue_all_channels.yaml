@@ -2,11 +2,10 @@ id: return_cancel_revenue_all_channels
 display_name: Return / Cancel Revenue (all channels, ex-GST)
 category: commerce
 status: certified
-description: >
-  All-channels Return / Cancel Revenue (ex-GST) — the dashboard General Statistics "Return / Cancel
-  Rev" card (All channels). Shopify event-date return+cancel revenue deduction
-  (commerce_order_events.revenue_deduction_excl_tax, Asia/Kolkata event axis). Shopify is the only
-  channel served, so this equals return_cancel_revenue (the dashboard displays it negated).
+description: >-
+  Revenue deducted by returns and cancellations in the period, ex-GST, on the event date, from
+  serve.returns_cancels_all_channels — default for "return/cancel revenue", "revenue lost to returns".
+  Same total as return_cancel_revenue.
 formula:
   human_readable: SUM(shopify event revenue_deduction_excl_tax), ex-GST
   authoritative_source: cube

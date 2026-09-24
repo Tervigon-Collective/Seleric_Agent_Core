@@ -2,11 +2,11 @@ id: session_conversion_rate
 display_name: Session Conversion Rate
 category: web_analytics
 status: certified
-description: 'Session Conversion Rate on serve.session_funnel — the session-grain customer-journey OLAP
-  fact. Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session
-  hour/day, channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Session conversion rate: sessions that purchased ÷ all sessions, recomputed from sums on
+  serve.session_funnel — default for "website conversion rate", "CVR by channel / landing page /
+  device / ad". Purchase is linked to the session itself; for orders ÷ sessions by channel using order
+  attribution use funnel_conversion_rate.
 formula:
   human_readable: purchased_sessions / sessions
   authoritative_source: cube

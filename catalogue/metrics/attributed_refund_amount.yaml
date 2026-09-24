@@ -2,10 +2,11 @@ id: attributed_refund_amount
 display_name: Attributed Refund Amount
 category: attribution
 status: certified
-description: >
-  Refund amount at order grain from the attribution oracle. Dashboard basis: Shopify/meta/google
-  attribution track separate return and cancel count/value pairs, computed on event date rather than
-  order date — see dashboard_alignment.
+description: >-
+  Refunded amount on orders placed in the period, split by last-touch marketing source, from
+  serve.order_attribution (order date — refunds are attached back to the original order, not the
+  refund date). Use to compare refund exposure by platform/campaign. For refunds by the date they were
+  issued use refunded_amount_excl_tax.
 formula:
   human_readable: >
     SUM(return_value) + SUM(cancel_value) on event date for Shopify/meta/google — not a single

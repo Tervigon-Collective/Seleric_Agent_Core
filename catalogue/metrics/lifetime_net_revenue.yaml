@@ -2,11 +2,9 @@ id: lifetime_net_revenue
 display_name: Lifetime Net Revenue
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no all-time
-  revenue-per-customer aggregation exists in Node-Backend. Sum of customers'
-  lifetime net revenue (ex-GST). A cumulative snapshot, not a period rollup —
-  do not filter by date_range.
+description: >-
+  Total all-time net sales (ex-GST) of the customers in the slice, from serve.customer_ltv. All-time
+  snapshot — do not apply a date range. Draft: not exposed to search.
 formula:
   human_readable: SUM(lifetime_net_revenue_excl_tax)
   authoritative_source: cube

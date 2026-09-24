@@ -2,10 +2,9 @@ id: meta_landing_page_views
 display_name: Meta Landing Page Views
 category: paid_media
 status: certified
-description: >
-  Meta-tracked landing page views. Dashboard basis: fetched via a separate
-  account-level Meta Graph API call, not the ClickHouse-backed query used for
-  spend/clicks/impressions — see dashboard_alignment.
+description: >-
+  Landing page views counted by the Meta pixel after an ad click (the page actually loaded), on
+  serve.meta_ads_daily. Slice by ad account, creative, ad format and optimisation goal only.
 formula:
   human_readable: SUM(meta_landing_page_views)
   authoritative_source: cube

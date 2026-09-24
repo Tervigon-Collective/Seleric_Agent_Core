@@ -2,11 +2,12 @@ id: channel_orders
 display_name: Channel Orders
 category: attribution
 status: certified
-description: >
-  Orders by the closed channel set (meta / google / organic_shopify / unattributed) on
-  serve.channel_attribution_daily. Reconciles to Total Orders by construction: SUM over all channels
-  == total_orders. Shopify last-touch split: meta / google / organic_shopify (true organic search) /
-  unattributed (empty UTM / tracking failure — NOT labeled organic).
+description: >-
+  Orders by acquisition channel (meta | google | organic_shopify | unattributed) per day — "orders by
+  channel", "how many orders came from Meta". Counts Shopify orders on their order date from
+  serve.channel_attribution_daily; the four channels add up to total_orders. organic_shopify = organic
+  search plus other non-paid sources (email, AI, referral); unattributed = no identifiable source. Not
+  this: per campaign/ad → ad_channel_orders.
 formula:
   human_readable: SUM(orders) by channel
   authoritative_source: cube

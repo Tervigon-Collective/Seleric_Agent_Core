@@ -166,7 +166,7 @@ def register_google_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         async def action() -> dict:
             cred = await _cred(customer_id=customer_id, brand_id=brand_id)
             res = await ctx.google_ads.set_campaign_status(
-                cred, cred.customer_id, campaign_id, status, validate_only=False
+                cred, cred.customer_id, campaign_id, status, validate_only=validate_only
             )
             return env.ok("campaigns.set_status", platform="google",
                           entity={"type": "campaign", "id": campaign_id,
@@ -177,7 +177,8 @@ def register_google_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             ctx, "google_campaigns_set_status", "campaigns.set_status",
             payload={"customer_id": customer_id, "campaign_id": campaign_id, "status": status},
             idempotency_key=idempotency_key, validate_only=validate_only,
-            account_id=customer_id, platform="google", write_scope=_G_WRITE, action=action,
+            account_id=customer_id, platform="google", write_scope=_G_WRITE,
+            server_side_validate=True, action=action,
         )
 
     @mcp.tool()
@@ -201,7 +202,7 @@ def register_google_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             cred = await _cred(customer_id=customer_id, brand_id=brand_id)
             res = await ctx.google_ads.create_campaign_budget(
                 cred, cred.customer_id, name, amount_micros, delivery_method,
-                explicitly_shared, validate_only=False,
+                explicitly_shared, validate_only=validate_only,
             )
             return env.ok("budgets.create", platform="google",
                           entity={"type": "campaign_budget",
@@ -214,7 +215,7 @@ def register_google_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                      "delivery_method": delivery_method, "explicitly_shared": explicitly_shared},
             idempotency_key=idempotency_key, validate_only=validate_only,
             account_id=customer_id, budget_minor=amount_micros, budget_cap=_cap(),
-            platform="google", write_scope=_G_WRITE, action=action,
+            platform="google", write_scope=_G_WRITE, server_side_validate=True, action=action,
         )
 
     @mcp.tool()
@@ -243,7 +244,7 @@ def register_google_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             cred = await _cred(customer_id=customer_id, brand_id=brand_id)
             res = await ctx.google_ads.create_campaign(
                 cred, cred.customer_id, name, campaign_budget_resource_name,
-                advertising_channel_type, status, bidding_type, validate_only=False,
+                advertising_channel_type, status, bidding_type, validate_only=validate_only,
                 start_date=start_date, end_date=end_date,
             )
             return env.ok("campaigns.create", platform="google",
@@ -259,5 +260,6 @@ def register_google_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                      "status": status, "bidding_type": bidding_type,
                      "start_date": start_date, "end_date": end_date},
             idempotency_key=idempotency_key, validate_only=validate_only,
-            account_id=customer_id, platform="google", write_scope=_G_WRITE, action=action,
+            account_id=customer_id, platform="google", write_scope=_G_WRITE,
+            server_side_validate=True, action=action,
         )

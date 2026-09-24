@@ -30,7 +30,7 @@ SUBDAILY_GRANULARITIES = {"hour"}
 # P&L-shaped measures must come from canonical_pnl (guard ported from server.js
 # validatePnlQuery): if a metric's id looks like P&L but maps elsewhere, the
 # catalogue is wrong — enforced at load; here we guard breakdown views.
-BREAKDOWN_VIEWS = {"meta_ad_breakdown"}
+BREAKDOWN_VIEWS = {"meta_ad_breakdown_performance"}
 
 
 def _ist_today() -> date:
@@ -56,7 +56,9 @@ def resolve_time_range(tr: TimeRange, today: date | None = None) -> tuple[date, 
         case "last_90d":
             return t - timedelta(days=90), t - timedelta(days=1)
         case "this_month":
-            return t.replace(day=1), t
+            start = t.replace(day=1)
+            end = t - timedelta(days=1)
+            return start, max(start, end)
         case "last_month":
             first_this = t.replace(day=1)
             last_prev = first_this - timedelta(days=1)

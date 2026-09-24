@@ -2,10 +2,9 @@ id: be_roas
 display_name: Break-Even ROAS (Shopify-only)
 category: finance
 status: certified
-description: 'Historical Analytics BE ROAS (FE tooltip / attribution form): Net Sales / (Net Sales − Net
-  COGS). Contribution-margin breakeven — the ad efficiency needed to cover COGS. Do not confuse with (net_cogs
-  + spend) / spend. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
-  use net_profit_blended.'
+description: >-
+  Break-even ROAS: net sales ÷ (net sales − Net COGS), from period sums on serve.canonical_pnl. Same
+  number as be_roas_all_channels — prefer that id unless the user says "Shopify-only".
 formula:
   human_readable: commerce_net_revenue_daily / (commerce_net_revenue_daily - net_cogs)
   authoritative_source: cube

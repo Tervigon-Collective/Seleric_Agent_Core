@@ -2,9 +2,10 @@ id: meta_hook_rate
 display_name: Meta Hook Rate
 category: paid_media
 status: approved
-description: >
-  Meta platform-delivery metric computed in the Cube/gold layer (verified 2026-09-24); not surfaced on the Node-Backend dashboard. Meta Hook Rate recomputed from
-  aggregated components — never SUM/AVG of row ratios.
+description: >-
+  Meta video hook rate: 3-second video views ÷ impressions, recomputed from sums on
+  serve.meta_ads_daily — how well the first seconds of a video ad stop the scroll. Compare creatives
+  with it.
 formula:
   human_readable: SUM(3s views) / SUM(impressions) — approved gold formula
   authoritative_source: cube

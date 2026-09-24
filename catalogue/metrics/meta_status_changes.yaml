@@ -2,8 +2,9 @@ id: meta_status_changes
 display_name: Meta Ads Status Changes
 category: paid_media
 status: certified
-description: >
-  Count of Meta entity snapshot rows where status actually changed. From serve.meta_ads_status_history on the changed_at axis. Not impressions, clicks, or spend — use meta_ad_performance for delivery.
+description: >-
+  Number of times a Meta campaign/adset/ad status actually changed (e.g. ACTIVE → PAUSED), on the
+  change date, from serve.meta_ads_status_history — "what did we pause/launch". Not delivery.
 formula:
   human_readable: status_changes
   authoritative_source: cube

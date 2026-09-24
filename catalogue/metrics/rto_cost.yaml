@@ -2,9 +2,9 @@ id: rto_cost
 display_name: RTO Logistics Cost (Shopify-only)
 category: finance
 status: certified
-description: 'Return-to-origin logistics cost arm of Shopify Net COGS (brand × day), recognized on the
-  return event date. FE §13 RTO Logistics Cost. Part of Net COGS — do not subtract again when Net COGS
-  is used. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Return-to-origin (RTO) logistics cost for returned/undelivered orders, recognised on the return
+  date, per brand-day on serve.canonical_pnl (INR). Part of net_cogs — do not add it again.
 formula:
   human_readable: SUM(rto_cost)
   authoritative_source: cube

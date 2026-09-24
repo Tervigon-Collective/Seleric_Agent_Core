@@ -2,9 +2,9 @@ id: meta_ctr
 display_name: Meta CTR
 category: paid_media
 status: certified
-description: >
-  Meta CTR recomputed from aggregated components — never SUM/AVG of row
-  ratios.
+description: >-
+  Meta click-through rate: all clicks ÷ impressions, recomputed from sums for any slice on
+  serve.meta_ads_daily (0–1 ratio).
 formula:
   human_readable: SUM(clicks) / SUM(impressions)
   authoritative_source: cube

@@ -2,8 +2,11 @@ id: total_sales
 display_name: Total Sales (Shopify-only, incl. GST)
 category: commerce
 status: certified
-description: 'Pre-discount checkout value including GST on eligible placement orders (gross_revenue +
-  total_discounts). Shopify-only. Use when the user says Shopify-only. For Total / all channels use total_sales_all_channels.'
+description: >-
+  Shopify Total Sales: checkout value before discounts INCLUDING GST, on the order date, from
+  serve.commerce_orders (dashboard Total Sales card). Includes later-cancelled orders. Sliceable by
+  geo, payment, UTM, customer type. Same total as total_sales_all_channels. Ex-GST equivalent →
+  gross_sales.
 formula:
   human_readable: Sum of gross_revenue + total_discounts per eligible order
   authoritative_source: cube

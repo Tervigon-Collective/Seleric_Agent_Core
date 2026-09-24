@@ -2,9 +2,10 @@ id: funnel_purchases
 display_name: Funnel Purchases
 category: web_analytics
 status: certified
-description: 'Orders on the channel-day funnel — order-grain last-touch attribution (fct_order_attribution lt_channel), NOT converted_sessions.
-
-  '
+description: >-
+  Orders per day and fine channel (ig_feed, fb_feed, google_pmax, organic, …) on serve.funnel_daily,
+  assigned by last-touch order attribution (includes active, partially refunded and payment-pending
+  orders).
 formula:
   human_readable: SUM(purchases)
   authoritative_source: cube

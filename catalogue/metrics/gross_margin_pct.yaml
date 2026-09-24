@@ -2,8 +2,10 @@ id: gross_margin_pct
 display_name: Gross Margin % (Shopify-only)
 category: finance
 status: certified
-description: 'Gross profit as a share of Shopify net sales (ratio of aggregates):
-  gross_profit / net_sales.'
+description: >-
+  Gross margin %: (net sales − Net COGS) ÷ net sales for the period, recomputed from sums on
+  serve.canonical_pnl (0–1 ratio). Identical to contribution_margin_pct. Not this: per product/SKU →
+  product_gross_margin_pct.
 formula:
   human_readable: 100 x SUM(gross_profit) / SUM(net_sales)
   authoritative_source: cube

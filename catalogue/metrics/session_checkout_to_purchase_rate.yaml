@@ -2,11 +2,10 @@ id: session_checkout_to_purchase_rate
 display_name: Checkout to Purchase Rate
 category: web_analytics
 status: certified
-description: 'Checkout to Purchase Rate on serve.session_funnel — the session-grain customer-journey OLAP
-  fact. Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session
-  hour/day, channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Sessions that purchased ÷ sessions with a tracked checkout event, on serve.session_funnel. NOT a
+  true step conversion: most purchasing sessions have no checkout event recorded, so this ratio is
+  unreliable — prefer session_conversion_rate.
 formula:
   human_readable: purchased_sessions / checkout_sessions
   authoritative_source: cube

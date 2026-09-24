@@ -2,9 +2,11 @@ id: total_operating_cost_all_channels
 display_name: Total Operating Cost (all channels — P&L)
 category: finance
 status: certified
-description: >
-  Historical / P&L all-channels Total Operating Cost: Shopify Net COGS. Shopify is the only channel
-  served, so this equals total_operating_cost / net_cogs.
+description: >-
+  Total operating cost / COGS for the whole business = Net COGS (product + shipping + packaging +
+  payment-gateway fees + RTO), per brand-day on serve.canonical_pnl (INR). Default for "COGS", "cost
+  of goods", "operating cost". Same number as net_cogs and total_operating_cost. Excludes ad spend and
+  fixed overheads.
 formula:
   human_readable: net_cogs
   authoritative_source: cube

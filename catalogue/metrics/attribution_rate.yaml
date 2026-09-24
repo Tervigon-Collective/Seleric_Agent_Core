@@ -2,8 +2,10 @@ id: attribution_rate
 display_name: Attribution Rate
 category: attribution
 status: draft
-description: Not implemented in the dashboard — Node-Backend has no equivalent live
-  calculation. Share of orders with an identified last-touch marketing touchpoint.
+description: >-
+  Share of orders with an identified marketing touch: touch_attributed_orders ÷ attributed_orders on
+  serve.order_attribution, recomputed for any slice (order date). A tracking-coverage signal — a
+  falling rate means more orders land in 'unattributed'. Draft: not exposed to search.
 formula:
   human_readable: touch_attributed_orders / attributed_orders
   authoritative_source: cube

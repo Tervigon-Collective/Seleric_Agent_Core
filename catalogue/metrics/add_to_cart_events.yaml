@@ -2,9 +2,9 @@ id: add_to_cart_events
 display_name: Add-to-Cart Events
 category: web_analytics
 status: certified
-description: 'Snowplow add_to_cart events on the event-type × channel day rollup. Counts events, not sessions — ATC-session counts (atc_sessions) live on SessionFunnel. Not comparable to Meta pixel ATC.
-
-  '
+description: >-
+  Add-to-cart events per day and channel on serve.web_events_daily. Counts events, not sessions (for a
+  rate use session_atc_rate). Not Meta pixel add-to-carts.
 formula:
   human_readable: SUM(events WHERE event_type = 'add_to_cart')
   authoritative_source: cube

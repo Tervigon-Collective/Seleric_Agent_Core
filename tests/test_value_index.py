@@ -329,3 +329,21 @@ async def test_warm_all_covers_every_active_brand(catalogue):
     assert set(index._builds) == expected
     await asyncio.wait_for(asyncio.gather(*[asyncio.shield(t) for t in index._builds.values()]), timeout=60)
     assert set(index._snapshots) == expected
+
+
+def test_one_entry_per_dimension_so_other_kinds_of_match_are_not_crowded_out(catalogue):
+    snap = _snap(
+        {
+            ("campaign_name", "meta_ad_performance"): {"TH-1-ACMEBOT-7JULY": 900, **{f"C{i}": 1 for i in range(10)}},
+            ("campaign_name", "session_funnel"): {"TH-1-ACMEBOT-7JULY": 500, **{f"C{i}": 1 for i in range(10)}},
+            ("campaign_name", "ad_channel_pnl"): {"TH-1-ACMEBOT-1SEP": 300, **{f"C{i}": 1 for i in range(10)}},
+            ("product_title", "product_performance"): {"AcmeBot Cleaner": 40, **{f"P{i}": 1 for i in range(10)}},
+        }
+    )
+    out = _index(catalogue).resolve("acmebot sales", snap)
+    term = next(t for t in out["terms"] if t["term"] == "acmebot")
+    dims = [d["dimension"] for d in term["dimensions"]]
+    assert dims.count("campaign_name") == 1 and "product_title" in dims
+    campaign = next(d for d in term["dimensions"] if d["dimension"] == "campaign_name")
+    assert set(campaign["views"]) == {"meta_ad_performance", "session_funnel", "ad_channel_pnl"}
+    assert {v["value"] for v in campaign["values"]} == {"TH-1-ACMEBOT-7JULY", "TH-1-ACMEBOT-1SEP"}

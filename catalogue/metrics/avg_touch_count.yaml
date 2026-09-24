@@ -2,8 +2,10 @@ id: avg_touch_count
 display_name: Average Touches per Path
 category: attribution
 status: certified
-description: Average touch_count per attribution path (ratio-of-aggregates). Shopify-only; not last-touch
-  credit_pct.
+description: >-
+  Average number of marketing touches before purchase: total touches ÷ order paths on
+  serve.attribution_paths (order date), recomputed for any slice. Use for "how many touches before
+  buying". Journey metric — not credit or revenue.
 formula:
   human_readable: AVG(touch_count)
   authoritative_source: cube

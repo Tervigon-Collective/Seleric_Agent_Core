@@ -2,10 +2,9 @@ id: repeat_order_share
 display_name: Repeat Order Share
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no purchase-sequence
-  model exists in Node-Backend. Share of orders that are a repeat purchase
-  (order_seq > 1).
+description: >-
+  Share of orders placed in the period that are repeat orders (order number > 1), on
+  serve.purchase_sequence. Draft: not exposed to search.
 formula:
   human_readable: repeat_orders / repeat_purchase_orders
   authoritative_source: cube

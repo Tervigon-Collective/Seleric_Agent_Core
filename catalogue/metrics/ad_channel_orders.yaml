@@ -2,10 +2,13 @@ id: ad_channel_orders
 display_name: Attributed Orders (cross-platform, ad grain)
 category: attribution
 status: certified
-description: >
-  Attributed orders at campaign/adset/ad grain across both platforms (channel = meta/google),
-  on the channel-P&L event-date basis, from ad_channel_pnl. Use with ad_channel_spend /
-  ad_channel_roas to judge which campaigns/ads drive volume. Rolls up to channel_pnl.
+description: >-
+  Orders per ad channel, campaign, adset and ad (Meta and Google) — "orders by campaign", "which ads
+  drive orders". Counts Shopify orders on their placement (order) date by last-touch channel/campaign,
+  from serve.ad_channel_pnl_daily. Summed over all rows of a channel it equals that channel's orders
+  on serve.channel_pnl. Use with ad_channel_spend and ad_channel_roas. Filter row_type='detail' to
+  rank campaigns/ads (reconciliation rows hold unplaceable orders). Not this: all-business orders →
+  total_orders; orders by channel only → channel_orders.
 formula:
   human_readable: SUM(orders)
   authoritative_source: cube

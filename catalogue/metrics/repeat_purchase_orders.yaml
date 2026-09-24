@@ -2,11 +2,9 @@ id: repeat_purchase_orders
 display_name: Sequenced Orders
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no sequencing model
-  exists at all in Node-Backend. Count of eligible orders in the
-  purchase-sequence model (per-customer order_seq assigned). Same population
-  as commerce Total Orders.
+description: >-
+  All eligible orders in the purchase-sequence model (order date), each with its per-customer order
+  number; filter order_seq / order_seq_band for Nth-order analysis. Draft: not exposed to search.
 formula:
   human_readable: COUNT(order_id)
   authoritative_source: cube

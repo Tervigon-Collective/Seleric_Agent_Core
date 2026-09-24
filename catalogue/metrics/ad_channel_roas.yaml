@@ -2,12 +2,13 @@ id: ad_channel_roas
 display_name: Ad ROAS (net sales / spend, ad grain)
 category: attribution
 status: certified
-description: >
-  Return on ad spend at campaign/adset/ad grain across both platforms (channel = meta/google):
-  first-party attributed net sales / ad spend, recomputed as ratio-of-aggregates from
-  ad_channel_pnl. The core efficiency decision per campaign/ad. This is revenue ROAS
-  (net sales / spend) — NOT contribution net_roas (canonical_pnl) and NOT platform-reported
-  ROAS. Compare only within the same slice.
+description: >-
+  Revenue ROAS per ad channel, campaign, adset and ad (Meta and Google) — "ROAS by campaign", "how are
+  my ads doing", "which ads are efficient". = sum(net sales) ÷ sum(ad spend) on
+  serve.ad_channel_pnl_daily, recomputed from the two sums for whatever slice you group by (never
+  average row ROAS). Uses first-party Shopify net sales, event-date basis. Not this: business-wide
+  contribution ROAS ((net sales − COGS) ÷ spend) → net_roas_all_channels; net sales ÷ total spend for
+  the whole business → mer. Not platform-reported ROAS.
 formula:
   human_readable: SUM(net_sales) / SUM(ad_spend)
   authoritative_source: cube

@@ -2,8 +2,9 @@ id: contribution_margin_pct
 display_name: Contribution Margin % (Shopify-only)
 category: finance
 status: certified
-description: 'Contribution margin as a share of net sales (ratio of aggregates),
-  aligned to canonical_pnl semantic execution.'
+description: >-
+  Contribution margin as a share of net sales: (net sales − Net COGS) ÷ net sales, recomputed from the
+  period sums on serve.canonical_pnl (0–1 ratio). Identical to gross_margin_pct.
 formula:
   human_readable: 100 x SUM(contribution_margin) / SUM(net_sales)
   authoritative_source: cube

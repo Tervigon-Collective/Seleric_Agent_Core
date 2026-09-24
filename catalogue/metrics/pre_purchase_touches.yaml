@@ -2,8 +2,10 @@ id: pre_purchase_touches
 display_name: Pre-Purchase Touches
 category: attribution
 status: certified
-description: Count of session-level pre-purchase touches stitched to Shopify orders (touchpoints view,
-  order_date). Journey grain — not last-touch credited orders.
+description: >-
+  Total pre-purchase website sessions (touches) linked to orders placed in the period, from
+  serve.touchpoints (order date). One order can have many touches. Slice by lt_platform. For orders
+  with at least one touch use touch_distinct_orders.
 formula:
   human_readable: touches
   authoritative_source: cube

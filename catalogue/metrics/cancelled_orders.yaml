@@ -2,9 +2,10 @@ id: cancelled_orders
 display_name: Cancelled Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'Orders cancelled on event date (Asia/Kolkata) from serve.commerce_order_events. Filter on event_date — not order_date.
-  Scope: Shopify-only (Historical Analytics / commerce oracle). For
-  all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Orders cancelled in the period, counted on the CANCEL date (not the order date), from
+  serve.commerce_order_events. Sliceable by geo, payment, UTM. Revenue lost to those cancellations →
+  event_cancel_revenue (sliceable) or cancel_revenue (brand-day total).
 formula:
   human_readable: Distinct orders with cancellation event in period
   authoritative_source: cube

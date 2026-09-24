@@ -2,10 +2,10 @@ id: payment_gateway_fees
 display_name: Payment Gateway Fees (Shopify-only)
 category: finance
 status: certified
-description: 'Payment gateway/processing fees arm of Shopify Net COGS (brand × day), including cancel-
-  and return-event gateway. FE §13 Payment Gateway Fees. Part of Net COGS — do not subtract again when
-  Net COGS is used. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
-  use net_profit_blended.'
+description: >-
+  Payment-gateway fee component of Net COGS for prepaid (online) orders, per brand-day on
+  serve.canonical_pnl (INR); COD orders carry no gateway fee. Cancel/return gateway costs land on the
+  event date. Part of net_cogs — do not add it again.
 formula:
   human_readable: SUM(payment_gateway_fees)
   authoritative_source: cube

@@ -2,11 +2,9 @@ id: meta_cost_per_landing_page_view
 display_name: Meta Cost per Landing Page View
 category: paid_media
 status: certified
-description: >
-  Meta Cost per Landing Page View recomputed from aggregated components —
-  never SUM/AVG of row ratios. Dashboard basis: landing_page_views comes from
-  a separate account-level Meta Graph API call, not the ClickHouse-backed
-  query used for spend — see dashboard_alignment.
+description: >-
+  Meta cost per landing page view: spend ÷ landing page views, recomputed from sums on
+  serve.meta_ads_daily (INR). Slice by ad account, creative, ad format, optimisation goal.
 formula:
   human_readable: SUM(spend) / SUM(landing_page_views)
   authoritative_source: cube

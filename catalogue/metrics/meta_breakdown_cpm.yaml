@@ -3,10 +3,9 @@ display_name: Meta CPM (breakdown)
 category: paid_media
 status: draft
 description: >-
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. MUST filter exactly one breakdown_type (age_and_gender | placement | platform_device
-  | publisher_platform | region) — the five slices repeat the same delivery, so unfiltered
-  aggregation counts spend 5x. CPM recomputed from slice aggregates.
+  Meta CPM (spend × 1000 ÷ impressions) by one audience/placement breakdown, recomputed from sums on
+  serve.meta_ads_breakdown_daily. MUST filter exactly one breakdown_type. Draft: not exposed to
+  search.
 formula:
   human_readable: SUM(spend)*1000/SUM(impressions) within one breakdown_type
   authoritative_source: cube

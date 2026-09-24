@@ -2,9 +2,13 @@ id: web_sessions
 display_name: Web Sessions
 category: web_analytics
 status: certified
-description: 'Snowplow website sessions from serve.session_funnel with funnel stage, UTM, geo, device, and landing-page breakdowns.
-
-  '
+description: >-
+  Website sessions (visits) tracked by Snowplow, one row per session on serve.session_funnel (session
+  date) — default for "sessions", "traffic", "visits". Slice by channel (fine values: organic,
+  ig_feed, fb_feed, audience_network, google_pmax, google_search, google_shopping, ai_chatgpt,
+  email_*, other — Meta = ig_feed+fb_feed+audience_network, Google = google_*), funnel_stage, UTM,
+  campaign_name, device, browser/OS, geo, landing/exit page. For ad-level (campaign/adset/ad id)
+  slicing use session_conversion_rate and the other session_* rates.
 formula:
   human_readable: COUNT(session)
   authoritative_source: cube

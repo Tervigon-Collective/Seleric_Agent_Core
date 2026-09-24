@@ -2,11 +2,17 @@ id: meta_attribution_net_sales
 display_name: Meta Attribution Net Sales
 category: attribution
 status: certified
-description: 'Meta Attribution Overview / Historical Meta channel Net Sales. Gross − Discounts − event-date
-  Returns − event-date Cancels (channel_pnl). NOT placement-only dashboard_net_sales_excl_tax on platform_attribution_commerce,
-  and NOT meta_attr_net_revenue (ad-day oracle).
-
-  '
+description: >-
+  Net sales from Meta (Facebook/Instagram paid ads) — the default answer to "Meta net sales", "net
+  sales from Meta", "Meta channel revenue". Computed on serve.channel_pnl as gross sales − discounts
+  on the order date, minus returns and cancellations of Meta-attributed orders on the date they happen
+  (the Meta Attribution Overview "Net Sales" card). Because returns/cancels land on their event date,
+  a short window can be NEGATIVE when returns of earlier orders exceed new sales — say so rather than
+  treating it as an error. Meta = last-touch platform facebook/instagram/meta; organic-social and
+  link-in-bio clicks are counted as unattributed, not Meta. Ex-GST, INR. Not this: for sales of orders
+  PLACED in the window (no later deductions) use attributed_net_revenue filtered lt_platform=meta; for
+  per-campaign/adset/ad Meta sales use ad_channel_net_sales with channel=meta; for Google use
+  google_attribution_net_sales.
 formula:
   human_readable: Meta gross − discounts − event returns − event cancels
   authoritative_source: cube

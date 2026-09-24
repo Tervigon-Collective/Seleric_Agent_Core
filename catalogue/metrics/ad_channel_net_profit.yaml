@@ -2,11 +2,14 @@ id: ad_channel_net_profit
 display_name: Ad Net Profit (cross-platform, ad grain)
 category: attribution
 status: certified
-description: >
-  First-party net profit attributed at campaign/adset/ad grain across both platforms
-  (channel = meta/google) from ad_channel_pnl: net sales − net COGS − ad spend, on the
-  channel-P&L event-date basis. The scale/kill decision metric per campaign. Rolls up to
-  channel_pnl net profit. Not platform-reported.
+description: >-
+  Net profit per ad channel, campaign, adset and ad (Meta and Google) — the scale/kill metric: "which
+  campaigns make money", "profit by campaign". = net sales − net COGS − ad spend per row, on the same
+  event-date basis as the channel Overview cards (serve.ad_channel_pnl_daily). Ex-GST, INR; can be
+  negative. Summed over all rows of a channel it equals meta_net_profit / google_net_profit;
+  row_type='reconciliation' rows hold the part not placeable on a campaign — include them for totals,
+  filter row_type='detail' to rank campaigns/ads. Not platform-reported (Meta/Google Ads Manager)
+  numbers.
 formula:
   human_readable: SUM(net_profit)
   authoritative_source: cube

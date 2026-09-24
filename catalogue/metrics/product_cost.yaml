@@ -2,7 +2,11 @@ id: product_cost
 display_name: Product Cost (Shopify-only)
 category: finance
 status: certified
-description: 'Merchandise product-cost arm of Shopify Net COGS (brand × day) — FE §13 Product Cost / /pnl/cogs card. Equals net_cogs − shipping − packaging − gateway − RTO. Not product_cogs (fully-loaded SKU lifecycle). Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Merchandise (product) cost component of Net COGS for the period, per brand-day on
+  serve.canonical_pnl (INR). Excludes shipping, packaging, gateway and RTO. Same number as
+  product_cost_all_channels. There is no queryable per-SKU cost metric; for per-SKU profitability use
+  product_gross_margin_pct.
 formula:
   human_readable: SUM(product_cost)
   authoritative_source: cube

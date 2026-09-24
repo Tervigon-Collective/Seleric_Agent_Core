@@ -156,12 +156,36 @@ class AppContext:
         self._freshness_cache = (time.monotonic(), payload)
         return payload
 
-    async def _latest_data_date(self, view_name: str) -> str | None:
+    def _translate_probe_filters(self, view_name: str, filters: list[dict] | None) -> list[dict]:
+        """Map request filter specs (catalogue dimension ids) to Cube member
+        filters for one view — same member mapping the planner uses. Filters
+        with unknown dimensions are skipped (the query itself would reject
+        them); a probe is never stiffer than the query it guards."""
+        out: list[dict] = []
+        for f in filters or []:
+            dim = self.catalogue.resolve_dimension(str(f.get("dimension") or ""))
+            if dim is None or view_name not in dim.views:
+                continue
+            entry: dict = {"member": dim.views[view_name], "operator": f["operator"]}
+            values = f.get("values")
+            if values:
+                entry["values"] = values
+            out.append(entry)
+        return out
+
+    async def _latest_data_date(
+        self, view_name: str, filters: list[dict] | None = None
+    ) -> str | None:
         """Latest value of the view's date dimension via a 1-row Cube probe
-        (cached per view for freshness_cache_ttl_seconds). None when the view
-        has no date dimension or the probe fails."""
+        (cached per view/filter-slice for freshness_cache_ttl_seconds). None
+        when the view has no date dimension or the probe fails. Scoping the
+        probe by the query's filters means a fresh slice in one brand cannot
+        mask a stale slice in the brand actually being queried."""
         ttl = self.settings.freshness_cache_ttl_seconds
-        cached = self._view_latest_cache.get(view_name)
+        key = view_name
+        if filters:
+            key = f"{view_name}\n{json.dumps(filters, sort_keys=True)}"
+        cached = self._view_latest_cache.get(key)
         if cached and time.monotonic() - cached[0] < ttl:
             return cached[1]
         view = self.catalogue.cat.views.get(view_name)
@@ -170,16 +194,23 @@ class AppContext:
             member = f"{view_name}.{view.date_dimension}"
             try:
                 res = await self.cube.load(
-                    {"dimensions": [member], "order": {member: "desc"}, "limit": 1}
+                    {
+                        "dimensions": [member],
+                        "filters": filters or [],
+                        "order": {member: "desc"},
+                        "limit": 1,
+                    }
                 )
                 if res.data:
                     latest = res.data[0].get(member)
             except Exception:
                 latest = None
-        self._view_latest_cache[view_name] = (time.monotonic(), latest)
+        self._view_latest_cache[key] = (time.monotonic(), latest)
         return latest
 
-    async def stale_views(self, metric_ids: list[str]) -> dict[str, dict]:
+    async def stale_views(
+        self, metric_ids: list[str], filters: list[dict] | None = None
+    ) -> dict[str, dict]:
         """Fail-closed freshness gate: map of view -> staleness detail for every
         view backing the requested metrics whose latest data date is POSITIVELY
         known to be older than its cadence allows (+ grace). Only the views
@@ -208,7 +239,9 @@ class AppContext:
             lag = _cadence_lag_days(cadence)
             if lag is None:
                 continue
-            latest_raw = await self._latest_data_date(view_name)
+            latest_raw = await self._latest_data_date(
+                view_name, self._translate_probe_filters(view_name, filters)
+            )
             if not latest_raw:
                 continue
             try:
@@ -838,7 +871,7 @@ def build_server(settings: Settings) -> FastMCP:
                     module=effective_module,
                 )
                 return mod_denial
-        stale = await ctx.stale_views(measures)
+        stale = await ctx.stale_views(measures, filters or [])
         if stale:
             logger.warning("metrics_query_stale_blocked", trace_id=trace_id, stale_views=list(stale))
             return _stale_refusal(stale)
@@ -893,10 +926,11 @@ def build_server(settings: Settings) -> FastMCP:
         stored = ctx.result_store.get(parent_query_id)
         if stored is not None:
             try:
-                parent_measures = QueryRequest.model_validate_json(stored.request_json).measures
+                parent_request = QueryRequest.model_validate_json(stored.request_json)
             except Exception:
-                parent_measures = None  # malformed/legacy stored request — let drilldown() surface its own error
-            if parent_measures is not None:
+                parent_request = None  # malformed/legacy stored request — let drilldown() surface its own error
+            if parent_request is not None:
+                parent_measures = parent_request.measures
                 denial = _check_metric_scopes(parent_measures)
                 if denial:
                     logger.warning("metrics_drilldown_denied", trace_id=trace_id, measures=parent_measures)
@@ -911,7 +945,9 @@ def build_server(settings: Settings) -> FastMCP:
                             module=effective_module,
                         )
                         return mod_denial
-                stale = await ctx.stale_views(parent_measures)
+                probe_filters = [f.model_dump() for f in parent_request.filters]
+                probe_filters.extend(additional_filters or [])
+                stale = await ctx.stale_views(parent_measures, probe_filters)
                 if stale:
                     logger.warning(
                         "metrics_drilldown_stale_blocked", trace_id=trace_id, stale_views=list(stale)

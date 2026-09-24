@@ -2,13 +2,13 @@ id: commerce_net_revenue
 display_name: Commerce Net Revenue (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: 'Per-order dashboard net sales (DASHBOARD_NET_SALES_O) summed on placement order_date. Placement-axis
-  only — does NOT deduct returns/cancels recognized on a later event date, so it will NOT reconcile to
-  the dashboard Net Sales card for periods with cross-period returns/cancels. Use this only when a query
-  needs order-grain breakdowns (city, UTM, payment method). For topline/period totals matching the dashboard,
-  use commerce_net_revenue_daily instead. Scope: Shopify-only (Historical Analytics / commerce oracle).
-  For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+description: >-
+  Net sales of orders PLACED in the period, sliceable by order attributes — use for "net sales by city
+  / state / UTM / payment method / new vs returning". Sums each order's net sales (ex-GST) on its
+  order date from serve.commerce_orders; later returns/cancels are NOT deducted from the period, so it
+  runs higher than the dashboard Net Sales card (e.g. Aug-2026 brand 20: ₹34.1L vs ₹28.0L). Slice:
+  shipping_* geo, payment_method/bucket/gateway, is_cod, is_new_customer, utm_*, source_name,
+  order/fulfilment status. For period totals use net_sales_all_channels.
 formula:
   human_readable: Sum of per-order net sales ex-GST (placement axis)
   authoritative_source: cube

@@ -2,10 +2,10 @@ id: product_gross_margin_pct
 display_name: Product Gross Margin %
 category: product
 status: certified
-description: >
-  Product gross profit as a share of lifecycle net revenue (ex-GST),
-  fully-loaded COGS basis, from serve.product_performance. A ratio — never sum
-  or average row/daily margin percentages; recompute from components.
+description: >-
+  Gross margin % per product/SKU: gross profit (net revenue − fully-loaded COGS: product + shipping +
+  packaging + gateway + RTO) ÷ net revenue, recomputed from sums on serve.product_performance.
+  Returned on a 0–100 scale (52.7 means 52.7%), unlike the business-level margin ratios which are 0–1.
 formula:
   human_readable: 100 × product_gross_profit / product_net_revenue
   authoritative_source: cube

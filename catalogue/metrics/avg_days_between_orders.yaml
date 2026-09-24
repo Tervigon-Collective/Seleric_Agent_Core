@@ -2,11 +2,9 @@ id: avg_days_between_orders
 display_name: Average Days Between Orders
 category: customer
 status: draft
-description: 'Not implemented in the dashboard as of this audit — no order-interval calc exists anywhere
-  in Node-Backend. Average days since the previous order, computed over repeat orders only (order_seq
-  > 1).
-
-  '
+description: >-
+  Average days between a customer's consecutive orders, over repeat orders only (order number > 1), on
+  serve.purchase_sequence (order date). Draft: not exposed to search.
 formula:
   human_readable: SUM(days_since_prev_order) / repeat_orders
   authoritative_source: cube

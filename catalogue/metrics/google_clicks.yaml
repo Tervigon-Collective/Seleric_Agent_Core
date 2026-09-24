@@ -2,10 +2,9 @@ id: google_clicks
 display_name: Google Clicks
 category: paid_media
 status: certified
-description: >
-  Google Ads clicks on report_date from google_ad_performance (campaign-day). Platform
-  delivery only — not conversions, conversion value or platform ROAS (attribution
-  boundary).
+description: >-
+  Google Ads clicks, per campaign per day on serve.google_ads_daily. Slice by customer account,
+  campaign, campaign_type.
 formula:
   human_readable: SUM(google_clicks)
   authoritative_source: cube

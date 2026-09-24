@@ -595,7 +595,18 @@ class ValueIndex:
                     # is not what the user is asking about.
                     if how != "exact" and volume <= 0:
                         continue
-                    hits.setdefault(key, []).append({"value": raw, "volume": volume, "match": how})
+                    hits.setdefault(key, []).append(
+                        {
+                            "value": raw,
+                            "volume": volume,
+                            "match": how,
+                            # Share of the value's words the term accounts for:
+                            # "pawtech" is half of "PawTech Cleaner" but a quarter
+                            # of "TH-336-PAWTECH-7JULY". Comparable across views,
+                            # unlike volume (each view counts a different metric).
+                            "coverage": round(len(term.split()) / max(1, len(value_norm.split())), 3),
+                        }
+                    )
             # Abbreviations are only trusted next to the full form: "wa" counts
             # in a dimension that also holds "whatsapp"; "MH" in state codes has
             # no "months" beside it and is dropped.
@@ -617,7 +628,7 @@ class ValueIndex:
                 continue
             dims: list[dict[str, Any]] = []
             for key, matches in hits.items():
-                matches.sort(key=lambda h: (_MATCH_RANK[h["match"]], -h["volume"]))
+                matches.sort(key=lambda h: (_MATCH_RANK[h["match"]], -h["coverage"], -h["volume"]))
                 for h in matches:
                     claimed.add((key, h["value"]))
                 dimension, view = key
@@ -633,12 +644,32 @@ class ValueIndex:
                             for v, vol in sorted(all_values.items(), key=lambda kv: -kv[1])[:top_values]
                         ],
                         "metrics": self._metrics_for(dimension, view),
-                        "_rank": (_MATCH_RANK[matches[0]["match"]], -sum(h["volume"] for h in matches)),
+                        "_rank": (
+                            _MATCH_RANK[matches[0]["match"]],
+                            -max(h["coverage"] for h in matches),
+                            -sum(h["volume"] for h in matches),
+                        ),
                     }
                 )
             dims.sort(key=lambda d: d["_rank"])
+            # One entry per dimension: the same dimension on several views
+            # (campaign_name on 5 ad/session views) must not crowd out a
+            # different kind of match (the product title) from the shortlist.
+            grouped: dict[str, dict[str, Any]] = {}
             for d in dims:
                 d.pop("_rank")
+                g = grouped.get(d["dimension"])
+                if g is None:
+                    grouped[d["dimension"]] = {**d, "views": [d["view"]]}
+                    continue
+                g["views"].append(d["view"])
+                seen = {v["value"] for v in g["values"]}
+                g["values"] += [v for v in d["values"] if v["value"] not in seen]
+                g["values"] = sorted(
+                    g["values"], key=lambda h: (_MATCH_RANK[h["match"]], -h["coverage"], -h["volume"])
+                )[:max_values]
+                g["metrics"] = list(dict.fromkeys(g["metrics"] + d["metrics"]))[:8]
+            dims = list(grouped.values())
             best = dims[0]["values"][0]["match"]
             resolved.append(
                 {
@@ -648,6 +679,15 @@ class ValueIndex:
                     "dimensions": dims[:max_dimensions],
                 }
             )
+        # Most telling terms first: exact matches on words the catalogue does
+        # not own, then by how much of the matched value the term is.
+        resolved.sort(
+            key=lambda t: (
+                _MATCH_RANK[t["best_match"]],
+                t["catalogue_vocabulary"],
+                -max(v["coverage"] for d in t["dimensions"] for v in d["values"]),
+            )
+        )
         return {
             "status": "ok",
             "brand_id": snap.brand_id,

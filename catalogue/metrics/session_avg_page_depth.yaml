@@ -2,11 +2,8 @@ id: session_avg_page_depth
 display_name: Avg Page Depth
 category: web_analytics
 status: certified
-description: 'Avg Page Depth on serve.session_funnel — the session-grain customer-journey OLAP fact. Sliceable
-  at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session hour/day, channel.
-  First-touch ad attribution on the session.
-
-  '
+description: >-
+  Average pages viewed per session: total page depth ÷ sessions on serve.session_funnel.
 formula:
   human_readable: SUM(page_depth)/sessions
   authoritative_source: cube

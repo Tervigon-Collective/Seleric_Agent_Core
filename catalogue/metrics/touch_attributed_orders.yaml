@@ -2,9 +2,10 @@ id: touch_attributed_orders
 display_name: Touch-Attributed Orders
 category: attribution
 status: draft
-description: Not implemented in the dashboard — Node-Backend has no equivalent live
-  calculation. Count of orders with an identified marketing touchpoint (attribution_method
-  != 'unattributed'). Last-touch only — no multi-touch/view-through.
+description: >-
+  Orders that have an identified marketing touch (attribution_method ≠ 'unattributed') — the tracked
+  subset of attributed_orders, from serve.order_attribution (order date). Use with attribution_rate to
+  judge tracking coverage. Draft: not exposed to search.
 formula:
   human_readable: COUNT(order_id) WHERE attribution_method != 'unattributed'
   authoritative_source: cube

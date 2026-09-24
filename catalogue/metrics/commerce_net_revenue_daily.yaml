@@ -2,14 +2,11 @@ id: commerce_net_revenue_daily
 display_name: Net Sales (Shopify-only, Dashboard Parity)
 category: commerce
 status: certified
-description: 'Brand x day Net Sales, ex-GST, from the serve.commerce_performance_daily rollup. Deducts
-  returns/cancels on the event date they occur rather than the original order''s placement date — this
-  is the exact basis of the Reports dashboard''s Net Sales card. Use this for topline/period totals. Use
-  commerce_net_revenue instead when the query needs order-grain breakdowns (city, UTM, payment method)
-  that only exist on commerce_orders; that metric is placement-axis and will not reconcile to the dashboard
-  card for periods with cross-period returns/cancels. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+description: >-
+  Shopify net sales for the period = gross − discounts on the order date, minus returns/cancels on
+  their event date, ex-GST, per brand-day on serve.commerce_performance_daily (dashboard Net Sales
+  card). Returns exactly the same number as net_sales_all_channels; use this id when the user says
+  "Shopify net sales". Brand × day only.
 formula:
   human_readable: Sum of net_sales_excl_tax from the daily commerce performance rollup, by report_date
   authoritative_source: cube

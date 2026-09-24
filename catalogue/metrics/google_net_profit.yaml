@@ -2,10 +2,12 @@ id: google_net_profit
 display_name: Google Net Profit
 category: attribution
 status: certified
-description: 'Google channel Net Profit from channel_pnl: Google Net Sales − Google Net COGS − Google
-  ad spend. Matches Attribution / Historical Google Overview.
-
-  '
+description: >-
+  Profit from Google Ads after product costs and Google spend — the answer to "is Google profitable",
+  "Google net profit". = Google net sales (google_attribution_net_sales) − Google net COGS
+  (google_net_cogs) − Google ad spend, from serve.channel_pnl (Google Overview "Net Profit" card).
+  Ex-GST, INR; can be negative. Not this: per-campaign profit → ad_channel_net_profit with
+  channel=google; whole-business profit → net_profit_all_channels.
 formula:
   human_readable: google_attribution_net_sales - google_net_cogs - google_spend
   authoritative_source: cube

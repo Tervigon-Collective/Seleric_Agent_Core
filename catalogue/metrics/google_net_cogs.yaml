@@ -2,9 +2,11 @@ id: google_net_cogs
 display_name: Google Net COGS
 category: attribution
 status: certified
-description: >
-  Google channel FE lifecycle Net COGS from channel_pnl (placement ACTIVE_OR_KEPT
-  + event return/cancel arms). Not product_cogs SKU grain.
+description: >-
+  Cost of goods for Google-attributed orders (product + shipping + packaging + payment-gateway fees +
+  RTO), from serve.channel_pnl. Placement costs land on the order date; return/cancel cost adjustments
+  land on their event date — the Google Overview "Net COGS" card. Ex-GST, INR. Use as the COGS leg of
+  Google profitability (google_net_profit). Not SKU-level product_cogs.
 formula:
   human_readable: SUM(google channel product + ship + pack + gateway + rto)
   authoritative_source: cube

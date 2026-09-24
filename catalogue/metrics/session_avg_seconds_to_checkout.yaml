@@ -2,11 +2,9 @@ id: session_avg_seconds_to_checkout
 display_name: Avg Seconds to Checkout
 category: web_analytics
 status: certified
-description: 'Avg Seconds to Checkout on serve.session_funnel — the session-grain customer-journey OLAP
-  fact. Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing page, session
-  hour/day, channel. First-touch ad attribution on the session.
-
-  '
+description: >-
+  Average seconds from session start to first tracked checkout event, over sessions with a checkout
+  event, on serve.session_funnel.
 formula:
   human_readable: SUM(seconds_to_checkout)/checkout_sessions
   authoritative_source: cube

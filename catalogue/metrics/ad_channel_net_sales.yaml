@@ -2,8 +2,16 @@ id: ad_channel_net_sales
 display_name: Ad-grain Channel Net Sales
 category: attribution
 status: certified
-description: >
-  Event-date lifecycle net sales at campaign/adset/ad from ad_channel_pnl. Rolls up to channel_pnl via reconciliation residual. Distinct from platform_attribution_commerce placement net.
+description: >-
+  Net sales per ad channel, campaign, adset and ad (Meta and Google) — use for "net sales by campaign
+  / adset / ad" or to compare Meta vs Google campaigns. Same event-date basis as the Overview cards:
+  gross − discounts on the order date, minus returns/cancels on their event date
+  (serve.ad_channel_pnl_daily). Ex-GST, INR. Summed over all rows of a channel it equals
+  meta_attribution_net_sales / google_attribution_net_sales exactly, because row_type='reconciliation'
+  rows (is_unattributed=1) carry sales that cannot be placed on a campaign (and the basis difference).
+  Include reconciliation rows for channel totals; filter row_type='detail' (and optionally
+  is_unattributed=0) when ranking campaigns/ads. Slice: channel (meta|google|organic|unattributed),
+  campaign_*, adset_*, ad_*.
 formula:
   human_readable: net_sales
   authoritative_source: cube

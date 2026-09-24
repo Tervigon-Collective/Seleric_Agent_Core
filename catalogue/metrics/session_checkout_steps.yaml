@@ -2,10 +2,9 @@ id: session_checkout_steps
 display_name: Session Checkout Steps
 category: web_analytics
 status: certified
-description: >
-  Session Checkout Steps on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing
-  page, session hour/day, channel. First-touch ad attribution on the session.
+description: >-
+  Total checkout-step events within sessions, summed on serve.session_funnel (partial tracking of
+  Shopify checkout).
 formula:
   human_readable: SUM(checkout_step_count)
   authoritative_source: cube

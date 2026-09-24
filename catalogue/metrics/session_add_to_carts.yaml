@@ -2,10 +2,9 @@ id: session_add_to_carts
 display_name: Session Add-to-Carts
 category: web_analytics
 status: certified
-description: >
-  Session Add-to-Carts on serve.session_funnel — the session-grain customer-journey OLAP fact.
-  Sliceable at ANY grain: ad (campaign/adset/ad), funnel stage, device, geo, landing
-  page, session hour/day, channel. First-touch ad attribution on the session.
+description: >-
+  Total add-to-cart actions within sessions (a session can add several times), summed on
+  serve.session_funnel. For sessions with ≥1 add-to-cart as a rate use session_atc_rate.
 formula:
   human_readable: SUM(add_to_cart_count)
   authoritative_source: cube

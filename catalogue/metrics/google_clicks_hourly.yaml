@@ -2,11 +2,9 @@ id: google_clicks_hourly
 display_name: Google Clicks (hourly)
 category: paid_media
 status: certified
-description: >
-  Google Clicks (hourly). Intraday grain from serve.google_ad_performance_hourly; hourly
-  totals reconcile exactly to the daily metric (google_clicks).
-  Use hour_of_day (IST 0-23) or report_hour_ts (granularity hour). Platform delivery
-  only (attribution boundary).
+description: >-
+  Google clicks by hour of day (IST 0–23) or hourly timestamp, on serve.google_ads_hourly. Hours add
+  up to google_clicks.
 formula:
   human_readable: SUM(google_clicks)
   authoritative_source: cube

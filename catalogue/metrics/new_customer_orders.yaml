@@ -2,9 +2,10 @@ id: new_customer_orders
 display_name: New Customer Orders (Shopify-only)
 category: commerce
 status: approved
-description: 'Orders placed by first-time customers. Scope: Shopify-only (Historical Analytics / commerce
-  oracle). For all-platform ad spend use total_ad_spend;
-  for blended-ads net profit use net_profit_blended.'
+description: >-
+  Orders placed in the period that are a customer's first order (is_new_customer=1), from
+  serve.commerce_orders (order date). Sliceable by geo, payment and UTM. For new customers by
+  marketing source use attributed_new_customer_orders; for CAC use new_customers / cac.
 formula:
   human_readable: Count of orders where the customer has no prior order
   authoritative_source: cube

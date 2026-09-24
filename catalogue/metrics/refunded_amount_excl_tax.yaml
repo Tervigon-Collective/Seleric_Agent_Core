@@ -2,9 +2,9 @@ id: refunded_amount_excl_tax
 display_name: Refunded Amount (ex-GST)
 category: operations
 status: certified
-description: 'Refund amount excluding tax from serve.refund_events on refund_date event axis.
-
-  '
+description: >-
+  Money refunded to customers in the period (ex-GST), on the REFUND date, from serve.refund_events —
+  "how much did we refund". Includes both return and cancellation refunds (slice pnl_refund_class).
 formula:
   human_readable: SUM(refunded_amount_excl_tax)
   authoritative_source: cube

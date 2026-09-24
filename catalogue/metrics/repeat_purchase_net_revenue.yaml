@@ -2,10 +2,9 @@ id: repeat_purchase_net_revenue
 display_name: Sequenced Net Revenue
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no purchase-sequence
-  revenue split exists in Node-Backend. Net revenue (ex-GST) at order grain
-  from the purchase-sequence model.
+description: >-
+  Net sales (ex-GST) of orders in the purchase-sequence model (order date); filter order_seq > 1 for
+  repeat-purchase revenue. Draft: not exposed to search.
 formula:
   human_readable: SUM(net_revenue_excl_tax)
   authoritative_source: cube

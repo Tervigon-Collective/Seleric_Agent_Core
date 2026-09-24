@@ -2,10 +2,10 @@ id: total_sales_all_channels
 display_name: Total Sales (all channels, incl. GST)
 category: commerce
 status: certified
-description: >
-  Historical Analytics / P&L Total Sales when All channels is selected: eligible Total Sales
-  (gross_revenue + total_discounts, incl. GST). Shopify is the only channel served, so this equals
-  total_sales.
+description: >-
+  Total Sales for the business: checkout value before discounts INCLUDING GST, on the order date, from
+  serve.sales_all_channels — default for "total sales", "sales by state/city". Same total as
+  total_sales. Slice by shipping region/country/city and payment method/bucket.
 formula:
   human_readable: SUM(shopify total_sales)
   authoritative_source: cube

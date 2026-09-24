@@ -2,10 +2,10 @@ id: event_cancel_revenue
 display_name: Cancel Revenue by Event (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: >
-  Cancellation revenue deducted on the cancel event date (ex-GST), order-grain with
-  full shipping geo and payment mix. Use this — not cancel_revenue on canonical_pnl —
-  for "cancelled revenue by state/region/COD/prepaid". Event axis: event_date.
+description: >-
+  Revenue deducted by cancellations in the period, ex-GST, on the cancel date, per order from
+  serve.commerce_order_events — use for "cancelled revenue by state / region / payment type". Same
+  total as cancel_revenue.
 formula:
   human_readable: SUM(cancel_revenue_excl_tax) WHERE event_type = cancellation
   authoritative_source: cube

@@ -2,9 +2,11 @@ id: customers
 display_name: Customers
 category: customer
 status: certified
-description: >
-  Dashboard basis: a 30-day windowed count of distinct Shopify customers (not
-  a lifetime, all-time-history snapshot) — see dashboard_alignment.
+description: >-
+  All customers who have ever placed an eligible order — an all-time snapshot from serve.customer_ltv,
+  NOT a count for a date range (it has no date filter). Filter by acquisition
+  platform/channel/campaign or lifetime order-count band. For customers acquired in a period use
+  new_customers.
 formula:
   human_readable: COUNT(DISTINCT customer_id) over the trailing 30-day window
   authoritative_source: cube

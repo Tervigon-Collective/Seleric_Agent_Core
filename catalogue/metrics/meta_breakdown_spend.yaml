@@ -3,10 +3,10 @@ display_name: Meta Spend (breakdown)
 category: paid_media
 status: draft
 description: >-
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. MUST filter exactly one breakdown_type (age_and_gender | placement | platform_device
-  | publisher_platform | region) — the five slices repeat the same delivery, so unfiltered
-  aggregation counts spend 5x. Meta spend re-sliced by audience/placement/device/platform/region.
+  Meta spend by audience/placement breakdown (age & gender, placement, platform & device, publisher
+  platform, region) on serve.meta_ads_breakdown_daily (INR). MUST filter exactly one breakdown_type
+  (age_and_gender | placement | platform_device | publisher_platform | region) — each type repeats the
+  same spend, so mixing them multiplies totals. Draft: not exposed to search.
 formula:
   human_readable: SUM(meta_spend) within one breakdown_type
   authoritative_source: cube

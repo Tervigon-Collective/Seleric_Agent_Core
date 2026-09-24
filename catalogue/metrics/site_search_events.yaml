@@ -2,9 +2,9 @@ id: site_search_events
 display_name: Site Search Events
 category: web_analytics
 status: certified
-description: 'Snowplow site_search events (on-site search interactions) on the event-type × channel day rollup. Search terms are not yet propagated past raw ingest — this is a volume metric only.
-
-  '
+description: >-
+  On-site search events per day and channel on serve.web_events_daily. Volume only — search terms are
+  not available.
 formula:
   human_readable: SUM(events WHERE event_type = 'site_search')
   authoritative_source: cube

@@ -2,10 +2,9 @@ id: avg_orders_per_customer
 display_name: Average Orders per Customer
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no such ratio is
-  surfaced anywhere in Node-Backend. Lifetime orders divided by customer
-  count.
+description: >-
+  Average all-time orders per customer: lifetime orders ÷ customers on serve.customer_ltv. Draft: not
+  exposed to search.
 formula:
   human_readable: lifetime_orders / customers
   authoritative_source: cube

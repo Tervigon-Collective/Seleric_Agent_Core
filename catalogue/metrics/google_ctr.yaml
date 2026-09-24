@@ -2,8 +2,9 @@ id: google_ctr
 display_name: Google CTR
 category: paid_media
 status: certified
-description: >
-  Google CTR recomputed from aggregated components (ratio of aggregates).
+description: >-
+  Google click-through rate: clicks ÷ impressions, recomputed from sums for any slice on
+  serve.google_ads_daily (0–1 ratio).
 formula:
   human_readable: SUM(clicks) / SUM(impressions)
   authoritative_source: cube

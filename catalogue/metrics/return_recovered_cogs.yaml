@@ -2,9 +2,9 @@ id: return_recovered_cogs
 display_name: Recovered COGS (Returns)
 category: operations
 status: certified
-description: 'Fully-loaded recovered COGS on return lines (product + packaging + shipping + gateway + RTO) from serve.return_lifecycle.
-
-  '
+description: >-
+  Cost recovered or reversed on returned lines (product + packaging + shipping + gateway + RTO
+  components), on the refund date, from serve.return_lifecycle (INR).
 formula:
   human_readable: SUM(recovered_cogs)
   authoritative_source: cube

@@ -2,18 +2,14 @@ id: attributed_orders
 display_name: Attributed Orders
 category: attribution
 status: certified
-description: >
-  Order-grain last-touch attribution, one row per order over the FULL Shopify
-  placement cohort — the SAME population as commerce Total Orders (Shopify).
-  Every order carries a last-touch channel; orders with no resolved touch fold into
-  unattributed (lt_platform 'unattributed' or empty-signal organic, attribution_method
-  'unattributed'), exactly like
-  the dashboard channel split. So attributed_orders == total_orders (Shopify) and
-  per-channel (lt_platform) breakdowns reconcile to it by construction. For the
-  RESOLVED subset (orders with an identified touch) use touch_attributed_orders and
-  attribution_rate. For orders per campaign/adset/ad (cross-platform) use
-  ad_channel_orders on ad_channel_pnl (sliced by channel — different grain/cohort,
-  will not tie to this).
+description: >-
+  Orders placed in the period, split by last-touch marketing source — "orders by UTM source / platform
+  / campaign". Counts distinct Shopify orders on their order date from serve.order_attribution. Covers
+  every Shopify order, so the unsliced total equals total_orders; orders with no identified touch sit
+  under lt_platform='unattributed'. Slice: lt_platform
+  (meta|google|unattributed|other|ai|organic|email), lt_channel, lt_utm_*, lt_campaign_*,
+  is_new_customer, geo, payment. Not this: only orders with an identified touch → filter
+  attribution_method != 'unattributed'; per campaign/adset/ad with spend → ad_channel_orders.
 formula:
   human_readable: COUNT(order_id)
   authoritative_source: cube

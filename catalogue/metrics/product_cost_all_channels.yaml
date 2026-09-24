@@ -2,9 +2,9 @@ id: product_cost_all_channels
 display_name: Product Cost (all channels — P&L)
 category: finance
 status: certified
-description: >
-  P&L Forecast Product Cost: Shopify merchandise product_cost. Shopify is the only channel served,
-  so this equals product_cost.
+description: >-
+  Merchandise (product) cost for the whole business, per brand-day on serve.canonical_pnl (INR). Same
+  number as product_cost; excludes shipping, packaging, gateway and RTO.
 formula:
   human_readable: SUM(product_cost)
   authoritative_source: cube

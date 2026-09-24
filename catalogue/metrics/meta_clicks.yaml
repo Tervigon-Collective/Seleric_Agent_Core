@@ -2,10 +2,9 @@ id: meta_clicks
 display_name: Meta Clicks
 category: paid_media
 status: certified
-description: >
-  All Meta ad clicks (link + other) on report_date from meta_ad_performance. Platform
-  delivery only — not landing-page views, not first-party attributed orders, not
-  platform-reported purchases.
+description: >-
+  All Meta ad clicks (link clicks plus other clicks such as profile or like), per ad per day on
+  serve.meta_ads_daily. For visits that actually reached the website use meta_landing_page_views.
 formula:
   human_readable: SUM(meta_clicks)
   authoritative_source: cube

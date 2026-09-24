@@ -2,10 +2,9 @@ id: prepaid_orders
 display_name: Prepaid Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'Online (prepaid) payment bucket from serve.commerce_orders. Residual after COD, paytm card
-  machine, and manual buckets. Excludes test, revenue-adjustment, draft. Scope: Shopify-only (Historical
-  Analytics / commerce oracle). For all-platform
-  ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Prepaid (online-payment) orders placed in the period (payment_bucket='online', excluding draft
+  orders), from serve.commerce_orders (order date). Companion to cod_orders.
 formula:
   human_readable: Count of orders in online payment bucket
   authoritative_source: cube

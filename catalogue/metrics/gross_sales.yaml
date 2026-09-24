@@ -2,11 +2,11 @@ id: gross_sales
 display_name: Gross Sales (Shopify-only, ex-GST)
 category: commerce
 status: certified
-description: 'Placement revenue excluding GST before discounts, on eligible placement orders — includes
-  cancelled and voided orders (dashboard quirk kept per Commerce Metric Policy v1). Matches the dashboard
-  Gross Sales card (Shopify-only). Placement axis: order_date. For the pre-discount value including GST
-  use total_sales. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
-  use net_profit_blended.'
+description: >-
+  Shopify gross sales: order value before discounts, ex-GST, on the order date, from
+  serve.commerce_orders — includes orders later cancelled or voided (dashboard Gross Sales card).
+  Sliceable by geo, payment, UTM, customer type. Same total as gross_sales_all_channels. Incl.-GST
+  equivalent → total_sales.
 formula:
   human_readable: 'Sum of (gross_excl_tax_derived + discount_excl_tax) per eligible order (is_test = 0,
     is_revenue_adjustment = 0); proportional GST strip per policy v1

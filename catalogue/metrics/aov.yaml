@@ -2,10 +2,10 @@ id: aov
 display_name: Average Order Value (Shopify-only)
 category: commerce
 status: certified
-description: 'Shopify Average Order Value at commerce order grain: Total Sales (incl. GST) ÷ placement
-  orders — matches dashboard "Average Order Value" / storeMetrics.
-
-  '
+description: >-
+  Average order value (dashboard AOV card): Total Sales INCLUDING GST ÷ orders placed, on the order
+  date, from serve.commerce_orders; includes later-cancelled orders in both parts. Slice by shipping
+  region/country/city. For AOV by marketing source (ex-GST net basis) use attributed_aov.
 formula:
   human_readable: total_sales / orders
   authoritative_source: cube

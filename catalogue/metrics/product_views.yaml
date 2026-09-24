@@ -2,9 +2,9 @@ id: product_views
 display_name: Product Views
 category: web_analytics
 status: certified
-description: 'Snowplow product_view events (product detail page views) on the event-type × channel day rollup. Counts events, not sessions — a session with three PDP views contributes three. PDP-session counts live on SessionFunnel.
-
-  '
+description: >-
+  Product detail page (PDP) view events per day and channel on serve.web_events_daily. Counts views,
+  not sessions — for sessions that viewed a product use session_pdp_rate.
 formula:
   human_readable: SUM(events WHERE event_type = 'product_view')
   authoritative_source: cube

@@ -182,7 +182,7 @@ class ActionBroker:
 
         today = datetime.now(IST).date()
         query = {
-            "measures": ["meta_ad_performance.spend", "meta_ad_performance.impressions"],
+            "measures": ["meta_ad_performance.meta_spend", "meta_ad_performance.meta_impressions"],
             "dimensions": ["meta_ad_performance.ad_id", "meta_ad_performance.ad_name"],
             "filters": [
                 {"member": "meta_ad_performance.ad_id", "operator": "equals",
@@ -202,7 +202,7 @@ class ActionBroker:
             return RuleResult(rule="ad_exists", passed=None, detail=f"Cube unavailable: {exc}")
         if res.data:
             row = res.data[0]
-            spend = row.get("meta_ad_performance.spend")
+            spend = row.get("meta_ad_performance.meta_spend")
             name = row.get("meta_ad_performance.ad_name")
             return RuleResult(
                 rule="ad_exists",
@@ -219,20 +219,20 @@ class ActionBroker:
         )
 
     async def _rule_not_already_paused(self, payload: dict) -> tuple[RuleResult, dict | None]:
-        """Best-effort: latest status event from meta_ad_status_changes."""
+        """Best-effort: latest status event from meta_ads_status_history."""
         query = {
             "dimensions": [
-                "meta_ad_status_changes.status",
-                "meta_ad_status_changes.changed_at",
-                "meta_ad_status_changes.entity_name",
+                "meta_ads_status_history.status",
+                "meta_ads_status_history.changed_at",
+                "meta_ads_status_history.entity_name",
             ],
             "filters": [
-                {"member": "meta_ad_status_changes.ad_id", "operator": "equals",
+                {"member": "meta_ads_status_history.ad_id", "operator": "equals",
                  "values": [payload["ad_id"]]},
-                {"member": "meta_ad_status_changes.entity_type", "operator": "equals",
-                 "values": ["ad"]},
+                {"member": "meta_ads_status_history.entity_type", "operator": "equals",
+                 "values": ["AD"]},
             ],
-            "order": {"meta_ad_status_changes.changed_at": "desc"},
+            "order": {"meta_ads_status_history.changed_at": "desc"},
             "limit": 1,
         }
         try:
@@ -256,12 +256,12 @@ class ActionBroker:
                 None,
             )
         row = res.data[0]
-        status = (row.get("meta_ad_status_changes.status") or "").upper()
+        status = (row.get("meta_ads_status_history.status") or "").upper()
         state = {
             "latest_known_status": status,
-            "status_changed_at": row.get("meta_ad_status_changes.changed_at"),
-            "entity_name": row.get("meta_ad_status_changes.entity_name"),
-            "source": "meta_ad_status_changes (may lag Meta by up to a day)",
+            "status_changed_at": row.get("meta_ads_status_history.changed_at"),
+            "entity_name": row.get("meta_ads_status_history.entity_name"),
+            "source": "meta_ads_status_history (may lag Meta by up to a day)",
         }
         if status == "PAUSED":
             return (

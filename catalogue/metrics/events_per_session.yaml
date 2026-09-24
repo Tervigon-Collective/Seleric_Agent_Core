@@ -2,9 +2,9 @@ id: events_per_session
 display_name: Events per Session
 category: web_analytics
 status: certified
-description: 'Average website events per session, computed at event grain (serve.web_events): COUNT(events) / COUNT(DISTINCT session-linked sessions), recomputed as a ratio of aggregates on any slice. Numerator includes sessionless server-side purchase events; denominator counts sessions with ≥1 web event.
-
-  '
+description: >-
+  Average website events per session: event count ÷ distinct sessions on serve.web_events (event
+  grain), recomputed for any slice.
 formula:
   human_readable: COUNT(events) / COUNT(DISTINCT session_id)
   authoritative_source: cube

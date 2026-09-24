@@ -2,10 +2,11 @@ id: orders
 display_name: Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'Shopify placement order count from serve.commerce_orders. Excludes test and revenue-adjustment
-  orders; includes later-cancelled and voided placements. Scope: Shopify-only (Historical Analytics /
-  commerce oracle). For all-platform ad spend use
-  total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Shopify orders placed in the period (order date), excluding test and revenue-adjustment orders,
+  including later-cancelled/voided ones, from serve.commerce_orders. Same number as total_orders; this
+  id additionally slices by UTM, customer type, order/fulfilment status and item_count (e.g.
+  multi-item orders).
 formula:
   human_readable: Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)
   authoritative_source: cube

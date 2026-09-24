@@ -2,10 +2,9 @@ id: lifetime_gross_revenue
 display_name: Lifetime Gross Revenue
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no all-time
-  revenue-per-customer aggregation exists in Node-Backend. Sum of customers'
-  lifetime gross revenue. A cumulative snapshot — do not filter by date_range.
+description: >-
+  Total all-time gross sales of the customers in the slice, from serve.customer_ltv. All-time
+  snapshot. Draft: not exposed to search.
 formula:
   human_readable: SUM(lifetime_gross_revenue)
   authoritative_source: cube

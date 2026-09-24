@@ -2,9 +2,10 @@ id: total_payments
 display_name: Total Payments
 category: commerce
 status: certified
-description: >
-  Historical Analytics Total Payments card — count of Shopify placement
-  non-draft orders across COD + online/prepaid + manual + paytm card machine.
+description: >-
+  Orders with a recorded payment method — COD + online + manual + card-machine, excluding draft orders
+  — placed in the period, from serve.commerce_orders (dashboard Total Payments card). An order count,
+  not an amount (for gateway amount use payment_amount_signed).
 formula:
   human_readable: Count of payment-bucketed placement orders
   authoritative_source: cube

@@ -2,9 +2,11 @@ id: total_operating_cost
 display_name: Total Operating Cost (Shopify-only)
 category: finance
 status: certified
-description: 'FE §13 Total Operating Cost — identical to Net COGS (product + ship + pack + gateway + RTO). Prefer this id when the user says "Total Operating Cost"; net_cogs when they say Net COGS. Same underlying value; exposed as its own Cube measure so results include a total_operating_cost column. Scope: Shopify-only.
-
-  '
+description: >-
+  "Total Operating Cost" dashboard card = Net COGS (product + shipping + packaging + payment-gateway
+  fees + RTO), per brand-day on serve.canonical_pnl (INR). Same number as net_cogs and
+  total_operating_cost_all_channels — use this id when the user says "total operating cost". Does NOT
+  include ad spend, salaries or overheads.
 formula:
   human_readable: SUM(net_cogs)
   authoritative_source: cube

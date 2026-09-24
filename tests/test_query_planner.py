@@ -31,7 +31,7 @@ def test_presets_exclude_partial_today():
         date(2026, 6, 1), date(2026, 6, 30)
     )
     assert resolve_time_range(TimeRange(preset="this_month"), TODAY) == (
-        date(2026, 7, 1), TODAY
+        date(2026, 7, 1), date(2026, 7, 9)
     )
 
 
@@ -191,7 +191,11 @@ def test_breakdown_guard():
 
     planner = QP.__new__(QP)
     with pytest.raises(PlanError, match="breakdown_type"):
-        planner._guard_breakdown("meta_ad_breakdown", [])
+        planner._guard_breakdown("meta_ad_breakdown_performance", [])
+
+    # A non-breakdown view/name is not subject to the guard at all: it early
+    # returns rather than demanding a breakdown_type filter it can't use.
+    assert planner._guard_breakdown("meta_ad_breakdown", []) is None
 
 
 # ---------- execution ----------

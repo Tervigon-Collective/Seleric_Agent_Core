@@ -2,9 +2,9 @@ id: product_cancel_revenue
 display_name: Product Cancel Revenue (ex-GST, cohort)
 category: product
 status: certified
-description: 'Line-level cohort cancellation revenue deduction (ex-GST) from product_performance. Supports SKU/product and shipping geo breakdowns. Deductions attach to the placement period (order_date), not the cancel event date.
-
-  '
+description: >-
+  Revenue deducted by cancellations per product/SKU (ex-GST), attached to the ORDER date, from
+  serve.product_performance.
 formula:
   human_readable: SUM(cohort_cancel_deduction_ex_gst) on eligible lines
   authoritative_source: cube

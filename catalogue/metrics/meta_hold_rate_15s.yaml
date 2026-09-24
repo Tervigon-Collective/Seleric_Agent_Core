@@ -2,9 +2,9 @@ id: meta_hold_rate_15s
 display_name: Meta Hold Rate (15s)
 category: paid_media
 status: approved
-description: >
-  Meta platform-delivery metric computed in the Cube/gold layer (verified 2026-09-24); not surfaced on the Node-Backend dashboard. Meta Hold Rate (15s) recomputed from
-  aggregated components — never SUM/AVG of row ratios.
+description: >-
+  Meta video hold rate: ThruPlays (15-second or complete views) ÷ 3-second views, recomputed from sums
+  on serve.meta_ads_daily — how many hooked viewers keep watching.
 formula:
   human_readable: SUM(thruplays) / SUM(3s views) — approved gold formula
   authoritative_source: cube

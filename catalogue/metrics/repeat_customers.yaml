@@ -2,10 +2,9 @@ id: repeat_customers
 display_name: Repeat Customers
 category: customer
 status: certified
-description: >
-  Dashboard basis: a windowed/sampled count of customers flagged as repeat
-  within the query window (Shopify REST), not a lifetime "more than one
-  order, ever" flag. See dashboard_alignment.
+description: >-
+  Customers who have placed more than one order ever — an all-time snapshot from serve.customer_ltv
+  (no date filter). Filter by acquisition platform/channel/campaign.
 formula:
   human_readable: COUNT(DISTINCT customer_id) WHERE repeat_in_window = true
     (windowed/sampled)

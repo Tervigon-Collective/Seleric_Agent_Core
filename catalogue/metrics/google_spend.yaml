@@ -2,8 +2,11 @@ id: google_spend
 display_name: Google Spend (Google-only)
 category: paid_media
 status: certified
-description: >
-  Google Ads spend only. For Meta-only use meta_spend; all platforms use total_ad_spend.
+description: >-
+  Google Ads spend as reported by Google, per campaign per day on serve.google_ads_daily (INR) —
+  default for "Google spend", "Google Ads cost". Slice by customer account, campaign, campaign_type
+  (SEARCH | PERFORMANCE_MAX | SHOPPING | DEMAND_GEN | VIDEO | DISPLAY). Campaign grain only (no ad
+  group/ad).
 formula:
   human_readable: SUM(google_spend)
   authoritative_source: cube

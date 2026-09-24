@@ -2,7 +2,9 @@ id: meta_cpc
 display_name: Meta CPC
 category: paid_media
 status: certified
-description: Meta CPC recomputed from aggregated components — never SUM/AVG of row ratios.
+description: >-
+  Meta cost per click: spend ÷ all clicks, recomputed from sums for any slice on serve.meta_ads_daily
+  (INR).
 formula:
   human_readable: SUM(spend) / SUM(clicks)
   authoritative_source: cube

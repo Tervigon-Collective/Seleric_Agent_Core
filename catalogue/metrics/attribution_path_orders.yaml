@@ -2,8 +2,11 @@ id: attribution_path_orders
 display_name: Attribution Path Orders
 category: attribution
 status: certified
-description: Shopify orders on attribution_paths (per attribution_model, order_date). Multi-touch
-  path grain; last-touch single-row credit is attributed_orders on order_attribution.
+description: >-
+  Orders that have a multi-touch conversion path record, from serve.attribution_paths (order date).
+  Currently only the last_touch_v1 model is populated, so it matches last-touch orders with a recorded
+  journey. Use for journey/path questions together with avg_touch_count. For order counts by source
+  use attributed_orders.
 formula:
   human_readable: orders
   authoritative_source: cube

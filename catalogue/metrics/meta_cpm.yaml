@@ -2,7 +2,9 @@ id: meta_cpm
 display_name: Meta CPM
 category: paid_media
 status: certified
-description: Meta CPM recomputed from aggregated components — never SUM/AVG of row ratios.
+description: >-
+  Meta cost per 1,000 impressions: spend × 1000 ÷ impressions, recomputed from sums for any slice on
+  serve.meta_ads_daily (INR).
 formula:
   human_readable: SUM(spend) * 1000 / SUM(impressions)
   authoritative_source: cube

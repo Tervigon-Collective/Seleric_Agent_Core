@@ -2,10 +2,12 @@ id: total_orders
 display_name: Total Orders (all channels)
 category: commerce
 status: certified
-description: >
-  Historical Analytics Total Orders when All channels is selected: Shopify eligible placement orders
-  (incl. later cancelled/voided). Date axis: order_date. For Shopify-only use metric orders (same
-  cohort). Do not confuse with Total Payments.
+description: >-
+  Orders placed in the period — the default answer to "orders", "order count", "order volume". Counts
+  Shopify orders on their order date (excluding test and revenue-adjustment orders; including ones
+  later cancelled or voided) from serve.orders_all_channels (dashboard Total Orders card). Slice by
+  geo (incl. pincode) and payment. Same number as orders. By marketing source → attributed_orders or
+  channel_orders.
 formula:
   human_readable: countDistinct(shopify eligible order_id)
   authoritative_source: cube

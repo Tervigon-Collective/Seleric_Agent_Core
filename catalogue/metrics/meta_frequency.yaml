@@ -2,10 +2,9 @@ id: meta_frequency
 display_name: Meta Frequency
 category: paid_media
 status: draft
-description: >
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. Meta Frequency recomputed from
-  aggregated components — never SUM/AVG of row ratios.
+description: >-
+  Meta frequency: impressions ÷ reach, recomputed from sums on serve.meta_ads_daily. Because reach is
+  only deduplicated per ad-day, multi-day frequency is understated. Draft: not exposed to search.
 formula:
   human_readable: SUM(impressions) / SUM(daily reach) — approximation above ad-day grain
   authoritative_source: cube

@@ -2,8 +2,9 @@ id: avg_attribution_confidence
 display_name: Average Attribution Confidence
 category: attribution
 status: draft
-description: Not implemented in the dashboard — Node-Backend has no equivalent live calculation. Mean
-  confidence score of the last-touch attribution match.
+description: >-
+  Mean confidence score of the last-touch match per order on serve.order_attribution (order date). A
+  data-quality diagnostic for attribution, not a business outcome. Draft: not exposed to search.
 formula:
   human_readable: SUM(attribution_confidence) / attributed_orders
   authoritative_source: cube

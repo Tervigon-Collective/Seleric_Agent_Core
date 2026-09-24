@@ -2,11 +2,9 @@ id: customer_profiles
 display_name: Customer Profiles
 category: customer
 status: draft
-description: >
-  Not implemented in the dashboard as of this audit — no customer master-data
-  table/endpoint exists in Node-Backend. Count of customer master-data rows
-  (serve.customer_data). Profile/consent/ acquisition only — use
-  lifetime_net_revenue / customers on CustomerIntelligence for LTV questions.
+description: >-
+  Count of customer master-data profiles (consent, acquisition source, default city) from
+  serve.customer_data. No revenue or order counts here. Draft: not exposed to search.
 formula:
   human_readable: COUNT(customer_id)
   authoritative_source: cube

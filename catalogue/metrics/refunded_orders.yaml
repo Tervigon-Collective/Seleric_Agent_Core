@@ -2,8 +2,10 @@ id: refunded_orders
 display_name: Returned Orders (Shopify-only)
 category: commerce
 status: certified
-description: 'Orders with return events on event date (Asia/Kolkata). Maps to returned_orders measure. Filter on event_date
-  — not order_date. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit use net_profit_blended.'
+description: >-
+  Orders returned in the period, counted on the RETURN date (not the order date), from
+  serve.commerce_order_events — "returned orders", "returns by state". Sliceable by geo, payment, UTM,
+  item_count. Returned revenue → event_return_revenue; products returned → returned_units.
 formula:
   human_readable: Distinct orders with return event in period
   authoritative_source: cube

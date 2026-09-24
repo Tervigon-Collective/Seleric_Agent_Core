@@ -2,10 +2,10 @@ id: shipping_cost
 display_name: Shipping Cost (Shopify-only)
 category: finance
 status: certified
-description: 'Fulfilment shipping cost arm of Shopify Net COGS (brand × day), including return-event shipping.
-  FE §13 Shipping Cost (Courier). Part of Net COGS — do not subtract again when Net COGS / Total Operating
-  Cost is used. Scope: Shopify-only (Historical Analytics / commerce oracle). For all-platform ad spend use total_ad_spend; for blended-ads net profit
-  use net_profit_blended.'
+description: >-
+  Courier/shipping cost component of Net COGS, per brand-day on serve.canonical_pnl (INR): outbound
+  shipping on the order date plus shipping on fully-returned orders on the return date. Part of
+  net_cogs — do not add it again.
 formula:
   human_readable: SUM(shipping_cost)
   authoritative_source: cube

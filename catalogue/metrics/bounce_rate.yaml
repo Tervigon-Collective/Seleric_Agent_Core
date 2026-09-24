@@ -2,9 +2,9 @@ id: bounce_rate
 display_name: Bounce Rate
 category: web_analytics
 status: certified
-description: 'Share of sessions that never reached a product detail page: (sessions - pdp_sessions) / sessions, recomputed from sums on any slice.
-
-  '
+description: >-
+  Share of sessions that never viewed a product page: (sessions − sessions with a product view) ÷
+  sessions, per day and fine channel on serve.funnel_daily. Not the classic single-page bounce rate.
 formula:
   human_readable: (SUM(sessions) - SUM(pdp_sessions)) / SUM(sessions)
   authoritative_source: cube

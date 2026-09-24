@@ -2,8 +2,9 @@ id: meta_thruplays
 display_name: Meta ThruPlays
 category: paid_media
 status: approved
-description: >
-  Meta platform-delivery metric computed in the Cube/gold layer (verified 2026-09-24); not surfaced on the Node-Backend dashboard. ThruPlays (15s or full watch).
+description: >-
+  Meta ThruPlays: video plays watched to completion or for at least 15 seconds, per ad per day on
+  serve.meta_ads_daily.
 formula:
   human_readable: SUM(meta_thruplays)
   authoritative_source: cube

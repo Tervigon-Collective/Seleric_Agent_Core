@@ -2,10 +2,10 @@ id: repeat_rate
 display_name: Repeat Customer Rate
 category: customer
 status: certified
-description: >
-  Dashboard basis: windowed/sampled repeat_customers ÷ windowed/sampled
-  customers — both components inherit the same windowed/sampled Shopify REST
-  basis, not a lifetime repeat rate. See dashboard_alignment.
+description: >-
+  Share of all customers who have ordered more than once, ever: repeat_customers ÷ customers on
+  serve.customer_ltv (all-time snapshot, no date filter; 0–1 ratio). Filter by acquisition
+  platform/channel/campaign to compare cohorts.
 formula:
   human_readable: (windowed/sampled repeat_customers) / (windowed/sampled customers)
   authoritative_source: cube

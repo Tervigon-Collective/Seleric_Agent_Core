@@ -2,9 +2,10 @@ id: product_orders
 display_name: Product Orders
 category: product
 status: certified
-description: 'Distinct eligible orders containing the product/SKU (serve.product_performance). One order can contain many SKUs — NEVER sum per-SKU order counts across SKUs; the ungrouped total is the count of orders with at least one product line.
-
-  '
+description: >-
+  Distinct orders containing the product/SKU (order date), from serve.product_performance. One order
+  can contain many products — never add product_orders across products; the unsliced value is orders
+  with at least one product line.
 formula:
   human_readable: Count of distinct eligible orders containing the product line
   authoritative_source: cube
