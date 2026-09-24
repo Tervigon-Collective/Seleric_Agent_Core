@@ -179,38 +179,92 @@ async def test_get_returns_none_while_warming_then_serves_the_snapshot(catalogue
     assert snap is not None and snap.brand_id == "20"
 
 
-def test_filter_on_a_value_the_dimension_never_holds_is_flagged_with_where_it_lives(catalogue):
-    index = _index(catalogue)
+class _LiveCube:
+    """Answers value probes from what is 'live' in Cube right now."""
+
+    def __init__(self, live: dict[str, dict[str, float]], *, delay: float = 0.0):
+        self.live = live  # qualified member -> {value: volume}
+        self.delay = delay
+        self.queries: list[dict] = []
+
+    async def load(self, query: dict) -> CubeResult:
+        import asyncio
+
+        self.queries.append(query)
+        if self.delay:
+            await asyncio.sleep(self.delay)
+        member = query["dimensions"][0]
+        measure = query["measures"][0]
+        wanted = next(f["values"] for f in query["filters"] if f["member"] == member)
+        rows = [{member: v, measure: vol} for v, vol in self.live.get(member, {}).items() if v in wanted]
+        return CubeResult(data=rows, raw={})
+
+    async def meta(self) -> dict:
+        return {"cubes": []}
+
+
+def _live_index(catalogue, live, **kw) -> ValueIndex:
+    index = ValueIndex(catalogue, _LiveCube(live, **kw), default_brand_id="20")  # type: ignore[arg-type]
     index._snapshots["20"] = _snap(
         {
-            ("channel", "orders_all_channels"): {"google": 900, "meta": 800, "organic_shopify": 90},
-            ("lt_utm_medium", "order_attribution"): {"acme chat": 33, "cpc": 500},
+            ("channel", "orders_all_channels"): {"google": 900, "meta": 800},
+            ("lt_utm_medium", "order_attribution"): {"cpc": 500},
         }
     )
-    out = index.check_filter_values("20", "orders_all_channels", [("channel", ["acme chat"])])
+    return index
+
+
+async def test_value_known_in_the_dimension_needs_no_cube_call(catalogue):
+    index = _live_index(catalogue, {})
+    assert await index.verify_filter_values("20", "orders_all_channels", [("channel", ["Google"])]) == []
+    assert index.cube.queries == []
+
+
+async def test_new_value_in_another_dimension_is_found_live_and_learned(catalogue):
+    # "acmechat" appeared after the last rebuild — only a live check knows it.
+    index = _live_index(catalogue, {"order_attribution.lt_utm_medium": {"acmechat": 12}})
+    out = await index.verify_filter_values("20", "orders_all_channels", [("channel", ["acmechat"])])
     assert out == [
         {
             "dimension": "channel",
             "view": "orders_all_channels",
-            "values": ["acme chat"],
-            "found_in": [{"dimension": "lt_utm_medium", "view": "order_attribution", "values": ["acme chat"]}],
+            "values": ["acmechat"],
+            "found_in": [{"dimension": "lt_utm_medium", "view": "order_attribution", "values": ["acmechat"]}],
         }
     ]
-    # a value that exists (any casing) is fine
-    assert index.check_filter_values("20", "orders_all_channels", [("channel", ["Google"])]) == []
+    # learned: resolvable from the snapshot on the next question
+    assert index._snapshots["20"].values[("lt_utm_medium", "order_attribution")]["acmechat"] == 12
 
 
-def test_missing_value_check_stays_silent_when_it_cannot_know(catalogue):
-    index = _index(catalogue)
-    assert index.check_filter_values("20", "v", [("channel", ["x"])]) == []  # no snapshot yet
-    snap = _snap({("product_title", "product_performance"): {"A": 1.0}})
-    snap.truncated.add(("product_title", "product_performance"))  # list incomplete
-    index._snapshots["20"] = snap
-    assert index.check_filter_values("20", "product_performance", [("product_title", ["B"])]) == []
-    # ids/numbers are never in the label index
-    snap2 = _snap({("campaign_id", "meta_ad_performance"): {"Some Label": 1.0}})
-    index._snapshots["20"] = snap2
-    assert index.check_filter_values("20", "meta_ad_performance", [("campaign_id", ["120248089961790783"])]) == []
+async def test_new_value_in_the_same_dimension_is_a_real_zero_not_a_problem(catalogue):
+    index = _live_index(catalogue, {"orders_all_channels.channel": {"acmechat": 0}})
+    assert await index.verify_filter_values("20", "orders_all_channels", [("channel", ["acmechat"])]) == []
+
+
+async def test_value_found_nowhere_is_reported_as_not_recorded(catalogue):
+    index = _live_index(catalogue, {})
+    out = await index.verify_filter_values("20", "orders_all_channels", [("channel", ["nosuchthing"])])
+    assert out and out[0]["found_in"] == []
+
+
+async def test_no_claim_when_the_live_check_cannot_finish(catalogue):
+    index = _live_index(catalogue, {}, delay=5.0)
+    found = await index.locate_live("20", ["nosuchthing"], timeout_s=0.05)
+    assert found is None
+    index2 = _live_index(catalogue, {}, delay=5.0)
+
+    async def _timeout(*a, **k):
+        return None
+
+    index2.locate_live = _timeout  # type: ignore[method-assign]
+    assert await index2.verify_filter_values("20", "orders_all_channels", [("channel", ["x"])]) == []
+
+
+async def test_ids_and_missing_snapshot_are_never_checked(catalogue):
+    index = _live_index(catalogue, {})
+    assert await index.verify_filter_values("20", "meta_ad_performance", [("campaign_id", ["120248089961790783"])]) == []
+    assert await index.verify_filter_values("26", "orders_all_channels", [("channel", ["x"])]) == []
+    assert index.cube.queries == []
 
 
 async def test_warm_starts_one_background_build(catalogue):
@@ -222,3 +276,56 @@ async def test_warm_starts_one_background_build(catalogue):
     assert len(index._builds) == 1
     await asyncio.wait_for(asyncio.shield(index._builds["20"]), timeout=30)
     assert "20" in index._snapshots
+
+
+# --- first question after a restart -------------------------------------------
+
+
+async def test_restart_serves_the_persisted_index_without_touching_cube(catalogue, db):
+    count_measure = catalogue.cat.metrics["attributed_orders"].cube_mapping.measure
+    cube = _MetaCube(
+        {"order_attribution.lt_utm_medium": [
+            {"order_attribution.lt_utm_medium": "acmechat", count_measure: "33"},
+            {"order_attribution.lt_utm_medium": "ac", count_measure: "13"},
+        ]},
+        {count_measure: "countDistinct"},
+    )
+    first = ValueIndex(catalogue, cube, default_brand_id="20", db=db)  # type: ignore[arg-type]
+    await first._build_and_store("20")
+
+    class _NoCube:
+        async def load(self, query):  # pragma: no cover - must not be called
+            raise AssertionError("restart must not need Cube to answer")
+
+        async def meta(self):  # pragma: no cover
+            raise AssertionError("restart must not need Cube to answer")
+
+    restarted = ValueIndex(catalogue, _NoCube(), default_brand_id="20", db=db)  # type: ignore[arg-type]
+    snap = await restarted.get("20", wait_s=0.0)
+    assert snap is not None  # available on the very first call, no warming
+    out = restarted.resolve("orders from acmechat", snap)
+    term = next(t for t in out["terms"] if t["term"] == "acmechat")
+    assert {v["value"] for v in term["dimensions"][0]["values"]} == {"acmechat", "ac"}
+
+
+def test_snapshot_from_another_catalogue_version_is_served_but_marked_stale(catalogue, db):
+    snap = _snap({("lt_utm_medium", "order_attribution"): {"acme chat": 3}})
+    db.execute(
+        "INSERT INTO value_index_snapshots (brand_key, catalogue_version, built_at, payload_json) VALUES (?, ?, ?, ?)",
+        ("20", "some-older-version", time.time(), snap.to_json()),
+    )
+    index = ValueIndex(catalogue, cube=None, default_brand_id="20", db=db)  # type: ignore[arg-type]
+    loaded = index._snapshots["20"]
+    assert loaded.values == snap.values
+    assert loaded.built_at == 0.0  # next warm() rebuilds it
+
+
+async def test_warm_all_covers_every_active_brand(catalogue):
+    import asyncio
+
+    index = ValueIndex(catalogue, _MetaCube({}, {}), default_brand_id="20")  # type: ignore[arg-type]
+    index.warm_all()
+    expected = {"20"} | {b.id for b in catalogue.list_brands()}
+    assert set(index._builds) == expected
+    await asyncio.wait_for(asyncio.gather(*[asyncio.shield(t) for t in index._builds.values()]), timeout=60)
+    assert set(index._snapshots) == expected

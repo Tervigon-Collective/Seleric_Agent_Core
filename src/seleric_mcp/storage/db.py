@@ -91,6 +91,16 @@ CREATE TABLE IF NOT EXISTS ads_operations (
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_ads_operations_tool ON ads_operations(tool_name, created_at);
+
+-- Last built value index per brand (catalogue_service/value_index.py), so a
+-- restarted server resolves values on its first question instead of rebuilding
+-- from Cube first. brand_key '' = no brand scope.
+CREATE TABLE IF NOT EXISTS value_index_snapshots (
+    brand_key TEXT PRIMARY KEY,
+    catalogue_version TEXT NOT NULL,
+    built_at REAL NOT NULL,
+    payload_json TEXT NOT NULL
+);
 """
 
 

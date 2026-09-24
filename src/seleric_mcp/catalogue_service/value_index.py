@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import asyncio
 import difflib
+import json
 import re
 import time
 import urllib.parse
@@ -50,6 +51,7 @@ from ..app.query_planner import _ist_today
 
 if TYPE_CHECKING:
     from ..semantic_layer.cube_client import CubeClient
+    from ..storage.db import Database
     from .service import CatalogueService
 
 log = structlog.get_logger()
@@ -162,11 +164,33 @@ class Snapshot:
     # (dimension, view) -> {raw value: volume}
     values: dict[tuple[str, str], dict[str, float]] = field(default_factory=dict)
     measure_metric: dict[tuple[str, str], str] = field(default_factory=dict)
-    # Keys whose Cube result hit row_cap: their value list is incomplete, so a
-    # value missing from it proves nothing.
-    truncated: set[tuple[str, str]] = field(default_factory=set)
     failed: int = 0
     _by_norm: dict[str, list[tuple[tuple[str, str], str, float]]] | None = None
+
+    def to_json(self) -> str:
+        return json.dumps(
+            {
+                "brand_id": self.brand_id,
+                "start": self.start.isoformat(),
+                "end": self.end.isoformat(),
+                "values": [[d, v, vals] for (d, v), vals in self.values.items()],
+                "measure_metric": [[d, v, m] for (d, v), m in self.measure_metric.items()],
+                "failed": self.failed,
+            }
+        )
+
+    @classmethod
+    def from_json(cls, payload: str, *, built_at: float) -> Snapshot:
+        data = json.loads(payload)
+        return cls(
+            brand_id=data.get("brand_id"),
+            start=date.fromisoformat(data["start"]),
+            end=date.fromisoformat(data["end"]),
+            built_at=built_at,
+            values={(d, v): dict(vals) for d, v, vals in data.get("values", [])},
+            measure_metric={(d, v): m for d, v, m in data.get("measure_metric", [])},
+            failed=int(data.get("failed", 0)),
+        )
 
     def by_norm(self) -> dict[str, list[tuple[tuple[str, str], str, float]]]:
         """normalized value -> [((dimension, view), raw value, volume)], built once."""
@@ -192,6 +216,7 @@ class ValueIndex:
         concurrency: int = 6,
         fuzzy_threshold: float = 0.85,
         max_share: float = 0.2,
+        db: Database | None = None,
     ) -> None:
         self.catalogue = catalogue
         self.cube = cube
@@ -202,8 +227,51 @@ class ValueIndex:
         self.concurrency = concurrency
         self.fuzzy_threshold = fuzzy_threshold
         self.max_share = max_share
+        self.db = db
         self._snapshots: dict[str | None, Snapshot] = {}
         self._builds: dict[str | None, asyncio.Task] = {}
+        # One Cube concurrency budget shared by every brand's build, so warming
+        # all brands after a restart doesn't multiply the load on Cube.
+        self._sem: asyncio.Semaphore | None = None
+        self._load_persisted()
+
+    # ---------- persistence ----------
+
+    def _load_persisted(self) -> None:
+        """Serve the last built index from the first request after a restart.
+        A snapshot built against a different catalogue version is still loaded
+        (values don't change with the catalogue) but marked stale so the next
+        warm() rebuilds it."""
+        if self.db is None:
+            return
+        try:
+            rows = self.db.fetchall(
+                "SELECT brand_key, catalogue_version, built_at, payload_json FROM value_index_snapshots"
+            )
+        except Exception as exc:
+            log.warning("value_index_load_failed", error=repr(exc))
+            return
+        for row in rows:
+            try:
+                built_at = float(row["built_at"])
+                if row["catalogue_version"] != self.catalogue.cat.version:
+                    built_at = 0.0
+                snap = Snapshot.from_json(row["payload_json"], built_at=built_at)
+            except Exception as exc:
+                log.warning("value_index_snapshot_unreadable", brand_key=row["brand_key"], error=repr(exc))
+                continue
+            self._snapshots[row["brand_key"] or None] = snap
+        if rows:
+            log.info("value_index_loaded", brands=[r["brand_key"] or None for r in rows])
+
+    def _save(self, snap: Snapshot) -> None:
+        if self.db is None:
+            return
+        self.db.execute(
+            "INSERT OR REPLACE INTO value_index_snapshots (brand_key, catalogue_version, built_at, payload_json) "
+            "VALUES (?, ?, ?, ?)",
+            (snap.brand_id or "", self.catalogue.cat.version, snap.built_at, snap.to_json()),
+        )
 
     # ---------- build ----------
 
@@ -276,7 +344,9 @@ class ValueIndex:
         end = _ist_today()
         start = end - timedelta(days=self.window_days)
         snap = Snapshot(brand_id=brand_id, start=start, end=end, built_at=time.time())
-        sem = asyncio.Semaphore(self.concurrency)
+        if self._sem is None:
+            self._sem = asyncio.Semaphore(self.concurrency)
+        sem = self._sem
         started = time.monotonic()
 
         async def one(t: Target) -> None:
@@ -287,8 +357,6 @@ class ValueIndex:
                     snap.failed += 1
                     log.warning("value_index_target_failed", dimension=t.dimension, view=t.view, error=repr(exc))
                     return
-            if values is not None and len(values) >= self.row_cap:
-                snap.truncated.add((t.dimension, t.view))
             labels = label_values(values or {})
             if labels:
                 snap.values[(t.dimension, t.view)] = labels
@@ -321,6 +389,10 @@ class ValueIndex:
         try:
             snap = await self.build(brand_id)
             self._snapshots[brand_id] = snap
+            try:
+                await asyncio.to_thread(self._save, snap)
+            except Exception as exc:  # persistence is an optimisation, never fatal
+                log.warning("value_index_save_failed", brand_id=brand_id, error=repr(exc))
             return snap
         finally:
             self._builds.pop(brand_id, None)
@@ -337,36 +409,95 @@ class ValueIndex:
         if not fresh and brand_id not in self._builds:
             self._builds[brand_id] = asyncio.create_task(self._build_and_store(brand_id))
 
-    def check_filter_values(
+    def warm_all(self) -> None:
+        """warm() every active brand (the default first)."""
+        self.warm(self.default_brand_id)
+        for brand in self.catalogue.list_brands():
+            self.warm(brand.id)
+
+    async def locate_live(
+        self, brand_id: str | None, wanted: list[str], *, timeout_s: float = 10.0
+    ) -> list[dict[str, Any]] | None:
+        """Where do these exact values occur *right now*? One small Cube query
+        per indexed label dimension, bounded by ``timeout_s``. Found values are
+        merged into the snapshot, so a value that appeared after the last
+        rebuild is known from its first question. None = could not check."""
+        snap = self._snapshots.get(brand_id)
+        if snap is None:
+            return None
+        wanted_norm = {normalize(w) for w in wanted}
+        by_key = {(t.dimension, t.view): t for t in self.targets()}
+        keys = [k for k in snap.values if k in by_key]
+        if self._sem is None:
+            self._sem = asyncio.Semaphore(self.concurrency)
+        sem = self._sem
+        found: list[dict[str, Any]] = []
+
+        async def probe(key: tuple[str, str]) -> None:
+            t = by_key[key]
+            query: dict[str, Any] = {
+                "measures": [t.measure],
+                "dimensions": [t.member],
+                "filters": [{"member": t.member, "operator": "equals", "values": list(wanted)}],
+                "timeDimensions": [
+                    {"dimension": t.date_member, "dateRange": [snap.start.isoformat(), _ist_today().isoformat()]}
+                ],
+                "limit": 20,
+            }
+            brand_dim = self.catalogue.cat.dimensions.get("brand_id")
+            brand_member = brand_dim.views.get(t.view) if brand_dim else None
+            if brand_id and brand_member:
+                query["filters"].append({"member": brand_member, "operator": "equals", "values": [brand_id]})
+            async with sem:
+                result = await self.cube.load(query)
+            hits = {
+                str(row.get(t.member)): float(row.get(t.measure) or 0)
+                for row in result.data
+                if row.get(t.member) is not None and normalize(row.get(t.member)) in wanted_norm
+            }
+            if hits:
+                found.append({"dimension": t.dimension, "view": t.view, "values": sorted(hits)})
+                merged = dict(snap.values.get(key, {}))
+                merged.update(hits)
+                snap.values[key] = merged
+                snap._by_norm = None
+
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*(probe(k) for k in keys), return_exceptions=True), timeout=timeout_s
+            )
+        except (TimeoutError, asyncio.TimeoutError):
+            log.warning("value_index_live_probe_timeout", values=wanted, checked=len(keys))
+            return None
+        return found
+
+    async def verify_filter_values(
         self, brand_id: str | None, view: str, filters: list[tuple[str, list[str]]]
     ) -> list[dict[str, Any]]:
-        """Equality filters whose values never occur in that dimension.
+        """Filters that produced a zero/empty result because the value does not
+        occur in that dimension (Cube answers such a filter with a 0 row).
 
-        Cube answers a filter on a value that does not exist with a 0 row, not
-        an empty result (live: channel=whatsapp → orders 0), so a wrong
-        dimension reads as "zero orders". Checked against the current snapshot
-        only (never waits); skipped when the dimension's value list is
-        incomplete (hit row_cap), not indexed, or the values are ids/numbers
-        (the index keeps labels only)."""
+        The caller only asks for zero/empty results — a filter that returned
+        real numbers proves its value exists. A value in the snapshot for that
+        dimension is accepted as is; any other value is checked against Cube
+        live before anything is claimed, so a value newer than the last rebuild
+        is never reported missing. ids/numbers are skipped (labels only)."""
         snap = self._snapshots.get(brand_id)
         if snap is None:
             return []
         problems: list[dict[str, Any]] = []
         for dimension, wanted in filters:
-            key = (dimension, view)
-            known = snap.values.get(key)
-            if known is None or key in snap.truncated or not wanted:
-                continue
-            if all(_is_opaque(w) for w in wanted):
+            if not wanted or all(_is_opaque(w) for w in wanted):
                 continue
             wanted_norm = {normalize(w) for w in wanted}
+            known = snap.values.get((dimension, view)) or {}
             if wanted_norm & {normalize(v) for v in known}:
                 continue
-            found = [
-                {"dimension": d, "view": vw, "values": [raw for raw in vals if normalize(raw) in wanted_norm][:5]}
-                for (d, vw), vals in snap.values.items()
-                if any(normalize(raw) in wanted_norm for raw in vals)
-            ]
+            found = await self.locate_live(brand_id, wanted)
+            if found is None:
+                continue  # could not check — make no claim
+            if any(f["dimension"] == dimension and f["view"] == view for f in found):
+                continue  # it exists here; the zero is real
             problems.append(
                 {"dimension": dimension, "view": view, "values": list(wanted), "found_in": found[:6]}
             )

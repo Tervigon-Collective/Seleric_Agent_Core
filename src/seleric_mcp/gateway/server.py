@@ -98,6 +98,7 @@ class AppContext:
             concurrency=settings.value_index_concurrency,
             fuzzy_threshold=settings.value_match_fuzzy_threshold,
             max_share=settings.value_match_max_share,
+            db=self.db,
         )
         self.audit = AuditLog(self.db)
         self.broker = ActionBroker(
@@ -260,19 +261,32 @@ def build_server(settings: Settings) -> FastMCP:
     def _log_call(tool: str, **fields: Any) -> str:
         trace_id = new_trace_id()
         logger.info("tool_call", tool=tool, trace_id=trace_id, **fields)
-        # Any traffic (incl. health probes) keeps the default brand's value
-        # index built, so the first real question after a restart has it.
-        ctx.values.warm(ctx.values.default_brand_id)
+        # Any traffic (incl. health probes) keeps every brand's value index
+        # built; a persisted snapshot already serves requests meanwhile.
+        ctx.values.warm_all()
         return trace_id
 
-    def _flag_missing_filter_values(result: Any, request: QueryRequest) -> None:
-        """Mark equality filters on values that never occur in the queried
-        dimension (Cube returns a 0 row for them, not an empty result), and say
-        where those values do occur."""
+    def _is_zero_result(result: dict, measures: list[str]) -> bool:
+        rows = result.get("rows") or []
+        for row in rows:
+            for m in measures:
+                v = row.get(m)
+                try:
+                    if v is not None and float(v) != 0:
+                        return False
+                except (TypeError, ValueError):
+                    return False
+        return True
+
+    async def _flag_missing_filter_values(result: Any, request: QueryRequest) -> None:
+        """A zero/empty result filtered on a value that does not occur in that
+        dimension (Cube returns a 0 row for it) is marked, with where the value
+        does occur. Non-zero results are never touched: they prove the value
+        exists."""
         if not isinstance(result, dict) or result.get("error"):
             return
         view = (result.get("provenance") or {}).get("cube_view")
-        if not view:
+        if not view or not _is_zero_result(result, list(request.measures)):
             return
         brand = ctx.values.default_brand_id
         checks: list[tuple[str, list[str]]] = []
@@ -285,7 +299,7 @@ def build_server(settings: Settings) -> FastMCP:
                 continue
             if f.operator == "equals":
                 checks.append((dim, values))
-        missing = ctx.values.check_filter_values(brand, view, checks)
+        missing = await ctx.values.verify_filter_values(brand, view, checks)
         if not missing:
             return
         result["value_not_found"] = missing
@@ -293,9 +307,9 @@ def build_server(settings: Settings) -> FastMCP:
         for m in missing:
             where = "; ".join(f"{x['dimension']} ({x['view']}): {', '.join(x['values'])}" for x in m["found_in"])
             warnings.append(
-                f"{', '.join(m['values'])} does not occur in {m['dimension']} on {m['view']} — "
-                f"the 0/empty result reflects that, not zero activity."
-                + (f" The data records it in: {where}." if where else "")
+                f"{', '.join(m['values'])} does not occur in {m['dimension']} on {m['view']} "
+                f"(checked live) — the 0/empty result reflects that, not zero activity."
+                + (f" The data records it in: {where}." if where else " It is not recorded in any dimension.")
             )
 
     def _check_metric_scopes(metric_ids: list[str]) -> dict | None:
@@ -840,7 +854,7 @@ def build_server(settings: Settings) -> FastMCP:
                 limit=limit,
             )
             result = await ctx.planner.run(request)
-            _flag_missing_filter_values(result, request)
+            await _flag_missing_filter_values(result, request)
             return result
         except PlanError as e:
             return e.to_payload()
