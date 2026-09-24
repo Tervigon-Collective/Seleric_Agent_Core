@@ -37,6 +37,7 @@ supported_dimensions:
 - is_cod
 - is_prepaid
 - is_new_customer
+- source_name
 supported_filters:
 - date_range
 - brand_id
@@ -56,6 +57,7 @@ supported_filters:
 - is_prepaid
 - is_new_customer
 - pnl_refund_class
+- source_name
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

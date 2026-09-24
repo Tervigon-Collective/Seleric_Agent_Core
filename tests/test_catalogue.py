@@ -12,6 +12,31 @@ from seleric_mcp.catalogue_service.service import (
 # catalogue id, glossary term, dimension or view name.
 _DISCONNECTED = re.compile(r"amazon", re.I)
 
+# Pseudo-filters a metric may list in supported_dimensions/filters that are not
+# real dimensions in the index (they name a query mechanic, not a column).
+_PSEUDO_DIMENSIONS = frozenset({"date_range"})
+
+
+def test_no_metric_references_an_undeclared_dimension(catalogue):
+    """Drift guard (capability audit invariant): every dimension a queryable
+    metric offers as a breakdown/filter must exist in the dimension index, so
+    the agent can actually resolve it. A miss means a metric promises a
+    capability the catalogue can't back — the class the "by source" trace turned
+    into a silent wrong answer. See scripts/capability_audit.py for the full
+    reachability/gap report this pins one invariant of."""
+    cat = catalogue.cat
+    declared = set(cat.dimensions) | _PSEUDO_DIMENSIONS
+    offenders: dict[str, list[str]] = {}
+    for m in cat.metrics.values():
+        if not m.is_queryable:
+            continue
+        missing = sorted(
+            {d for d in (*m.supported_dimensions, *m.supported_filters) if d} - declared
+        )
+        if missing:
+            offenders[m.id] = missing
+    assert not offenders, f"metrics reference undeclared dimensions: {offenders}"
+
 
 def test_loads_seed(catalogue):
     # Commerce + Product + Paid Media certified surfaces — pin to baseline minimum.

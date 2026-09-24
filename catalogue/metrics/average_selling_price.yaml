@@ -43,6 +43,7 @@ supported_dimensions:
 - product_id
 - variant_id
 - pnl_refund_class
+- source_name
 supported_filters:
 - date_range
 - brand_id
@@ -63,6 +64,7 @@ supported_filters:
 - product_id
 - variant_id
 - pnl_refund_class
+- source_name
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:

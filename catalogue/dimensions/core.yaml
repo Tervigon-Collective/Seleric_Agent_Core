@@ -215,6 +215,7 @@ dimensions:
     views:
       commerce_orders: commerce_orders.source_name
       order_attribution: order_attribution.source_name
+      product_performance: product_performance.source_name
   # ---- Customer LTV (2026-07-16): Customer.CustomerIntelligence ----
   - id: acquisition_platform
     display_name: Acquisition Platform
