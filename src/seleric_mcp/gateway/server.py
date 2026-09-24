@@ -34,6 +34,7 @@ from ..app.models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRang
 from ..app.query_planner import QueryPlanner
 from ..app.result_store import ResultStore
 from ..catalogue_service.loader import load_catalogue
+from ..catalogue_service.value_index import ValueIndex
 from ..catalogue_service.service import CatalogueService
 from ..config import Settings
 from ..observability.audit import AuditLog
@@ -86,6 +87,17 @@ class AppContext:
             self.cube,
             self.result_store,
             default_brand_id=settings.default_brand_id or None,
+        )
+        self.values = ValueIndex(
+            self.catalogue,
+            self.cube,
+            default_brand_id=settings.default_brand_id or None,
+            window_days=settings.value_index_window_days,
+            row_cap=settings.value_index_row_cap,
+            ttl_s=settings.value_index_ttl_seconds,
+            concurrency=settings.value_index_concurrency,
+            fuzzy_threshold=settings.value_match_fuzzy_threshold,
+            max_share=settings.value_match_max_share,
         )
         self.audit = AuditLog(self.db)
         self.broker = ActionBroker(
@@ -585,6 +597,24 @@ def build_server(settings: Settings) -> FastMCP:
         resolved. kind=dimension never returns a metric."""
         _log_call("catalogue_resolve_term", text=text, kind=kind)
         return ctx.catalogue.resolve_term(text, kind=kind).model_dump()
+
+    @mcp.tool()
+    async def catalogue_resolve_values(text: str, brand_id: str | None = None) -> dict:
+        """Resolve the words of a question to values that exist in the data
+        (a source, campaign, product or city name -> the dimension and exact
+        values that hold it). Learned from Cube, not
+        declared: every categorical dimension's live values over a rolling
+        window. Returns, per matched term, the dimensions/views holding it, the
+        matching values with volume and match type (exact|token|fuzzy|contains|
+        abbreviation), the dimension's top values, and metrics on that view.
+        Candidates only — the caller decides which apply. status='warming' while
+        the index for this brand is first being built."""
+        _log_call("catalogue_resolve_values", text=text, brand_id=brand_id)
+        brand = brand_id or ctx.values.brand_in_text(text) or ctx.values.default_brand_id
+        snap = await ctx.values.get(brand, wait_s=4.0)
+        if snap is None:
+            return {"status": "warming", "brand_id": brand, "terms": [], "unmatched_terms": []}
+        return ctx.values.resolve(text, snap)
 
     @mcp.tool()
     def catalogue_get_ontology(module: str | None = None) -> dict:

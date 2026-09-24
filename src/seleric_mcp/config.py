@@ -149,6 +149,14 @@ class Settings:
     freshness_enforcement: bool = True
     freshness_grace_days: int = 1
     default_brand_id: str = "20"
+    # Value index (catalogue_service/value_index.py): live dimension values
+    # learned from Cube for resolving user words to data values.
+    value_index_window_days: int = 180
+    value_index_row_cap: int = 1000
+    value_index_ttl_seconds: int = 21600
+    value_index_concurrency: int = 6
+    value_match_fuzzy_threshold: float = 0.85
+    value_match_max_share: float = 0.2
 
     # --- Meta Marketing Graph API (direct read/write backend for ads/meta/) ---
     meta_access_token: str = ""
@@ -392,6 +400,12 @@ def load_settings(config_path: Path | None = None) -> Settings:
             "SELERIC_IDEMPOTENCY_WINDOW_HOURS", "idempotency_window_hours"
         ),
         top_movers_limit=_tunable_int("SELERIC_TOP_MOVERS_LIMIT", "top_movers_limit"),
+        value_index_window_days=_tunable_int("SELERIC_VALUE_INDEX_WINDOW_DAYS", "value_index_window_days"),
+        value_index_row_cap=_tunable_int("SELERIC_VALUE_INDEX_ROW_CAP", "value_index_row_cap"),
+        value_index_ttl_seconds=_tunable_int("SELERIC_VALUE_INDEX_TTL_S", "value_index_ttl_seconds"),
+        value_index_concurrency=_tunable_int("SELERIC_VALUE_INDEX_CONCURRENCY", "value_index_concurrency"),
+        value_match_fuzzy_threshold=_tunable_float("SELERIC_VALUE_MATCH_FUZZY", "value_match_fuzzy_threshold"),
+        value_match_max_share=_tunable_float("SELERIC_VALUE_MATCH_MAX_SHARE", "value_match_max_share"),
         anomaly_sigma=_tunable_float("SELERIC_ANOMALY_SIGMA", "anomaly_sigma"),
         anomaly_min_points=_tunable_int("SELERIC_ANOMALY_MIN_POINTS", "anomaly_min_points"),
         freshness_cache_ttl_seconds=_tunable_int(
