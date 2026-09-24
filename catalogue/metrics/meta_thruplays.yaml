@@ -1,10 +1,9 @@
 id: meta_thruplays
 display_name: Meta ThruPlays
 category: paid_media
-status: draft
+status: approved
 description: >
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. ThruPlays (15s or full watch).
+  Meta platform-delivery metric computed in the Cube/gold layer (verified 2026-09-24); not surfaced on the Node-Backend dashboard. ThruPlays (15s or full watch).
 formula:
   human_readable: SUM(meta_thruplays)
   authoritative_source: cube
@@ -71,7 +70,7 @@ examples:
 validation_tests:
 - meta_thruplays >= 0 for any slice
 dashboard_alignment:
-  status: not_implemented
+  status: platform_only
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   note: >

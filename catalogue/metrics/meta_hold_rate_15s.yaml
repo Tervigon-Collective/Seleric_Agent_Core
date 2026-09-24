@@ -1,10 +1,9 @@
 id: meta_hold_rate_15s
 display_name: Meta Hold Rate (15s)
 category: paid_media
-status: draft
+status: approved
 description: >
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. Meta Hold Rate (15s) recomputed from
+  Meta platform-delivery metric computed in the Cube/gold layer (verified 2026-09-24); not surfaced on the Node-Backend dashboard. Meta Hold Rate (15s) recomputed from
   aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(thruplays) / SUM(3s views) — approved gold formula
@@ -76,9 +75,8 @@ ratio_components:
   denominator: meta_ad_performance.meta_video_3s_views
 companion_measures:
 - meta_thruplays
-- meta_video_3s_views
 dashboard_alignment:
-  status: not_implemented
+  status: platform_only
   audited_on: '2026-07-21'
   source: Seleric_Dashboard/Node-Backend
   note: >

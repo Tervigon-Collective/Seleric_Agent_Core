@@ -1,17 +1,19 @@
-id: ad_channel_net_sales
-display_name: Ad-grain Channel Net Sales
+id: ad_channel_orders
+display_name: Attributed Orders (cross-platform, ad grain)
 category: attribution
 status: certified
 description: >
-  Event-date lifecycle net sales at campaign/adset/ad from ad_channel_pnl. Rolls up to channel_pnl via reconciliation residual. Distinct from platform_attribution_commerce placement net.
+  Attributed orders at campaign/adset/ad grain across both platforms (channel = meta/google),
+  on the channel-P&L event-date basis, from ad_channel_pnl. Use with ad_channel_spend /
+  ad_channel_roas to judge which campaigns/ads drive volume. Rolls up to channel_pnl.
 formula:
-  human_readable: net_sales
+  human_readable: SUM(orders)
   authoritative_source: cube
 cube_mapping:
   view: ad_channel_pnl
-  measure: ad_channel_pnl.net_sales
+  measure: ad_channel_pnl.orders
 aggregation: additive
-unit: INR
+unit: count
 grain: daily campaign/adset/ad × channel
 supported_dimensions:
 - brand_id
@@ -47,11 +49,17 @@ access_policy:
   scopes:
   - metrics:read
 examples:
-- question: Ad-grain Channel Net Sales last 30 days
+- question: Attributed orders by campaign last 30 days
   request:
     measures:
-    - ad_channel_net_sales
+    - ad_channel_orders
+    dimensions:
+    - campaign_name
+    filters:
+    - dimension: row_type
+      operator: equals
+      values: [detail]
     time_range:
       preset: last_30d
 validation_tests:
-- ad_channel_net_sales is defined on view ad_channel_pnl
+- ad_channel_orders >= 0 for any slice

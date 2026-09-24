@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 218
+count: 185
 metrics:
   active_orders:
     category: commerce
@@ -12,12 +12,37 @@ metrics:
     - Commerce.ActiveOrder
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
+  ad_channel_net_profit:
+    category: attribution
+    cube_view: ad_channel_pnl
+    contract: null
+    glossary: []
+    om_name: adChannelNetProfit
   ad_channel_net_sales:
     category: attribution
     cube_view: ad_channel_pnl
     contract: null
     glossary: []
     om_name: adChannelNetSales
+  ad_channel_orders:
+    category: attribution
+    cube_view: ad_channel_pnl
+    contract: null
+    glossary: []
+    om_name: adChannelOrders
+  ad_channel_roas:
+    category: attribution
+    cube_view: ad_channel_pnl
+    contract: null
+    glossary: []
+    om_name: adChannelRoas
+  ad_channel_spend:
+    category: paid_media
+    cube_view: ad_channel_pnl
+    contract: null
+    glossary:
+    - Paid Media.Spend
+    om_name: adChannelSpend
   add_to_cart_events:
     category: web_analytics
     cube_view: web_events_daily
@@ -399,15 +424,6 @@ metrics:
     om_name: funnelRevenue
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
-  google_attribution_gross_sales:
-    category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: googleAttributionGrossSales
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
   google_attribution_net_sales:
     category: attribution
     cube_view: channel_pnl
@@ -417,24 +433,6 @@ metrics:
     om_name: googleAttributionNetSales
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
-  google_attribution_orders:
-    category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
-    glossary:
-    - Attribution.AttributedOrder
-    om_name: googleAttributionOrders
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
-  google_attribution_total_sales:
-    category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: googleAttributionTotalSales
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
   google_clicks:
     category: paid_media
     cube_view: google_ad_performance
@@ -462,15 +460,6 @@ metrics:
     om_name: googleCpc
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
-  google_cpc_hourly:
-    category: paid_media
-    cube_view: google_ad_performance_hourly
-    contract: null
-    glossary:
-    - Paid Media.Spend
-    om_name: googleCpcHourly
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-31'
   google_cpm:
     category: paid_media
     cube_view: google_ad_performance
@@ -480,15 +469,6 @@ metrics:
     om_name: googleCpm
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
-  google_cpm_hourly:
-    category: paid_media
-    cube_view: google_ad_performance_hourly
-    contract: null
-    glossary:
-    - Paid Media.Spend
-    om_name: googleCpmHourly
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-31'
   google_ctr:
     category: paid_media
     cube_view: google_ad_performance
@@ -498,15 +478,6 @@ metrics:
     om_name: googleCtr
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
-  google_ctr_hourly:
-    category: paid_media
-    cube_view: google_ad_performance_hourly
-    contract: null
-    glossary:
-    - Paid Media.Spend
-    om_name: googleCtrHourly
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-31'
   google_impressions:
     category: paid_media
     cube_view: google_ad_performance
@@ -525,24 +496,6 @@ metrics:
     om_name: googleImpressionsHourly
     dashboard_status: match
     dashboard_audited_on: '2026-07-31'
-  google_interaction_rate:
-    category: paid_media
-    cube_view: google_ad_performance
-    contract: paid_media_google_contract_v1
-    glossary:
-    - Paid Media.CTR
-    om_name: googleInteractionRate
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  google_interactions:
-    category: paid_media
-    cube_view: google_ad_performance
-    contract: paid_media_google_contract_v1
-    glossary:
-    - Paid Media.CTR
-    om_name: googleInteractions
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
   google_net_cogs:
     category: attribution
     cube_view: channel_pnl
@@ -635,7 +588,7 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: grossSalesAllChannels
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   gross_units_ordered:
     category: product
@@ -698,78 +651,6 @@ metrics:
     om_name: mer
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
-  meta_attr_aov:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttrAov
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
-  meta_attr_gross_revenue:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttrGrossRevenue
-    dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
-  meta_attr_net_revenue:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttrNetRevenue
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
-  meta_attr_new_customer_orders:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedOrder
-    om_name: metaAttrNewCustomerOrders
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_attr_new_customer_revenue:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttrNewCustomerRevenue
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_attr_orders:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedOrder
-    om_name: metaAttrOrders
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
-  meta_attr_refund_amount:
-    category: attribution
-    cube_view: meta_ad_attribution
-    contract: attribution_meta_ad_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttrRefundAmount
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_attribution_gross_sales:
-    category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttributionGrossSales
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
   meta_attribution_net_sales:
     category: attribution
     cube_view: channel_pnl
@@ -779,24 +660,6 @@ metrics:
     om_name: metaAttributionNetSales
     dashboard_status: match
     dashboard_audited_on: '2026-07-27'
-  meta_attribution_orders:
-    category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
-    glossary:
-    - Attribution.AttributedOrder
-    om_name: metaAttributionOrders
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
-  meta_attribution_total_sales:
-    category: attribution
-    cube_view: platform_attribution_commerce
-    contract: attribution_order_contract_v1
-    glossary:
-    - Attribution.AttributedNetRevenue
-    om_name: metaAttributionTotalSales
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-21'
   meta_breakdown_clicks:
     category: paid_media
     cube_view: meta_ad_breakdown_performance
@@ -833,15 +696,6 @@ metrics:
     om_name: metaBreakdownCtr
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
-  meta_breakdown_hook_rate:
-    category: paid_media
-    cube_view: meta_ad_breakdown_performance
-    contract: paid_media_meta_breakdown_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaBreakdownHookRate
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
   meta_breakdown_impressions:
     category: paid_media
     cube_view: meta_ad_breakdown_performance
@@ -851,24 +705,6 @@ metrics:
     om_name: metaBreakdownImpressions
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
-  meta_breakdown_landing_page_views:
-    category: paid_media
-    cube_view: meta_ad_breakdown_performance
-    contract: paid_media_meta_breakdown_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaBreakdownLandingPageViews
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_breakdown_link_clicks:
-    category: paid_media
-    cube_view: meta_ad_breakdown_performance
-    contract: paid_media_meta_breakdown_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaBreakdownLinkClicks
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
   meta_breakdown_spend:
     category: paid_media
     cube_view: meta_ad_breakdown_performance
@@ -876,24 +712,6 @@ metrics:
     glossary:
     - Paid Media.Spend
     om_name: metaBreakdownSpend
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_breakdown_thruplays:
-    category: paid_media
-    cube_view: meta_ad_breakdown_performance
-    contract: paid_media_meta_breakdown_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaBreakdownThruplays
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_breakdown_video_completion_rate:
-    category: paid_media
-    cube_view: meta_ad_breakdown_performance
-    contract: paid_media_meta_breakdown_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaBreakdownVideoCompletionRate
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
   meta_clicks:
@@ -932,15 +750,6 @@ metrics:
     om_name: metaCostPerLinkClick
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
-  meta_cost_per_thruplay:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaCostPerThruplay
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
   meta_cpc:
     category: paid_media
     cube_view: meta_ad_performance
@@ -950,15 +759,6 @@ metrics:
     om_name: metaCpc
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
-  meta_cpc_hourly:
-    category: paid_media
-    cube_view: meta_ad_performance_hourly
-    contract: null
-    glossary:
-    - Paid Media.Spend
-    om_name: metaCpcHourly
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-31'
   meta_cpm:
     category: paid_media
     cube_view: meta_ad_performance
@@ -968,15 +768,6 @@ metrics:
     om_name: metaCpm
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
-  meta_cpm_hourly:
-    category: paid_media
-    cube_view: meta_ad_performance_hourly
-    contract: null
-    glossary:
-    - Paid Media.Spend
-    om_name: metaCpmHourly
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-31'
   meta_ctr:
     category: paid_media
     cube_view: meta_ad_performance
@@ -986,15 +777,6 @@ metrics:
     om_name: metaCtr
     dashboard_status: drift_corrected
     dashboard_audited_on: '2026-07-21'
-  meta_ctr_hourly:
-    category: paid_media
-    cube_view: meta_ad_performance_hourly
-    contract: null
-    glossary:
-    - Paid Media.Spend
-    om_name: metaCtrHourly
-    dashboard_status: match
-    dashboard_audited_on: '2026-07-31'
   meta_frequency:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1010,7 +792,7 @@ metrics:
     contract: paid_media_meta_contract_v1
     glossary:
     - Paid Media.HoldRate(Meta)
-    dashboard_status: not_implemented
+    dashboard_status: platform_only
     dashboard_audited_on: '2026-07-21'
   meta_hook_rate:
     category: paid_media
@@ -1019,8 +801,8 @@ metrics:
     glossary:
     - Paid Media.HookRate(Meta)
     om_name: metaHookRate
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
+    dashboard_status: platform_only
+    dashboard_audited_on: '2026-09-24'
   meta_impressions:
     category: paid_media
     cube_view: meta_ad_performance
@@ -1114,95 +896,7 @@ metrics:
     glossary:
     - Paid Media.ThruPlay
     om_name: metaThruplays
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_video_100_pct_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.HoldRate(Meta)
-    dashboard_status: unclear
-    dashboard_audited_on: '2026-07-21'
-  meta_video_25_pct_rate:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo25PctRate
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_video_25_pct_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo25PctViews
-    dashboard_status: unclear
-    dashboard_audited_on: '2026-07-21'
-  meta_video_30s_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo30SViews
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_video_3s_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.HookRate(Meta)
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_video_50_pct_rate:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo50PctRate
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_video_50_pct_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo50PctViews
-    dashboard_status: unclear
-    dashboard_audited_on: '2026-07-21'
-  meta_video_75_pct_rate:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo75PctRate
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-07-21'
-  meta_video_75_pct_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo75PctViews
-    dashboard_status: unclear
-    dashboard_audited_on: '2026-07-21'
-  meta_video_95_pct_views:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideo95PctViews
-    dashboard_status: not_implemented
+    dashboard_status: platform_only
     dashboard_audited_on: '2026-07-21'
   meta_video_completion_rate:
     category: paid_media
@@ -1212,15 +906,6 @@ metrics:
     - Paid Media.HoldRate(Meta)
     om_name: metaVideoCompletionRate
     dashboard_status: drift_corrected
-    dashboard_audited_on: '2026-07-21'
-  meta_video_plays:
-    category: paid_media
-    cube_view: meta_ad_performance
-    contract: paid_media_meta_contract_v1
-    glossary:
-    - Paid Media.Spend
-    om_name: metaVideoPlays
-    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   net_cogs:
     category: finance
@@ -1256,7 +941,7 @@ metrics:
     glossary:
     - Finance.NetProfit
     om_name: netProfitAllChannels
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   net_profit_blended:
     category: finance
@@ -1291,7 +976,7 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: netSalesAllChannels
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-27'
   new_customer_orders:
     category: commerce
@@ -1402,7 +1087,7 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: productCostAllChannels
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   product_gross_margin_pct:
     category: product
@@ -1458,15 +1143,6 @@ metrics:
     om_name: productViews
     dashboard_status: not_implemented
     dashboard_audited_on: '2026-07-21'
-  returned_units:
-    category: product
-    cube_view: product_performance
-    contract: product_performance_contract_v1
-    glossary:
-    - Product.Product
-    om_name: returnedUnits
-    dashboard_status: not_implemented
-    dashboard_audited_on: '2026-09-22'
   refund_count:
     category: operations
     cube_view: refund_events
@@ -1573,7 +1249,7 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: returnCancelRevenueAllChannels
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-27'
   return_recovered_cogs:
     category: operations
@@ -1593,6 +1269,13 @@ metrics:
     om_name: returnRevenue
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  returned_units:
+    category: product
+    cube_view: product_performance
+    contract: product_performance_contract_v1
+    glossary:
+    - Product.Product
+    om_name: returnedUnits
   returns_cancels:
     category: commerce
     cube_view: commerce_orders
@@ -1609,7 +1292,7 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: returnsCancelsAllChannels
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-27'
   returns_excl_tax:
     category: operations
@@ -1800,7 +1483,7 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: totalAdSpend
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   total_operating_cost:
     category: finance
@@ -1818,7 +1501,7 @@ metrics:
     glossary:
     - Finance.NetCogs
     om_name: totalOperatingCostAllChannels
-    dashboard_status: MATCH
+    dashboard_status: unclear
     dashboard_audited_on: '2026-09-04'
   total_orders:
     category: commerce
@@ -1827,7 +1510,7 @@ metrics:
     glossary:
     - Commerce.TotalOrders
     om_name: totalOrders
-    dashboard_status: match
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   total_payments:
     category: commerce
@@ -1854,7 +1537,7 @@ metrics:
     glossary:
     - Commerce.CommerceOrder
     om_name: totalSalesAllChannels
-    dashboard_status: drift_corrected
+    dashboard_status: unclear
     dashboard_audited_on: '2026-07-21'
   touch_attributed_orders:
     category: attribution

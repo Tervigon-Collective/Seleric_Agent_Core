@@ -75,8 +75,7 @@ ratio_components:
   numerator: meta_ad_performance.meta_video_100_pct_views
   denominator: meta_ad_performance.meta_video_plays
 companion_measures:
-- meta_video_100_pct_views
-- meta_video_plays
+- meta_thruplays
 dashboard_alignment:
   status: drift_corrected
   audited_on: '2026-07-21'

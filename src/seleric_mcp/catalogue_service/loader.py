@@ -219,6 +219,11 @@ class OpenMetadataOntology(BaseModel):
     # Hand-authored; agents must not invent this. Shape is free-form YAML
     # (see ontology.yaml grain_defaults) returned as-is by get_ontology.
     grain_defaults: dict = Field(default_factory=dict)
+    # Declared drill-down hierarchies (drill paths + per-platform depth ceilings)
+    # and non-drillable guards. Hand-authored free-form YAML (see ontology.yaml
+    # hierarchies), returned as-is by get_ontology so the agent drills in a legal
+    # order and does not treat non-additive/daily-grain metrics as drillable.
+    hierarchies: dict = Field(default_factory=dict)
     # Explicit reasons for catalogue metrics that are not in an entity cluster.
     # Shape: {default?: str, by_metric?: {id: reason}, by_view?: {view: reason},
     #         by_category?: {category: reason}}

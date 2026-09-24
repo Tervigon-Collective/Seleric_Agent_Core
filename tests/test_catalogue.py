@@ -232,9 +232,10 @@ PROMPT_ATTRIBUTION_GOLDEN = {
     "attributed revenue": "attributed_net_revenue",
     "attr sales": "attributed_net_revenue",
     "attributed orders": "attributed_orders",
-    # C) Meta ad-grain last-touch
-    "meta attr net revenue": "meta_attr_net_revenue",
-    "meta attributed sales": "meta_attr_net_revenue",
+    # C) Cross-platform ad-grain economics now come from ad_channel_pnl
+    # (meta_attr_* / platform_attribution_commerce retired 2026-09-24).
+    "ad performance": "ad_channel_roas",
+    "ad spend by platform": "ad_channel_spend",
     # D) channel attribution daily
     "channel net revenue": "channel_net_revenue",
 }
@@ -344,14 +345,15 @@ def test_resolve_attribution_scope(catalogue):
         "attr orders": "attributed_orders",
         "attributed gross sales": "attributed_gross_revenue",
         "attr aov": "attributed_aov",
-        "meta attributed sales": "meta_attr_net_revenue",
-        "meta attr sales": "meta_attr_net_revenue",
-        "meta attributed orders": "meta_attr_orders",
+        # Cross-platform ad-grain economics now resolve to ad_channel_pnl
+        # (meta_attr_* / platform_attribution_commerce retired 2026-09-24).
+        "ad performance": "ad_channel_roas",
+        "roas by campaign": "ad_channel_roas",
+        "ad spend by platform": "ad_channel_spend",
+        # channel_pnl net-sales survivors (Attribution Overview parity)
         "meta attribution net sales": "meta_attribution_net_sales",
         "meta attribution sales": "meta_attribution_net_sales",
-        "meta attribution orders": "meta_attribution_orders",
         "google attribution net sales": "google_attribution_net_sales",
-        "google attribution orders": "google_attribution_orders",
         "channel attribution daily sales": "channel_net_revenue",
         "channel orders": "channel_orders",
         "channel sales": "channel_net_revenue",
@@ -518,9 +520,11 @@ def test_trap_metrics_have_depends_on_catalogue_ids(catalogue):
         assert want <= deps, f"{mid}: missing depends_on {want - deps}"
         for dep in deps:
             assert dep in catalogue.cat.metrics, f"{mid}: unknown depends_on {dep}"
-    # Near-dup Meta Overview vs ad-grain table stay linked
-    assert "meta_attribution_orders" in catalogue.get_metric("meta_attr_orders").companion_measures
-    assert "meta_attr_orders" in catalogue.get_metric("meta_attribution_orders").companion_measures
+    # Cross-platform ad-grain economics now come from ad_channel_pnl (sliced by
+    # channel); the meta_attr_* / platform_attribution_commerce sets were retired
+    # from the agent surface on 2026-09-24.
+    assert catalogue.get_metric("ad_channel_roas") is not None
+    assert "ad_channel_spend" in catalogue.get_metric("ad_channel_roas").companion_measures
 
 
 
@@ -663,6 +667,23 @@ def test_get_ontology_unknown_module(catalogue):
     out = catalogue.get_ontology("not_a_module")
     assert "error" in out
     assert "commerce" in out["valid_modules"]
+
+
+def test_hierarchies_declared_with_platform_ceilings(catalogue):
+    """Drill-down needs declared paths + per-platform depth ceilings + non-drillable
+    guards so cross-platform ad drills degrade gracefully and blended metrics do
+    not pretend to drill."""
+    h = catalogue.get_ontology()["hierarchies"]
+    ad = h["ad_delivery"]
+    assert ad["path"] == ["channel", "campaign_id", "adset_id", "ad_id"]
+    # adset/ad are Meta-deep; Google resolves to campaign
+    assert ad["available_on"]["adset_id"] == ["meta"]
+    assert ad["available_on"]["ad_id"] == ["meta"]
+    # blended / ratio metrics must be flagged non-drillable below native grain
+    assert {"total_ad_spend", "mer", "net_roas_all_channels"} <= set(h["non_drillable"])
+    # every non_drillable id is a real catalogue metric
+    for mid in h["non_drillable"]:
+        assert catalogue.get_metric(mid) is not None, mid
 
 
 def test_item_count_dimension_is_on_commerce_order_metrics(catalogue):

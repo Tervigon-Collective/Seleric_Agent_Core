@@ -1,0 +1,68 @@
+id: ad_channel_roas
+display_name: Ad ROAS (net sales / spend, ad grain)
+category: attribution
+status: certified
+description: >
+  Return on ad spend at campaign/adset/ad grain across both platforms (channel = meta/google):
+  first-party attributed net sales / ad spend, recomputed as ratio-of-aggregates from
+  ad_channel_pnl. The core efficiency decision per campaign/ad. This is revenue ROAS
+  (net sales / spend) — NOT contribution net_roas (canonical_pnl) and NOT platform-reported
+  ROAS. Compare only within the same slice.
+formula:
+  human_readable: SUM(net_sales) / SUM(ad_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: ad_channel_pnl
+  measure: ad_channel_pnl.net_roas
+aggregation: ratio
+unit: ratio
+grain: daily campaign/adset/ad × channel
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- row_type
+- is_unattributed
+supported_filters:
+- date_range
+- brand_id
+- channel
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- row_type
+- is_unattributed
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: ROAS by platform last 30 days
+  request:
+    measures:
+    - ad_channel_roas
+    dimensions:
+    - channel
+    time_range:
+      preset: last_30d
+validation_tests:
+- ad_channel_roas equals SUM(net_sales) / SUM(ad_spend) recomputed on any slice
+ratio_components:
+  numerator: ad_channel_pnl.net_sales
+  denominator: ad_channel_pnl.ad_spend
+companion_measures:
+- ad_channel_net_sales
+- ad_channel_spend

@@ -784,6 +784,7 @@ class CatalogueService:
             "entity_clusters": clusters_out,
             "attribution_boundary": boundary,
             "grain_defaults": onto.grain_defaults or None,
+            "hierarchies": onto.hierarchies or None,
             "catalogue_version": self.version,
         }
 

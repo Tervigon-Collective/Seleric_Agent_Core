@@ -1,0 +1,65 @@
+id: ad_channel_spend
+display_name: Ad Spend (cross-platform, ad grain)
+category: paid_media
+status: certified
+description: >
+  Ad spend at campaign/adset/ad grain across BOTH platforms (channel = meta/google),
+  from ad_channel_pnl. This is the cross-platform "ad performance" spend surface: slice by
+  channel for Meta-vs-Google, by campaign/adset/ad to drill. Sums to channel_pnl / canonical
+  total_ad_spend over a period. For platform-only delivery detail (video/creative/hourly) use
+  meta_spend / google_spend on the delivery views.
+formula:
+  human_readable: SUM(ad_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: ad_channel_pnl
+  measure: ad_channel_pnl.ad_spend
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: daily campaign/adset/ad × channel
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- row_type
+- is_unattributed
+supported_filters:
+- date_range
+- brand_id
+- channel
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- row_type
+- is_unattributed
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Ad spend by platform last 30 days
+  request:
+    measures:
+    - ad_channel_spend
+    dimensions:
+    - channel
+    time_range:
+      preset: last_30d
+validation_tests:
+- ad_channel_spend >= 0 for any slice
+- SUM over all rows (row_type detail + reconciliation) ties to channel_pnl ad spend

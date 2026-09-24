@@ -1,0 +1,66 @@
+id: ad_channel_net_profit
+display_name: Ad Net Profit (cross-platform, ad grain)
+category: attribution
+status: certified
+description: >
+  First-party net profit attributed at campaign/adset/ad grain across both platforms
+  (channel = meta/google) from ad_channel_pnl: net sales − net COGS − ad spend, on the
+  channel-P&L event-date basis. The scale/kill decision metric per campaign. Rolls up to
+  channel_pnl net profit. Not platform-reported.
+formula:
+  human_readable: SUM(net_profit)
+  authoritative_source: cube
+cube_mapping:
+  view: ad_channel_pnl
+  measure: ad_channel_pnl.net_profit
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: daily campaign/adset/ad × channel
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- row_type
+- is_unattributed
+supported_filters:
+- date_range
+- brand_id
+- channel
+- campaign_id
+- campaign_name
+- adset_id
+- adset_name
+- ad_id
+- ad_name
+- row_type
+- is_unattributed
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Net profit by campaign last 30 days
+  request:
+    measures:
+    - ad_channel_net_profit
+    dimensions:
+    - campaign_name
+    filters:
+    - dimension: row_type
+      operator: equals
+      values: [detail]
+    time_range:
+      preset: last_30d
+validation_tests:
+- SUM over all rows ties to channel_pnl net profit for the same slice

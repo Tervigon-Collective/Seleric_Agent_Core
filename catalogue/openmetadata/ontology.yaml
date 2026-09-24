@@ -46,8 +46,8 @@ domains:
     om_glossary: Attribution
     owner_team: growth-attribution
     data_products: [MarketingAttribution, ChannelAttribution]
-    cube_views: [order_attribution, meta_ad_attribution, touchpoints, attribution_paths, channel_attribution]
-    grain: Order (+ Meta ad-day + channel-day)
+    cube_views: [order_attribution, meta_ad_attribution, touchpoints, attribution_paths, channel_attribution, ad_channel_pnl]
+    grain: Order (+ Meta ad-day + channel-day + ad-grain P&L)
     date_axes: [order_date, report_date]
     notes: >
       Last-touch, first-party revenue, Shopify orders + Meta/Google touchpoints.
@@ -164,17 +164,15 @@ entity_clusters:
       - touch_distinct_orders
       - attribution_path_orders
       - avg_touch_count
-  meta_ad_attribution:
-    glossary: Attribution.AttributedOrder
-    related: [Attribution.AttributedNetRevenue, Attribution.LastTouch]
+  ad_channel_pnl:
+    glossary: Attribution.AdChannelPnl
+    related: [Attribution.AttributedNetRevenue, Paid Media.Spend, Finance.NetProfit]
     catalogue_metrics:
-      - meta_attr_orders
-      - meta_attr_net_revenue
-      - meta_attr_gross_revenue
-      - meta_attr_refund_amount
-      - meta_attr_new_customer_orders
-      - meta_attr_new_customer_revenue
-      - meta_attr_aov
+      - ad_channel_spend
+      - ad_channel_orders
+      - ad_channel_net_sales
+      - ad_channel_net_profit
+      - ad_channel_roas
   customer_ltv:
     glossary: Customer.LifetimeValue
     related: [Customer.RepeatCustomer, Customer.AcquisitionChannel, Customer.HashedPII]
@@ -215,6 +213,23 @@ attribution_boundary:
 # Agents must not invent these; catalogue_resolve_dimension + this block are
 # the vocabulary. Hand-authored (same class as attribution_boundary).
 grain_defaults:
+  by_platform:
+    when: >
+      "ad performance" / "how are my ads doing" / "ad spend" / "roas by platform" /
+      "paid media" with no single platform named.
+    dimension_id: channel
+    product: ChannelAttribution
+    view: ad_channel_pnl
+    value_space: meta/google (+ organic/unattributed rows present; filter to meta/google for paid ads)
+    default_measures: [ad_channel_spend, ad_channel_roas, ad_channel_net_profit, ad_channel_orders]
+    agent_policy: >
+      Channel-agnostic ad-performance questions default to ad_channel_pnl sliced by channel so
+      BOTH Meta and Google are returned — never answer "ad performance" from one platform's
+      delivery view alone. For channel/period TOTALS sum all rows; for a campaign/adset/ad
+      breakdown filter row_type='detail'. Drill order: channel → campaign → adset → ad (adset/ad
+      are Meta-deep; Google resolves to campaign, with unplaceable spend in the is_unattributed
+      bucket). For platform-specific creative/video/hourly delivery use meta_ad_performance /
+      google_ad_performance.
   by_channel:
     when: unspecified "by channel" / "channel-wise" report with no measure named
     dimension_id: channel
@@ -249,6 +264,50 @@ grain_defaults:
         view: channel_pnl
         measures: [meta_attribution_net_sales, google_attribution_net_sales]
         note: P&L Meta/Google/organic/unattributed — Attribution Analysis Overview
+
+# Declared drill-down hierarchies: the legal drill order per axis and, for ad
+# delivery, the per-platform depth ceiling. Agents drill in this order and degrade
+# gracefully. non_drillable names non-additive / coarse-grain metrics that must
+# never be broken out below their native grain (parts will not sum to the whole).
+hierarchies:
+  ad_delivery:
+    view: ad_channel_pnl
+    path: [channel, campaign_id, adset_id, ad_id]
+    labels: {campaign_id: campaign_name, adset_id: adset_name, ad_id: ad_name}
+    available_on:
+      adset_id: [meta]
+      ad_id: [meta]
+    note: >
+      Cross-platform ad economics (ad_channel_spend / ad_channel_roas /
+      ad_channel_net_profit / ad_channel_orders / ad_channel_net_sales). Google
+      resolves to campaign grain; deeper Meta creative/placement/hourly detail lives
+      on meta_ad_performance / meta_ad_breakdown_performance / *_hourly. For channel or
+      period TOTALS sum all rows; for a campaign/adset/ad breakdown filter
+      row_type='detail' so the reconciliation residual is not a phantom campaign.
+  time:
+    path: [year, quarter, month, week, day, hour]
+    note: >
+      hour granularity only on the *_hourly paid-media views
+      (meta_ad_performance_hourly / google_ad_performance_hourly); every other view
+      stops at day.
+  date_spine:
+    note: >
+      One logical "date" spans six physical day axes by domain — join cross-domain on
+      the domain's native axis, never mix them. All are IST calendar days.
+    by_domain:
+      PaidMedia: report_date
+      Finance: report_date
+      Attribution: {orders: order_date, channel_day: report_date}
+      Commerce: {orders: order_date, revenue_and_returns: event_date}
+      Operations: refund_date
+      WebAnalytics: {sessions: session_date, events: event_date}
+  non_drillable:
+    total_ad_spend: brand x day only (no campaign/ad grain) — drill via ad_channel_spend.
+    mer: ratio, brand x day — never sum across campaigns; undefined below daily brand grain.
+    net_roas: contribution ratio, brand x day — not additive.
+    net_roas_all_channels: contribution ratio, brand x day — not additive; do not break out by campaign.
+    gross_roas_all_channels: ratio, brand x day — not additive.
+    be_roas_all_channels: ratio, brand x day — not additive.
 
 # Metrics not listed in entity_clusters. Lookup order: by_metric, by_view,
 # by_category, then default. Agents treat these as view-siblings, not a

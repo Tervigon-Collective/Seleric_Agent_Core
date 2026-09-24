@@ -51,5 +51,4 @@ dashboard_alignment:
   source: Seleric_Dashboard/Node-Backend
   evidence: pnlService.getAttributionChannelPnl + lineItemHistoricalSql.buildChannelMetricsSql
 companion_measures:
-- meta_attr_net_revenue
 - meta_net_profit

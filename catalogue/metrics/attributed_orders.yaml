@@ -11,10 +11,9 @@ description: >
   the dashboard channel split. So attributed_orders == total_orders (Shopify) and
   per-channel (lt_platform) breakdowns reconcile to it by construction. For the
   RESOLVED subset (orders with an identified touch) use touch_attributed_orders and
-  attribution_rate. This is NOT the Meta Attribution Analysis dashboard: for orders
-  attributed to a Meta campaign/adset/ad (the Meta Attribution Table) use
-  meta_attr_orders; for the Meta Attribution Overview "Total Orders" card use
-  meta_attribution_orders (different grain/cohort — they will not tie to this).
+  attribution_rate. For orders per campaign/adset/ad (cross-platform) use
+  ad_channel_orders on ad_channel_pnl (sliced by channel — different grain/cohort,
+  will not tie to this).
 formula:
   human_readable: COUNT(order_id)
   authoritative_source: cube

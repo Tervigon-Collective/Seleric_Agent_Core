@@ -1,10 +1,9 @@
 id: meta_hook_rate
 display_name: Meta Hook Rate
 category: paid_media
-status: draft
+status: approved
 description: >
-  Not implemented in the Node-Backend dashboard as of 2026-07-21 — describes
-  the intended Cube-layer design only. Meta Hook Rate recomputed from
+  Meta platform-delivery metric computed in the Cube/gold layer (verified 2026-09-24); not surfaced on the Node-Backend dashboard. Meta Hook Rate recomputed from
   aggregated components — never SUM/AVG of row ratios.
 formula:
   human_readable: SUM(3s views) / SUM(impressions) — approved gold formula
@@ -75,12 +74,14 @@ ratio_components:
   numerator: meta_ad_performance.meta_video_3s_views
   denominator: meta_ad_performance.meta_impressions
 companion_measures:
-- meta_video_3s_views
 - meta_impressions
 dashboard_alignment:
-  status: not_implemented
-  audited_on: '2026-07-21'
+  status: platform_only
+  audited_on: '2026-09-24'
   source: Seleric_Dashboard/Node-Backend
   note: >
-    No 3-second-view field is fetched anywhere in Node-Backend, so this
-    metric's numerator does not exist and it is not computed on the dashboard.
+    Not computed on the Node-Backend dashboard, but the numerator
+    (meta_video_3s_views) IS present in gold.fct_meta_ads_daily and the Cube
+    measure verifies live (0.189 = 374,911 3s-views / 1,983,144 impressions,
+    brand 20, last 30d, 2026-09-24). Platform-delivery metric; certified as
+    approved (queryable) on that basis, not dashboard parity.

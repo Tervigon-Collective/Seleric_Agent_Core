@@ -547,12 +547,7 @@ dimensions:
       funnel_daily: funnel_daily.report_date
       web_events_daily: web_events_daily.report_date
       platform_attribution_commerce: platform_attribution_commerce.report_date
-  - id: platform
-    display_name: Attribution Platform
-    description: Last-touch platform bucket on platform_attribution_commerce (meta | google | organic).
-    aliases: [lt platform, attribution platform]
-    views:
-      platform_attribution_commerce: platform_attribution_commerce.platform
+      ad_channel_pnl: ad_channel_pnl.report_date
   - id: campaign_id
     display_name: Campaign ID
     description: Platform campaign identifier.
@@ -563,6 +558,7 @@ dimensions:
       meta_ad_attribution: meta_ad_attribution.campaign_id
       google_ad_performance: google_ad_performance.campaign_id
       google_ad_performance_hourly: google_ad_performance_hourly.campaign_id
+      ad_channel_pnl: ad_channel_pnl.campaign_id
   - id: campaign_name
     display_name: Campaign Name
     description: >
@@ -577,6 +573,7 @@ dimensions:
       google_ad_performance: google_ad_performance.campaign_name
       google_ad_performance_hourly: google_ad_performance_hourly.campaign_name
       session_funnel: session_funnel.campaign_name
+      ad_channel_pnl: ad_channel_pnl.campaign_name
   - id: campaign_status
     display_name: Campaign Status
     description: Platform campaign status (ACTIVE/PAUSED/... per platform).
@@ -607,6 +604,7 @@ dimensions:
       meta_ad_performance: meta_ad_performance.adset_id
       meta_ad_performance_hourly: meta_ad_performance_hourly.adset_id
       meta_ad_attribution: meta_ad_attribution.adset_id
+      ad_channel_pnl: ad_channel_pnl.adset_id
   - id: adset_name
     display_name: Adset Name (Meta)
     description: >
@@ -617,6 +615,7 @@ dimensions:
       meta_ad_performance_hourly: meta_ad_performance_hourly.adset_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_name
       meta_ad_attribution: meta_ad_attribution.adset_name
+      ad_channel_pnl: ad_channel_pnl.adset_name
   - id: ad_id
     display_name: Ad ID (Meta)
     description: >
@@ -627,6 +626,7 @@ dimensions:
       meta_ad_performance: meta_ad_performance.ad_id
       meta_ad_performance_hourly: meta_ad_performance_hourly.ad_id
       meta_ad_attribution: meta_ad_attribution.ad_id
+      ad_channel_pnl: ad_channel_pnl.ad_id
   - id: ad_name
     display_name: Ad Name (Meta)
     description: >
@@ -637,6 +637,7 @@ dimensions:
       meta_ad_performance_hourly: meta_ad_performance_hourly.ad_name
       meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_name
       meta_ad_attribution: meta_ad_attribution.ad_name
+      ad_channel_pnl: ad_channel_pnl.ad_name
   - id: creative_id
     display_name: Creative ID (Meta)
     description: >
@@ -735,6 +736,7 @@ dimensions:
       web_events_daily: web_events_daily.channel
       orders_all_channels: orders_all_channels.channel
       sales_all_channels: sales_all_channels.channel
+      ad_channel_pnl: ad_channel_pnl.channel
   - id: source_platform
     display_name: Source Platform
     description: Originating platform of the attribution row (shopify).
@@ -1037,3 +1039,22 @@ dimensions:
     aliases: [neurohack, neurotag, creative tag, hack]
     views:
       meta_ad_performance: meta_ad_performance.neurohack_tag_codes
+  # ---- Ad / Channel P&L query controls (ad_channel_pnl) ----
+  - id: row_type
+    display_name: Row Type (Ad/Channel P&L)
+    description: >
+      'detail' = campaign/adset/ad rows; 'reconciliation' = the per-(brand,day,channel)
+      residual that makes SUM(all rows) tie to channel_pnl. For channel/period TOTALS sum
+      ALL rows (do not filter). For a campaign/adset/ad BREAKDOWN filter row_type='detail'
+      so the residual bucket does not appear as a phantom campaign.
+    allowed_values: [detail, reconciliation]
+    views:
+      ad_channel_pnl: ad_channel_pnl.row_type
+  - id: is_unattributed
+    display_name: Paid but Campaign-Unresolved
+    description: >
+      1 = spend that is real but not placeable at campaign grain (Google PMax / click-ID
+      etc.). Group by this to separate placeable ad spend from the unresolved bucket; it is
+      not organic and not an error.
+    views:
+      ad_channel_pnl: ad_channel_pnl.is_unattributed

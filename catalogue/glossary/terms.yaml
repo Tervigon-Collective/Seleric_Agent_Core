@@ -507,10 +507,10 @@ terms:
   - term: attributed sales
     canonical_id: attributed_net_revenue
     definition: >
-      All-channel last-touch net revenue (order_attribution oracle). For a Meta
-      campaign/adset/ad — the Meta Attribution Analysis Table — use
-      meta_attr_net_revenue; for the Meta Attribution Overview "Net Sales" card use
-      meta_attribution_net_sales. These do not reconcile with attributed_net_revenue.
+      All-channel last-touch net revenue (order_attribution oracle). For per-campaign/
+      adset/ad economics use ad_channel_net_sales / ad_channel_roas on ad_channel_pnl
+      (cross-platform, sliced by channel); for the Meta Attribution Overview "Net Sales"
+      card use meta_attribution_net_sales. These do not reconcile with attributed_net_revenue.
   - term: attr sales
     canonical_id: attributed_net_revenue
   - term: attr revenue
@@ -529,7 +529,7 @@ terms:
     canonical_id: attributed_net_revenue
     definition: >
       Use attributed_net_revenue (optionally break down by lt_campaign_name).
-      Meta ad-grain campaign view → meta_attr_net_revenue.
+      Per-campaign/ad economics (cross-platform) → ad_channel_net_sales on ad_channel_pnl.
   - term: attributed gross revenue
     canonical_id: attributed_gross_revenue
   - term: attributed gross sales
@@ -540,20 +540,16 @@ terms:
     canonical_id: attributed_orders
     definition: >
       All-channel last-touch order count (order_attribution oracle), one row per
-      order. For orders in a Meta campaign/adset/ad — the Meta Attribution Analysis
-      Table — use meta_attr_orders; for the Meta Attribution Overview "Total Orders"
-      card use meta_attribution_orders. These Meta products do not reconcile with
-      attributed_orders (different grain/cohort). Use attributed_orders only for
-      all-channel or order-level breakdowns (city / payment / new-vs-repeat).
+      order. For orders per campaign/adset/ad use ad_channel_orders on ad_channel_pnl
+      (cross-platform, sliced by channel). Use attributed_orders for all-channel or
+      order-level breakdowns (city / payment / new-vs-repeat).
   - term: attr orders
     canonical_id: attributed_orders
   - term: attribution orders
     canonical_id: attributed_orders
     definition: >
-      All-channel last-touch order count (order_attribution). For a Meta
-      campaign/adset/ad use meta_attr_orders (Table) or meta_attribution_orders
-      (Overview card); for other single platforms use the platform's attribution
-      metric.
+      All-channel last-touch order count (order_attribution). For orders per
+      campaign/adset/ad (cross-platform) use ad_channel_orders on ad_channel_pnl.
   - term: last-touch orders
     canonical_id: attributed_orders
   - term: attributed aov
@@ -578,55 +574,24 @@ terms:
     canonical_id: avg_attribution_confidence
   - term: average attribution confidence
     canonical_id: avg_attribution_confidence
-  - term: meta attributed revenue
-    canonical_id: meta_attr_net_revenue
-  - term: meta attributed sales
-    canonical_id: meta_attr_net_revenue
-  - term: meta attr sales
-    canonical_id: meta_attr_net_revenue
+  # Platform-prefixed ad-grain attribution (meta_attr_* / platform_attribution_commerce
+  # meta|google_attribution_gross/total/orders) retired from the agent surface
+  # (2026-09-24). Cross-platform ad economics now come from ad_channel_* on
+  # ad_channel_pnl (sliced by channel); all-channel last-touch from order_attribution.
+  # channel_pnl net-sales survivors kept below for Attribution Analysis Overview parity.
   - term: meta attribution sales
     canonical_id: meta_attribution_net_sales
     definition: >
-      Meta Attribution Analysis page Net Sales (commerce cohort). For ad-day
-      last-touch oracle use "meta attributed sales" → meta_attr_net_revenue.
+      Meta Attribution Analysis Overview Net Sales (channel-day, channel_pnl). For
+      cross-platform ad-grain spend/ROAS/profit use the ad_channel_* metrics.
   - term: meta attribution net sales
     canonical_id: meta_attribution_net_sales
   - term: meta attribution analysis net sales
     canonical_id: meta_attribution_net_sales
-  - term: meta attribution gross sales
-    canonical_id: meta_attribution_gross_sales
-  - term: meta attribution total sales
-    canonical_id: meta_attribution_total_sales
-  - term: meta attribution orders
-    canonical_id: meta_attribution_orders
   - term: google attribution net sales
     canonical_id: google_attribution_net_sales
   - term: google attribution analysis net sales
     canonical_id: google_attribution_net_sales
-  - term: google attribution gross sales
-    canonical_id: google_attribution_gross_sales
-  - term: google attribution total sales
-    canonical_id: google_attribution_total_sales
-  - term: google attribution orders
-    canonical_id: google_attribution_orders
-  - term: meta attributed net revenue
-    canonical_id: meta_attr_net_revenue
-  - term: meta attributed gross revenue
-    canonical_id: meta_attr_gross_revenue
-  - term: meta attributed gross sales
-    canonical_id: meta_attr_gross_revenue
-  - term: meta attributed orders
-    canonical_id: meta_attr_orders
-  - term: meta attr orders
-    canonical_id: meta_attr_orders
-  - term: meta attributed aov
-    canonical_id: meta_attr_aov
-  - term: meta attributed refunds
-    canonical_id: meta_attr_refund_amount
-  - term: meta attributed new customer orders
-    canonical_id: meta_attr_new_customer_orders
-  - term: meta attributed new customer revenue
-    canonical_id: meta_attr_new_customer_revenue
   - term: channel orders
     canonical_id: channel_orders
   - term: channel sales
@@ -740,7 +705,7 @@ terms:
     canonical_id: null
     definition: >
       Platform-reported Google conversions are non-canonical on the certified
-      serve surface. Use google_clicks / google_interactions for delivery.
+      serve surface. Use google_clicks / google_ctr for delivery.
   - term: google conversion value
     canonical_id: null
     definition: Platform-reported Google conversion value — not certified in PaidMedia V1.
@@ -934,9 +899,55 @@ terms:
     canonical_id: meta_breakdown_spend
   - term: meta breakdown CTR
     canonical_id: meta_breakdown_ctr
-  - term: meta breakdown hook rate
-    canonical_id: meta_breakdown_hook_rate
-  - term: google interactions
-    canonical_id: google_interactions
-  - term: google interaction rate
-    canonical_id: google_interaction_rate
+  # ---- Cross-platform ad performance (ad_channel_pnl) ----
+  # Channel-agnostic ad questions route here so BOTH Meta and Google are returned
+  # (slice by channel). See ontology grain_defaults.by_platform.
+  - term: ad performance
+    canonical_id: ad_channel_roas
+    definition: >
+      Cross-platform ad performance = ad_channel_pnl sliced by channel (meta/google). Report
+      ad_channel_spend, ad_channel_roas, ad_channel_net_profit, ad_channel_orders together — never
+      one platform alone. Drill channel → campaign → adset → ad (adset/ad Meta-deep; Google to
+      campaign). Platform-specific creative/video/hourly detail → meta_ad_performance /
+      google_ad_performance.
+  - term: how are my ads doing
+    canonical_id: ad_channel_roas
+    definition: >
+      Cross-platform ad performance. Default to ad_channel_spend + ad_channel_roas +
+      ad_channel_net_profit by channel (Meta and Google both).
+  - term: paid media
+    canonical_id: null
+    definition: >
+      Paid-media performance across Meta + Google. For economics (spend/ROAS/profit by
+      platform/campaign) use the ad_channel_* metrics on ad_channel_pnl; for platform delivery
+      detail use meta_ad_performance / google_ad_performance.
+  - term: advertising
+    canonical_id: null
+    definition: >
+      Ad performance across platforms — see "ad performance" (ad_channel_* on ad_channel_pnl).
+  - term: ad spend by campaign
+    canonical_id: ad_channel_spend
+  - term: ad spend by platform
+    canonical_id: ad_channel_spend
+  - term: campaign spend
+    canonical_id: ad_channel_spend
+  - term: spend by campaign
+    canonical_id: ad_channel_spend
+  - term: spend by ad
+    canonical_id: ad_channel_spend
+  - term: ad roas
+    canonical_id: ad_channel_roas
+  - term: roas by campaign
+    canonical_id: ad_channel_roas
+  - term: roas by platform
+    canonical_id: ad_channel_roas
+  - term: campaign roas
+    canonical_id: ad_channel_roas
+  - term: ad net profit
+    canonical_id: ad_channel_net_profit
+  - term: net profit by campaign
+    canonical_id: ad_channel_net_profit
+  - term: profit by campaign
+    canonical_id: ad_channel_net_profit
+  - term: orders by campaign
+    canonical_id: ad_channel_orders

@@ -5,9 +5,9 @@ status: certified
 description: >
   Placement-axis first-party net revenue (ex-GST) at order grain from the attribution
   product, LAST-TOUCH model only, ALL channels — NOT the Meta Attribution dashboard.
-  For Meta campaign/adset/ad net sales (Meta Attribution Table) use
-  meta_attr_net_revenue; for the Meta Attribution Overview "Net Sales" card use
-  meta_attribution_net_sales. Canonical net-sales rule (dashboard parity; fix applied
+  For per-campaign/adset/ad net sales use ad_channel_net_sales on ad_channel_pnl
+  (cross-platform, sliced by channel); for the Meta Attribution Overview "Net Sales"
+  card use meta_attribution_net_sales. Canonical net-sales rule (dashboard parity; fix applied
   in serve.order_attribution, effective after Cube redeploy):
   cancelled/voided/revenue-adjustment → 0; paid → net ex-GST; unpaid COD → gross
   ex-GST − discounts (NOT zero — COD placements count as net sales until
