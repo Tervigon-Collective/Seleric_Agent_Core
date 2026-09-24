@@ -72,6 +72,7 @@ class AppContext:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.db = Database(settings.db_path)
+        self._tool_call_times: dict[str, list[float]] = {}  # tool name -> [timestamp, ...]
         self.catalogue = CatalogueService(
             load_catalogue(settings.catalogue_dir),
             auto_threshold=settings.resolve_auto_threshold,
@@ -129,6 +130,24 @@ class AppContext:
     def actor(self) -> str:
         # Single shared service token for MVP => single logical actor.
         return "service-token"
+
+    def check_tool_call_rate(self, tool_name: str, max_calls: int = 4, window_seconds: int = 60) -> tuple[bool, str]:
+        """Check if a tool has been called more than max_calls times in the last window_seconds.
+
+        Returns (should_continue, message). If should_continue is False, the tool should fail with the message.
+        """
+        now = time.time()
+        calls = self._tool_call_times.get(tool_name, [])
+        # Keep only calls within the window
+        calls = [t for t in calls if now - t < window_seconds]
+        self._tool_call_times[tool_name] = calls + [now]
+
+        if len(calls) >= max_calls:
+            return (False,
+                    f"{tool_name} called {len(calls) + 1} times in {window_seconds}s. "
+                    "No metric supports your query. Use query_metrics to answer a different question, "
+                    "or call final_result to report that the requested metric does not exist.")
+        return (True, "")
 
     async def freshness_report(self) -> dict:
         ttl = self.settings.freshness_cache_ttl_seconds
@@ -474,8 +493,19 @@ def build_server(settings: Settings) -> FastMCP:
 
         Use this (or catalogue_search_metrics with an empty query) to warm an
         agent catalogue cache. Grain lives on each match's supported_dimensions
-        — do not require a view first. Pass module=<id> to scope."""
+        — do not require a view first. Pass module=<id> to scope.
+
+        NOTE: Metrics are per-grain (daily, per product, per customer, per campaign).
+        There is no single metric for "growth", "acceleration", "trend", or
+        "period-over-period change" — those require 2+ queries + calculation.
+        For questions about changes over time, ask for the metric at two periods
+        (e.g., "product_net_revenue in Aug" and "product_net_revenue in Sep")
+        and describe the delta calculation."""
         _log_call("catalogue_list_metrics", module=module)
+        # Fail if called more than 3 times in 60s — tool loop breaker.
+        should_continue, message = ctx.check_tool_call_rate("catalogue_list_metrics", max_calls=3, window_seconds=60)
+        if not should_continue:
+            return {"error": message, "success": False}
         effective, refusal = _resolve_module(module)
         if refusal:
             return refusal
