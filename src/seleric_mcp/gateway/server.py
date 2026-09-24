@@ -945,13 +945,13 @@ def build_server(settings: Settings) -> FastMCP:
         status = ctx.broker.status(action_request_id)
         return status if status else {"error": f"Unknown action request '{action_request_id}'"}
 
-    # ---------------- Meta Ads management tools (ads/meta/) ----------------
+    # ------- Meta / Google Ads management tools (ads/meta/, ads/google/) -------
+    # Third-party platform APIs, not certified Cube serve views — only exposed
+    # when settings.ads_tools_enabled is set (default off).
 
-    register_meta_ads_tools(mcp, ctx)
-
-    # ---------------- Google Ads management tools (ads/google/) ----------------
-
-    register_google_ads_tools(mcp, ctx)
+    if settings.ads_tools_enabled:
+        register_meta_ads_tools(mcp, ctx)
+        register_google_ads_tools(mcp, ctx)
 
     # ---------------- resources ----------------
 

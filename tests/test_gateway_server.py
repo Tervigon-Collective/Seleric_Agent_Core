@@ -138,7 +138,15 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "google_campaigns_list", "google_campaigns_get", "google_campaigns_set_status",
         "google_budgets_create", "google_campaigns_create",
     }
-    assert names == analytics_and_actions | meta_ads | google_ads
+    # Ads management tools are third-party APIs, off by default.
+    assert names == analytics_and_actions
+    assert not names & (meta_ads | google_ads)
+
+    import dataclasses
+
+    enabled = build_server(dataclasses.replace(ctx.settings, ads_tools_enabled=True))
+    enabled_names = {t.name for t in enabled._tool_manager.list_tools()}
+    assert enabled_names == analytics_and_actions | meta_ads | google_ads
 
 
 # ---------- access_policy.scopes enforcement (was declared, never checked) ----------
