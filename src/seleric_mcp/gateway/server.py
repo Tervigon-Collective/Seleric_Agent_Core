@@ -260,7 +260,43 @@ def build_server(settings: Settings) -> FastMCP:
     def _log_call(tool: str, **fields: Any) -> str:
         trace_id = new_trace_id()
         logger.info("tool_call", tool=tool, trace_id=trace_id, **fields)
+        # Any traffic (incl. health probes) keeps the default brand's value
+        # index built, so the first real question after a restart has it.
+        ctx.values.warm(ctx.values.default_brand_id)
         return trace_id
+
+    def _flag_missing_filter_values(result: Any, request: QueryRequest) -> None:
+        """Mark equality filters on values that never occur in the queried
+        dimension (Cube returns a 0 row for them, not an empty result), and say
+        where those values do occur."""
+        if not isinstance(result, dict) or result.get("error"):
+            return
+        view = (result.get("provenance") or {}).get("cube_view")
+        if not view:
+            return
+        brand = ctx.values.default_brand_id
+        checks: list[tuple[str, list[str]]] = []
+        for f in request.filters:
+            dim = ctx.catalogue.resolve_dimension_id(f.dimension) or f.dimension
+            values = [str(v) for v in (f.values or [])]
+            if dim == "brand_id":
+                if f.operator == "equals" and values:
+                    brand = values[0]
+                continue
+            if f.operator == "equals":
+                checks.append((dim, values))
+        missing = ctx.values.check_filter_values(brand, view, checks)
+        if not missing:
+            return
+        result["value_not_found"] = missing
+        warnings = result.setdefault("warnings", [])
+        for m in missing:
+            where = "; ".join(f"{x['dimension']} ({x['view']}): {', '.join(x['values'])}" for x in m["found_in"])
+            warnings.append(
+                f"{', '.join(m['values'])} does not occur in {m['dimension']} on {m['view']} — "
+                f"the 0/empty result reflects that, not zero activity."
+                + (f" The data records it in: {where}." if where else "")
+            )
 
     def _check_metric_scopes(metric_ids: list[str]) -> dict | None:
         """Enforce access_policy.scopes (declared on every catalogue metric)
@@ -803,7 +839,9 @@ def build_server(settings: Settings) -> FastMCP:
                 sort=[SortSpec.model_validate(s) for s in (sort or [])],
                 limit=limit,
             )
-            return await ctx.planner.run(request)
+            result = await ctx.planner.run(request)
+            _flag_missing_filter_values(result, request)
+            return result
         except PlanError as e:
             return e.to_payload()
         except Exception as e:

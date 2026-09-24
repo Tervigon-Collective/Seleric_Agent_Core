@@ -162,6 +162,9 @@ class Snapshot:
     # (dimension, view) -> {raw value: volume}
     values: dict[tuple[str, str], dict[str, float]] = field(default_factory=dict)
     measure_metric: dict[tuple[str, str], str] = field(default_factory=dict)
+    # Keys whose Cube result hit row_cap: their value list is incomplete, so a
+    # value missing from it proves nothing.
+    truncated: set[tuple[str, str]] = field(default_factory=set)
     failed: int = 0
     _by_norm: dict[str, list[tuple[tuple[str, str], str, float]]] | None = None
 
@@ -284,6 +287,8 @@ class ValueIndex:
                     snap.failed += 1
                     log.warning("value_index_target_failed", dimension=t.dimension, view=t.view, error=repr(exc))
                     return
+            if values is not None and len(values) >= self.row_cap:
+                snap.truncated.add((t.dimension, t.view))
             labels = label_values(values or {})
             if labels:
                 snap.values[(t.dimension, t.view)] = labels
@@ -319,6 +324,53 @@ class ValueIndex:
             return snap
         finally:
             self._builds.pop(brand_id, None)
+
+    def warm(self, brand_id: str | None) -> None:
+        """Start a background build if the brand's index is missing or stale.
+        Never blocks; a no-op outside a running event loop."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        snap = self._snapshots.get(brand_id)
+        fresh = snap is not None and (time.time() - snap.built_at) < self.ttl_s
+        if not fresh and brand_id not in self._builds:
+            self._builds[brand_id] = asyncio.create_task(self._build_and_store(brand_id))
+
+    def check_filter_values(
+        self, brand_id: str | None, view: str, filters: list[tuple[str, list[str]]]
+    ) -> list[dict[str, Any]]:
+        """Equality filters whose values never occur in that dimension.
+
+        Cube answers a filter on a value that does not exist with a 0 row, not
+        an empty result (live: channel=whatsapp → orders 0), so a wrong
+        dimension reads as "zero orders". Checked against the current snapshot
+        only (never waits); skipped when the dimension's value list is
+        incomplete (hit row_cap), not indexed, or the values are ids/numbers
+        (the index keeps labels only)."""
+        snap = self._snapshots.get(brand_id)
+        if snap is None:
+            return []
+        problems: list[dict[str, Any]] = []
+        for dimension, wanted in filters:
+            key = (dimension, view)
+            known = snap.values.get(key)
+            if known is None or key in snap.truncated or not wanted:
+                continue
+            if all(_is_opaque(w) for w in wanted):
+                continue
+            wanted_norm = {normalize(w) for w in wanted}
+            if wanted_norm & {normalize(v) for v in known}:
+                continue
+            found = [
+                {"dimension": d, "view": vw, "values": [raw for raw in vals if normalize(raw) in wanted_norm][:5]}
+                for (d, vw), vals in snap.values.items()
+                if any(normalize(raw) in wanted_norm for raw in vals)
+            ]
+            problems.append(
+                {"dimension": dimension, "view": view, "values": list(wanted), "found_in": found[:6]}
+            )
+        return problems
 
     async def get(self, brand_id: str | None, *, wait_s: float) -> Snapshot | None:
         """Current snapshot for the brand. Missing → build, waiting up to wait_s.

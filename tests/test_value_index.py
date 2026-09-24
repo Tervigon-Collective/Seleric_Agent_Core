@@ -177,3 +177,48 @@ async def test_get_returns_none_while_warming_then_serves_the_snapshot(catalogue
     assert await index.get("20", wait_s=0.0) is None  # warming
     snap = await index.get("20", wait_s=30.0)
     assert snap is not None and snap.brand_id == "20"
+
+
+def test_filter_on_a_value_the_dimension_never_holds_is_flagged_with_where_it_lives(catalogue):
+    index = _index(catalogue)
+    index._snapshots["20"] = _snap(
+        {
+            ("channel", "orders_all_channels"): {"google": 900, "meta": 800, "organic_shopify": 90},
+            ("lt_utm_medium", "order_attribution"): {"acme chat": 33, "cpc": 500},
+        }
+    )
+    out = index.check_filter_values("20", "orders_all_channels", [("channel", ["acme chat"])])
+    assert out == [
+        {
+            "dimension": "channel",
+            "view": "orders_all_channels",
+            "values": ["acme chat"],
+            "found_in": [{"dimension": "lt_utm_medium", "view": "order_attribution", "values": ["acme chat"]}],
+        }
+    ]
+    # a value that exists (any casing) is fine
+    assert index.check_filter_values("20", "orders_all_channels", [("channel", ["Google"])]) == []
+
+
+def test_missing_value_check_stays_silent_when_it_cannot_know(catalogue):
+    index = _index(catalogue)
+    assert index.check_filter_values("20", "v", [("channel", ["x"])]) == []  # no snapshot yet
+    snap = _snap({("product_title", "product_performance"): {"A": 1.0}})
+    snap.truncated.add(("product_title", "product_performance"))  # list incomplete
+    index._snapshots["20"] = snap
+    assert index.check_filter_values("20", "product_performance", [("product_title", ["B"])]) == []
+    # ids/numbers are never in the label index
+    snap2 = _snap({("campaign_id", "meta_ad_performance"): {"Some Label": 1.0}})
+    index._snapshots["20"] = snap2
+    assert index.check_filter_values("20", "meta_ad_performance", [("campaign_id", ["120248089961790783"])]) == []
+
+
+async def test_warm_starts_one_background_build(catalogue):
+    import asyncio
+
+    index = ValueIndex(catalogue, _MetaCube({}, {}), default_brand_id="20")  # type: ignore[arg-type]
+    index.warm("20")
+    index.warm("20")  # second call does not start another build
+    assert len(index._builds) == 1
+    await asyncio.wait_for(asyncio.shield(index._builds["20"]), timeout=30)
+    assert "20" in index._snapshots

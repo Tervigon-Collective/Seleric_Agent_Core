@@ -409,12 +409,7 @@ CURRENT SCOPE (set by the dashboard — do not widen it)
 
 _UNSCOPED_SCOPE_HEADER = """\
 CURRENT SCOPE (set by the dashboard)
-- Data module: none — you have access to ALL data domains (funnel / web
-  analytics, commerce, product, paid media, attribution, customer, finance /
-  P&L, and operations) in a single conversation. Nothing is out of scope; use
-  the catalogue to find the right metric for whatever the user asks, across any
-  domain, and answer directly. Do NOT decline a question for being "in another
-  module".
+- Data module: the current dashboard module.
 - Brand: {brand_label}. Numbers are for this brand unless the user names another.
 """
 
