@@ -3,9 +3,7 @@ display_name: New Customer Orders (Shopify-only)
 category: commerce
 status: approved
 description: >-
-  Orders placed in the period that are a customer's first order (is_new_customer=1), from
-  serve.commerce_orders (order date). Sliceable by geo, payment and UTM. For new customers by
-  marketing source use attributed_new_customer_orders; for CAC use new_customers / cac.
+  Orders placed in the period that are a customer's first order (is_new_customer=1), from serve.commerce_orders on order date (id: new_customer_orders); formula: count of orders where customer has no prior order; grain: order, additive; date axis: order_date (IST); scope: Shopify eligible placements, includes later cancels, excludes test orders; siblings: for attributed new customers by marketing source use attributed_new_customer_orders, for CAC use new_customers / cac, for all orders use orders.
 formula:
   human_readable: Count of orders where the customer has no prior order
   authoritative_source: cube

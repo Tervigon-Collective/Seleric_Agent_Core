@@ -3,12 +3,7 @@ display_name: Product Net Revenue (ex-GST)
 category: product
 status: certified
 description: >-
-  Net sales per product / SKU / variant — the default for "sales by product", "top products", "SKU
-  revenue". Sums line-item net revenue (ex-GST, after that line's own cancellations and returns) on
-  the ORDER date from serve.product_performance; returns are pulled back into the month the order was
-  placed. Line-level basis (excludes order-level shipping etc.), so the total will not equal
-  net_sales_all_channels. Slice: product_title, variant_title, sku, product_type, vendor, geo,
-  payment, is_new_customer.
+  Net sales per product / SKU / variant — the default for "sales by product", "top products", "SKU revenue" (id: product_net_revenue); formula: sum of (net_pre_refund_excl_gst − cancelled_revenue_excl_gst − returned_revenue_excl_gst) on eligible lines on ORDER date, returns pulled back to order month; grain: order_item (line), additive; date axis: order_date; scope: line-level basis (excludes order-level shipping), total will not equal net_sales_all_channels; siblings: for brand-day totals use net_sales_all_channels, for city/UTM/payment use commerce_net_revenue, for order-grain use orders.
 formula:
   human_readable: 'Sum of (net_pre_refund_excl_gst − cancelled_revenue_excl_gst − returned_revenue_excl_gst) on eligible lines
 

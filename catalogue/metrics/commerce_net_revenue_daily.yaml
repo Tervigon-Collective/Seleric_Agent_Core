@@ -3,10 +3,7 @@ display_name: Net Sales (Shopify-only, Dashboard Parity)
 category: commerce
 status: certified
 description: >-
-  Shopify net sales for the period = gross − discounts on the order date, minus returns/cancels on
-  their event date, ex-GST, per brand-day on serve.commerce_performance_daily (dashboard Net Sales
-  card). Returns exactly the same number as net_sales_all_channels; use this id when the user says
-  "Shopify net sales". Brand × day only.
+  Shopify net sales for the period = gross − discounts on order date − event-date returns/cancels, ex-GST, per brand-day on serve.commerce_performance_daily (dashboard Net Sales card) (id: commerce_net_revenue_daily); formula: sum of net_sales_excl_tax from daily commerce rollup by report_date; grain: brand × day, additive; date axis: report_date (IST calendar day); scope: Shopify eligible placements, includes later cancels, excludes test orders; siblings: use net_sales_all_channels for all-channels default, for city/UTM/payment breakdowns use commerce_net_revenue, for product breakdown use product_net_revenue.
 formula:
   human_readable: Sum of net_sales_excl_tax from the daily commerce performance rollup, by report_date
   authoritative_source: cube

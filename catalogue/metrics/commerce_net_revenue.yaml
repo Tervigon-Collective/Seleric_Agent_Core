@@ -3,12 +3,7 @@ display_name: Commerce Net Revenue (Shopify-only, ex-GST)
 category: commerce
 status: certified
 description: >-
-  Net sales of orders PLACED in the period, sliceable by order attributes — use for "net sales by city
-  / state / UTM / payment method / new vs returning". Sums each order's net sales (ex-GST) on its
-  order date from serve.commerce_orders; later returns/cancels are NOT deducted from the period, so it
-  runs higher than the dashboard Net Sales card (e.g. Aug-2026 brand 20: ₹34.1L vs ₹28.0L). Slice:
-  shipping_* geo, payment_method/bucket/gateway, is_cod, is_new_customer, utm_*, source_name,
-  order/fulfilment status. For period totals use net_sales_all_channels.
+  Net sales of orders PLACED in the period, sliceable by order attributes — use for "net sales by city / state / UTM / payment method / new vs returning" (id: commerce_net_revenue); formula: sum of per-order net sales ex-GST (placement axis); grain: order, additive; date axis: order_date; scope: placement axis, later returns/cancels NOT deducted (runs higher than dashboard Net Sales); siblings: for period totals (event-date returns deducted) use net_sales_all_channels, for brand-day use commerce_net_revenue_daily, for product-level use product_net_revenue.
 formula:
   human_readable: Sum of per-order net sales ex-GST (placement axis)
   authoritative_source: cube

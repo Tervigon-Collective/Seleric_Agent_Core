@@ -3,10 +3,7 @@ display_name: Total Ad Spend (all platforms)
 category: finance
 status: certified
 description: >-
-  Total advertising spend = Meta + Google ad spend for the period, per brand-day on
-  serve.canonical_pnl (INR) — default for "ad spend", "marketing spend", "performance marketing". Same
-  number as shopify_ad_spend. Not this: Meta only → meta_spend; Google only → google_spend; by
-  campaign/ad → ad_channel_spend.
+  Total advertising spend = Meta + Google ad spend for the period, per brand-day on serve.canonical_pnl (INR) (id: total_ad_spend); formula: SUM(meta_spend) + SUM(google_spend); grain: brand × day, additive; date axis: report_date (IST calendar day); scope: all-platforms P&L; siblings: for Meta only use meta_spend, for Google only use google_spend, for by campaign/ad use ad_channel_spend.
 formula:
   human_readable: SUM(meta_spend) + SUM(google_spend)
   authoritative_source: cube

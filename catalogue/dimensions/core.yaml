@@ -526,8 +526,12 @@ dimensions:
   - id: report_date
     display_name: Report Date
     description: >
-      Daily platform reporting day (platform account day; IST-aligned accounts).
-      The ONLY time axis for paid-media products — no hourly axis exists.
+      Daily reporting day (platform account day for paid media; IST calendar day for commerce).
+      Paid-media views (meta_ad_performance, google_ad_performance, meta_ad_attribution,
+      channel_pnl, ad_channel_pnl) use platform account day; commerce views (commerce_performance,
+      canonical_pnl, orders_all_channels, sales_all_channels, returns_cancels_all_channels) use
+      IST calendar day. Hourly axes exist on meta_ad_performance_hourly and
+      google_ad_performance_hourly via report_hour_ts; other views have no hourly axis.
     is_time: true
     views:
       commerce_performance: commerce_performance.report_date
@@ -712,12 +716,7 @@ dimensions:
   - id: channel
     display_name: Channel
     description: >
-      On channel_attribution: closed set (meta/google/organic_shopify/unattributed). On channel_pnl: meta/google/organic/unattributed.
-      On funnel_daily and session_funnel: FINE channel (ig_feed, google_search,
-      organic, ...). On orders_all_channels / sales_all_channels: marketplace channel (shopify). Distinct from lt_channel (last-touch FINE on
-      order_attribution). Unspecified "by channel" / "channel-wise" with no
-      measure defaults to ChannelAttribution closed set — see ontology
-      grain_defaults; do not slice Shopify commerce totals by this dim.
+      Value space differs by view: channel_attribution uses closed set (meta/google/organic_shopify/unattributed); channel_pnl and ad_channel_pnl use P&L set (meta/google/organic/unattributed); funnel_daily, session_funnel, web_events, web_events_daily use FINE last-touch channels (ig_feed, google_search, organic, ...); orders_all_channels, sales_all_channels, returns_cancels_all_channels use marketplace (shopify). Distinct from lt_channel (last-touch FINE on order_attribution). Unspecified "by channel" defaults to ChannelAttribution closed set — see ontology grain_defaults; do not slice Shopify commerce totals by this dim.
     aliases:
       - marketplace
       - marketplace channel

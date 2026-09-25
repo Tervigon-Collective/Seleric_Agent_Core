@@ -3,13 +3,7 @@ display_name: Net Sales (all channels)
 category: commerce
 status: certified
 description: >-
-  Business net sales for the period — the default answer to "net sales", "revenue", "sales",
-  "topline". = gross sales − discounts on the order date, minus returns and cancellations on the date
-  they happen, ex-GST, per brand-day on serve.canonical_pnl (the dashboard Net Sales card). Reconciles
-  with net_profit_all_channels. Shopify is the only sales channel, so this equals
-  commerce_net_revenue_daily. Brand × day only — no channel, geo or product slices. Not this: by ad
-  channel → meta_attribution_net_sales / google_attribution_net_sales (or ad_channel_net_sales by
-  channel); by city/UTM/payment → commerce_net_revenue; by product → product_net_revenue.
+  Business net sales for the period — the default answer to "net sales", "revenue", "sales", "topline" (id: net_sales_all_channels); formula: gross sales − discounts on order date − event-date returns/cancels, ex-GST; grain: brand × day, additive; date axis: report_date (IST calendar day); scope: Shopify eligible placements, includes later cancels, excludes test orders; siblings: by ad channel use meta_attribution_net_sales / google_attribution_net_sales, by city/UTM/payment use commerce_net_revenue, by product use product_net_revenue.
 formula:
   human_readable: canonical_pnl net_sales_all_channels_pnl = Shopify net_sales_excl_tax, ex-GST
   authoritative_source: cube

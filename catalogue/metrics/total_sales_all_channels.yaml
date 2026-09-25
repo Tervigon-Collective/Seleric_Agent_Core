@@ -3,9 +3,7 @@ display_name: Total Sales (all channels, incl. GST)
 category: commerce
 status: certified
 description: >-
-  Total Sales for the business: checkout value before discounts INCLUDING GST, on the order date, from
-  serve.sales_all_channels — default for "total sales", "sales by state/city". Same total as
-  total_sales. Slice by shipping region/country/city and payment method/bucket.
+  Total Sales for the business: checkout value before discounts INCLUDING GST, on the order date (id: total_sales_all_channels); formula: SUM(shopify total_sales); grain: daily (brand × day), additive; date axis: report_date (IST calendar day); scope: Shopify eligible placements, includes GST, order date basis; siblings: for net sales (ex-GST, minus returns/cancels) use net_sales_all_channels, for Shopify-only order date use total_sales, for geo/payment breakdowns this metric supports shipping_region/city and payment_method/bucket.
 formula:
   human_readable: SUM(shopify total_sales)
   authoritative_source: cube

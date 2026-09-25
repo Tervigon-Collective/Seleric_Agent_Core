@@ -107,6 +107,7 @@ class ViewDef(BaseModel):
     # midnight; sub-daily queries must group on this timestamp instead.
     datetime_dimension: str | None = None
     freshness: Freshness
+    description: str = ""
 
 
 class BusinessRule(BaseModel):

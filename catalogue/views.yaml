@@ -16,18 +16,24 @@ views:
     freshness:
       source: serve.commerce_orders
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: order. Date axis: order_date (IST), sub-daily via order_created_at_ist. Population: Shopify eligible orders (excludes test/revenue-adjustment). Measures: orders, total_sales, commerce_net_revenue, new_customer_orders, and breakdowns by UTM/payment/geo/status. For brand-day totals use commerce_performance; for product-level use product_performance.
   - name: commerce_performance
     title: Commerce Performance Daily (Serve)
     date_dimension: report_date
     freshness:
       source: serve.commerce_performance_daily
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: brand × day. Date axis: report_date (IST calendar day). Population: Shopify daily rollup. Measures: commerce_net_revenue_daily (dashboard Net Sales parity), total_sales, orders. For order-grain breakdowns use commerce_orders; for product-level use product_performance.
   - name: product_performance
     title: Product / SKU Performance (Serve)
     date_dimension: order_date
     freshness:
       source: serve.product_performance (VIEW over gold.fct_order_items FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: order_item (line). Date axis: order_date. Population: Shopify line items. Measures: product_net_revenue, product_orders, returned_units, product_cancel_revenue, product_return_revenue. For brand-day totals use commerce_performance; for order-grain use commerce_orders.
   # product_ad_spend removed 2026-09-07: serve.product_ad_spend_daily does not exist.
 
   - name: meta_ad_performance
@@ -36,36 +42,48 @@ views:
     freshness:
       source: serve.meta_ads_daily (VIEW over gold.fct_meta_ads_daily FINAL)
       expected_cadence: "5-min gold sync after dbt orchestrator; platform account day"
+    description: >
+      Grain: daily ad (brand × account × day × campaign × adset × ad). Date axis: report_date (platform account day). Population: Meta delivery daily. Measures: meta_spend, meta_impressions, meta_clicks, meta_ctr, meta_cpc, meta_cpm, meta_hook_rate, meta_thruplays, meta_landing_page_views. For hourly use meta_ad_performance_hourly; for breakdowns use meta_ad_breakdown_performance.
   - name: google_ad_performance
     title: Google Ads Performance (Serve, daily)
     date_dimension: report_date
     freshness:
       source: serve.google_ads_daily (VIEW aggregating gold.fct_google_ads_daily FINAL)
       expected_cadence: "5-min gold sync after dbt orchestrator; customer account day"
+    description: >
+      Grain: daily ad (brand × customer_account × day × campaign). Date axis: report_date (customer account day). Population: Google Ads delivery daily. Measures: google_spend, google_impressions, google_clicks, google_ctr, google_cpc, google_cpm. For hourly use google_ad_performance_hourly.
   - name: meta_ad_breakdown_performance
     title: Meta Ads Breakdown (Serve, daily)
     date_dimension: report_date
     freshness:
       source: serve.meta_ads_breakdown_daily (VIEW over gold.mart_meta_ad_breakdown_daily FINAL)
       expected_cadence: "5-min gold sync after dbt orchestrator; platform account day"
+    description: >
+      Grain: daily ad × breakdown (age/gender, placement, platform_device, publisher_platform, region). Date axis: report_date. Population: Meta delivery with breakdown_type filter (REQUIRED: must filter exactly one breakdown_type or metrics count 5x). Measures: meta_breakdown_spend, meta_breakdown_impressions, meta_breakdown_clicks, meta_breakdown_ctr, meta_breakdown_cpc, meta_breakdown_cpm. For non-breakdown daily use meta_ad_performance.
   - name: order_attribution
     title: Order Attribution (Serve, last-touch)
     date_dimension: order_date
     freshness:
       source: serve.order_attribution (VIEW over gold.fct_order_attribution FINAL)
       expected_cadence: "hourly after gold sync, IST; order_date older than 3 days final"
+    description: >
+      Grain: order. Date axis: order_date. Population: Shopify orders with last-touch attribution. Measures: attributed_net_revenue, attributed_gross_revenue, attributed_orders, attributed_new_customer_orders, attribution_rate. Dimensions: lt_platform, lt_channel, lt_utm_*. For channel-P&L basis use channel_pnl; for platform-attribution commerce use platform_attribution_commerce.
   - name: meta_ad_attribution
     title: Meta Ad Attribution Daily (Serve, last-touch)
     date_dimension: report_date
     freshness:
       source: serve.meta_ad_attribution_daily (VIEW over gold.mart_meta_ad_daily_attribution FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day × campaign/adset/ad (Meta last-touch). Date axis: report_date. Population: Meta attributed daily. Measures: meta_attribution_net_sales, meta_attribution_orders. For cross-platform ad-grain use ad_channel_pnl.
   - name: customer_ltv
     title: Customer LTV (Serve)
     date_dimension: last_order_at
     freshness:
       source: serve.customer_ltv (VIEW over gold.fct_orders FINAL + dim_customers)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: customer. Date axis: last_order_at. Population: Shopify customers. Measures: avg_ltv, lifetime_net_revenue, lifetime_order_count. For period new-customer AOV use ltv (Historical LTV card).
   - name: purchase_sequence
     title: Purchase Sequence (Serve)
     date_dimension: order_date
@@ -73,105 +91,136 @@ views:
     freshness:
       source: serve.purchase_sequence (VIEW over gold.fct_orders FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: order. Date axis: order_date, sub-daily via order_created_at_ist. Population: Shopify orders with sequence number. Measures: orders, new_customer_orders, repeat_purchase_orders. Dimensions: order_seq, order_seq_band, is_first_order.
   - name: canonical_pnl
     title: Canonical P&L Daily (Serve)
     date_dimension: report_date
     freshness:
       source: serve.canonical_pnl (commerce oracle + FE §11 Net COGS + ads spend)
       expected_cadence: "hourly after gold sync; costs lag ~1 day (is_final = report_date <= today-3)"
+    description: >
+      Grain: brand × day. Date axis: report_date (IST calendar day). Population: P&L unified (commerce + Net COGS + ads). Measures: net_sales_all_channels, net_profit_all_channels, total_operating_cost_all_channels, total_ad_spend, gross_roas_all_channels, net_roas_all_channels, be_roas_all_channels. For Shopify-only daily use commerce_performance; for order-grain use commerce_orders.
   - name: daily_pnl
     title: Daily P&L (alias of canonical_pnl)
     date_dimension: report_date
     freshness:
       source: serve.canonical_pnl via Cube view daily_pnl (legacy measure names)
       expected_cadence: "hourly after gold sync; costs lag ~1 day (is_final = report_date <= today-3)"
+    description: >
+      Grain: brand × day. Date axis: report_date. Population: same as canonical_pnl (legacy measure names). Use canonical_pnl for new queries.
   - name: orders_all_channels
     title: Total Orders (All Channels)
     date_dimension: report_date
     freshness:
       source: serve.commerce_orders
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day (brand × day). Date axis: report_date. Population: Shopify orders rolled to daily. Measures: total_orders. For order-grain use commerce_orders; for net sales use net_sales_all_channels.
   - name: sales_all_channels
     title: Sales (All Channels)
     date_dimension: report_date
     freshness:
       source: serve.commerce_orders
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day (brand × day). Date axis: report_date. Population: Shopify orders rolled to daily. Measures: total_sales_all_channels (incl. GST). For net sales use net_sales_all_channels; for order-grain use commerce_orders.
   - name: refund_events
     title: Refund Events (Serve)
     date_dimension: refund_date
     freshness:
       source: serve.refund_events (VIEW over gold.fct_refunds FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: refund event. Date axis: refund_date (IST). Population: refund events. Measures: refunded_amount_excl_tax, refunded_orders, refund_count. For return lifecycle use return_lifecycle; for P&L returns/cancels use returns_cancels_all_channels.
   - name: return_lifecycle
     title: Return Lifecycle (Serve)
     date_dimension: refund_date
     freshness:
       source: serve.return_lifecycle (VIEW over gold.fct_refund_line_items FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: return line item. Date axis: refund_date (IST). Population: refund line items. Measures: returned_units, product_return_revenue, product_cancel_revenue. For event-level refunds use refund_events.
   - name: channel_pnl
     title: Channel P&L (Meta / Google / Organic)
     date_dimension: report_date
     freshness:
       source: serve.commerce_orders + serve.commerce_order_events + gold.fct_order_attribution
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day × channel (meta/google/organic/unattributed). Date axis: report_date. Population: last-touch channel P&L. Measures: meta_attribution_net_sales, google_attribution_net_sales, ad_channel_net_sales, channel_orders, meta_net_profit, google_net_profit, meta_net_cogs, google_net_cogs. For order-grain attribution use order_attribution; for cross-platform ad-grain use ad_channel_pnl.
   - name: returns_cancels_all_channels
     title: Returns / Cancels (All Channels)
     date_dimension: report_date
     freshness:
       source: serve.commerce_order_events
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day (brand × day). Date axis: report_date. Population: returns/cancels rolled to daily. Measures: returns_cancels_all_channels, return_cancel_revenue_all_channels. For event-grain use refund_events / return_lifecycle.
   - name: ltv_cac
     title: "LTV : CAC (Historical)"
     date_dimension: report_date
     freshness:
       source: gold.fct_order_attribution + serve.meta/google_ads_daily
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day. Date axis: report_date. Population: attributed new customers + ad spend. Measures: ltv_cac_ratio, ltv, cac. For customer-level LTV use customer_ltv.
   - name: channel_attribution
     title: Channel Attribution Daily (Serve)
     date_dimension: report_date
     freshness:
       source: serve.channel_attribution_daily
       expected_cadence: "hourly after gold sync; 30h SLA"
+    description: >
+      Grain: day × channel (closed set: meta/google/organic_shopify/unattributed). Date axis: report_date. Population: channel attribution daily. Measures: channel_orders, ad_channel_net_sales (by channel). For P&L basis use channel_pnl; for order-grain use order_attribution.
   - name: platform_attribution_commerce
     title: Platform Attribution Commerce (placement cohort)
     date_dimension: report_date
     freshness:
       source: serve.commerce_orders LEFT JOIN gold.fct_order_attribution (argMax lt_platform)
       expected_cadence: "hourly after gold sync, IST"
-    notes: >
-      *_net_sales here is placement dashboard_net_sales_excl_tax — NOT Attribution
-      Overview Net Sales. Prefer channel_pnl.*_net_sales for Overview Net.
+    description: >
+      Grain: day × platform. Date axis: report_date. Population: placement-cohort commerce with platform attribution. Measures: *_net_sales (placement dashboard_net_sales_excl_tax — NOT Attribution Overview Net Sales). Prefer channel_pnl.*_net_sales for Overview Net.
   - name: customer_data
     title: Customer Data (Serve)
     date_dimension: null
     freshness:
       source: serve.customer_data
       expected_cadence: "hourly after gold dim_customers sync, IST"
+    description: >
+      Grain: customer. No date axis. Population: Shopify customer profiles. Measures: (dimensions only: customer_id, acquisition_platform, acquisition_channel, default_city, etc.). For LTV use customer_ltv.
   - name: session_funnel
     title: Session Funnel (Serve)
     date_dimension: session_date
     freshness:
       source: serve.session_funnel (VIEW over gold.fct_session_funnel FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: session. Date axis: session_date (IST). Population: website sessions. Measures: web_sessions, product_views, add_to_cart_events, session_conversion_rate, session_atc_rate. Dimensions: channel (FINE: ig_feed, google_search, ...), funnel_stage. For daily rollup use funnel_daily.
   - name: funnel_daily
     title: Funnel Daily (Serve)
     date_dimension: report_date
     freshness:
       source: serve.funnel_daily (VIEW over gold.mart_funnel_daily FINAL)
       expected_cadence: "daily after dw/mart run; 26h SLA"
+    description: >
+      Grain: day × channel (FINE). Date axis: report_date. Population: daily funnel rollup. Measures: funnel_purchases, funnel_revenue, funnel_conversion_rate. For session-grain use session_funnel.
   - name: web_events
     title: Web Events (Serve)
     date_dimension: event_date
     freshness:
       source: serve.web_events (VIEW over gold.fct_web_events FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: event. Date axis: event_date (IST). Population: Snowplow events. Measures: web_events, web_page_views, product_views, add_to_cart_events, collection_views, site_search_events. Dimensions: channel (FINE), event_type. For daily rollup use web_events_daily.
   - name: web_events_daily
     title: Web Events Daily (Serve)
     date_dimension: report_date
     freshness:
       source: serve.web_events_daily (VIEW over gold.mart_web_events_daily FINAL)
       expected_cadence: "daily after dw/mart run; 26h SLA"
+    description: >
+      Grain: day × channel (FINE). Date axis: report_date. Population: daily web events rollup. Measures: web_events, web_page_views, product_views. For event-grain use web_events.
   - name: meta_ad_performance_hourly
     title: Meta Ads Performance (Serve, hourly)
     date_dimension: report_date
@@ -179,6 +228,8 @@ views:
     freshness:
       source: serve.meta_ads_hourly
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: hour × ad (brand × account × day × hour × campaign × adset × ad). Date axis: report_date + report_hour_ts (IST hour). Population: Meta delivery hourly. Measures: meta_spend_hourly, meta_impressions_hourly, meta_clicks_hourly. For daily use meta_ad_performance.
   - name: google_ad_performance_hourly
     title: Google Ads Performance (Serve, hourly)
     date_dimension: report_date
@@ -186,6 +237,8 @@ views:
     freshness:
       source: serve.google_ads_hourly
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: hour × campaign (brand × customer_account × day × hour × campaign). Date axis: report_date + report_hour_ts (IST hour). Population: Google Ads delivery hourly. Measures: google_spend_hourly, google_impressions_hourly, google_clicks_hourly. For daily use google_ad_performance.
 
   # --- Registered 2026-09-07 to close reconcile_layers VIEW_NOT_IN_CATALOGUE.
   # These Cube views were already certified in OpenMetadata but carried no agent-side
@@ -197,12 +250,16 @@ views:
     freshness:
       source: serve.touchpoints (VIEW over gold.fct_touchpoints FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: touchpoint. Date axis: order_date. Population: pre-purchase touchpoints per order. Measures: pre_purchase_touches, touch_distinct_orders. For attribution use order_attribution.
   - name: attribution_paths
     title: Attribution Paths (Serve, per-model journey)
     date_dimension: order_date
     freshness:
       source: serve.attribution_paths (VIEW over gold.fct_attribution_paths FINAL)
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: path step. Date axis: order_date. Population: attribution paths per model. Measures: (dimensions only: attribution_model, path_step, etc.). For last-touch use order_attribution.
   - name: meta_ads_status_history
     title: Meta Ads Status History (Serve)
     date_dimension: changed_at
@@ -210,6 +267,8 @@ views:
     freshness:
       source: serve.meta_ads_status_history
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: status change. Date axis: changed_at (IST timestamp). Population: Meta ads status history. Measures: (dimensions only: campaign_id, adset_id, ad_id, status, changed_at). Not for performance metrics.
   - name: google_ads_status_history
     title: Google Ads Status History (Serve)
     date_dimension: changed_at
@@ -217,12 +276,16 @@ views:
     freshness:
       source: serve.google_ads_status_history
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: status change. Date axis: changed_at (IST timestamp). Population: Google Ads status history. Measures: (dimensions only: campaign_id, ad_group_id, ad_id, status, changed_at). Not for performance metrics.
   - name: finance_waterfall
     title: Finance Waterfall Daily (Serve)
     date_dimension: report_date
     freshness:
       source: serve.finance_waterfall_daily
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day. Date axis: report_date. Population: finance waterfall daily. Measures: finance_waterfall_net_profit.
   - name: payments
     title: Shopify Payments (Serve)
     date_dimension: transaction_date
@@ -230,9 +293,13 @@ views:
     freshness:
       source: serve.payments
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: transaction. Date axis: transaction_date, sub-daily via transaction_created_at. Population: Shopify payment transactions. Measures: payment_gateway_fees.
   - name: ad_channel_pnl
     title: Ad / Channel P&L (Serve)
     date_dimension: report_date
     freshness:
       source: serve.ad_channel_pnl_daily
       expected_cadence: "hourly after gold sync, IST"
+    description: >
+      Grain: day × channel × campaign × adset × ad (with reconciliation row_type). Date axis: report_date. Population: cross-platform ad P&L. Measures: ad_channel_spend, ad_channel_roas, ad_channel_net_sales, ad_channel_net_profit, ad_channel_orders. For channel-P&L summary use channel_pnl; for platform delivery use meta_ad_performance / google_ad_performance.

@@ -3,9 +3,7 @@ display_name: Returns / Cancels (All Channels)
 category: commerce
 status: certified
 description: >-
-  Orders with a return or cancellation in the period, counted on the event date, from
-  serve.returns_cancels_all_channels — default for "returns and cancellations". Same total as
-  returns_cancels.
+  Orders with a return or cancellation in the period, counted on the event date, from serve.returns_cancels_all_channels — default for "returns and cancellations" (id: returns_cancels_all_channels); formula: shopify event-date returns+cancels; grain: brand × day, additive; date axis: report_date (IST calendar day); scope: Shopify event-date returns/cancels; siblings: same total as returns_cancels (Shopify-only), for event-grain use refund_events / return_lifecycle on refund_date.
 formula:
   human_readable: shopify event-date returns+cancels
   authoritative_source: cube

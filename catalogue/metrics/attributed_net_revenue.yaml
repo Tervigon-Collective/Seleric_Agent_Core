@@ -3,16 +3,7 @@ display_name: Attributed Net Revenue
 category: attribution
 status: certified
 description: >-
-  Net sales of orders placed in the period, split by last-touch marketing source — use for "revenue by
-  UTM source / campaign / platform" at order grain. Sums each order's net sales (ex-GST) on its order
-  date from serve.order_attribution; returns/cancels that happen later are NOT deducted from the
-  period. Cancelled/voided orders count 0; unpaid COD counts gross − discounts until
-  cancelled/returned. Covers every Shopify order (the full Total Orders population); orders with no
-  touch have lt_platform='unattributed'. Slice: lt_platform
-  (meta|google|unattributed|other|ai|organic|email), lt_channel (ig_feed, fb_feed, google_pmax,
-  google_search, google_shopping, organic, …), lt_utm_*, lt_campaign_*, geo, payment. Not this:
-  Meta/Google Overview card net sales → meta_attribution_net_sales / google_attribution_net_sales;
-  per-campaign P&L → ad_channel_net_sales.
+  Net sales of orders placed in the period, split by last-touch marketing source — use for "revenue by UTM source / campaign / platform" at order grain (id: attributed_net_revenue); formula: SUM(credited_net_revenue_excl_tax) on last_touch_v1 (one credit row per order); grain: order (last-touch attribution), additive; date axis: order_date; scope: full Total Orders population, returns/cancels NOT deducted from period, cancelled/voided count 0, unpaid COD counts gross − discounts; siblings: for Meta/Google Overview card net sales use meta_attribution_net_sales / google_attribution_net_sales, for per-campaign P&L use ad_channel_net_sales, for brand-day totals use net_sales_all_channels.
 formula:
   human_readable: SUM(credited_net_revenue_excl_tax) on last_touch_v1 (one credit row per order)
   authoritative_source: cube

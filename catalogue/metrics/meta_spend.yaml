@@ -3,11 +3,7 @@ display_name: Meta Spend (Meta-only)
 category: paid_media
 status: certified
 description: >-
-  Meta (Facebook/Instagram) ad spend as reported by Meta, per ad per day on serve.meta_ads_daily (INR)
-  — default for "Meta spend", "Facebook ad spend". Slice by ad account, campaign
-  (name/status/objective), adset, ad, creative. Not this: Google → google_spend; both platforms →
-  total_ad_spend; Meta spend next to first-party sales per campaign → ad_channel_spend with
-  channel=meta.
+  Meta (Facebook/Instagram) ad spend as reported by Meta, per ad per day on serve.meta_ads_daily (INR) (id: meta_spend); formula: SUM(meta_spend); grain: daily ad grain (brand × account × day × campaign × adset × ad), additive; date axis: report_date (platform account day); scope: Meta delivery only; siblings: for Google use google_spend, for both platforms use total_ad_spend, for Meta spend with first-party sales per campaign use ad_channel_spend with channel=meta.
 formula:
   human_readable: SUM(meta_spend)
   authoritative_source: cube

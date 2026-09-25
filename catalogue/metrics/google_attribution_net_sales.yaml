@@ -3,14 +3,7 @@ display_name: Google Attribution Net Sales
 category: attribution
 status: certified
 description: >-
-  Net sales from Google Ads — the default answer to "Google net sales", "net sales from Google",
-  "Google channel revenue". Computed on serve.channel_pnl as gross sales − discounts on the order
-  date, minus returns and cancellations of Google-attributed orders on the date they happen (the
-  Google Attribution Overview "Net Sales" card). Can be negative in a short window when returns of
-  earlier orders exceed new sales. Google = last-touch platform google/google-ads (Search, Shopping,
-  PMax). Ex-GST, INR. Not this: for sales of orders PLACED in the window use attributed_net_revenue
-  filtered lt_platform=google; per-campaign Google sales → ad_channel_net_sales with channel=google;
-  Meta → meta_attribution_net_sales.
+  Net sales from Google Ads — the default for "Google net sales", "net sales from Google", "Google channel revenue" (id: google_attribution_net_sales); formula: Google gross − discounts − event-date returns/cancels on channel_pnl; grain: day × channel (google), additive; date axis: report_date (platform account day); scope: Google last-touch (google/google-ads Search/Shopping/PMax); siblings: for order-date sales (no later deductions) use attributed_net_revenue filtered lt_platform=google, for per-campaign use ad_channel_net_sales with channel=google, for Meta use meta_attribution_net_sales.
 formula:
   human_readable: Google gross − discounts − event returns − event cancels
   authoritative_source: cube

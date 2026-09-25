@@ -3,8 +3,7 @@ display_name: Gross ROAS (All Channels)
 category: finance
 status: certified
 description: >-
-  Gross ROAS: gross sales (before discounts, ex-GST) ÷ total ad spend, recomputed from period sums on
-  serve.canonical_pnl. Default for "gross ROAS". Same number as gross_roas.
+  Gross ROAS: gross sales (before discounts, ex-GST) ÷ total ad spend, recomputed from period sums on serve.canonical_pnl (id: gross_roas_all_channels); formula: gross_sales_all_channels / total_ad_spend (ratio of aggregates, do not sum across rows); grain: brand × day, ratio; date axis: report_date (IST calendar day); scope: all-channels P&L; siblings: for Shopify-only use gross_roas, for net ROAS use net_roas_all_channels.
 formula:
   human_readable: gross_sales_all_channels / total_ad_spend
   authoritative_source: cube

@@ -3,10 +3,7 @@ display_name: Orders (Shopify-only)
 category: commerce
 status: certified
 description: >-
-  Shopify orders placed in the period (order date), excluding test and revenue-adjustment orders,
-  including later-cancelled/voided ones, from serve.commerce_orders. Same number as total_orders; this
-  id additionally slices by UTM, customer type, order/fulfilment status and item_count (e.g.
-  multi-item orders).
+  Shopify orders placed in the period (order date), excluding test/revenue-adjustment orders, including later-cancelled (id: orders); formula: count of eligible orders (is_test=0, is_revenue_adjustment=0); grain: order, additive; date axis: order_date (IST); scope: Shopify eligible placements, includes later cancels, excludes test orders; siblings: for all-channels default use total_orders, for new customers use new_customer_orders, for attributed orders use attributed_orders, for event-date cancels/returns use cancelled_orders / refunded_orders on event_date.
 formula:
   human_readable: Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)
   authoritative_source: cube

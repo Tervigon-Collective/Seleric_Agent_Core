@@ -3,10 +3,7 @@ display_name: Net ROAS (All Channels)
 category: finance
 status: certified
 description: >-
-  Net ROAS for the business: (net sales − Net COGS) ÷ total ad spend, recomputed from period sums on
-  serve.canonical_pnl — default for "ROAS", "net ROAS", "return on ad spend". Measures contribution
-  earned per rupee of ads; below 1 means ads cost more than the margin they bring. Same number as
-  net_roas. Not this: sales ÷ spend → mer; per campaign/ad → ad_channel_roas.
+  Net ROAS for the business: (net sales − Net COGS) ÷ total ad spend, recomputed from period sums on serve.canonical_pnl — default for "ROAS", "net ROAS", "return on ad spend" (id: net_roas_all_channels); formula: (net_sales_all_channels - total_operating_cost_all_channels) / total_ad_spend (ratio of aggregates, do not sum across rows); grain: brand × day, ratio; date axis: report_date (IST calendar day); scope: all-channels P&L; siblings: for sales ÷ spend use mer, for per campaign/ad use ad_channel_roas, for Shopify-only use net_roas.
 formula:
   human_readable: (net_sales_all_channels - total_operating_cost_all_channels) / total_ad_spend
   authoritative_source: cube

@@ -3,8 +3,7 @@ display_name: Meta Impressions
 category: paid_media
 status: certified
 description: >-
-  Meta ad impressions (times ads were shown), per ad per day on serve.meta_ads_daily. Additive across
-  ads and days. Not reach (unique people).
+  Meta ad impressions (times ads were shown), per ad per day on serve.meta_ads_daily (id: meta_impressions); formula: SUM(meta_impressions); grain: daily ad grain (brand × account × day × campaign × adset × ad), additive; date axis: report_date (platform account day); scope: Meta delivery only, not reach (unique people); siblings: for hourly use meta_impressions_hourly, for clicks use meta_clicks, for spend use meta_spend.
 formula:
   human_readable: SUM(meta_impressions)
   authoritative_source: cube
