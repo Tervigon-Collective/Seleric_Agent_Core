@@ -14,7 +14,7 @@ import difflib
 import re
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .loader import BrandDef, Catalogue, DimensionDef, MetricDef, ModuleDef
 
@@ -236,6 +236,79 @@ _CHANNEL_VIEW_VALUE_SPACE: dict[str, str] = {
 }
 
 
+# --- Concept-layer resolution results (deterministic concept + axes -> metric) ---
+class ResolvedConcept(BaseModel):
+    kind: Literal["resolved_concept"] = "resolved_concept"
+    concept: str
+    metric_id: str
+    axes: dict[str, str]
+    defaults_applied: list[str] = Field(default_factory=list)
+    filter: dict[str, str] = Field(default_factory=dict)
+    used_fallback: bool = False
+    draft: bool = False  # resolved metric is uncertified — disclose the caveat
+    note: str | None = None
+    disambiguation: str | None = None
+
+
+class UnsupportedConcept(BaseModel):
+    kind: Literal["unsupported_concept"] = "unsupported_concept"
+    concept: str
+    axes: dict[str, str]
+    reason: str
+    nearest_metrics: list[str] = Field(default_factory=list)
+
+
+class UnknownConcept(BaseModel):
+    kind: Literal["unknown_concept"] = "unknown_concept"
+    text: str
+    suggestions: list[str] = Field(default_factory=list)
+
+
+# Free-text axis hints -> canonical axis value. Only applied when the concept
+# actually declares that axis value (so a hint for an absent axis is ignored).
+_AXIS_KEYWORDS: dict[str, list[tuple[str, str]]] = {
+    "basis": [("incl gst", "total"), ("including gst", "total"), ("total sales", "total"),
+              ("contribution", "contribution"), ("per order", "per_order"),
+              ("breakeven", "breakeven"), ("break even", "breakeven"), ("be roas", "breakeven"),
+              ("gross", "gross"), ("net", "net"), ("total", "total")],
+    "scope": [("all channel", "company"), ("all-channel", "company"), ("all channels", "company"),
+              ("blended", "blended"), ("shopify", "shopify"), ("sku", "product"),
+              ("product", "product"), ("pnl", "pnl"), ("event", "event")],
+    "attribution": [("last-touch", "last_touch"), ("last touch", "last_touch"),
+                    ("attributed", "last_touch"), ("attribution", "last_touch"),
+                    ("by channel", "channel"), ("channel-wise", "channel"),
+                    ("per channel", "channel"), ("channel", "channel"),
+                    ("platform", "platform")],
+    "platform": [("facebook", "meta"), ("instagram", "meta"), ("meta", "meta"),
+                 ("google", "google"), ("whatsapp", "whatsapp"), ("cross", "cross"),
+                 ("shopify", "shopify_card")],
+    "grain": [("per campaign", "campaign"), ("by campaign", "campaign"),
+              ("per adset", "adset"), ("by adset", "adset"), ("per ad", "ad"),
+              ("by hour", "hour"), ("hourly", "hour"), ("by day", "daily"),
+              ("daily", "daily"), ("per order", "order")],
+    "status": [("cod", "cod"), ("prepaid", "prepaid"), ("new customer", "new"),
+               ("cancelled", "cancelled"), ("canceled", "cancelled"), ("returned", "returned"),
+               ("first order", "first"), ("repeat", "repeat"), ("active", "active")],
+    "action": [("cancel", "cancel"), ("return", "return"), ("refund", "return")],
+    "measure": [("revenue", "revenue"), ("orders", "orders"), ("units", "units"),
+                ("lines", "lines"), ("count", "count"), ("confidence", "confidence"),
+                ("touches", "touches"), ("frequency", "frequency"), ("reach", "reach"),
+                ("order share", "order")],
+    "component": [("shipping", "shipping"), ("packaging", "packaging"),
+                  ("payment gateway", "gateway"), ("gateway", "gateway"), ("rto", "rto"),
+                  ("product cost", "product"), ("product", "product")],
+    "type": [("new", "new"), ("repeat", "repeat")],
+    "kind": [("link", "link")],
+    "metric_kind": [("ctr", "ctr"), ("cpc", "cpc"), ("cpm", "cpm")],
+    "event": [("collection", "collection"), ("add to cart", "atc"), ("add-to-cart", "atc"),
+              ("page view", "pageview"), ("pageview", "pageview"), ("site search", "search"),
+              ("search", "search"), ("product view", "pdp"), ("pdp", "pdp")],
+    "source": [("funnel", "funnel"), ("session", "session")],
+    "horizon": [("lifetime", "lifetime"), ("first order", "first_order"),
+                ("first-order", "first_order")],
+}
+
+
 class CatalogueService:
     def __init__(
         self,
@@ -282,6 +355,14 @@ class CatalogueService:
                 self._cluster_related_glossary[cname] = list(spec.get("related") or [])
                 for mid in metrics:
                     self._metric_cluster.setdefault(mid, cname)
+        # Concept layer: alias/name (lowercased) -> concept id. Longer aliases are
+        # more specific, so keep them for greedy longest-match on free text.
+        self._concept_by_alias: dict[str, str] = {}
+        for c in catalogue.concepts.values():
+            for token in {c.id, c.display_name, *c.aliases}:
+                t = (token or "").strip().lower()
+                if t:
+                    self._concept_by_alias[t] = c.id
 
     def _resolve_module_views(self, mod: ModuleDef) -> set[str]:
         views: set[str] = set(mod.extra_views)
@@ -296,6 +377,123 @@ class CatalogueService:
     @property
     def version(self) -> str:
         return self.cat.version
+
+    # ---- Concept layer resolution ------------------------------------------------
+    def resolve_concept(
+        self, text: str, axes: dict[str, str] | None = None
+    ) -> "ResolvedConcept | UnsupportedConcept | UnknownConcept":
+        """Deterministic: a business concept + axis selection -> exactly one metric.
+
+        Unspecified axes take their declared default (disclosed in
+        ``defaults_applied``). A draft target degrades to its declared fallback.
+        A combination with no resolution returns UnsupportedConcept with a reason,
+        never a wrong sibling.
+        """
+        cid, preset_axes, preset_filter = self._match_concept(text)
+        if cid is None:
+            sugg = difflib.get_close_matches(
+                _normalize(text), sorted(self._concept_by_alias), n=5, cutoff=0.5
+            )
+            return UnknownConcept(text=text, suggestions=sugg)
+        c = self.cat.concepts[cid]
+        filled, defaults_applied = self._fill_axes(c, text, preset_axes, axes)
+        for u in c.unsupported:
+            if all(filled.get(k) == v for k, v in u.when.items()):
+                return UnsupportedConcept(
+                    concept=cid, axes=filled, reason=u.reason,
+                    nearest_metrics=self._concept_metrics(c),
+                )
+        row = self._match_resolve(c, filled)
+        if row is None:
+            return UnsupportedConcept(
+                concept=cid, axes=filled,
+                reason="no resolution declared for this axis combination",
+                nearest_metrics=self._concept_metrics(c),
+            )
+        metric = row.metric
+        flt = dict(preset_filter)
+        flt.update(row.filter)
+        used_fallback = False
+        draft = False
+        note = None
+        m = self.cat.metrics.get(metric)
+        if m is None or not m.is_queryable:
+            if row.fallback is not None:
+                # A certified substitute is declared — use it (e.g. channel_orders).
+                metric = row.fallback.metric
+                note = row.fallback.note
+                used_fallback = True
+            else:
+                # No substitute: the draft metric IS the answer; flag it uncertified.
+                draft = True
+                note = f"{metric} is uncertified (draft); treat as directional."
+        return ResolvedConcept(
+            concept=cid, metric_id=metric, axes=filled,
+            defaults_applied=defaults_applied, filter=flt,
+            used_fallback=used_fallback, draft=draft, note=note,
+            disambiguation=c.disambiguation,
+        )
+
+    def _match_concept(
+        self, text: str
+    ) -> tuple[str | None, dict[str, str], dict[str, str]]:
+        t = (text or "").strip().lower()
+        # 1. Exact compat alias (old metric id / shorthand) -> concept + preset axes.
+        alias = self.cat.concept_aliases.get(t)
+        if alias is not None:
+            return alias.concept, dict(alias.axes), dict(alias.filter)
+        # 2. Exact concept alias / display_name / id.
+        if t in self._concept_by_alias:
+            return self._concept_by_alias[t], {}, {}
+        # 3. Longest concept alias appearing as a whole-word substring.
+        best: str | None = None
+        best_len = 0
+        for al, cid in self._concept_by_alias.items():
+            if len(al) > best_len and re.search(rf"\b{re.escape(al)}\b", t):
+                best, best_len = cid, len(al)
+        return best, {}, {}
+
+    def _fill_axes(
+        self, c, text: str, preset_axes: dict, explicit_axes: dict | None
+    ) -> tuple[dict[str, str], list[str]]:
+        t = (text or "").strip().lower()
+        filled: dict[str, str] = {}
+        explicitly_set: set[str] = set()
+        for aname, axis in c.axes.items():
+            if axis.default is not None:
+                filled[aname] = axis.default
+        for aname, axis in c.axes.items():
+            for kw, val in _AXIS_KEYWORDS.get(aname, []):
+                if val in axis.values and kw in t:
+                    filled[aname] = val
+                    explicitly_set.add(aname)
+                    break
+        for k, v in (preset_axes or {}).items():
+            if k in c.axes:
+                filled[k] = v
+                explicitly_set.add(k)
+        for k, v in (explicit_axes or {}).items():
+            if k in c.axes:
+                filled[k] = v
+                explicitly_set.add(k)
+        defaults_applied = sorted(a for a in filled if a not in explicitly_set)
+        return filled, defaults_applied
+
+    def _match_resolve(self, c, filled: dict[str, str]):
+        """Most-specific matching row wins (most ``when`` keys); ties -> first."""
+        best = None
+        best_spec = -1
+        for r in c.resolves:
+            if all(filled.get(k) == v for k, v in r.when.items()) and len(r.when) > best_spec:
+                best, best_spec = r, len(r.when)
+        return best
+
+    def _concept_metrics(self, c) -> list[str]:
+        out: list[str] = []
+        for r in c.resolves:
+            if r.metric not in out:
+                out.append(r.metric)
+        return out
 
     def _searchable_metrics(self) -> list[MetricDef]:
         return [m for m in self.cat.metrics.values() if m.is_queryable]
@@ -481,15 +679,19 @@ class CatalogueService:
             elif any(tok in m.description.lower() for tok in q_content if len(tok) > 3):
                 add(m, "description", 5)
 
-        # Grain hits: drop description-only metrics that do not support those
-        # dimensions (stops "report" in a commerce blurb winning a channel-wise
-        # question). Then attach queryable metrics that declare the dim.
+        # Grain hits: a "by <grain>" question can only be answered by metrics
+        # that carry that grain. Drop EVERY match supporting none of the resolved
+        # grain dimensions — however it matched — so a grain-incapable metric can
+        # never be the top answer. Previously only description matches were
+        # dropped, so a broad single-word glossary term ("revenue", "profit",
+        # "cogs", ...) floated an all-channels P&L metric with no channel/city
+        # dimension to #1 for "revenue by channel" / "revenue by city" etc.
+        # (P1-1) — burying the grain-capable metric the glossary already names.
+        # Then attach queryable metrics that declare the dim.
         if dim_matches:
             grain_ids = set(dim_matches)
             for mid, summary in list(matches.items()):
-                if summary.matched_on == "description" and not grain_ids.intersection(
-                    summary.supported_dimensions
-                ):
+                if not grain_ids.intersection(summary.supported_dimensions):
                     del matches[mid]
             for did in grain_ids:
                 for rec in self._supporting_metric_records(did, queryable_only=True):

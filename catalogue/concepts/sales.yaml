@@ -1,0 +1,57 @@
+id: sales
+display_name: Sales / Revenue
+one_liner: Money from sales; net (ex-GST, after discounts & returns) unless stated.
+aliases: [revenue, sales, net sales, net revenue, topline, turnover, gross sales, total sales]
+axes:
+  basis: {values: [net, gross, total], default: net}
+  scope: {values: [company, shopify, product], default: company}
+  attribution: {values: [none, last_touch, channel, platform], default: none}
+  platform: {values: [all, meta, google], default: all}
+  grain: {values: [period, order, daily], default: period}
+resolves:
+  - when: {basis: net, scope: company, attribution: none}
+    metric: net_sales_all_channels
+  - when: {basis: gross, scope: company, attribution: none}
+    metric: gross_sales_all_channels
+  - when: {basis: total, scope: company, attribution: none}
+    metric: total_sales_all_channels
+  - when: {basis: net, scope: shopify, attribution: none, grain: period}
+    metric: commerce_net_revenue_daily
+  - when: {basis: net, scope: shopify, attribution: none, grain: order}
+    metric: commerce_net_revenue
+  - when: {basis: gross, scope: shopify, attribution: none}
+    metric: gross_sales
+  - when: {basis: total, scope: shopify, attribution: none}
+    metric: total_sales
+  - when: {basis: net, scope: product}
+    metric: product_net_revenue
+  - when: {basis: net, attribution: last_touch}
+    metric: attributed_net_revenue
+  - when: {basis: gross, attribution: last_touch}
+    metric: attributed_gross_revenue
+  - when: {basis: net, attribution: channel}
+    metric: channel_net_revenue
+    filter: {channel_type: attribution_closed_set}
+    fallback:
+      metric: channel_orders
+      note: >
+        Channel net revenue is uncertified; reporting orders by channel. For
+        dashboard-parity channel revenue use meta_attribution_net_sales /
+        google_attribution_net_sales (per platform).
+  - when: {basis: gross, attribution: channel}
+    metric: channel_gross_revenue
+    filter: {channel_type: attribution_closed_set}
+    fallback:
+      metric: channel_orders
+      note: Channel gross revenue is uncertified; reporting orders by channel.
+  - when: {basis: net, attribution: platform, platform: meta}
+    metric: meta_attribution_net_sales
+  - when: {basis: net, attribution: platform, platform: google}
+    metric: google_attribution_net_sales
+disambiguation: >
+  attribution=none (P&L) and attribution=last_touch/channel are different readings
+  and do NOT reconcile (~20% apart). If attribution is unstated, default to none
+  (all-channels P&L) and say so.
+unsupported:
+  - when: {basis: total, scope: product}
+    reason: product/line grain has no incl-GST (total) measure

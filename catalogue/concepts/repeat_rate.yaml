@@ -1,0 +1,11 @@
+id: repeat_rate
+display_name: Repeat Rate
+one_liner: Repeat behaviour; customer repeat rate or repeat order share.
+aliases: [repeat rate, repeat purchase rate, repeat order share]
+axes:
+  measure: {values: [customer, order], default: customer}
+resolves:
+  - when: {measure: customer}
+    metric: repeat_rate
+  - when: {measure: order}
+    metric: repeat_order_share

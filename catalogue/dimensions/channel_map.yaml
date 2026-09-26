@@ -1,0 +1,26 @@
+# Channel normalization — the ONLY place a channel is declared. Raw source tokens
+# (source_platform / utm / ad account) -> canonical channel + channel_type + parent.
+# Adding a new channel (e.g. WhatsApp) is ONE entry here + the loader emitting rows;
+# no new metric, column, or glossary edit. A mandatory catch-all guarantees no
+# revenue is dropped when a source is not yet mapped.
+channels:
+  - canonical: meta
+    channel_type: attribution_closed_set
+    parent: null
+    matches: [meta, facebook, fb, instagram, ig, fb_feed, ig_feed, fb_reels, ig_reels, ig_story]
+  - canonical: google
+    channel_type: attribution_closed_set
+    parent: null
+    matches: [google, google_pmax, google_search, google_shopping, adwords, gads, youtube]
+  - canonical: whatsapp
+    channel_type: attribution_closed_set
+    parent: null
+    matches: [whatsapp, wa, wa_business, wati, interakt]
+  - canonical: organic_shopify
+    channel_type: attribution_closed_set
+    parent: null
+    matches: [organic, direct, shopify, referral, email, seo]
+  - canonical: unattributed
+    channel_type: attribution_closed_set
+    parent: null
+    matches: ["*"]   # catch-all: unmapped sources land here, never dropped

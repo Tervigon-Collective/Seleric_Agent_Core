@@ -1,0 +1,13 @@
+id: attribution_quality
+display_name: Attribution Quality
+one_liner: Attribution coverage/confidence diagnostics.
+aliases: [attribution rate, attribution confidence, touch count, attribution quality]
+axes:
+  measure: {values: [rate, confidence, touches], default: rate}
+resolves:
+  - when: {measure: rate}
+    metric: attribution_rate
+  - when: {measure: confidence}
+    metric: avg_attribution_confidence
+  - when: {measure: touches}
+    metric: avg_touch_count

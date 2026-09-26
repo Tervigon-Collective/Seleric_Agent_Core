@@ -1,0 +1,42 @@
+id: returns_cancels
+display_name: Returns / Cancels
+one_liner: Returns and/or cancellations; revenue lost, order counts, or units.
+aliases: [returns, cancels, returns and cancels, returns/cancels, refunds, cancellations, return revenue, cancel revenue]
+axes:
+  measure: {values: [revenue, orders, units, lines, count], default: revenue}
+  action: {values: [both, return, cancel], default: both}
+  scope: {values: [all_channels, shopify, pnl, event, product], default: all_channels}
+resolves:
+  - when: {measure: revenue, action: both, scope: all_channels}
+    metric: return_cancel_revenue_all_channels
+  - when: {measure: revenue, action: both, scope: shopify}
+    metric: return_cancel_revenue
+  - when: {measure: revenue, action: return, scope: pnl}
+    metric: return_revenue
+  - when: {measure: revenue, action: return, scope: event}
+    metric: event_return_revenue
+  - when: {measure: revenue, action: return, scope: product}
+    metric: product_return_revenue
+  - when: {measure: revenue, action: cancel, scope: pnl}
+    metric: cancel_revenue
+  - when: {measure: revenue, action: cancel, scope: event}
+    metric: event_cancel_revenue
+  - when: {measure: revenue, action: cancel, scope: product}
+    metric: product_cancel_revenue
+  - when: {measure: orders, action: both, scope: all_channels}
+    metric: returns_cancels_all_channels
+  - when: {measure: orders, action: both, scope: shopify}
+    metric: returns_cancels
+  - when: {measure: orders, action: return}
+    metric: refunded_orders
+  - when: {measure: orders, action: cancel}
+    metric: cancelled_orders
+  - when: {measure: units}
+    metric: returned_units
+  - when: {measure: lines}
+    metric: refund_lines
+  - when: {measure: count}
+    metric: refund_count
+disambiguation: >
+  P&L (pnl) recognises returns/cancels on the order date; event recognises them on
+  the later event date — the two will not reconcile within a period.

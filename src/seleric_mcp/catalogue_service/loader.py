@@ -97,6 +97,68 @@ class GlossaryTerm(BaseModel):
     definition: str | None = None
 
 
+class ConceptAxis(BaseModel):
+    """One orthogonal axis of a concept (basis/scope/attribution/…).
+
+    Closed value set with exactly one default. Unspecified axes take the default
+    at resolve time and the default is disclosed to the caller.
+    """
+    values: list[str]
+    default: str | None = None
+
+
+class ConceptResolveFallback(BaseModel):
+    metric: str
+    note: str | None = None
+
+
+class ConceptResolve(BaseModel):
+    """One row of a concept's resolution table: an axis selection -> one metric.
+
+    ``when`` is a partial axis tuple; a row matches when every key in ``when``
+    equals the filled axis value. The most specific matching row (most ``when``
+    keys) wins. ``filter`` carries a non-axis dimension filter (e.g. channel).
+    A ``draft`` target must declare a ``fallback`` so a concept never silently
+    resolves to a non-queryable metric.
+    """
+    when: dict[str, str] = Field(default_factory=dict)
+    metric: str
+    filter: dict[str, str] = Field(default_factory=dict)
+    status: Literal["approved", "certified", "draft"] | None = None
+    fallback: ConceptResolveFallback | None = None
+
+
+class ConceptUnsupported(BaseModel):
+    when: dict[str, str] = Field(default_factory=dict)
+    reason: str
+
+
+class ConceptDef(BaseModel):
+    id: str
+    display_name: str
+    one_liner: str = ""
+    aliases: list[str] = Field(default_factory=list)
+    axes: dict[str, ConceptAxis] = Field(default_factory=dict)
+    resolves: list[ConceptResolve] = Field(default_factory=list)
+    unsupported: list[ConceptUnsupported] = Field(default_factory=list)
+    disambiguation: str | None = None
+
+
+class ConceptAlias(BaseModel):
+    """Compat: an old metric id / shorthand -> a concept + axis selection."""
+    concept: str
+    axes: dict[str, str] = Field(default_factory=dict)
+    filter: dict[str, str] = Field(default_factory=dict)
+
+
+class ChannelMapEntry(BaseModel):
+    """Raw source token -> canonical channel. A new channel is one entry here."""
+    canonical: str
+    channel_type: str
+    parent: str | None = None
+    matches: list[str] = Field(default_factory=list)
+
+
 class ViewDef(BaseModel):
     name: str
     title: str
@@ -255,6 +317,11 @@ class Catalogue(BaseModel):
     brands: BrandRegistry | None = None
     openmetadata: OpenMetadataRegistry | None = None
     modules: dict[str, ModuleDef] = Field(default_factory=dict)
+    # Concept layer: business concept -> (axes) -> exactly one metric. The
+    # deterministic resolution surface above the flat metric namespace.
+    concepts: dict[str, ConceptDef] = Field(default_factory=dict)
+    concept_aliases: dict[str, ConceptAlias] = Field(default_factory=dict)
+    channel_map: list[ChannelMapEntry] = Field(default_factory=list)
 
 
 def _read_yaml(path: Path) -> dict:
@@ -317,6 +384,26 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
             spec["id"] = mid
             modules[mid] = ModuleDef.model_validate(spec)
 
+    # Concept layer (optional — a deployment without it behaves exactly as before).
+    concepts: dict[str, ConceptDef] = {}
+    concepts_dir = catalogue_dir / "concepts"
+    if concepts_dir.exists():
+        for p in sorted(concepts_dir.glob("*.yaml")):
+            c = ConceptDef.model_validate(_read_yaml(p))
+            concepts[c.id] = c
+
+    concept_aliases: dict[str, ConceptAlias] = {}
+    aliases_path = catalogue_dir / "aliases.yaml"
+    if aliases_path.exists():
+        for aid, spec in (_read_yaml(aliases_path).get("aliases") or {}).items():
+            concept_aliases[aid] = ConceptAlias.model_validate(spec or {})
+
+    channel_map: list[ChannelMapEntry] = []
+    channel_map_path = catalogue_dir / "dimensions" / "channel_map.yaml"
+    if channel_map_path.exists():
+        for raw in _read_yaml(channel_map_path).get("channels") or []:
+            channel_map.append(ChannelMapEntry.model_validate(raw))
+
     om_registry: OpenMetadataRegistry | None = None
     om_path = catalogue_dir / "openmetadata" / "registry.yaml"
     if om_path.exists():
@@ -352,6 +439,9 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         brands=brands,
         openmetadata=om_registry,
         modules=modules,
+        concepts=concepts,
+        concept_aliases=concept_aliases,
+        channel_map=channel_map,
     )
     _check_integrity(cat)
     return cat
@@ -564,6 +654,65 @@ def _check_integrity(cat: Catalogue) -> None:
                     problems.append(f"module {mod.id}: unknown extra_view '{view}'")
             if not resolved_any:
                 problems.append(f"module {mod.id}: resolves to no cube views")
+
+    # Concept layer: every resolution must land on a real metric, drafts must
+    # degrade to a queryable fallback, and axis references must be declared —
+    # so a concept can never silently resolve to a missing or wrong metric.
+    seen_bindings: dict[tuple, str] = {}
+    for c in cat.concepts.values():
+        for aname, axis in c.axes.items():
+            if axis.default is not None and axis.default not in axis.values:
+                problems.append(
+                    f"concept {c.id}: axis '{aname}' default {axis.default!r} not in values"
+                )
+        for i, r in enumerate(c.resolves):
+            for k, v in r.when.items():
+                axis = c.axes.get(k)
+                if axis is None:
+                    problems.append(f"concept {c.id}: resolve[{i}] when references unknown axis '{k}'")
+                elif v not in axis.values:
+                    problems.append(
+                        f"concept {c.id}: resolve[{i}] when {k}={v!r} not a value of axis '{k}'"
+                    )
+            m = cat.metrics.get(r.metric)
+            if m is None:
+                problems.append(f"concept {c.id}: resolve[{i}] unknown metric '{r.metric}'")
+            # A draft target is allowed (the resolver flags it as uncertified). A
+            # fallback is only for when a CERTIFIED substitute exists — and it must
+            # itself be queryable.
+            if r.fallback is not None:
+                fb = cat.metrics.get(r.fallback.metric)
+                if fb is None:
+                    problems.append(
+                        f"concept {c.id}: resolve[{i}] fallback unknown metric '{r.fallback.metric}'"
+                    )
+                elif not fb.is_queryable:
+                    problems.append(
+                        f"concept {c.id}: resolve[{i}] fallback '{r.fallback.metric}' "
+                        f"is not queryable ({fb.status})"
+                    )
+            # Uniqueness: no two concept rows may bind the same metric under the
+            # same axis+filter selection (that would be two meanings for one number).
+            key = (r.metric, tuple(sorted(r.when.items())), tuple(sorted(r.filter.items())))
+            if key in seen_bindings and seen_bindings[key] != c.id:
+                problems.append(
+                    f"concept {c.id}: binding {r.metric} @ {dict(r.when)} collides with "
+                    f"concept {seen_bindings[key]}"
+                )
+            else:
+                seen_bindings[key] = c.id
+    for aid, alias in cat.concept_aliases.items():
+        if alias.concept not in cat.concepts:
+            problems.append(f"alias '{aid}': unknown concept '{alias.concept}'")
+            continue
+        c = cat.concepts[alias.concept]
+        for k, v in alias.axes.items():
+            axis = c.axes.get(k)
+            if axis is None:
+                problems.append(f"alias '{aid}': unknown axis '{k}' for concept '{alias.concept}'")
+            elif v not in axis.values:
+                problems.append(f"alias '{aid}': {k}={v!r} not a value of axis '{k}'")
+
     if problems:
         raise ValueError("Catalogue integrity check failed:\n" + "\n".join(problems))
 

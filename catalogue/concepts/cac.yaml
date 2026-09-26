@@ -1,0 +1,8 @@
+id: cac
+display_name: CAC
+one_liner: Customer acquisition cost.
+aliases: [cac, customer acquisition cost]
+axes: {}
+resolves:
+  - when: {}
+    metric: cac

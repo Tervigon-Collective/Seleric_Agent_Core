@@ -1,0 +1,26 @@
+id: roas
+display_name: ROAS
+one_liner: Return on ad spend; all-channels net unless stated.
+aliases: [roas, return on ad spend]
+axes:
+  basis: {values: [net, gross, breakeven], default: net}
+  scope: {values: [company, shopify], default: company}
+  platform: {values: [all, cross], default: all}
+resolves:
+  - when: {basis: net, scope: company, platform: all}
+    metric: net_roas_all_channels
+  - when: {basis: net, scope: shopify, platform: all}
+    metric: net_roas
+  - when: {basis: gross, scope: company, platform: all}
+    metric: gross_roas_all_channels
+  - when: {basis: gross, scope: shopify, platform: all}
+    metric: gross_roas
+  - when: {basis: breakeven, scope: company, platform: all}
+    metric: be_roas_all_channels
+  - when: {basis: breakeven, scope: shopify, platform: all}
+    metric: be_roas
+  - when: {platform: cross}
+    metric: ad_channel_roas
+disambiguation: >
+  Platform-reported Meta/Google ROAS is not certified; cross-platform ad ROAS by
+  channel/campaign is ad_channel_roas.

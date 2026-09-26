@@ -112,6 +112,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "catalogue_list_brands",
         "catalogue_resolve_brand",
         "catalogue_resolve_term",
+        "catalogue_resolve_concept",
         "catalogue_resolve_dimension",
         "catalogue_resolve_values",
         "modules_list",

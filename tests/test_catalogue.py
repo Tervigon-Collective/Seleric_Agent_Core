@@ -99,6 +99,42 @@ def test_search_glossary_term(catalogue):
     assert result.matches[0].matched_on.startswith("glossary")
 
 
+def test_by_grain_search_never_returns_grain_incapable_metric(catalogue):
+    # P1-1: a "by <grain>" question can only be answered by a metric that carries
+    # that grain. A broad single-word glossary term ("revenue", "profit", ...)
+    # must not float an all-channels P&L metric with no channel/city dimension to
+    # the top of "revenue by channel" / "revenue by city". Invariant: when a
+    # search resolves grain dimensions, EVERY returned metric supports at least
+    # one of them.
+    for query in (
+        "revenue by channel",
+        "net revenue by channel",
+        "revenue by city",
+        "profit by channel",
+        "returns by payment method",
+    ):
+        result = catalogue.search(query)
+        grain = {d.id for d in result.dimensions}
+        assert grain, f"expected a resolved grain dimension for {query!r}"
+        for m in result.matches:
+            assert grain.intersection(m.supported_dimensions), (
+                f"{query!r} returned {m.id} which cannot be sliced by {sorted(grain)}"
+            )
+    # The specific P1-1 regression: this channel-less P&L metric must be gone.
+    top = catalogue.search("revenue by channel").matches
+    assert "net_sales_all_channels" not in {m.id for m in top}
+
+
+def test_by_channel_defaults_to_ontology_channel_attribution(catalogue):
+    # ontology grain_defaults.by_channel: an unspecified "by channel" question
+    # defaults to ChannelAttribution. The more-specific glossary term
+    # "orders by channel" (-> channel_orders) must outrank the bare "orders"
+    # topline metric (total_orders), which otherwise wins on file order alone.
+    ids = [m.id for m in catalogue.search("orders by channel").matches]
+    assert "channel_orders" in ids and "total_orders" in ids
+    assert ids.index("channel_orders") < ids.index("total_orders")
+
+
 def test_search_unknown_returns_suggestions_not_guesses(catalogue):
     result = catalogue.search("zzzz frobnicator")
     assert result.matches == []

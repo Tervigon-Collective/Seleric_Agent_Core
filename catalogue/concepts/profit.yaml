@@ -1,0 +1,32 @@
+id: profit
+display_name: Profit
+one_liner: Bottom-line profit; all-channels net unless stated.
+aliases: [profit, net profit, bottom line, gross profit]
+axes:
+  basis: {values: [gross, net, contribution], default: net}
+  scope: {values: [company, all_channels, shopify, blended, product], default: all_channels}
+resolves:
+  - when: {basis: net, scope: all_channels}
+    metric: net_profit_all_channels
+  - when: {basis: net, scope: company}
+    metric: net_profit_all_channels
+  - when: {basis: net, scope: shopify}
+    metric: net_profit
+  - when: {basis: net, scope: blended}
+    metric: net_profit_blended
+  - when: {basis: gross, scope: company}
+    metric: gross_profit
+  - when: {basis: gross, scope: all_channels}
+    metric: gross_profit
+  - when: {basis: contribution, scope: company}
+    metric: contribution_margin
+  - when: {basis: contribution, scope: all_channels}
+    metric: contribution_margin
+  - when: {basis: gross, scope: product}
+    metric: product_gross_profit
+    fallback:
+      metric: product_net_revenue
+      note: Product gross profit is uncertified; reporting product net revenue.
+disambiguation: >
+  Net profit defaults to all-channels (Historical/P&L). Shopify-only is a narrower
+  scope; blended is all-platforms.

@@ -1,0 +1,26 @@
+id: cogs
+display_name: COGS / Operating Cost
+one_liner: Cost of goods / operating cost; all-channels Net COGS unless stated.
+aliases: [cogs, net cogs, cost of goods, operating cost, total operating cost, company cogs]
+axes:
+  scope: {values: [all_channels, shopify, product], default: all_channels}
+  component: {values: [total, product, shipping, packaging, gateway, rto], default: total}
+resolves:
+  - when: {scope: all_channels, component: total}
+    metric: total_operating_cost_all_channels
+  - when: {scope: shopify, component: total}
+    metric: total_operating_cost
+  - when: {scope: product, component: total}
+    metric: product_cogs
+  - when: {scope: all_channels, component: product}
+    metric: product_cost_all_channels
+  - when: {scope: shopify, component: product}
+    metric: product_cost
+  - when: {component: shipping}
+    metric: shipping_cost
+  - when: {component: packaging}
+    metric: packaging_cost
+  - when: {component: gateway}
+    metric: payment_gateway_fees
+  - when: {component: rto}
+    metric: rto_cost

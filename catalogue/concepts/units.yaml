@@ -1,0 +1,13 @@
+id: units
+display_name: Units Sold
+one_liner: Units sold (SKU/line grain).
+aliases: [units, units sold, quantity sold, gross units]
+axes:
+  basis: {values: [net, gross, per_order], default: net}
+resolves:
+  - when: {basis: net}
+    metric: units_sold
+  - when: {basis: gross}
+    metric: gross_units_ordered
+  - when: {basis: per_order}
+    metric: units_per_order

@@ -1,0 +1,16 @@
+id: margin
+display_name: Margin %
+one_liner: Margin percentage; net (company) unless stated.
+aliases: [margin, margin %, gross margin, net margin, contribution margin %]
+axes:
+  basis: {values: [gross, net, contribution], default: net}
+  scope: {values: [company, product], default: company}
+resolves:
+  - when: {basis: net, scope: company}
+    metric: net_margin_pct
+  - when: {basis: gross, scope: company}
+    metric: gross_margin_pct
+  - when: {basis: contribution, scope: company}
+    metric: contribution_margin_pct
+  - when: {basis: gross, scope: product}
+    metric: product_gross_margin_pct

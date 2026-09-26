@@ -1,0 +1,11 @@
+id: conversion_rate
+display_name: Conversion Rate
+one_liner: Session conversion rate (session funnel) unless funnel-daily is asked.
+aliases: [conversion rate, cvr, conversion]
+axes:
+  source: {values: [session, funnel], default: session}
+resolves:
+  - when: {source: session}
+    metric: session_conversion_rate
+  - when: {source: funnel}
+    metric: funnel_conversion_rate

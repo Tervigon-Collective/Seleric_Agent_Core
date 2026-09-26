@@ -730,6 +730,32 @@ def build_server(settings: Settings) -> FastMCP:
         return ctx.values.resolve(text, snap)
 
     @mcp.tool()
+    def catalogue_resolve_concept(text: str, axes: dict | None = None) -> dict:
+        """Resolve a business concept + axis selection to exactly ONE metric.
+
+        The deterministic resolution path (prefer over catalogue_search_metrics for
+        analytical questions). Give the concept phrase (e.g. "revenue", "orders",
+        "ad spend") and optionally an explicit axis selection, e.g.
+        axes={"basis":"net","scope":"company","attribution":"channel"}. Unspecified
+        axes take their declared default and are reported in defaults_applied —
+        disclose them to the user. Axes: basis(net/gross/total), scope(company/
+        shopify/product/all_channels), attribution(none/last_touch/channel/platform),
+        platform(all/meta/google), grain, plus concept-specific axes.
+
+        Returns one of:
+          - resolved_concept: {metric_id, axes, defaults_applied, filter,
+            used_fallback, draft, note, disambiguation}. Query metrics_query with
+            metric_id (apply `filter`). If draft=true or a note is present, state
+            the caveat. If disambiguation is set (e.g. attributed vs P&L revenue),
+            surface it when the axis was defaulted.
+          - unsupported_concept: {reason, nearest_metrics} — do not substitute a
+            metric; tell the user what is unsupported or ask for the missing axis.
+          - unknown_concept: {suggestions} — fall back to catalogue_search_metrics.
+        """
+        _log_call("catalogue_resolve_concept", text=text, axes=axes)
+        return ctx.catalogue.resolve_concept(text, axes).model_dump()
+
+    @mcp.tool()
     def catalogue_get_ontology(module: str | None = None) -> dict:
         """Business ontology snapshot: domains, data products, entity clusters
         (related catalogue metrics), grain/date axes, attribution boundary,

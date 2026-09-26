@@ -1,0 +1,8 @@
+id: mer
+display_name: MER
+one_liner: Marketing efficiency ratio (net sales / total ad spend).
+aliases: [mer, marketing efficiency ratio]
+axes: {}
+resolves:
+  - when: {}
+    metric: mer

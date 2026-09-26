@@ -1,0 +1,8 @@
+id: asp
+display_name: ASP
+one_liner: Average selling price per unit (SKU grain).
+aliases: [asp, average selling price]
+axes: {}
+resolves:
+  - when: {}
+    metric: average_selling_price

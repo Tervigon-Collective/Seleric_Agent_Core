@@ -59,6 +59,7 @@ ANALYST_TOOLS = frozenset(
         "catalogue_related_metrics",
         "catalogue_list_dimensions",
         "catalogue_resolve_term",
+        "catalogue_resolve_concept",
         "catalogue_resolve_dimension",
         "catalogue_resolve_brand",
         "catalogue_list_brands",

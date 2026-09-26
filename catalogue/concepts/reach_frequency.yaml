@@ -1,0 +1,11 @@
+id: reach_frequency
+display_name: Reach / Frequency
+one_liner: Meta reach and frequency (non-additive).
+aliases: [reach, frequency]
+axes:
+  measure: {values: [reach, frequency], default: reach}
+resolves:
+  - when: {measure: reach}
+    metric: meta_reach
+  - when: {measure: frequency}
+    metric: meta_frequency
