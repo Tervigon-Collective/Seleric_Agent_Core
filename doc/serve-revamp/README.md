@@ -39,13 +39,14 @@ retries.
   `catalogue_resolve_concept`; `tests/test_concepts.py` (25 tests) + full suite
   (257) passing. "revenue by channel" now resolves deterministically to
   `channel_orders` (fallback), no longer the channel-less P&L metric.
-- **Phase 2 (ClickHouse marts): started (author-only).** Target confirmed =
-  ClickHouse serve. Flagship `mart_channel_daily` authored as a shadow view by
-  composition over existing serve relations, with apply script + parity SQL
-  (`data_platform/mage-ai/serve/marts/`), and a per-mart build spec
-  ([09](09_MART_BUILD_SPEC.md)) for the remaining ~9. **Not applied** — an operator
-  runs `serve/marts/apply_views.sh` + the parity checks against `clickhouse.seleric.com`
-  (I do not write to production). Remaining marts are generated after the flagship
-  parity passes.
+- **Phase 2 (ClickHouse marts): all 7 composite marts authored & validated
+  read-only (author-only).** In `data_platform/mage-ai/serve/marts/views/`:
+  `mart_channel_daily`, `mart_pnl_daily`, `mart_customers`, `mart_orders`,
+  `mart_ads_daily`, `mart_sessions_daily`, `mart_ad_status` — each composed over the
+  existing certified serve views, **validated against live ClickHouse read-only**
+  (grain-unique at its key; measure parity vs sources = 0). The 5 single-source
+  domains need no new relation (rebrand at P3). See [09](09_MART_BUILD_SPEC.md).
+  **Not applied to production** — an operator runs `serve/marts/apply_views.sh`
+  (`CREATE VIEW` is the only write); I only ran read-only `DESCRIBE`/`SELECT`.
 - **Phases 3–5 (Cube, OpenMetadata, agent cutover): pending** — follow per-mart
-  after apply. See [08](08_MIGRATION_PLAN.md).
+  after apply (need the applied marts + live Cube). See [08](08_MIGRATION_PLAN.md).

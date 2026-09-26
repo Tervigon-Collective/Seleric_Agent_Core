@@ -65,18 +65,21 @@ avg_ltv, repeat_rate, and even count measures like `customers`) are computed in 
 
 | Mart | Grain | Compose from (existing serve.*) | Method |
 |---|---|---|---|
-| **mart_channel_daily** ✅ authored | brand×date×channel_type×channel | channel_attribution_daily, channel_pnl, sales/orders/returns_cancels_all_channels | UNION ALL by channel_type |
-| **mart_pnl_daily** ✅ authored | brand×date | canonical_pnl ⟕ ltv_cac (waterfall excluded, see above) | LEFT JOIN on (brand_id,report_date) |
-| **mart_customers** ✅ authored | brand×customer_id | customer_ltv ⟕ customer_data | LEFT JOIN on (brand_id,customer_id) |
-| **mart_orders** spec | brand×order_id | commerce_orders ⟕ order_attribution(1:1) ⟕ purchase_sequence ⟕ platform_attribution_commerce; commerce_order_events rolled to order | LEFT JOIN; event revenue via GROUP BY subquery (never raw 1:M) |
-| **mart_ads_daily** spec | brand×date×channel×campaign×adset×ad | meta_ads_daily (channel='meta'), google_ads_daily (channel='google'), ad_channel_pnl, meta_ad_attribution | UNION meta/google delivery + LEFT JOIN economics/attribution; platform-only cols NULL cross-platform |
-| **mart_sessions_daily** spec | brand×date×channel | funnel_daily ⟕ web_events_daily | LEFT JOIN on (brand_id,report_date,channel) |
-| **mart_ad_status** spec | brand×entity×changed_at | meta_ads_status_history (channel='meta'), google_ads_status_history (channel='google') | UNION ALL, add channel + normalize adgroup_id→adset_id |
+| **mart_channel_daily** ✅ validated | brand×date×channel_type×channel | channel_attribution_daily, channel_pnl, sales/orders/returns_cancels_all_channels | UNION ALL by channel_type (each source GROUP BY'd to grain) |
+| **mart_pnl_daily** ✅ validated | brand×date | canonical_pnl ⟕ ltv_cac_daily (aggregated; waterfall excluded) | LEFT JOIN; net_profit parity=0 |
+| **mart_customers** ✅ validated | brand×customer_id | customer_ltv ⟕ customer_data | LEFT JOIN on (brand_id,customer_id) |
+| **mart_orders** ✅ validated | brand×order_id | commerce_orders ⟕ order_attribution(last_touch_v1, collapsed) ⟕ purchase_sequence | LEFT JOIN; net_revenue parity=0, 99.8% attributed |
+| **mart_ads_daily** ✅ validated | brand×date×channel×campaign×adset×ad | meta_ads_daily+google_ads_daily (delivery UNION) ⟕ ad_channel_pnl(row_type=detail) ⟕ meta_ad_attribution | spend parity=0 both platforms |
+| **mart_sessions_daily** ✅ validated | brand×date×channel | funnel_daily ⟕ web_events_daily (aggregated) | LEFT JOIN on (brand_id,report_date,channel) |
+| **mart_ad_status** ✅ validated | brand×channel×entity_type×entity_id×changed_at | meta_ads_status_history + google_ads_status_history | UNION ALL, add channel, normalize adgroup_id→adset_id |
 | mart_order_items / mart_sessions / mart_refunds / mart_refund_lines / mart_payments | (source grain) | product_performance / session_funnel / refund_events / return_lifecycle / payments | **no new relation** — rebrand existing view at P3 |
 
-`mart_orders` and `mart_ads_daily` are the two error-prone composites (event rollup;
-cross-platform UNION+join) — author against a live ClickHouse and iterate on parity
-rather than blind, given no offline CH here.
+All 7 composite marts are authored in `data_platform/mage-ai/serve/marts/views/` and
+**validated read-only against live ClickHouse** — every one grain-unique at its key, and
+measure parity vs sources = 0 where checked (net_profit, net_revenue, meta/google spend).
+Validation caught + fixed real grain bugs (channel_pnl, ltv_cac_daily not unique at their
+cube grain → needed GROUP BY; qualified `o.brand_id` output names → explicit AS). The
+operator applies via `apply_views.sh` (the only write step); P3 wiring follows.
 
 ## Rules (carried from the physical model, §03)
 
