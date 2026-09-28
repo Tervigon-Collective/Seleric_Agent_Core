@@ -37,6 +37,12 @@ from pathlib import Path
 import yaml
 
 CORE = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CORE / "src"))
+from seleric_mcp.catalogue_service.cube_databases import (  # noqa: E402
+    load_cube_model,
+    view_databases,
+)
+
 CUBE_DIR = Path(os.environ.get("SELERIC_CUBE_DIR", "/opt/seleric/mage-ai/infra/cube"))
 OM_DIR = Path(os.environ.get("SELERIC_OM_DIR", "/opt/seleric/mage-ai/openmetadata"))
 CUBE_API = os.environ.get("SELERIC_CUBE_API", "http://127.0.0.1:4001")
@@ -47,7 +53,7 @@ CH_PREFIX = "clickhouse.default"
 
 
 # ----------------------------------------------------------------- ClickHouse
-def _ch_conn() -> tuple[str, str, str]:
+def _cube_env() -> dict[str, str]:
     env: dict[str, str] = {}
     f = CUBE_DIR / ".env"
     if f.exists():
@@ -57,6 +63,11 @@ def _ch_conn() -> tuple[str, str, str]:
                 k, v = line.split("=", 1)
                 env.setdefault(k.strip(), v.strip())
     env.update({k: v for k, v in os.environ.items() if k.startswith("CUBEJS_DB_")})
+    return env
+
+
+def _ch_conn() -> tuple[str, str, str]:
+    env = _cube_env()
     return (
         f"http://{env.get('CUBEJS_DB_HOST', '127.0.0.1')}:{env.get('CUBEJS_DB_PORT', '8123')}/",
         env.get("CUBEJS_DB_USER", "default"),
@@ -137,6 +148,14 @@ def cube_surface() -> dict:
                 seen.append(root)
         view_cubes[v["name"]] = seen
 
+    # Physical databases per view, from every cube on its join paths. A view is
+    # served by exactly the databases listed here; the MCP scope gate reads it.
+    model_cubes, model_view_cubes = load_cube_model(CUBE_DIR)
+    known_dbs = [r[0] for r in ch("SELECT name FROM system.databases FORMAT TSV")]
+    dbs_by_view = view_databases(
+        model_cubes, model_view_cubes, known_dbs, _cube_env().get("CUBEJS_DB_NAME")
+    )
+
     views: dict[str, dict] = {}
     for c in meta.get("cubes", []):
         if c["name"] not in view_cubes:
@@ -151,6 +170,7 @@ def cube_surface() -> dict:
             ),
             "_cubes": view_cubes[c["name"]],
             "serve_tables": sorted({t for cu in view_cubes[c["name"]] for t in cube_tables.get(cu, [])}),
+            "databases": dbs_by_view.get(c["name"], []),
         }
     # keep views declared in YAML but absent from /meta visible rather than silently dropped
     for name, cubes in view_cubes.items():
@@ -164,6 +184,7 @@ def cube_surface() -> dict:
                 "time_dimensions": [],
                 "_cubes": cubes,
                 "serve_tables": sorted({t for cu in cubes for t in cube_tables.get(cu, [])}),
+                "databases": dbs_by_view.get(name, []),
                 "_not_in_cube_meta": True,
             },
         )
@@ -314,6 +335,7 @@ def build() -> dict:
             "serve_table": f"{CH_PREFIX}.{CH_DB_SERVE}.{primary}" if primary else None,
             "serve_tables": [f"{CH_PREFIX}.{CH_DB_SERVE}.{t}" for t in serve_tables],
             "gold_inputs": [f"{CH_PREFIX}.{CH_DB_GOLD}.{g}" for g in gold_inputs],
+            "databases": v["databases"],
             "contract": contract["name"] if contract else None,
             "date_dimension": date_dim,
             "datetime_dimension": datetime_dim,

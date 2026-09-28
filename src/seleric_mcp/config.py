@@ -131,6 +131,11 @@ class Settings:
     # the default surface is catalogue + metrics_query + actions only.
     # Env override: SELERIC_MCP_ADS_TOOLS=true.
     ads_tools_enabled: bool = False
+    # Serve-database scope gate. When set, only metrics whose view reads
+    # exclusively from this database are visible; everything else is hidden
+    # from search, resolve and query. Empty = no gating.
+    # Env override: SELERIC_SERVE_DB.
+    serve_db: str = ""
     catalogue_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "catalogue")
 
     # --- behavior tunables ---
@@ -278,6 +283,8 @@ def load_settings(config_path: Path | None = None) -> Settings:
         _env_or("SELERIC_MCP_ADS_TOOLS", _cfg_get(gateway, "ads_tools_enabled", False)), False
     )
 
+    serve_db = str(_env_or("SELERIC_SERVE_DB", _cfg_get(gateway, "serve_db", ""))).strip()
+
     write_cfg = _as_bool(_cfg_get(gateway, "write_enabled", False), False)
     write_env = os.getenv("WRITE_ENABLED")
     if write_env is not None and write_env.strip() != "":
@@ -382,6 +389,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         caller_scopes=scopes,
         module=module,
         ads_tools_enabled=ads_tools_enabled,
+        serve_db=serve_db,
         db_path=db_path,
         resolve_auto_threshold=_tunable_float(
             "SELERIC_RESOLVE_AUTO_THRESHOLD", "resolve_auto_threshold"

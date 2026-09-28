@@ -42,7 +42,8 @@ services:
       SELERIC_MCP_DB: /data/seleric_mcp.db
       OPENMETADATA_BASE_URL: http://host.docker.internal:8585
       # FastMCP DNS-rebinding / CORS — same public domain via nginx
-      MCP_ALLOWED_HOSTS: mcp.seleric.com,127.0.0.1:*,localhost:*
+      # mcp:* = in-network callers (Seleric_Agent api/recovery via seleric-mcp_default)
+      MCP_ALLOWED_HOSTS: mcp.seleric.com,127.0.0.1:*,localhost:*,mcp:*
       MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*
     volumes:
       - ./catalogue:/app/catalogue:ro

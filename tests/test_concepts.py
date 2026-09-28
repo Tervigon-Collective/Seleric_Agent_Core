@@ -100,6 +100,18 @@ def test_unknown_concept_returns_suggestions(catalogue):
     assert isinstance(r, UnknownConcept)
 
 
+@pytest.mark.parametrize(
+    "singular,plural",
+    [("net sale", "net sales"), ("order", "orders"), ("cancelled order", "cancelled orders")],
+)
+def test_singular_plural_resolve_the_same(catalogue, singular, plural):
+    # Live: bare "net sale" missed and forced a second resolve on "net sales".
+    s, p = _resolve(catalogue, singular), _resolve(catalogue, plural)
+    assert isinstance(p, ResolvedConcept), f"{plural!r} -> {p}"
+    assert isinstance(s, ResolvedConcept), f"{singular!r} -> {s}"
+    assert s.metric_id == p.metric_id
+
+
 def test_every_resolves_target_exists_and_fallbacks_queryable(catalogue):
     # Mirrors the load-time integrity guarantee, as a standalone check.
     metrics = catalogue.cat.metrics

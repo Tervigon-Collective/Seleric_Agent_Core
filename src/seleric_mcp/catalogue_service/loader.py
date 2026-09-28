@@ -88,6 +88,9 @@ class DimensionDef(BaseModel):
     # equals/notEquals filters be case/typo-corrected instead of silently
     # matching zero rows. None means "no known enum" — filter values pass
     # through unvalidated, exactly as before this field existed.
+    stable_key: str | None = None  # id of the dimension that identifies the entity
+    # this label names (e.g. a title's product id). Labels can change or collide
+    # across periods; comparisons across periods should join on the key.
 
 
 class GlossaryTerm(BaseModel):
@@ -170,6 +173,9 @@ class ViewDef(BaseModel):
     datetime_dimension: str | None = None
     freshness: Freshness
     description: str = ""
+    # Physical databases the view's cubes read, derived from the Cube model by
+    # scripts/sync_catalogue_from_sources.py. Empty means unknown (no crosswalk).
+    databases: list[str] = Field(default_factory=list)
 
 
 class BusinessRule(BaseModel):
@@ -473,6 +479,7 @@ def _apply_crosswalk(
             v.date_dimension = spec["date_dimension"]
         if spec.get("datetime_dimension"):
             v.datetime_dimension = spec["datetime_dimension"]
+        v.databases = sorted(spec.get("databases") or [])
 
     if om is None:
         return cw
@@ -712,6 +719,17 @@ def _check_integrity(cat: Catalogue) -> None:
                 problems.append(f"alias '{aid}': unknown axis '{k}' for concept '{alias.concept}'")
             elif v not in axis.values:
                 problems.append(f"alias '{aid}': {k}={v!r} not a value of axis '{k}'")
+
+    for d in cat.dimensions.values():
+        if d.stable_key is None:
+            continue
+        key = cat.dimensions.get(d.stable_key)
+        if key is None:
+            problems.append(f"dimension {d.id}: stable_key '{d.stable_key}' is not a dimension")
+        elif not set(d.views) & set(key.views):
+            problems.append(
+                f"dimension {d.id}: stable_key '{d.stable_key}' shares no view with it"
+            )
 
     if problems:
         raise ValueError("Catalogue integrity check failed:\n" + "\n".join(problems))

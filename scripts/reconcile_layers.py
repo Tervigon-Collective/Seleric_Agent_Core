@@ -30,6 +30,13 @@ from pathlib import Path
 import yaml
 
 CORE = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CORE / "src"))
+from seleric_mcp.catalogue_service.cube_databases import (  # noqa: E402
+    cube_databases,
+    load_cube_model,
+    view_databases,
+)
+
 CUBE = Path(os.environ.get("SELERIC_CUBE_DIR", "/opt/seleric/mage-ai/infra/cube"))
 OM = Path(os.environ.get("SELERIC_OM_DIR", "/opt/seleric/mage-ai/openmetadata"))
 
@@ -61,7 +68,7 @@ def load_waivers() -> dict[str, str]:
 
 
 # ---------------------------------------------------------------- ClickHouse
-def _ch_env() -> tuple[str, str, str]:
+def _cube_env() -> dict[str, str]:
     env: dict[str, str] = {}
     envfile = CUBE / ".env"
     if envfile.exists():
@@ -71,6 +78,11 @@ def _ch_env() -> tuple[str, str, str]:
                 k, v = line.split("=", 1)
                 env.setdefault(k.strip(), v.strip())
     env.update({k: v for k, v in os.environ.items() if k.startswith("CUBEJS_DB_")})
+    return env
+
+
+def _ch_env() -> tuple[str, str, str]:
+    env = _cube_env()
     host = env.get("CUBEJS_DB_HOST", "127.0.0.1")
     port = env.get("CUBEJS_DB_PORT", "8123")
     return (
@@ -467,6 +479,75 @@ def check_coverage(r: Report, wh: dict, cb: dict, cat: dict) -> None:
                 )
 
 
+# ---------------------------------- 1b. serve-only guarantee (MCP surface isolation)
+def _configured_serve_db() -> str:
+    """The MCP scope gate's database (SELERIC_SERVE_DB via Base_Agent settings)."""
+    try:
+        from seleric_mcp.config import load_settings
+        return load_settings().serve_db
+    except Exception:  # noqa: BLE001 - report runs without a full MCP config
+        return os.environ.get("SELERIC_SERVE_DB", "").strip()
+
+
+def check_serve_only(r: Report, cb: dict) -> None:
+    """The MCP-exposed Cube surface must read ONLY from serve / serve_dev — never gold
+    or raw. Inspects each cube's real SQL source fields (`sql_table:` + relations
+    qualified with a warehouse database inside a `sql:` value), never description/meta
+    prose where gold names appear as lineage. Also enforces mart-cube DB consistency
+    against $SERVE_MART_DB, and — when the MCP is pinned to a serve database — that no
+    view mixes it with another database, listing what the pin hides."""
+    want = os.environ.get("SERVE_MART_DB", "serve_dev")
+    known = [row[0] for row in ch("SELECT name FROM system.databases FORMAT TSV")]
+    default_db = _cube_env().get("CUBEJS_DB_NAME")
+    for name, c in cb["cubes"].items():
+        dbs = cube_databases(c, known, default_db)
+        leak = dbs & {"gold", "raw"}
+        if leak:
+            r.add("reconciliation", "BLOCKER", "CUBE_READS_NON_SERVE", name,
+                  f"cube '{name}' reads {sorted(leak)} in SQL — the MCP surface must be "
+                  f"serve/serve_dev only; gold/raw must not be reachable through the agent",
+                  f"repoint {c.get('_file', name)} sql/sql_table to the serve.* view")
+        fname = c.get("_file", "")
+        if "serve_mart_" in fname and dbs and dbs != {want}:
+            r.add("reconciliation", "BLOCKER", "MART_CUBE_DB_MISMATCH", name,
+                  f"mart cube '{name}' reads {sorted(dbs)}; expected only [{want}] "
+                  f"(SERVE_MART_DB) — dev/prod mart DB is inconsistent",
+                  f"run infra/cube/set_mart_db.sh with SERVE_MART_DB={want}")
+
+    serve_db = _configured_serve_db()
+    if not serve_db:
+        return
+    model_cubes, model_views = load_cube_model(CUBE)
+    live = view_databases(model_cubes, model_views, known, default_db)
+    for view, dbs in sorted(live.items()):
+        if serve_db in dbs and len(dbs) > 1:
+            r.add("reconciliation", "BLOCKER", "VIEW_MIXES_SERVE_DB", view,
+                  f"view '{view}' reads {dbs}; the MCP is pinned to [{serve_db}] "
+                  f"(SELERIC_SERVE_DB), so this view is hidden and its data is half-migrated",
+                  f"repoint every cube on {view}'s join paths to {serve_db}, or split the view")
+
+    from seleric_mcp.catalogue_service.loader import load_catalogue as load_agent_catalogue
+    from seleric_mcp.catalogue_service.scope import scope_catalogue
+
+    agent_cat = load_agent_catalogue(CORE / "catalogue")
+    for view, v in agent_cat.views.items():
+        if view in live and sorted(v.databases) != live[view]:
+            r.add("reconciliation", "WARN", "CROSSWALK_DATABASES_STALE", view,
+                  f"crosswalk says {sorted(v.databases)}, Cube model reads {live[view]} — the "
+                  f"scope gate is deciding on stale data",
+                  "py scripts/sync_catalogue_from_sources.py")
+    _, summary = scope_catalogue(agent_cat, serve_db)
+    hidden_by_view: dict[str, list[str]] = defaultdict(list)
+    for mid in summary.metrics_hidden:
+        hidden_by_view[agent_cat.metrics[mid].cube_mapping.view].append(mid)
+    for view, mids in sorted(hidden_by_view.items()):
+        dbs = summary.views_hidden.get(view, [])
+        r.add("reconciliation", "INFO", "SCOPE_HIDDEN_METRICS", view,
+              f"{len(mids)} metric(s) hidden by SELERIC_SERVE_DB={serve_db} "
+              f"(view reads {dbs or 'unknown'}): {', '.join(mids)}",
+              f"build the {view} model on {serve_db} to expose them")
+
+
 # -------------------------------------------------- 2. OpenMetadata reconcile
 def check_reconciliation(r: Report, wh: dict, cb: dict, om: dict, cat: dict) -> None:
     ont_domains = cat["effective_domains"]
@@ -745,14 +826,14 @@ def check_semantics(r: Report, wh: dict, cb: dict, om: dict, cat: dict) -> None:
 
 # ---------------------------------------------------------------------- main
 SECTIONS = ("coverage", "reconciliation", "semantics")
-ORDER = {"BLOCKER": 0, "WARN": 1, "WAIVED": 2}
+ORDER = {"BLOCKER": 0, "WARN": 1, "WAIVED": 2, "INFO": 3}
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--section", choices=SECTIONS, action="append")
-    ap.add_argument("--severity", choices=("BLOCKER", "WARN", "WAIVED"))
+    ap.add_argument("--severity", choices=("BLOCKER", "WARN", "WAIVED", "INFO"))
     ap.add_argument("--hide-waived", action="store_true", help="omit deliberately waived findings")
     args = ap.parse_args()
 
@@ -768,6 +849,7 @@ def main() -> int:
               "views that include a whole cube — a broken metric mapping can hide there",
               "start Cube, or set SELERIC_CUBE_API")
     check_coverage(r, wh, cb, cat)
+    check_serve_only(r, cb)
     check_reconciliation(r, wh, cb, om, cat)
     check_semantics(r, wh, cb, om, cat)
     check_crosswalk(r, cat)
@@ -820,7 +902,9 @@ def main() -> int:
             continue
         nb = sum(1 for f in rows if f["severity"] == "BLOCKER")
         nwv = sum(1 for f in rows if f["severity"] == "WAIVED")
-        print(f"== {sec.upper()}  ({nb} blockers, {len(rows) - nb - nwv} warnings, {nwv} waived)")
+        nwarn = sum(1 for f in rows if f["severity"] == "WARN")
+        ninfo = sum(1 for f in rows if f["severity"] == "INFO")
+        print(f"== {sec.upper()}  ({nb} blockers, {nwarn} warnings, {nwv} waived, {ninfo} info)")
         code = None
         for f in rows:
             if f["code"] != code:

@@ -11,12 +11,16 @@ below returns `unknown`. The server never silently picks a weak match.
 from __future__ import annotations
 
 import difflib
+import logging
 import re
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from .loader import BrandDef, Catalogue, DimensionDef, MetricDef, ModuleDef
+from .scope import ScopeSummary, scope_catalogue
+
+logger = logging.getLogger(__name__)
 
 # Fuzzy-resolution band fallbacks (SequenceMatcher ratio on normalized
 # strings). Runtime values come from Settings (env-overridable); these only
@@ -28,6 +32,22 @@ RUNNER_UP_MARGIN = 0.05         # winner must beat #2 by this to auto-resolve
 
 def _normalize(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def _number_variants(t: str) -> list[str]:
+    """The text plus a singular/plural toggle of its trailing noun, so 'net sale'
+    matches the 'net sales' alias (and vice versa). Only the last token is
+    toggled — business concepts pluralise the head noun ('net sales', 'orders').
+    The original always comes first, so an exact match still wins; each variant
+    is only ever *looked up* against the real alias index, so a bogus form
+    ('gros' from 'gross') can never resolve to a wrong metric."""
+    t = t.strip()
+    if not t:
+        return []
+    head, _, last = t.rpartition(" ")
+    prefix = f"{head} " if head else ""
+    toggled = f"{prefix}{last[:-1]}" if last.endswith("s") and len(last) > 1 else f"{prefix}{last}s"
+    return [t, toggled]
 
 
 # Words that carry no metric meaning; ignored when scoring name overlap so
@@ -309,6 +329,19 @@ _AXIS_KEYWORDS: dict[str, list[tuple[str, str]]] = {
 }
 
 
+def _log_scope(s: ScopeSummary) -> None:
+    logger.warning(
+        "serve-db scope '%s': %d views / %d metrics visible; hidden: %d views, "
+        "%d metrics, %d dimensions, %d glossary terms",
+        s.serve_db, len(s.views_kept), s.metrics_kept, len(s.views_hidden),
+        len(s.metrics_hidden), len(s.dimensions_hidden), len(s.glossary_hidden),
+    )
+    logger.info("serve-db scope visible views: %s", ", ".join(s.views_kept) or "(none)")
+    mixed = {v: dbs for v, dbs in s.views_hidden.items() if s.serve_db in dbs}
+    if mixed:
+        logger.warning("serve-db scope hid views that mix databases: %s", mixed)
+
+
 class CatalogueService:
     def __init__(
         self,
@@ -317,8 +350,16 @@ class CatalogueService:
         auto_threshold: float = AUTO_RESOLVE_THRESHOLD,
         ambiguous_threshold: float = AMBIGUOUS_THRESHOLD,
         runner_up_margin: float = RUNNER_UP_MARGIN,
+        serve_db: str = "",
     ):
+        catalogue, self.scope = scope_catalogue(catalogue, serve_db)
+        self.serve_db = serve_db
+        if self.scope is not None:
+            _log_scope(self.scope)
         self.cat = catalogue
+        self._hidden_metrics: frozenset[str] = frozenset(
+            self.scope.metrics_hidden if self.scope is not None else ()
+        )
         self.auto_threshold = auto_threshold
         self.ambiguous_threshold = ambiguous_threshold
         self.runner_up_margin = runner_up_margin
@@ -417,6 +458,20 @@ class CatalogueService:
         draft = False
         note = None
         m = self.cat.metrics.get(metric)
+        hidden = self._hidden_metrics
+        out_of_scope = metric in hidden or (
+            (m is None or not m.is_queryable)
+            and row.fallback is not None
+            and row.fallback.metric in hidden
+        )
+        if out_of_scope:
+            # Never substitute across databases: the gate exists so a question is
+            # answered from the pinned serve database or not at all.
+            return UnsupportedConcept(
+                concept=cid, axes=filled,
+                reason=f"not available in the configured serve database ({self.serve_db})",
+                nearest_metrics=self._concept_metrics(c),
+            )
         if m is None or not m.is_queryable:
             if row.fallback is not None:
                 # A certified substitute is declared — use it (e.g. channel_orders).
@@ -438,20 +493,29 @@ class CatalogueService:
         self, text: str
     ) -> tuple[str | None, dict[str, str], dict[str, str]]:
         t = (text or "").strip().lower()
-        # 1. Exact compat alias (old metric id / shorthand) -> concept + preset axes.
-        alias = self.cat.concept_aliases.get(t)
-        if alias is not None:
-            return alias.concept, dict(alias.axes), dict(alias.filter)
-        # 2. Exact concept alias / display_name / id.
-        if t in self._concept_by_alias:
-            return self._concept_by_alias[t], {}, {}
-        # 3. Longest concept alias appearing as a whole-word substring.
-        best: str | None = None
-        best_len = 0
-        for al, cid in self._concept_by_alias.items():
-            if len(al) > best_len and re.search(rf"\b{re.escape(al)}\b", t):
-                best, best_len = cid, len(al)
-        return best, {}, {}
+        # 1./2. Exact match on the text, then a singular/plural toggle of it.
+        # Compat alias (old metric id / shorthand, carries preset axes) wins over
+        # a plain concept alias / display_name / id at the same form.
+        for cand in _number_variants(t):
+            alias = self.cat.concept_aliases.get(cand)
+            if alias is not None:
+                return alias.concept, dict(alias.axes), dict(alias.filter)
+            if cand in self._concept_by_alias:
+                return self._concept_by_alias[cand], {}, {}
+        # 3. Longest concept alias appearing as a whole-word substring. Tried on
+        # the original wording first, then the plural-toggled form ('cancelled
+        # order' -> 'cancelled orders', where the 'orders' alias then matches).
+        # ponytail: only the trailing noun is toggled, so a mid-phrase mismatch
+        # ('cancelled order value') still won't match — rare enough to skip.
+        for cand in _number_variants(t):
+            best: str | None = None
+            best_len = 0
+            for al, cid in self._concept_by_alias.items():
+                if len(al) > best_len and re.search(rf"\b{re.escape(al)}\b", cand):
+                    best, best_len = cid, len(al)
+            if best is not None:
+                return best, {}, {}
+        return None, {}, {}
 
     def _fill_axes(
         self, c, text: str, preset_axes: dict, explicit_axes: dict | None
@@ -491,7 +555,7 @@ class CatalogueService:
     def _concept_metrics(self, c) -> list[str]:
         out: list[str] = []
         for r in c.resolves:
-            if r.metric not in out:
+            if r.metric not in out and (self.scope is None or r.metric in self.cat.metrics):
                 out.append(r.metric)
         return out
 
@@ -561,6 +625,7 @@ class CatalogueService:
                     "id": d.id,
                     "display_name": d.display_name,
                     "aliases": list(d.aliases),
+                    "stable_key": d.stable_key,
                     "views": dict(d.views),
                     "products": [p.model_dump() for p in self._dimension_products(d)],
                 }
@@ -968,7 +1033,10 @@ class CatalogueService:
                     "om_glossary": spec.get("om_glossary"),
                     "owner_team": spec.get("owner_team"),
                     "data_products": dps,
-                    "cube_views": list(spec.get("cube_views") or []),
+                    "cube_views": [
+                        v for v in (spec.get("cube_views") or [])
+                        if self.scope is None or v in self.cat.views
+                    ],
                     "grain": spec.get("grain"),
                     "date_axes": list(spec.get("date_axes") or []),
                     "notes": str(spec.get("notes") or "").strip() or None,
@@ -985,6 +1053,8 @@ class CatalogueService:
                 ]
                 if not metrics:
                     continue
+            if self.scope is not None and not metrics:
+                continue
             clusters_out.append(
                 {
                     "id": cname,

@@ -78,6 +78,7 @@ class AppContext:
             auto_threshold=settings.resolve_auto_threshold,
             ambiguous_threshold=settings.resolve_ambiguous_threshold,
             runner_up_margin=settings.resolve_runner_up_margin,
+            serve_db=settings.serve_db,
         )
         self.cube = CubeClient(settings)
         self.result_store = ResultStore(
