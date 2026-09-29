@@ -629,6 +629,7 @@ class CatalogueService:
                     "display_name": d.display_name,
                     "aliases": list(d.aliases),
                     "stable_key": d.stable_key,
+                    "is_time": d.is_time,
                     "views": dict(d.views),
                     "products": [p.model_dump() for p in self._dimension_products(d)],
                 }

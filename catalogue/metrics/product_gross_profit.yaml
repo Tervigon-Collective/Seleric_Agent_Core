@@ -1,11 +1,13 @@
 id: product_gross_profit
 display_name: Product Gross Profit (ex-GST)
 category: product
-status: draft
+status: certified
 description: >-
   Gross profit per product/SKU: line net revenue − fully-loaded line COGS (product + shipping +
-  packaging + gateway + RTO), order date, from serve.product_performance (INR). Draft: not exposed to
-  search.
+  packaging + gateway + RTO), order date, from serve.product_performance (INR). Use for "most/least
+  profitable products" and "loss-making products" (sort ascending). Lines with no maintained unit
+  cost book 0 COGS, so a product with missing cost shows inflated profit — pair with
+  cost_coverage_pct / product_gross_margin_pct to judge reliability.
 formula:
   human_readable: Sum of (lifecycle net revenue ex-GST − lifecycle net_cogs) at line
     grain

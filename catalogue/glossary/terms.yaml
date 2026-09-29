@@ -64,8 +64,14 @@ terms:
   - term: sales by product
     canonical_id: product_net_revenue
   - term: most profitable product
-    canonical_id: product_gross_margin_pct
-    definition: "Only margin % is queryable per product (product_gross_margin_pct, 0–100 scale); a rupee gross-profit-per-SKU metric is not available. Rank by margin and show product_net_revenue beside it."
+    canonical_id: product_gross_profit
+    definition: "Rupee gross profit per product (product_gross_profit): rank desc for most profitable, asc for loss-making. For efficiency use product_gross_margin_pct (0–100 scale). Products with unmaintained cost book 0 COGS and look inflated — check cost_coverage_pct."
+  - term: loss making product
+    canonical_id: product_gross_profit
+  - term: loss making products
+    canonical_id: product_gross_profit
+  - term: least profitable product
+    canonical_id: product_gross_profit
   - term: product margin
     canonical_id: product_gross_margin_pct
   - term: gross margin by SKU

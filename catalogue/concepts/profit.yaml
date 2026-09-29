@@ -30,9 +30,6 @@ resolves:
     metric: contribution_margin
   - when: {basis: gross, scope: product}
     metric: product_gross_profit
-    fallback:
-      metric: product_net_revenue
-      note: Product gross profit is uncertified; reporting product net revenue.
 disambiguation: >
   Net profit defaults to all-channels (Historical/P&L). Shopify-only is a narrower
   scope; blended is all-platforms. When a marketing channel is named (google/meta/organic),
