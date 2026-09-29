@@ -1,0 +1,349 @@
+# GENERATED FILE - do not hand-edit.
+# Regenerate:  py scripts/sync_dimension_coverage.py
+# Verify:      py scripts/sync_dimension_coverage.py --check
+#
+# Mart dimensions (Cube /meta) minus catalogue/dimension_waivers.yaml, emitted
+# as view mappings the loader merges onto the curated dimension defs. To change
+# what appears here, add a mart column or edit dimension_waivers.yaml — never
+# this file. Curated semantics (display_name, aliases, allowed_values) live in
+# dimensions/core.yaml and win over anything here.
+dimensions:
+- id: accepts_marketing
+  display_name: Accepts Marketing
+  views:
+    customer_ltv: customer_ltv.accepts_marketing
+- id: account_name
+  display_name: Account Name
+  views:
+    google_ad_performance_hourly: google_ad_performance_hourly.account_name
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.account_name
+    meta_ad_performance: meta_ad_performance.account_name
+    meta_ad_performance_hourly: meta_ad_performance_hourly.account_name
+- id: account_state
+  display_name: Account State
+  views:
+    customer_data: customer_data.account_state
+- id: acquisition_campaign
+  display_name: Acquisition Campaign
+  views:
+    purchase_sequence: purchase_sequence.acquisition_campaign
+- id: acquisition_channel
+  display_name: Acquisition Channel
+  views:
+    purchase_sequence: purchase_sequence.acquisition_channel
+- id: acquisition_platform
+  display_name: Acquisition Platform
+  views:
+    purchase_sequence: purchase_sequence.acquisition_platform
+- id: ad_account_id
+  display_name: Ad Account Id
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_account_id
+- id: ad_format
+  display_name: Ad Format
+  views:
+    meta_ad_attribution: meta_ad_attribution.ad_format
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_format
+    meta_ad_performance_hourly: meta_ad_performance_hourly.ad_format
+    session_funnel: session_funnel.ad_format
+- id: ad_id
+  display_name: Ad Id
+  views:
+    google_ads_status_history: google_ads_status_history.ad_id
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_id
+    meta_ads_status_history: meta_ads_status_history.ad_id
+- id: ad_status
+  display_name: Ad Status
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_status
+    meta_ad_performance: meta_ad_performance.ad_status
+    meta_ad_performance_hourly: meta_ad_performance_hourly.ad_status
+- id: adgroup_id
+  display_name: Adgroup Id
+  views:
+    google_ads_status_history: google_ads_status_history.adgroup_id
+- id: adset_id
+  display_name: Adset Id
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_id
+    meta_ads_status_history: meta_ads_status_history.adset_id
+- id: adset_optimization_goal
+  display_name: Adset Optimization Goal
+  views:
+    meta_ad_attribution: meta_ad_attribution.adset_optimization_goal
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_optimization_goal
+    meta_ad_performance_hourly: meta_ad_performance_hourly.adset_optimization_goal
+- id: adset_status
+  display_name: Adset Status
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_status
+    meta_ad_performance: meta_ad_performance.adset_status
+    meta_ad_performance_hourly: meta_ad_performance_hourly.adset_status
+- id: attribution_model
+  display_name: Attribution Model
+  views:
+    channel_attribution: channel_attribution.attribution_model
+- id: bidding_strategy_type
+  display_name: Bidding Strategy Type
+  views:
+    google_ad_performance_hourly: google_ad_performance_hourly.bidding_strategy_type
+    google_ads_status_history: google_ads_status_history.bidding_strategy_type
+- id: brand_id
+  display_name: Brand Id
+  views:
+    daily_pnl: daily_pnl.brand_id
+- id: campaign_bid_strategy
+  display_name: Campaign Bid Strategy
+  views:
+    google_ad_performance: google_ad_performance.campaign_bid_strategy
+    google_ad_performance_hourly: google_ad_performance_hourly.campaign_bid_strategy
+- id: campaign_id
+  display_name: Campaign Id
+  views:
+    google_ads_status_history: google_ads_status_history.campaign_id
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_id
+    meta_ads_status_history: meta_ads_status_history.campaign_id
+- id: campaign_objective
+  display_name: Campaign Objective
+  views:
+    google_ad_performance: google_ad_performance.campaign_objective
+    google_ad_performance_hourly: google_ad_performance_hourly.campaign_objective
+    meta_ad_attribution: meta_ad_attribution.campaign_objective
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_objective
+    session_funnel: session_funnel.campaign_objective
+- id: campaign_status
+  display_name: Campaign Status
+  views:
+    google_ad_performance: google_ad_performance.campaign_status
+    google_ad_performance_hourly: google_ad_performance_hourly.campaign_status
+    meta_ad_attribution: meta_ad_attribution.campaign_status
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_status
+    meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_status
+    session_funnel: session_funnel.campaign_status
+- id: changed_at
+  display_name: Changed At
+  views:
+    google_ads_status_history: google_ads_status_history.changed_at
+    meta_ads_status_history: meta_ads_status_history.changed_at
+- id: channel_campaign
+  display_name: Channel Campaign
+  views:
+    touchpoints: touchpoints.channel_campaign
+- id: channel_medium
+  display_name: Channel Medium
+  views:
+    touchpoints: touchpoints.channel_medium
+- id: channel_source
+  display_name: Channel Source
+  views:
+    touchpoints: touchpoints.channel_source
+- id: conversion_path
+  display_name: Conversion Path
+  views:
+    attribution_paths: attribution_paths.conversion_path
+- id: country
+  display_name: Country
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.country
+- id: creative_cta_type
+  display_name: Creative Cta Type
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.creative_cta_type
+    meta_ad_performance_hourly: meta_ad_performance_hourly.creative_cta_type
+- id: creative_id
+  display_name: Creative Id
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.creative_id
+    meta_ad_performance_hourly: meta_ad_performance_hourly.creative_id
+- id: creative_name
+  display_name: Creative Name
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.creative_name
+    meta_ad_performance_hourly: meta_ad_performance_hourly.creative_name
+- id: creative_status
+  display_name: Creative Status
+  views:
+    meta_ad_performance: meta_ad_performance.creative_status
+- id: creative_type
+  display_name: Creative Type
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.creative_type
+- id: customer_name
+  display_name: Customer Name
+  views:
+    google_ad_performance: google_ad_performance.customer_name
+- id: default_city
+  display_name: Default City
+  views:
+    purchase_sequence: purchase_sequence.default_city
+- id: default_country
+  display_name: Default Country
+  views:
+    purchase_sequence: purchase_sequence.default_country
+- id: default_province
+  display_name: Default Province
+  views:
+    purchase_sequence: purchase_sequence.default_province
+- id: device_platform
+  display_name: Device Platform
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.device_platform
+- id: effective_status
+  display_name: Effective Status
+  views:
+    meta_ads_status_history: meta_ads_status_history.effective_status
+- id: email_marketing_state
+  display_name: Email Marketing State
+  views:
+    customer_data: customer_data.email_marketing_state
+    customer_ltv: customer_ltv.email_marketing_state
+- id: entity_id
+  display_name: Entity Id
+  views:
+    google_ads_status_history: google_ads_status_history.entity_id
+    meta_ads_status_history: meta_ads_status_history.entity_id
+- id: entity_name
+  display_name: Entity Name
+  views:
+    google_ads_status_history: google_ads_status_history.entity_name
+    meta_ads_status_history: meta_ads_status_history.entity_name
+- id: entity_type
+  display_name: Entity Type
+  views:
+    google_ads_status_history: google_ads_status_history.entity_type
+    meta_ads_status_history: meta_ads_status_history.entity_type
+- id: first_order_product
+  display_name: First Order Product
+  views:
+    customer_ltv: customer_ltv.first_order_product
+- id: impression_device
+  display_name: Impression Device
+  views:
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.impression_device
+- id: is_cod
+  display_name: Is Cod
+  views:
+    payments: payments.is_cod
+- id: is_commerce_placement_order
+  display_name: Is Commerce Placement Order
+  views:
+    commerce_orders: commerce_orders.is_commerce_placement_order
+- id: is_placement_active_order
+  display_name: Is Placement Active Order
+  views:
+    commerce_orders: commerce_orders.is_placement_active_order
+- id: is_refund
+  display_name: Is Refund
+  views:
+    payments: payments.is_refund
+- id: lt_channel
+  display_name: Lt Channel
+  views:
+    touchpoints: touchpoints.lt_channel
+- id: neurohack_categories
+  display_name: Neurohack Categories
+  views:
+    meta_ad_performance: meta_ad_performance.neurohack_categories
+- id: neurohack_hack_names
+  display_name: Neurohack Hack Names
+  views:
+    meta_ad_performance: meta_ad_performance.neurohack_hack_names
+- id: neurohack_tag_codes
+  display_name: Neurohack Tag Codes
+  views:
+    meta_ad_attribution: meta_ad_attribution.neurohack_tag_codes
+    meta_ad_breakdown_performance: meta_ad_breakdown_performance.neurohack_tag_codes
+    meta_ad_performance_hourly: meta_ad_performance_hourly.neurohack_tag_codes
+- id: payment_gateway
+  display_name: Payment Gateway
+  views:
+    payments: payments.payment_gateway
+- id: payment_method
+  display_name: Payment Method
+  views:
+    payments: payments.payment_method
+- id: platform
+  display_name: Platform
+  views:
+    platform_attribution_commerce: platform_attribution_commerce.platform
+    web_events: web_events.platform
+- id: pnl_refund_class
+  display_name: Pnl Refund Class
+  views:
+    commerce_orders: commerce_orders.pnl_refund_class
+- id: prev_status
+  display_name: Prev Status
+  views:
+    google_ads_status_history: google_ads_status_history.prev_status
+    meta_ads_status_history: meta_ads_status_history.prev_status
+- id: product_type
+  display_name: Product Type
+  views:
+    web_events: web_events.product_type
+- id: profile_is_repeat_customer
+  display_name: Profile Is Repeat Customer
+  views:
+    purchase_sequence: purchase_sequence.profile_is_repeat_customer
+- id: refund_id
+  display_name: Refund Id
+  views:
+    refund_events: refund_events.refund_id
+    return_lifecycle: return_lifecycle.refund_id
+- id: refund_line_item_id
+  display_name: Refund Line Item Id
+  views:
+    return_lifecycle: return_lifecycle.refund_line_item_id
+- id: report_date
+  display_name: Report Date
+  views:
+    daily_pnl: daily_pnl.report_date
+    finance_waterfall: finance_waterfall.report_date
+- id: segment_ad_network_type
+  display_name: Segment Ad Network Type
+  views:
+    google_ad_performance_hourly: google_ad_performance_hourly.segment_ad_network_type
+- id: segment_device
+  display_name: Segment Device
+  views:
+    google_ad_performance_hourly: google_ad_performance_hourly.segment_device
+- id: sms_marketing_state
+  display_name: Sms Marketing State
+  views:
+    customer_ltv: customer_ltv.sms_marketing_state
+- id: status
+  display_name: Status
+  views:
+    google_ads_status_history: google_ads_status_history.status
+    meta_ads_status_history: meta_ads_status_history.status
+- id: touch_count
+  display_name: Touch Count
+  views:
+    attribution_paths: attribution_paths.touch_count
+- id: touch_sequence
+  display_name: Touch Sequence
+  views:
+    touchpoints: touchpoints.touch_sequence
+- id: transaction_created_at
+  display_name: Transaction Created At
+  views:
+    payments: payments.transaction_created_at
+- id: transaction_date
+  display_name: Transaction Date
+  views:
+    payments: payments.transaction_date
+- id: transaction_id
+  display_name: Transaction Id
+  views:
+    payments: payments.transaction_id
+- id: transaction_kind
+  display_name: Transaction Kind
+  views:
+    payments: payments.transaction_kind
+- id: transaction_status
+  display_name: Transaction Status
+  views:
+    payments: payments.transaction_status
+- id: waterfall_key
+  display_name: Waterfall Key
+  views:
+    finance_waterfall: finance_waterfall.waterfall_key

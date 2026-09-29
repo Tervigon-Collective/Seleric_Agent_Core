@@ -142,6 +142,21 @@ class QueryPlanner:
         for mid in metric_ids:
             resolved = self.catalogue.resolve_metric_id(mid)
             if resolved is None:
+                # Fall back to concept/glossary/alias resolution so natural names the
+                # operator actually types ("net sales", "ad spend") resolve instead of
+                # hard-failing. Only deterministic (unambiguous) hits are auto-applied;
+                # the resolution is disclosed as a warning. Ambiguous/unknown still fail.
+                term = self.catalogue.resolve_term(mid)
+                target = getattr(term, "metric_id", None)
+                if (
+                    target
+                    and target in self.catalogue.cat.metrics
+                    and self.catalogue.cat.metrics[target].is_queryable
+                ):
+                    via = getattr(term, "matched_via", "term resolution")
+                    warnings.append(f"'{mid}' resolved to metric '{target}' via {via}.")
+                    metrics.append(self.catalogue.get_metric(target))
+                    continue
                 result = self.catalogue.search(mid)
                 hints = [s.id for s in result.matches] + result.suggestions
                 m = self.catalogue.get_metric(mid)
@@ -360,6 +375,39 @@ class QueryPlanner:
             aliased.append(out)
         return aliased
 
+    def _present_rows(
+        self, rows: list[dict] | None, metrics: list[MetricDef], view: str
+    ) -> list[dict] | None:
+        """Project stored rows (which carry raw Cube member keys) to a clean,
+        client-facing shape: measure members are dropped (their catalogue id alias
+        already carries the value) and dimension members are renamed to the
+        catalogue dimension id, so no ``view.member`` name leaks to the caller."""
+        if not rows:
+            return rows
+        drop: set[str] = set()
+        for m in metrics:
+            drop.add(m.cube_mapping.measure)
+            if m.cube_mapping.measure_pct:
+                drop.add(m.cube_mapping.measure_pct)
+            if m.ratio_components:
+                drop.add(m.ratio_components.numerator)
+                drop.add(m.ratio_components.denominator)
+        rename: dict[str, str] = {}
+        for d in self.catalogue.cat.dimensions.values():
+            member = d.views.get(view)
+            if member:
+                rename[member] = d.id
+        out: list[dict] = []
+        for row in rows:
+            clean: dict = {}
+            for k, v in row.items():
+                if k in drop:
+                    continue
+                key = rename.get(k) or (k.split(".", 1)[-1] if "." in k else k)
+                clean[key] = v
+            out.append(clean)
+        return out
+
     # ---------- cube query build ----------
 
     def _build_cube_query(
@@ -527,12 +575,19 @@ class QueryPlanner:
             )
         )
 
-        columns = sorted({k for row in rows for k in row})
+        # Stored rows keep Cube member keys (drilldown / insight_engine read them),
+        # but the tool response must not leak internal names — project to catalogue
+        # ids for the client. See _present_rows.
+        out_rows = self._present_rows(rows, metrics, view)
+        out_compare = (
+            self._present_rows(compare_rows, metrics, view) if compare_rows is not None else None
+        )
+        columns = sorted({k for row in out_rows for k in row})
         return {
             "query_id": query_id,
             "columns": columns,
-            "rows": rows,
-            "compare_rows": compare_rows,
+            "rows": out_rows,
+            "compare_rows": out_compare,
             "warnings": filter_warnings,
             "provenance": provenance,
         }

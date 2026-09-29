@@ -301,6 +301,30 @@ hierarchies:
       Commerce: {orders: order_date, revenue_and_returns: event_date}
       Operations: refund_date
       WebAnalytics: {sessions: session_date, events: event_date}
+  cross_grain_bridges:
+    note: >
+      How to answer a question that spans two grains or domains. The semantic layer runs
+      ONE Cube query per view and never joins across views, so a cross-grain answer is a
+      multi-step plan (query A, query B, join in the agent on a shared key) — or it is not
+      answerable as a single metric, in which case say so rather than forcing one view to
+      carry an axis it does not have. metrics_query already returns, on an unsupported
+      dimension, the sibling metrics that DO support it — use that to pick the right view.
+    join_keys:
+      order_id: one order across order_attribution / touchpoints / commerce_orders / product_performance / refund_events (its channel credit, its lines, its refunds).
+      customer_id: one customer across customer_ltv / customer_data / purchase_sequence / commerce_orders (LTV, profile, order history).
+      campaign_id/adset_id/ad_id: ad_channel_pnl <-> meta_ad_performance / google_ad_performance for deeper delivery detail.
+      brand_id + date: the only cross-DOMAIN bridge — join on each domain's native date axis (see date_spine), never mix axes.
+    boundaries:
+      channel_x_product: >
+        Paid-media/attribution grain (channel, campaign) and product-line grain (sku,
+        variant) do NOT meet in any single view: attribution/P&L views carry no product
+        axis and product_performance carries no channel axis. "Net sales from channel X
+        by SKU/variant" is therefore not a single metric — bridge on order_id (the
+        channel's attributed orders -> their product lines) only if line-level channel
+        credit is acceptable, else answer at each view's grain and state the limit.
+      channel_x_session: >
+        session_funnel / web_events carry utm_* and channel but are NOT order-attributed;
+        do not equate a session's utm channel with last-touch order credit (order_attribution).
   non_drillable:
     total_ad_spend: brand x day only (no campaign/ad grain) — drill via ad_channel_spend.
     mer: ratio, brand x day — never sum across campaigns; undefined below daily brand grain.
@@ -308,6 +332,13 @@ hierarchies:
     net_roas_all_channels: contribution ratio, brand x day — not additive; do not break out by campaign.
     gross_roas_all_channels: ratio, brand x day — not additive.
     be_roas_all_channels: ratio, brand x day — not additive.
+    # Canonical P&L is brand x day; channel/campaign & product breakdowns live on sibling
+    # views. Named here so an agent starting from the headline metric is routed, not stuck.
+    net_profit: brand x day (canonical_pnl) — for channel/campaign grain use ad_channel_net_profit; for per-product margin use product_net_revenue / product_gross_profit.
+    net_profit_all_channels: brand x day — channel breakdown via ad_channel_net_profit; not additive below daily brand grain.
+    net_profit_blended: brand x day blended — no channel/campaign grain; break out by channel via ad_channel_net_profit.
+    contribution_margin: brand x day — no channel/campaign grain; ad-channel economics via ad_channel_net_profit.
+    gross_profit: brand x day P&L — per-product margin via product_gross_profit / product_net_revenue on product_performance.
 
 # Metrics not listed in entity_clusters. Lookup order: by_metric, by_view,
 # by_category, then default. Agents treat these as view-siblings, not a

@@ -1,0 +1,76 @@
+# Drill-down coverage waivers (F-9 governance).
+#
+# The catalogue DERIVES each metric's group-by/filter surface from the dimensions
+# its Cube view actually carries (see loader._derive_supported_dimensions and
+# scripts/sync_dimension_coverage.py). Default is EXPOSE: any same-grain dimension
+# on a metric's view becomes sliceable. This file lists the exceptions that must
+# NOT be auto-exposed, with a class and reason, so a new mart column can never
+# silently leak PII or bloat the surface — it fails the coverage gate until
+# classified here or catalogued explicitly.
+#
+# Anything a metric lists in its own supported_dimensions is ALWAYS kept (curated
+# wins); waivers only limit what derivation ADDS.
+#
+# Match is by dimension id (the bare Cube member suffix, e.g. "email_hash" for
+# "customer_ltv.email_hash"). `patterns` are regex matched against the id.
+
+waivers:
+  # ---- PII / direct identifiers: never a group-by, privacy boundary ----
+  pii:
+    reason: Direct or re-identifying personal data; slicing exposes individuals.
+    ids:
+      - email_hash
+      - customer_id
+      - shopify_order_id
+      - order_id
+      - order_name
+      - shipping_pincode
+    patterns:
+      - '^phone'
+      - 'email$'
+
+  # ---- High-cardinality free text: not a meaningful group-by (millions of buckets) ----
+  high_cardinality:
+    reason: Free-text / near-unique per row; useless and expensive as a group-by.
+    ids:
+      - creative_body
+      - creative_title
+      - creative_thumbnail_url
+      - creative_destination_url
+      - creative_image_url
+      - ad_headline
+      - breakdown_dimension_1
+      - breakdown_dimension_2
+      - landing_page_resolved
+      - referrer_path
+    patterns:
+      - 'url$'
+      - 'thumbnail'
+
+  # ---- Not a grain: attributes, budgets, currencies, raw timestamps, model plumbing ----
+  # These describe an entity or the pipeline; they are not axes an operator slices
+  # a business metric by. Raw *_at timestamps are excluded because the real time
+  # axis is report_date/order_date (+ the intraday granularity path).
+  not_a_grain:
+    reason: Entity attribute / pipeline field / raw timestamp — not a business axis.
+    ids:
+      - source_currency
+      - source_basis
+      - model_version
+      - is_final
+      - credit_pct
+      - credit_rows
+      - credited_net_revenue_excl_tax
+      - touch_id
+      - touch_ts
+      - is_cost_set
+      - is_eligible_line
+      - campaign_start_date
+      - campaign_end_date
+      - campaign_daily_budget
+      - campaign_lifetime_budget
+    patterns:
+      - '_at_ist$'
+      - '^first_order_at'
+      - '^last_order_at'
+      - '_budget$'

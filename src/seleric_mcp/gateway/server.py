@@ -872,6 +872,7 @@ def build_server(settings: Settings) -> FastMCP:
         dimensions: list[str] | None = None,
         filters: list[dict] | None = None,
         granularity: str = "none",
+        grain: str | None = None,
         compare_period: str | None = None,
         sort: list[dict] | None = None,
         limit: int | None = None,
@@ -908,6 +909,10 @@ def build_server(settings: Settings) -> FastMCP:
         modules_list) scopes this call to one dashboard module and refuses any
         measure outside it; a pinned instance forces its module regardless."""
         trace_id = _log_call("metrics_query", measures=measures, module=module)
+        # `grain` is the natural word an agent reaches for; accept it as an alias so
+        # it is never silently dropped (would return the default daily/none bucket).
+        if grain is not None and granularity == "none":
+            granularity = grain
         denial = _check_metric_scopes(measures)
         if denial:
             logger.warning("metrics_query_denied", trace_id=trace_id, measures=measures)

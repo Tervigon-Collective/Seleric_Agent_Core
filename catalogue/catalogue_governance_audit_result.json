@@ -1,0 +1,3434 @@
+{
+  "summary": {
+    "metrics": 187,
+    "dimensions": 125,
+    "views": 35,
+    "concepts": 27,
+    "cube_views_live": 71,
+    "broken": 0,
+    "measure_collisions": 0,
+    "desc_overlaps>=0.72": 45,
+    "views_uncovered_measures": 31,
+    "views_uncovered_dims": 28,
+    "views_no_date_axis": 1,
+    "metrics_with_blocked_drilldowns": 120,
+    "total_blocked_metric_dim_combos": 992
+  },
+  "blocked_drilldowns_widest": [
+    {
+      "metric": "first_orders",
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "is_cod",
+        "is_first_order",
+        "is_prepaid",
+        "order_created_at_ist",
+        "order_date",
+        "order_seq",
+        "order_seq_band",
+        "order_status",
+        "payment_bucket",
+        "payment_gateway",
+        "payment_method",
+        "profile_is_repeat_customer (uncatalogued dim)",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    {
+      "metric": "aov",
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "financial_status",
+        "fulfillment_status",
+        "is_cod",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "is_prepaid",
+        "item_count",
+        "order_created_at_ist",
+        "order_name",
+        "order_status",
+        "payment_bucket",
+        "payment_gateway",
+        "payment_method",
+        "pnl_refund_class (uncatalogued dim)",
+        "return_status",
+        "shipping_pincode",
+        "shipping_state_code",
+        "source_name",
+        "utm_campaign",
+        "utm_medium",
+        "utm_source"
+      ]
+    },
+    {
+      "metric": "meta_cost_per_landing_page_view",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_id",
+        "ad_name",
+        "ad_status (uncatalogued dim)",
+        "adset_id",
+        "adset_name",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_id",
+        "campaign_name",
+        "campaign_objective",
+        "campaign_start_date (uncatalogued dim)",
+        "campaign_status",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_id",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "creative_type",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_landing_page_views",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_id",
+        "ad_name",
+        "ad_status (uncatalogued dim)",
+        "adset_id",
+        "adset_name",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_id",
+        "campaign_name",
+        "campaign_objective",
+        "campaign_start_date (uncatalogued dim)",
+        "campaign_status",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_id",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "creative_type",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "total_payments",
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "financial_status",
+        "fulfillment_status",
+        "is_cod",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "is_prepaid",
+        "item_count",
+        "order_created_at_ist",
+        "order_name",
+        "order_status",
+        "pnl_refund_class (uncatalogued dim)",
+        "return_status",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code",
+        "source_name",
+        "utm_campaign",
+        "utm_medium",
+        "utm_source"
+      ]
+    },
+    {
+      "metric": "meta_breakdown_clicks",
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_breakdown_cpc",
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_breakdown_cpm",
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_breakdown_ctr",
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_breakdown_impressions",
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_breakdown_spend",
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_ctr",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_objective",
+        "campaign_start_date (uncatalogued dim)",
+        "campaign_status",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_id",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "creative_type",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "web_sessions",
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "ad_id",
+        "ad_name",
+        "adset_id",
+        "adset_name",
+        "campaign_id",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "converted",
+        "furthest_stage_bucket",
+        "identity_resolution_method",
+        "landing_page_resolved",
+        "session_day_of_week",
+        "session_hour",
+        "shopify_order_id",
+        "utm_content",
+        "utm_term"
+      ]
+    },
+    {
+      "metric": "avg_days_between_orders",
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "order_created_at_ist",
+        "profile_is_repeat_customer (uncatalogued dim)",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    {
+      "metric": "customers",
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "acquisition_campaign",
+        "acquisition_channel",
+        "acquisition_platform",
+        "customer_id",
+        "customer_default_city",
+        "customer_default_province",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "is_repeat_customer",
+        "last_order_at (uncatalogued dim)",
+        "lifetime_order_count_band",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "repeat_customers",
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "acquisition_campaign",
+        "acquisition_channel",
+        "acquisition_platform",
+        "customer_id",
+        "customer_default_city",
+        "customer_default_province",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "is_repeat_customer",
+        "last_order_at (uncatalogued dim)",
+        "lifetime_order_count_band",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "repeat_rate",
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "acquisition_campaign",
+        "acquisition_channel",
+        "acquisition_platform",
+        "customer_id",
+        "customer_default_city",
+        "customer_default_province",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "is_repeat_customer",
+        "last_order_at (uncatalogued dim)",
+        "lifetime_order_count_band",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_clicks",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_cost_per_link_click",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_cpc",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_cpm",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_frequency",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_hold_rate_15s",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_hook_rate",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    {
+      "metric": "meta_impressions",
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    }
+  ],
+  "blocked_dim_frequency": {
+    "campaign_status (uncatalogued dim)": 35,
+    "campaign_objective (uncatalogued dim)": 32,
+    "source_currency (uncatalogued dim)": 28,
+    "account_name (uncatalogued dim)": 28,
+    "ad_format (uncatalogued dim)": 26,
+    "ad_status (uncatalogued dim)": 25,
+    "adset_status (uncatalogued dim)": 25,
+    "is_commerce_placement_order (uncatalogued dim)": 17,
+    "is_placement_active_order (uncatalogued dim)": 17,
+    "pnl_refund_class (uncatalogued dim)": 17,
+    "shopify_order_id": 17,
+    "event_type": 16,
+    "ad_headline (uncatalogued dim)": 16,
+    "campaign_end_date (uncatalogued dim)": 16,
+    "campaign_start_date (uncatalogued dim)": 16,
+    "creative_body (uncatalogued dim)": 16,
+    "creative_destination_url (uncatalogued dim)": 16,
+    "creative_status (uncatalogued dim)": 16,
+    "creative_thumbnail_url (uncatalogued dim)": 16,
+    "creative_title (uncatalogued dim)": 16,
+    "neurohack_categories (uncatalogued dim)": 16,
+    "neurohack_hack_names (uncatalogued dim)": 16,
+    "email_hash (uncatalogued dim)": 15,
+    "order_created_at_ist": 14,
+    "item_count": 13,
+    "order_name": 13,
+    "event_date": 11,
+    "email_marketing_state (uncatalogued dim)": 10,
+    "credited_net_revenue_excl_tax (uncatalogued dim)": 9,
+    "customer_id (uncatalogued dim)": 9,
+    "accepts_marketing (uncatalogued dim)": 9,
+    "customer_id": 9,
+    "first_order_at (uncatalogued dim)": 9,
+    "first_order_product (uncatalogued dim)": 9,
+    "last_order_at (uncatalogued dim)": 9,
+    "sms_marketing_state (uncatalogued dim)": 9,
+    "campaign_bid_strategy (uncatalogued dim)": 9,
+    "campaign_daily_budget (uncatalogued dim)": 9,
+    "adset_optimization_goal (uncatalogued dim)": 9,
+    "creative_cta_type (uncatalogued dim)": 9,
+    "creative_id (uncatalogued dim)": 9,
+    "creative_name (uncatalogued dim)": 9,
+    "neurohack_tag_codes (uncatalogued dim)": 9,
+    "is_new_customer": 8,
+    "ad_id (uncatalogued dim)": 8,
+    "campaign_id (uncatalogued dim)": 8,
+    "shipping_pincode": 7,
+    "shipping_state_code": 7,
+    "order_date": 7,
+    "adset_id (uncatalogued dim)": 7,
+    "shipping_city": 6,
+    "shipping_country": 6,
+    "shipping_region": 6,
+    "acquisition_campaign (uncatalogued dim)": 6,
+    "acquisition_channel (uncatalogued dim)": 6,
+    "acquisition_platform (uncatalogued dim)": 6,
+    "default_city (uncatalogued dim)": 6,
+    "default_country (uncatalogued dim)": 6,
+    "default_province (uncatalogued dim)": 6,
+    "profile_is_repeat_customer (uncatalogued dim)": 6,
+    "campaign_lifetime_budget (uncatalogued dim)": 6,
+    "customer_name (uncatalogued dim)": 6,
+    "ad_account_id (uncatalogued dim)": 6,
+    "breakdown_dimension_1 (uncatalogued dim)": 6,
+    "breakdown_dimension_2 (uncatalogued dim)": 6,
+    "country (uncatalogued dim)": 6,
+    "creative_type (uncatalogued dim)": 6,
+    "device_platform (uncatalogued dim)": 6,
+    "impression_device (uncatalogued dim)": 6,
+    "refund_id (uncatalogued dim)": 5,
+    "is_cod": 4,
+    "is_prepaid": 4,
+    "identity_resolution_method": 4,
+    "bidding_strategy_type (uncatalogued dim)": 4,
+    "channel": 4,
+    "order_status": 3,
+    "payment_bucket": 3,
+    "payment_gateway": 3,
+    "payment_method": 3,
+    "attribution_model (uncatalogued dim)": 3,
+    "acquisition_campaign": 3,
+    "acquisition_channel": 3,
+    "acquisition_platform": 3,
+    "customer_default_city": 3,
+    "customer_default_province": 3,
+    "is_repeat_customer": 3,
+    "lifetime_order_count_band": 3,
+    "segment_ad_network_type (uncatalogued dim)": 3,
+    "segment_device (uncatalogued dim)": 3,
+    "ad_id": 3,
+    "ad_name": 3,
+    "adset_id": 3,
+    "adset_name": 3,
+    "campaign_id": 3,
+    "campaign_objective": 3,
+    "campaign_status": 3,
+    "creative_id": 3,
+    "creative_type": 3,
+    "financial_status": 2,
+    "fulfillment_status": 2,
+    "return_status": 2,
+    "source_name": 2,
+    "utm_campaign": 2,
+    "utm_medium": 2,
+    "utm_source": 2,
+    "conversion_path (uncatalogued dim)": 2,
+    "touch_count (uncatalogued dim)": 2,
+    "changed_at (uncatalogued dim)": 2,
+    "entity_id (uncatalogued dim)": 2,
+    "entity_name (uncatalogued dim)": 2,
+    "entity_type (uncatalogued dim)": 2,
+    "prev_status (uncatalogued dim)": 2,
+    "status (uncatalogued dim)": 2,
+    "campaign_name": 2,
+    "channel_campaign (uncatalogued dim)": 2,
+    "channel_medium (uncatalogued dim)": 2,
+    "channel_source (uncatalogued dim)": 2,
+    "lt_channel (uncatalogued dim)": 2,
+    "touch_sequence (uncatalogued dim)": 2,
+    "touch_ts (uncatalogued dim)": 2,
+    "refund_line_item_id (uncatalogued dim)": 2,
+    "account_state (uncatalogued dim)": 1,
+    "page_title": 1,
+    "platform (uncatalogued dim)": 1,
+    "product_type (uncatalogued dim)": 1,
+    "referrer_path (uncatalogued dim)": 1,
+    "report_date (uncatalogued dim)": 1,
+    "waterfall_key (uncatalogued dim)": 1,
+    "is_first_order": 1,
+    "order_seq": 1,
+    "order_seq_band": 1,
+    "customer_account_id": 1,
+    "adgroup_id (uncatalogued dim)": 1,
+    "effective_status (uncatalogued dim)": 1,
+    "is_cod (uncatalogued dim)": 1,
+    "is_refund (uncatalogued dim)": 1,
+    "payment_gateway (uncatalogued dim)": 1,
+    "payment_method (uncatalogued dim)": 1,
+    "transaction_created_at (uncatalogued dim)": 1,
+    "transaction_date (uncatalogued dim)": 1,
+    "transaction_id (uncatalogued dim)": 1,
+    "transaction_kind (uncatalogued dim)": 1,
+    "transaction_status (uncatalogued dim)": 1,
+    "product_id": 1,
+    "variant_id": 1,
+    "lt_platform": 1,
+    "converted": 1,
+    "furthest_stage_bucket": 1,
+    "landing_page_resolved": 1,
+    "session_day_of_week": 1,
+    "session_hour": 1,
+    "utm_content": 1,
+    "utm_term": 1
+  },
+  "blocked_drilldowns_all": {
+    "active_orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "add_to_cart_events": {
+      "view": "web_events_daily",
+      "blocked": [
+        "event_type"
+      ]
+    },
+    "aov": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "financial_status",
+        "fulfillment_status",
+        "is_cod",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "is_prepaid",
+        "item_count",
+        "order_created_at_ist",
+        "order_name",
+        "order_status",
+        "payment_bucket",
+        "payment_gateway",
+        "payment_method",
+        "pnl_refund_class (uncatalogued dim)",
+        "return_status",
+        "shipping_pincode",
+        "shipping_state_code",
+        "source_name",
+        "utm_campaign",
+        "utm_medium",
+        "utm_source"
+      ]
+    },
+    "attributed_aov": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)"
+      ]
+    },
+    "attributed_gross_revenue": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)"
+      ]
+    },
+    "attributed_net_revenue": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)"
+      ]
+    },
+    "attributed_new_customer_orders": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)"
+      ]
+    },
+    "attributed_orders": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)"
+      ]
+    },
+    "attributed_refund_amount": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)"
+      ]
+    },
+    "attribution_path_orders": {
+      "view": "attribution_paths",
+      "blocked": [
+        "conversion_path (uncatalogued dim)",
+        "touch_count (uncatalogued dim)"
+      ]
+    },
+    "attribution_rate": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)",
+        "identity_resolution_method",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    "avg_attribution_confidence": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)",
+        "identity_resolution_method",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    "avg_days_between_orders": {
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "order_created_at_ist",
+        "profile_is_repeat_customer (uncatalogued dim)",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    "avg_days_since_last_order": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "customer_id",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "last_order_at (uncatalogued dim)",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "avg_ltv": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "customer_id",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "last_order_at (uncatalogued dim)",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "avg_orders_per_customer": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "customer_id",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "last_order_at (uncatalogued dim)",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "avg_touch_count": {
+      "view": "attribution_paths",
+      "blocked": [
+        "conversion_path (uncatalogued dim)",
+        "touch_count (uncatalogued dim)"
+      ]
+    },
+    "cancelled_orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "order_created_at_ist",
+        "order_date",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "channel_gross_revenue": {
+      "view": "channel_attribution",
+      "blocked": [
+        "attribution_model (uncatalogued dim)"
+      ]
+    },
+    "channel_net_revenue": {
+      "view": "channel_attribution",
+      "blocked": [
+        "attribution_model (uncatalogued dim)"
+      ]
+    },
+    "channel_orders": {
+      "view": "channel_attribution",
+      "blocked": [
+        "attribution_model (uncatalogued dim)"
+      ]
+    },
+    "cod_orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "collection_views": {
+      "view": "web_events_daily",
+      "blocked": [
+        "event_type"
+      ]
+    },
+    "commerce_net_revenue": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "customer_profiles": {
+      "view": "customer_data",
+      "blocked": [
+        "account_state (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "customers": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "acquisition_campaign",
+        "acquisition_channel",
+        "acquisition_platform",
+        "customer_id",
+        "customer_default_city",
+        "customer_default_province",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "is_repeat_customer",
+        "last_order_at (uncatalogued dim)",
+        "lifetime_order_count_band",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "discounts": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "event_cancel_revenue": {
+      "view": "commerce_orders",
+      "blocked": [
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_created_at_ist",
+        "order_date",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "event_return_revenue": {
+      "view": "commerce_orders",
+      "blocked": [
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_created_at_ist",
+        "order_date",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "events_per_session": {
+      "view": "web_events",
+      "blocked": [
+        "page_title",
+        "platform (uncatalogued dim)",
+        "product_type (uncatalogued dim)",
+        "referrer_path (uncatalogued dim)"
+      ]
+    },
+    "finance_waterfall_net_profit": {
+      "view": "finance_waterfall",
+      "blocked": [
+        "report_date (uncatalogued dim)",
+        "waterfall_key (uncatalogued dim)"
+      ]
+    },
+    "first_orders": {
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "is_cod",
+        "is_first_order",
+        "is_prepaid",
+        "order_created_at_ist",
+        "order_date",
+        "order_seq",
+        "order_seq_band",
+        "order_status",
+        "payment_bucket",
+        "payment_gateway",
+        "payment_method",
+        "profile_is_repeat_customer (uncatalogued dim)",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    "google_clicks": {
+      "view": "google_ad_performance",
+      "blocked": [
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_lifetime_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_name (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "google_clicks_hourly": {
+      "view": "google_ad_performance_hourly",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "bidding_strategy_type (uncatalogued dim)",
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "segment_ad_network_type (uncatalogued dim)",
+        "segment_device (uncatalogued dim)"
+      ]
+    },
+    "google_cpc": {
+      "view": "google_ad_performance",
+      "blocked": [
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_lifetime_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_name (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "google_cpm": {
+      "view": "google_ad_performance",
+      "blocked": [
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_lifetime_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_name (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "google_ctr": {
+      "view": "google_ad_performance",
+      "blocked": [
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_lifetime_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_account_id",
+        "customer_name (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "google_impressions": {
+      "view": "google_ad_performance",
+      "blocked": [
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_lifetime_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_name (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "google_impressions_hourly": {
+      "view": "google_ad_performance_hourly",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "bidding_strategy_type (uncatalogued dim)",
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "segment_ad_network_type (uncatalogued dim)",
+        "segment_device (uncatalogued dim)"
+      ]
+    },
+    "google_net_cogs": {
+      "view": "channel_pnl",
+      "blocked": [
+        "channel"
+      ]
+    },
+    "google_net_profit": {
+      "view": "channel_pnl",
+      "blocked": [
+        "channel"
+      ]
+    },
+    "google_spend": {
+      "view": "google_ad_performance",
+      "blocked": [
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_lifetime_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_name (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "google_spend_hourly": {
+      "view": "google_ad_performance_hourly",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "bidding_strategy_type (uncatalogued dim)",
+        "campaign_bid_strategy (uncatalogued dim)",
+        "campaign_daily_budget (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "segment_ad_network_type (uncatalogued dim)",
+        "segment_device (uncatalogued dim)"
+      ]
+    },
+    "google_status_changes": {
+      "view": "google_ads_status_history",
+      "blocked": [
+        "ad_id (uncatalogued dim)",
+        "adgroup_id (uncatalogued dim)",
+        "bidding_strategy_type (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "changed_at (uncatalogued dim)",
+        "entity_id (uncatalogued dim)",
+        "entity_name (uncatalogued dim)",
+        "entity_type (uncatalogued dim)",
+        "prev_status (uncatalogued dim)",
+        "status (uncatalogued dim)"
+      ]
+    },
+    "gross_sales": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "gross_sales_all_channels": {
+      "view": "sales_all_channels",
+      "blocked": [
+        "is_cod",
+        "is_prepaid",
+        "payment_bucket",
+        "payment_gateway",
+        "payment_method"
+      ]
+    },
+    "lifetime_gross_revenue": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "customer_id",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "last_order_at (uncatalogued dim)",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "lifetime_net_revenue": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "customer_id",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "last_order_at (uncatalogued dim)",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "lifetime_orders": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "customer_id",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "last_order_at (uncatalogued dim)",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "meta_breakdown_clicks": {
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_breakdown_cpc": {
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_breakdown_cpm": {
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_breakdown_ctr": {
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_breakdown_impressions": {
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_breakdown_spend": {
+      "view": "meta_ad_breakdown_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_account_id (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_id (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "breakdown_dimension_1 (uncatalogued dim)",
+        "breakdown_dimension_2 (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "country (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "creative_type (uncatalogued dim)",
+        "device_platform (uncatalogued dim)",
+        "impression_device (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_clicks": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_clicks_hourly": {
+      "view": "meta_ad_performance_hourly",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)"
+      ]
+    },
+    "meta_cost_per_landing_page_view": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_id",
+        "ad_name",
+        "ad_status (uncatalogued dim)",
+        "adset_id",
+        "adset_name",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_id",
+        "campaign_name",
+        "campaign_objective",
+        "campaign_start_date (uncatalogued dim)",
+        "campaign_status",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_id",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "creative_type",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_cost_per_link_click": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_cpc": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_cpm": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_ctr": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_objective",
+        "campaign_start_date (uncatalogued dim)",
+        "campaign_status",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_id",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "creative_type",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_frequency": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_hold_rate_15s": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_hook_rate": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_impressions": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_impressions_hourly": {
+      "view": "meta_ad_performance_hourly",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)"
+      ]
+    },
+    "meta_landing_page_views": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_id",
+        "ad_name",
+        "ad_status (uncatalogued dim)",
+        "adset_id",
+        "adset_name",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_id",
+        "campaign_name",
+        "campaign_objective",
+        "campaign_start_date (uncatalogued dim)",
+        "campaign_status",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_id",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "creative_type",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_link_clicks": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_net_cogs": {
+      "view": "channel_pnl",
+      "blocked": [
+        "channel"
+      ]
+    },
+    "meta_net_profit": {
+      "view": "channel_pnl",
+      "blocked": [
+        "channel"
+      ]
+    },
+    "meta_reach": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_spend": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_spend_hourly": {
+      "view": "meta_ad_performance_hourly",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_format (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_optimization_goal (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "creative_cta_type (uncatalogued dim)",
+        "creative_id (uncatalogued dim)",
+        "creative_name (uncatalogued dim)",
+        "neurohack_tag_codes (uncatalogued dim)"
+      ]
+    },
+    "meta_status_changes": {
+      "view": "meta_ads_status_history",
+      "blocked": [
+        "ad_id (uncatalogued dim)",
+        "adset_id (uncatalogued dim)",
+        "campaign_id (uncatalogued dim)",
+        "changed_at (uncatalogued dim)",
+        "effective_status (uncatalogued dim)",
+        "entity_id (uncatalogued dim)",
+        "entity_name (uncatalogued dim)",
+        "entity_type (uncatalogued dim)",
+        "prev_status (uncatalogued dim)",
+        "status (uncatalogued dim)"
+      ]
+    },
+    "meta_thruplays": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "meta_video_completion_rate": {
+      "view": "meta_ad_performance",
+      "blocked": [
+        "account_name (uncatalogued dim)",
+        "ad_headline (uncatalogued dim)",
+        "ad_status (uncatalogued dim)",
+        "adset_status (uncatalogued dim)",
+        "campaign_end_date (uncatalogued dim)",
+        "campaign_start_date (uncatalogued dim)",
+        "creative_body (uncatalogued dim)",
+        "creative_destination_url (uncatalogued dim)",
+        "creative_status (uncatalogued dim)",
+        "creative_thumbnail_url (uncatalogued dim)",
+        "creative_title (uncatalogued dim)",
+        "neurohack_categories (uncatalogued dim)",
+        "neurohack_hack_names (uncatalogued dim)",
+        "source_currency (uncatalogued dim)"
+      ]
+    },
+    "new_customer_orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "payment_amount_signed": {
+      "view": "payments",
+      "blocked": [
+        "is_cod (uncatalogued dim)",
+        "is_refund (uncatalogued dim)",
+        "payment_gateway (uncatalogued dim)",
+        "payment_method (uncatalogued dim)",
+        "transaction_created_at (uncatalogued dim)",
+        "transaction_date (uncatalogued dim)",
+        "transaction_id (uncatalogued dim)",
+        "transaction_kind (uncatalogued dim)",
+        "transaction_status (uncatalogued dim)"
+      ]
+    },
+    "pre_purchase_touches": {
+      "view": "touchpoints",
+      "blocked": [
+        "channel_campaign (uncatalogued dim)",
+        "channel_medium (uncatalogued dim)",
+        "channel_source (uncatalogued dim)",
+        "lt_channel (uncatalogued dim)",
+        "touch_sequence (uncatalogued dim)",
+        "touch_ts (uncatalogued dim)"
+      ]
+    },
+    "prepaid_orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "product_views": {
+      "view": "web_events_daily",
+      "blocked": [
+        "event_type"
+      ]
+    },
+    "refund_count": {
+      "view": "refund_events",
+      "blocked": [
+        "refund_id (uncatalogued dim)"
+      ]
+    },
+    "refund_lines": {
+      "view": "return_lifecycle",
+      "blocked": [
+        "refund_id (uncatalogued dim)",
+        "refund_line_item_id (uncatalogued dim)"
+      ]
+    },
+    "refunded_amount_excl_tax": {
+      "view": "refund_events",
+      "blocked": [
+        "refund_id (uncatalogued dim)"
+      ]
+    },
+    "refunded_orders": {
+      "view": "commerce_orders",
+      "blocked": [
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "order_created_at_ist",
+        "order_date",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "repeat_customers": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "acquisition_campaign",
+        "acquisition_channel",
+        "acquisition_platform",
+        "customer_id",
+        "customer_default_city",
+        "customer_default_province",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "is_repeat_customer",
+        "last_order_at (uncatalogued dim)",
+        "lifetime_order_count_band",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "repeat_order_share": {
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "order_created_at_ist",
+        "profile_is_repeat_customer (uncatalogued dim)"
+      ]
+    },
+    "repeat_orders": {
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "order_created_at_ist",
+        "profile_is_repeat_customer (uncatalogued dim)"
+      ]
+    },
+    "repeat_purchase_net_revenue": {
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "order_created_at_ist",
+        "profile_is_repeat_customer (uncatalogued dim)"
+      ]
+    },
+    "repeat_purchase_orders": {
+      "view": "purchase_sequence",
+      "blocked": [
+        "acquisition_campaign (uncatalogued dim)",
+        "acquisition_channel (uncatalogued dim)",
+        "acquisition_platform (uncatalogued dim)",
+        "customer_id (uncatalogued dim)",
+        "default_city (uncatalogued dim)",
+        "default_country (uncatalogued dim)",
+        "default_province (uncatalogued dim)",
+        "email_hash (uncatalogued dim)",
+        "order_created_at_ist",
+        "profile_is_repeat_customer (uncatalogued dim)"
+      ]
+    },
+    "repeat_rate": {
+      "view": "customer_ltv",
+      "blocked": [
+        "accepts_marketing (uncatalogued dim)",
+        "acquisition_campaign",
+        "acquisition_channel",
+        "acquisition_platform",
+        "customer_id",
+        "customer_default_city",
+        "customer_default_province",
+        "email_hash (uncatalogued dim)",
+        "email_marketing_state (uncatalogued dim)",
+        "first_order_at (uncatalogued dim)",
+        "first_order_product (uncatalogued dim)",
+        "is_repeat_customer",
+        "last_order_at (uncatalogued dim)",
+        "lifetime_order_count_band",
+        "sms_marketing_state (uncatalogued dim)"
+      ]
+    },
+    "return_cancel_revenue": {
+      "view": "commerce_orders",
+      "blocked": [
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_created_at_ist",
+        "order_date",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "return_recovered_cogs": {
+      "view": "return_lifecycle",
+      "blocked": [
+        "product_id",
+        "refund_id (uncatalogued dim)",
+        "refund_line_item_id (uncatalogued dim)",
+        "variant_id"
+      ]
+    },
+    "returns_cancels": {
+      "view": "commerce_orders",
+      "blocked": [
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "order_created_at_ist",
+        "order_date",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "returns_excl_tax": {
+      "view": "refund_events",
+      "blocked": [
+        "refund_id (uncatalogued dim)"
+      ]
+    },
+    "session_add_to_carts": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_atc_rate": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_atc_to_checkout_rate": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_avg_page_depth": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_avg_seconds_to_add_to_cart": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_avg_seconds_to_checkout": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_avg_seconds_to_purchase": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_checkout_rate": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_checkout_steps": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_checkout_to_purchase_rate": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_collection_views": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_conversion_rate": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_pdp_rate": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_product_views": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_remove_from_carts": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "session_site_searches": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "shopify_order_id"
+      ]
+    },
+    "site_search_events": {
+      "view": "web_events_daily",
+      "blocked": [
+        "event_type"
+      ]
+    },
+    "total_payments": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "financial_status",
+        "fulfillment_status",
+        "is_cod",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_new_customer",
+        "is_placement_active_order (uncatalogued dim)",
+        "is_prepaid",
+        "item_count",
+        "order_created_at_ist",
+        "order_name",
+        "order_status",
+        "pnl_refund_class (uncatalogued dim)",
+        "return_status",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code",
+        "source_name",
+        "utm_campaign",
+        "utm_medium",
+        "utm_source"
+      ]
+    },
+    "total_sales": {
+      "view": "commerce_orders",
+      "blocked": [
+        "event_date",
+        "event_type",
+        "is_commerce_placement_order (uncatalogued dim)",
+        "is_placement_active_order (uncatalogued dim)",
+        "item_count",
+        "order_name",
+        "pnl_refund_class (uncatalogued dim)"
+      ]
+    },
+    "touch_attributed_orders": {
+      "view": "order_attribution",
+      "blocked": [
+        "credited_net_revenue_excl_tax (uncatalogued dim)",
+        "identity_resolution_method",
+        "shipping_city",
+        "shipping_country",
+        "shipping_pincode",
+        "shipping_region",
+        "shipping_state_code"
+      ]
+    },
+    "touch_distinct_orders": {
+      "view": "touchpoints",
+      "blocked": [
+        "channel_campaign (uncatalogued dim)",
+        "channel_medium (uncatalogued dim)",
+        "channel_source (uncatalogued dim)",
+        "lt_channel (uncatalogued dim)",
+        "lt_platform",
+        "touch_sequence (uncatalogued dim)",
+        "touch_ts (uncatalogued dim)"
+      ]
+    },
+    "web_page_views": {
+      "view": "web_events_daily",
+      "blocked": [
+        "event_type"
+      ]
+    },
+    "web_sessions": {
+      "view": "session_funnel",
+      "blocked": [
+        "ad_format (uncatalogued dim)",
+        "ad_id",
+        "ad_name",
+        "adset_id",
+        "adset_name",
+        "campaign_id",
+        "campaign_objective (uncatalogued dim)",
+        "campaign_status (uncatalogued dim)",
+        "converted",
+        "furthest_stage_bucket",
+        "identity_resolution_method",
+        "landing_page_resolved",
+        "session_day_of_week",
+        "session_hour",
+        "shopify_order_id",
+        "utm_content",
+        "utm_term"
+      ]
+    }
+  },
+  "broken": [],
+  "measure_collisions": {},
+  "desc_overlaps": [
+    {
+      "a": "lifetime_gross_revenue",
+      "b": "lifetime_orders",
+      "ratio": 0.955,
+      "same_measure": false
+    },
+    {
+      "a": "meta_breakdown_cpm",
+      "b": "meta_breakdown_ctr",
+      "ratio": 0.952,
+      "same_measure": false
+    },
+    {
+      "a": "meta_breakdown_cpc",
+      "b": "meta_breakdown_cpm",
+      "ratio": 0.946,
+      "same_measure": false
+    },
+    {
+      "a": "google_clicks",
+      "b": "google_impressions",
+      "ratio": 0.944,
+      "same_measure": false
+    },
+    {
+      "a": "meta_breakdown_cpc",
+      "b": "meta_breakdown_ctr",
+      "ratio": 0.94,
+      "same_measure": false
+    },
+    {
+      "a": "gross_roas",
+      "b": "net_roas",
+      "ratio": 0.915,
+      "same_measure": false
+    },
+    {
+      "a": "google_ctr",
+      "b": "meta_ctr",
+      "ratio": 0.913,
+      "same_measure": false
+    },
+    {
+      "a": "meta_clicks_hourly",
+      "b": "meta_impressions_hourly",
+      "ratio": 0.902,
+      "same_measure": false
+    },
+    {
+      "a": "google_cpc",
+      "b": "meta_cpc",
+      "ratio": 0.899,
+      "same_measure": false
+    },
+    {
+      "a": "google_clicks_hourly",
+      "b": "google_impressions_hourly",
+      "ratio": 0.891,
+      "same_measure": false
+    },
+    {
+      "a": "be_roas",
+      "b": "net_roas",
+      "ratio": 0.869,
+      "same_measure": false
+    },
+    {
+      "a": "google_cpm",
+      "b": "meta_cpm",
+      "ratio": 0.866,
+      "same_measure": false
+    },
+    {
+      "a": "lifetime_gross_revenue",
+      "b": "lifetime_net_revenue",
+      "ratio": 0.855,
+      "same_measure": false
+    },
+    {
+      "a": "lifetime_net_revenue",
+      "b": "lifetime_orders",
+      "ratio": 0.842,
+      "same_measure": false
+    },
+    {
+      "a": "google_net_cogs",
+      "b": "meta_net_cogs",
+      "ratio": 0.839,
+      "same_measure": false
+    },
+    {
+      "a": "google_clicks_hourly",
+      "b": "google_spend_hourly",
+      "ratio": 0.835,
+      "same_measure": false
+    },
+    {
+      "a": "google_impressions_hourly",
+      "b": "meta_impressions_hourly",
+      "ratio": 0.835,
+      "same_measure": false
+    },
+    {
+      "a": "google_impressions_hourly",
+      "b": "google_spend_hourly",
+      "ratio": 0.834,
+      "same_measure": false
+    },
+    {
+      "a": "event_cancel_revenue",
+      "b": "event_return_revenue",
+      "ratio": 0.826,
+      "same_measure": false
+    },
+    {
+      "a": "be_roas",
+      "b": "gross_roas",
+      "ratio": 0.824,
+      "same_measure": false
+    },
+    {
+      "a": "google_clicks_hourly",
+      "b": "meta_clicks_hourly",
+      "ratio": 0.822,
+      "same_measure": false
+    },
+    {
+      "a": "meta_cpc",
+      "b": "meta_cpm",
+      "ratio": 0.815,
+      "same_measure": false
+    },
+    {
+      "a": "google_spend_hourly",
+      "b": "meta_clicks_hourly",
+      "ratio": 0.809,
+      "same_measure": false
+    },
+    {
+      "a": "repeat_order_share",
+      "b": "repeat_orders",
+      "ratio": 0.807,
+      "same_measure": false
+    },
+    {
+      "a": "session_avg_seconds_to_add_to_cart",
+      "b": "session_avg_seconds_to_checkout",
+      "ratio": 0.807,
+      "same_measure": false
+    },
+    {
+      "a": "cod_orders",
+      "b": "prepaid_orders",
+      "ratio": 0.794,
+      "same_measure": false
+    },
+    {
+      "a": "google_cpc",
+      "b": "google_ctr",
+      "ratio": 0.785,
+      "same_measure": false
+    },
+    {
+      "a": "meta_cpc",
+      "b": "meta_ctr",
+      "ratio": 0.785,
+      "same_measure": false
+    },
+    {
+      "a": "google_status_changes",
+      "b": "meta_status_changes",
+      "ratio": 0.782,
+      "same_measure": false
+    },
+    {
+      "a": "google_spend_hourly",
+      "b": "meta_impressions_hourly",
+      "ratio": 0.779,
+      "same_measure": false
+    },
+    {
+      "a": "meta_impressions_hourly",
+      "b": "meta_spend_hourly",
+      "ratio": 0.773,
+      "same_measure": false
+    },
+    {
+      "a": "google_spend_hourly",
+      "b": "meta_spend_hourly",
+      "ratio": 0.772,
+      "same_measure": false
+    },
+    {
+      "a": "meta_clicks_hourly",
+      "b": "meta_spend_hourly",
+      "ratio": 0.772,
+      "same_measure": false
+    },
+    {
+      "a": "meta_cost_per_link_click",
+      "b": "meta_cpc",
+      "ratio": 0.761,
+      "same_measure": false
+    },
+    {
+      "a": "session_avg_seconds_to_add_to_cart",
+      "b": "session_avg_seconds_to_purchase",
+      "ratio": 0.754,
+      "same_measure": false
+    },
+    {
+      "a": "meta_breakdown_clicks",
+      "b": "meta_breakdown_cpc",
+      "ratio": 0.751,
+      "same_measure": false
+    },
+    {
+      "a": "google_cpc",
+      "b": "meta_cpm",
+      "ratio": 0.75,
+      "same_measure": false
+    },
+    {
+      "a": "session_collection_views",
+      "b": "session_remove_from_carts",
+      "ratio": 0.75,
+      "same_measure": false
+    },
+    {
+      "a": "google_cpc",
+      "b": "google_cpm",
+      "ratio": 0.748,
+      "same_measure": false
+    },
+    {
+      "a": "avg_days_between_orders",
+      "b": "repeat_orders",
+      "ratio": 0.747,
+      "same_measure": false
+    }
+  ],
+  "uncovered_measures": {
+    "ad_channel_pnl": [
+      "ad_channel_pnl.cancel_revenue",
+      "ad_channel_pnl.cancelled_orders",
+      "ad_channel_pnl.clicks",
+      "ad_channel_pnl.ctr",
+      "ad_channel_pnl.discounts",
+      "ad_channel_pnl.gross_sales",
+      "ad_channel_pnl.impressions",
+      "ad_channel_pnl.net_cogs",
+      "ad_channel_pnl.product_cost",
+      "ad_channel_pnl.return_revenue",
+      "ad_channel_pnl.returned_orders"
+    ],
+    "canonical_pnl": [
+      "canonical_pnl.discounts",
+      "canonical_pnl.google_spend",
+      "canonical_pnl.gross_sales",
+      "canonical_pnl.mer_all_channels",
+      "canonical_pnl.meta_spend",
+      "canonical_pnl.net_sales",
+      "canonical_pnl.orders"
+    ],
+    "channel_attribution": [
+      "channel_attribution.new_customer_orders",
+      "channel_attribution.unattributed_orders"
+    ],
+    "channel_pnl": [
+      "channel_pnl.ad_spend",
+      "channel_pnl.be_roas",
+      "channel_pnl.cancel_revenue",
+      "channel_pnl.cancelled_orders",
+      "channel_pnl.discounts",
+      "channel_pnl.google_ad_spend",
+      "channel_pnl.google_be_roas",
+      "channel_pnl.google_discounts",
+      "channel_pnl.google_gross_roas",
+      "channel_pnl.google_gross_sales",
+      "channel_pnl.google_net_roas",
+      "channel_pnl.google_orders",
+      "channel_pnl.google_returns_cancels",
+      "channel_pnl.google_total_sales",
+      "channel_pnl.gross_roas",
+      "channel_pnl.gross_sales",
+      "channel_pnl.meta_ad_spend",
+      "channel_pnl.meta_be_roas",
+      "channel_pnl.meta_discounts",
+      "channel_pnl.meta_gross_roas",
+      "channel_pnl.meta_gross_sales",
+      "channel_pnl.meta_net_roas",
+      "channel_pnl.meta_orders",
+      "channel_pnl.meta_returns_cancels",
+      "channel_pnl.meta_total_sales",
+      "channel_pnl.net_cogs",
+      "channel_pnl.net_profit",
+      "channel_pnl.net_roas",
+      "channel_pnl.net_sales",
+      "channel_pnl.orders",
+      "channel_pnl.organic_net_cogs",
+      "channel_pnl.organic_net_profit",
+      "channel_pnl.organic_net_sales",
+      "channel_pnl.organic_orders",
+      "channel_pnl.product_cost",
+      "channel_pnl.return_revenue",
+      "channel_pnl.returned_orders",
+      "channel_pnl.returns_cancels",
+      "channel_pnl.shopify_net_cogs",
+      "channel_pnl.shopify_net_sales",
+      "channel_pnl.shopify_returns_cancels",
+      "channel_pnl.total_sales"
+    ],
+    "commerce_orders": [
+      "commerce_orders.manual_orders",
+      "commerce_orders.net_revenue_excl_tax",
+      "commerce_orders.paytm_card_machine_orders",
+      "commerce_orders.total_refund_amount",
+      "commerce_orders.total_shipping_charged"
+    ],
+    "commerce_performance": [
+      "commerce_performance.aov",
+      "commerce_performance.cancelled_orders",
+      "commerce_performance.discounts_excl_tax",
+      "commerce_performance.gross_sales_excl_tax",
+      "commerce_performance.orders",
+      "commerce_performance.returned_orders",
+      "commerce_performance.total_sales"
+    ],
+    "customer_data": [
+      "customer_data.marketing_opt_in_customers"
+    ],
+    "daily_pnl": [
+      "daily_pnl.google_spend",
+      "daily_pnl.gross_margin_pct",
+      "daily_pnl.gross_profit",
+      "daily_pnl.gross_revenue",
+      "daily_pnl.mer",
+      "daily_pnl.meta_spend",
+      "daily_pnl.net_profit",
+      "daily_pnl.orders_created",
+      "daily_pnl.total_ad_spend",
+      "daily_pnl.total_cogs",
+      "daily_pnl.total_sales_ex_gst"
+    ],
+    "finance_waterfall": [
+      "finance_waterfall.line_gmv",
+      "finance_waterfall.line_gross_profit",
+      "finance_waterfall.line_marketing",
+      "finance_waterfall.line_net_cogs",
+      "finance_waterfall.line_net_revenue_excl_gst"
+    ],
+    "funnel_daily": [
+      "funnel_daily.atc_sessions",
+      "funnel_daily.atc_to_checkout_rate",
+      "funnel_daily.bounce_sessions",
+      "funnel_daily.checkout_sessions",
+      "funnel_daily.converted_sessions",
+      "funnel_daily.pdp_sessions",
+      "funnel_daily.pdp_to_atc_rate",
+      "funnel_daily.session_to_pdp_rate",
+      "funnel_daily.sessions"
+    ],
+    "google_ad_performance_hourly": [
+      "google_ad_performance_hourly.google_interactions"
+    ],
+    "google_ads_status_history": [
+      "google_ads_status_history.budget_changes",
+      "google_ads_status_history.status_events"
+    ],
+    "ltv_cac": [
+      "ltv_cac.new_customer_revenue",
+      "ltv_cac.total_ad_spend"
+    ],
+    "meta_ad_attribution": [
+      "meta_ad_attribution.attributed_aov",
+      "meta_ad_attribution.attributed_gross_revenue",
+      "meta_ad_attribution.attributed_net_revenue",
+      "meta_ad_attribution.attributed_orders",
+      "meta_ad_attribution.attributed_refund_amount",
+      "meta_ad_attribution.new_customer_orders",
+      "meta_ad_attribution.new_customer_revenue"
+    ],
+    "meta_ad_breakdown_performance": [
+      "meta_ad_breakdown_performance.meta_hold_rate_15s",
+      "meta_ad_breakdown_performance.meta_hook_rate",
+      "meta_ad_breakdown_performance.meta_landing_page_views",
+      "meta_ad_breakdown_performance.meta_link_clicks",
+      "meta_ad_breakdown_performance.meta_reach",
+      "meta_ad_breakdown_performance.meta_thruplays",
+      "meta_ad_breakdown_performance.meta_video_100_pct_views",
+      "meta_ad_breakdown_performance.meta_video_25_pct_views",
+      "meta_ad_breakdown_performance.meta_video_3s_views",
+      "meta_ad_breakdown_performance.meta_video_50_pct_views",
+      "meta_ad_breakdown_performance.meta_video_75_pct_views",
+      "meta_ad_breakdown_performance.meta_video_95_pct_views",
+      "meta_ad_breakdown_performance.meta_video_completion_rate"
+    ],
+    "meta_ad_performance": [
+      "meta_ad_performance.adset_daily_budget",
+      "meta_ad_performance.adset_lifetime_budget",
+      "meta_ad_performance.campaign_daily_budget",
+      "meta_ad_performance.campaign_lifetime_budget",
+      "meta_ad_performance.meta_video_100_pct_views",
+      "meta_ad_performance.meta_video_3s_views",
+      "meta_ad_performance.meta_video_plays"
+    ],
+    "meta_ad_performance_hourly": [
+      "meta_ad_performance_hourly.meta_add_to_cart",
+      "meta_ad_performance_hourly.meta_initiate_checkout",
+      "meta_ad_performance_hourly.meta_landing_page_views",
+      "meta_ad_performance_hourly.meta_link_clicks",
+      "meta_ad_performance_hourly.meta_reach",
+      "meta_ad_performance_hourly.meta_thruplays",
+      "meta_ad_performance_hourly.meta_video_3s_views",
+      "meta_ad_performance_hourly.meta_view_content"
+    ],
+    "meta_ads_status_history": [
+      "meta_ads_status_history.budget_changes",
+      "meta_ads_status_history.status_events"
+    ],
+    "order_attribution": [
+      "order_attribution.attribution_confidence",
+      "order_attribution.credit_rows"
+    ],
+    "orders_all_channels": [
+      "orders_all_channels.shopify_orders"
+    ],
+    "payments": [
+      "payments.payment_amount",
+      "payments.successful_transactions",
+      "payments.transactions"
+    ],
+    "platform_attribution_commerce": [
+      "platform_attribution_commerce.discounts",
+      "platform_attribution_commerce.google_gross_sales",
+      "platform_attribution_commerce.google_net_sales",
+      "platform_attribution_commerce.google_orders",
+      "platform_attribution_commerce.google_total_sales",
+      "platform_attribution_commerce.gross_sales",
+      "platform_attribution_commerce.meta_gross_sales",
+      "platform_attribution_commerce.meta_net_sales",
+      "platform_attribution_commerce.meta_orders",
+      "platform_attribution_commerce.meta_total_sales",
+      "platform_attribution_commerce.net_sales",
+      "platform_attribution_commerce.orders",
+      "platform_attribution_commerce.total_sales"
+    ],
+    "product_performance": [
+      "product_performance.cancelled_units",
+      "product_performance.cost_coverage_pct",
+      "product_performance.gross_cogs",
+      "product_performance.gross_line_revenue_ex_gst",
+      "product_performance.line_item_count",
+      "product_performance.lines_missing_cogs",
+      "product_performance.product_cost_only",
+      "product_performance.total_cogs",
+      "product_performance.total_line_discounts",
+      "product_performance.total_quantity",
+      "product_performance.unique_products"
+    ],
+    "purchase_sequence": [
+      "purchase_sequence.days_since_prev_order"
+    ],
+    "refund_events": [
+      "refund_events.avg_refund_value",
+      "refund_events.money_refunds",
+      "refund_events.refunded_amount",
+      "refund_events.refunded_quantity",
+      "refund_events.restock_rate",
+      "refund_events.restocked_refunds"
+    ],
+    "return_lifecycle": [
+      "return_lifecycle.avg_refund_per_unit",
+      "return_lifecycle.recovered_gateway_fee",
+      "return_lifecycle.recovered_packaging_cost",
+      "return_lifecycle.recovered_product_cost",
+      "return_lifecycle.recovered_shipping_cost",
+      "return_lifecycle.refunded_amount_excl_tax",
+      "return_lifecycle.refunded_units",
+      "return_lifecycle.rto_cost_refund"
+    ],
+    "returns_cancels_all_channels": [
+      "returns_cancels_all_channels.shopify_return_cancel_revenue",
+      "returns_cancels_all_channels.shopify_returns_cancels"
+    ],
+    "sales_all_channels": [
+      "sales_all_channels.net_sales",
+      "sales_all_channels.shopify_gross_sales",
+      "sales_all_channels.shopify_net_sales",
+      "sales_all_channels.shopify_total_sales"
+    ],
+    "session_funnel": [
+      "session_funnel.atc_sessions",
+      "session_funnel.avg_session_duration_sec",
+      "session_funnel.bounce_rate",
+      "session_funnel.bounce_sessions",
+      "session_funnel.checkout_sessions",
+      "session_funnel.engaged_rate",
+      "session_funnel.engaged_sessions",
+      "session_funnel.page_depth",
+      "session_funnel.pdp_sessions",
+      "session_funnel.purchase_revenue",
+      "session_funnel.purchased_sessions",
+      "session_funnel.seconds_to_add_to_cart",
+      "session_funnel.seconds_to_checkout",
+      "session_funnel.seconds_to_purchase",
+      "session_funnel.total_page_views",
+      "session_funnel.total_session_seconds"
+    ],
+    "web_events": [
+      "web_events.add_to_cart_events",
+      "web_events.checkout_step_events",
+      "web_events.collection_views",
+      "web_events.event_revenue",
+      "web_events.events",
+      "web_events.page_views",
+      "web_events.product_views",
+      "web_events.purchase_events",
+      "web_events.remove_from_cart_events",
+      "web_events.site_search_events",
+      "web_events.unique_sessions"
+    ],
+    "web_events_daily": [
+      "web_events_daily.purchase_events",
+      "web_events_daily.revenue"
+    ]
+  },
+  "uncovered_dims": {
+    "attribution_paths": [
+      "attribution_paths.conversion_path",
+      "attribution_paths.is_final",
+      "attribution_paths.order_id",
+      "attribution_paths.touch_count"
+    ],
+    "canonical_pnl": [
+      "canonical_pnl.is_final",
+      "canonical_pnl.model_version",
+      "canonical_pnl.source_basis"
+    ],
+    "channel_attribution": [
+      "channel_attribution.attribution_model",
+      "channel_attribution.is_final"
+    ],
+    "commerce_orders": [
+      "commerce_orders.is_commerce_placement_order",
+      "commerce_orders.is_placement_active_order",
+      "commerce_orders.pnl_refund_class"
+    ],
+    "customer_data": [
+      "customer_data.account_state",
+      "customer_data.email_marketing_state"
+    ],
+    "customer_ltv": [
+      "customer_ltv.accepts_marketing",
+      "customer_ltv.email_hash",
+      "customer_ltv.email_marketing_state",
+      "customer_ltv.first_order_at",
+      "customer_ltv.first_order_product",
+      "customer_ltv.last_order_at",
+      "customer_ltv.model_version",
+      "customer_ltv.sms_marketing_state"
+    ],
+    "daily_pnl": [
+      "daily_pnl.brand_id",
+      "daily_pnl.report_date"
+    ],
+    "finance_waterfall": [
+      "finance_waterfall.is_final",
+      "finance_waterfall.model_version",
+      "finance_waterfall.report_date",
+      "finance_waterfall.waterfall_key"
+    ],
+    "funnel_daily": [
+      "funnel_daily.is_final"
+    ],
+    "google_ad_performance": [
+      "google_ad_performance.campaign_bid_strategy",
+      "google_ad_performance.campaign_daily_budget",
+      "google_ad_performance.campaign_lifetime_budget",
+      "google_ad_performance.campaign_objective",
+      "google_ad_performance.campaign_status",
+      "google_ad_performance.customer_name",
+      "google_ad_performance.model_version",
+      "google_ad_performance.source_basis",
+      "google_ad_performance.source_currency"
+    ],
+    "google_ad_performance_hourly": [
+      "google_ad_performance_hourly.account_name",
+      "google_ad_performance_hourly.bidding_strategy_type",
+      "google_ad_performance_hourly.campaign_bid_strategy",
+      "google_ad_performance_hourly.campaign_daily_budget",
+      "google_ad_performance_hourly.campaign_objective",
+      "google_ad_performance_hourly.campaign_status",
+      "google_ad_performance_hourly.customer_id",
+      "google_ad_performance_hourly.model_version",
+      "google_ad_performance_hourly.segment_ad_network_type",
+      "google_ad_performance_hourly.segment_device"
+    ],
+    "google_ads_status_history": [
+      "google_ads_status_history.ad_id",
+      "google_ads_status_history.adgroup_id",
+      "google_ads_status_history.bidding_strategy_type",
+      "google_ads_status_history.campaign_id",
+      "google_ads_status_history.changed_at",
+      "google_ads_status_history.entity_id",
+      "google_ads_status_history.entity_name",
+      "google_ads_status_history.entity_type",
+      "google_ads_status_history.is_final",
+      "google_ads_status_history.model_version",
+      "google_ads_status_history.prev_status",
+      "google_ads_status_history.status"
+    ],
+    "meta_ad_attribution": [
+      "meta_ad_attribution.ad_format",
+      "meta_ad_attribution.adset_optimization_goal",
+      "meta_ad_attribution.campaign_objective",
+      "meta_ad_attribution.campaign_status",
+      "meta_ad_attribution.is_final",
+      "meta_ad_attribution.model_version",
+      "meta_ad_attribution.neurohack_tag_codes"
+    ],
+    "meta_ad_breakdown_performance": [
+      "meta_ad_breakdown_performance.account_name",
+      "meta_ad_breakdown_performance.ad_account_id",
+      "meta_ad_breakdown_performance.ad_format",
+      "meta_ad_breakdown_performance.ad_id",
+      "meta_ad_breakdown_performance.ad_status",
+      "meta_ad_breakdown_performance.adset_id",
+      "meta_ad_breakdown_performance.adset_optimization_goal",
+      "meta_ad_breakdown_performance.adset_status",
+      "meta_ad_breakdown_performance.breakdown_dimension_1",
+      "meta_ad_breakdown_performance.breakdown_dimension_2",
+      "meta_ad_breakdown_performance.campaign_id",
+      "meta_ad_breakdown_performance.campaign_objective",
+      "meta_ad_breakdown_performance.campaign_status",
+      "meta_ad_breakdown_performance.country",
+      "meta_ad_breakdown_performance.creative_cta_type",
+      "meta_ad_breakdown_performance.creative_id",
+      "meta_ad_breakdown_performance.creative_name",
+      "meta_ad_breakdown_performance.creative_type",
+      "meta_ad_breakdown_performance.device_platform",
+      "meta_ad_breakdown_performance.impression_device",
+      "meta_ad_breakdown_performance.is_final",
+      "meta_ad_breakdown_performance.model_version",
+      "meta_ad_breakdown_performance.neurohack_tag_codes",
+      "meta_ad_breakdown_performance.source_basis",
+      "meta_ad_breakdown_performance.source_currency"
+    ],
+    "meta_ad_performance": [
+      "meta_ad_performance.account_name",
+      "meta_ad_performance.ad_headline",
+      "meta_ad_performance.ad_status",
+      "meta_ad_performance.adset_status",
+      "meta_ad_performance.campaign_end_date",
+      "meta_ad_performance.campaign_start_date",
+      "meta_ad_performance.creative_body",
+      "meta_ad_performance.creative_destination_url",
+      "meta_ad_performance.creative_status",
+      "meta_ad_performance.creative_thumbnail_url",
+      "meta_ad_performance.creative_title",
+      "meta_ad_performance.model_version",
+      "meta_ad_performance.neurohack_categories",
+      "meta_ad_performance.neurohack_hack_names",
+      "meta_ad_performance.source_basis",
+      "meta_ad_performance.source_currency"
+    ],
+    "meta_ad_performance_hourly": [
+      "meta_ad_performance_hourly.account_name",
+      "meta_ad_performance_hourly.ad_format",
+      "meta_ad_performance_hourly.ad_status",
+      "meta_ad_performance_hourly.adset_optimization_goal",
+      "meta_ad_performance_hourly.adset_status",
+      "meta_ad_performance_hourly.campaign_status",
+      "meta_ad_performance_hourly.creative_cta_type",
+      "meta_ad_performance_hourly.creative_id",
+      "meta_ad_performance_hourly.creative_name",
+      "meta_ad_performance_hourly.model_version",
+      "meta_ad_performance_hourly.neurohack_tag_codes"
+    ],
+    "meta_ads_status_history": [
+      "meta_ads_status_history.ad_id",
+      "meta_ads_status_history.adset_id",
+      "meta_ads_status_history.campaign_id",
+      "meta_ads_status_history.changed_at",
+      "meta_ads_status_history.effective_status",
+      "meta_ads_status_history.entity_id",
+      "meta_ads_status_history.entity_name",
+      "meta_ads_status_history.entity_type",
+      "meta_ads_status_history.is_final",
+      "meta_ads_status_history.model_version",
+      "meta_ads_status_history.prev_status",
+      "meta_ads_status_history.status"
+    ],
+    "order_attribution": [
+      "order_attribution.credit_pct",
+      "order_attribution.credited_net_revenue_excl_tax",
+      "order_attribution.is_final",
+      "order_attribution.model_version",
+      "order_attribution.order_id",
+      "order_attribution.touch_id"
+    ],
+    "payments": [
+      "payments.is_cod",
+      "payments.is_final",
+      "payments.is_refund",
+      "payments.model_version",
+      "payments.order_id",
+      "payments.payment_gateway",
+      "payments.payment_method",
+      "payments.transaction_created_at",
+      "payments.transaction_date",
+      "payments.transaction_id",
+      "payments.transaction_kind",
+      "payments.transaction_status"
+    ],
+    "platform_attribution_commerce": [
+      "platform_attribution_commerce.is_final",
+      "platform_attribution_commerce.model_version",
+      "platform_attribution_commerce.order_id",
+      "platform_attribution_commerce.platform"
+    ],
+    "product_performance": [
+      "product_performance.created_at_ist",
+      "product_performance.is_cost_set",
+      "product_performance.is_eligible_line"
+    ],
+    "purchase_sequence": [
+      "purchase_sequence.acquisition_campaign",
+      "purchase_sequence.acquisition_channel",
+      "purchase_sequence.acquisition_platform",
+      "purchase_sequence.customer_id",
+      "purchase_sequence.default_city",
+      "purchase_sequence.default_country",
+      "purchase_sequence.default_province",
+      "purchase_sequence.email_hash",
+      "purchase_sequence.model_version",
+      "purchase_sequence.order_id",
+      "purchase_sequence.profile_is_repeat_customer"
+    ],
+    "refund_events": [
+      "refund_events.is_final",
+      "refund_events.model_version",
+      "refund_events.order_id",
+      "refund_events.refund_id"
+    ],
+    "return_lifecycle": [
+      "return_lifecycle.is_cost_set",
+      "return_lifecycle.is_final",
+      "return_lifecycle.model_version",
+      "return_lifecycle.order_id",
+      "return_lifecycle.refund_id",
+      "return_lifecycle.refund_line_item_id"
+    ],
+    "session_funnel": [
+      "session_funnel.ad_format",
+      "session_funnel.campaign_objective",
+      "session_funnel.campaign_status",
+      "session_funnel.is_final"
+    ],
+    "touchpoints": [
+      "touchpoints.channel_campaign",
+      "touchpoints.channel_medium",
+      "touchpoints.channel_source",
+      "touchpoints.is_final",
+      "touchpoints.lt_channel",
+      "touchpoints.order_id",
+      "touchpoints.touch_id",
+      "touchpoints.touch_sequence",
+      "touchpoints.touch_ts"
+    ],
+    "web_events": [
+      "web_events.is_final",
+      "web_events.platform",
+      "web_events.product_type",
+      "web_events.referrer_path"
+    ],
+    "web_events_daily": [
+      "web_events_daily.is_final"
+    ]
+  },
+  "views_no_date_axis": [
+    "customer_data"
+  ],
+  "metrics_on_noaxis_views": {
+    "customer_data": [
+      "customer_profiles"
+    ]
+  },
+  "chain_keymap": {
+    "brand_id": [
+      "ad_channel_pnl",
+      "attribution_paths",
+      "canonical_pnl",
+      "channel_attribution",
+      "channel_pnl",
+      "commerce_orders",
+      "commerce_performance",
+      "customer_data",
+      "customer_ltv",
+      "finance_waterfall",
+      "funnel_daily",
+      "google_ad_performance",
+      "google_ad_performance_hourly",
+      "google_ads_status_history",
+      "ltv_cac",
+      "meta_ad_attribution",
+      "meta_ad_breakdown_performance",
+      "meta_ad_performance",
+      "meta_ad_performance_hourly",
+      "meta_ads_status_history",
+      "order_attribution",
+      "orders_all_channels",
+      "payments",
+      "platform_attribution_commerce",
+      "product_performance",
+      "purchase_sequence",
+      "refund_events",
+      "return_lifecycle",
+      "returns_cancels_all_channels",
+      "sales_all_channels",
+      "session_funnel",
+      "touchpoints",
+      "web_events",
+      "web_events_daily"
+    ],
+    "channel": [
+      "ad_channel_pnl",
+      "channel_attribution",
+      "channel_pnl",
+      "funnel_daily",
+      "orders_all_channels",
+      "returns_cancels_all_channels",
+      "sales_all_channels",
+      "session_funnel",
+      "web_events",
+      "web_events_daily"
+    ],
+    "campaign_id": [
+      "ad_channel_pnl",
+      "google_ad_performance",
+      "google_ad_performance_hourly",
+      "meta_ad_attribution",
+      "meta_ad_performance",
+      "meta_ad_performance_hourly",
+      "session_funnel"
+    ],
+    "campaign_name": [
+      "ad_channel_pnl",
+      "google_ad_performance",
+      "google_ad_performance_hourly",
+      "meta_ad_attribution",
+      "meta_ad_breakdown_performance",
+      "meta_ad_performance",
+      "meta_ad_performance_hourly",
+      "session_funnel"
+    ],
+    "adset_id": [
+      "ad_channel_pnl",
+      "meta_ad_attribution",
+      "meta_ad_performance",
+      "meta_ad_performance_hourly",
+      "session_funnel"
+    ],
+    "ad_id": [
+      "ad_channel_pnl",
+      "meta_ad_attribution",
+      "meta_ad_performance",
+      "meta_ad_performance_hourly",
+      "session_funnel"
+    ],
+    "product_id": [
+      "product_performance",
+      "return_lifecycle",
+      "web_events"
+    ],
+    "sku": [
+      "product_performance",
+      "return_lifecycle",
+      "web_events"
+    ],
+    "variant_id": [
+      "product_performance",
+      "return_lifecycle"
+    ],
+    "variant_title": [
+      "product_performance",
+      "return_lifecycle"
+    ],
+    "report_date": [
+      "ad_channel_pnl",
+      "canonical_pnl",
+      "channel_attribution",
+      "channel_pnl",
+      "commerce_performance",
+      "funnel_daily",
+      "google_ad_performance",
+      "google_ad_performance_hourly",
+      "ltv_cac",
+      "meta_ad_attribution",
+      "meta_ad_breakdown_performance",
+      "meta_ad_performance",
+      "meta_ad_performance_hourly",
+      "orders_all_channels",
+      "platform_attribution_commerce",
+      "returns_cancels_all_channels",
+      "sales_all_channels",
+      "web_events_daily"
+    ],
+    "order_date": [
+      "attribution_paths",
+      "commerce_orders",
+      "order_attribution",
+      "product_performance",
+      "purchase_sequence",
+      "refund_events",
+      "return_lifecycle",
+      "touchpoints"
+    ],
+    "customer_id": [
+      "customer_data",
+      "customer_ltv"
+    ],
+    "session_id": [],
+    "landing_page": [],
+    "traffic_source": []
+  },
+  "all_dimensions": [
+    "accepts_marketing",
+    "acquisition_campaign",
+    "acquisition_channel",
+    "acquisition_platform",
+    "ad_account_id",
+    "ad_format",
+    "ad_id",
+    "ad_name",
+    "adset_id",
+    "adset_name",
+    "adset_optimization_goal",
+    "age",
+    "attribution_method",
+    "attribution_model",
+    "brand_id",
+    "breakdown_type",
+    "browser_family",
+    "campaign_id",
+    "campaign_name",
+    "campaign_objective",
+    "campaign_status",
+    "campaign_type",
+    "channel",
+    "collection",
+    "commerce_order_id",
+    "converted",
+    "creative_cta_type",
+    "creative_id",
+    "creative_name",
+    "creative_type",
+    "customer_account_id",
+    "customer_default_city",
+    "customer_default_province",
+    "customer_id",
+    "default_city",
+    "default_country",
+    "default_province",
+    "device_type",
+    "event_date",
+    "event_type",
+    "exit_page_path",
+    "financial_status",
+    "fulfillment_status",
+    "funnel_stage",
+    "funnel_web_platform",
+    "furthest_stage_bucket",
+    "gender",
+    "geo_city",
+    "geo_country",
+    "geo_region",
+    "hour_of_day",
+    "identity_resolution_method",
+    "is_cod",
+    "is_final",
+    "is_first_order",
+    "is_new_customer",
+    "is_prepaid",
+    "is_repeat_customer",
+    "is_unattributed",
+    "is_unprocessed",
+    "item_count",
+    "landing_page_path",
+    "landing_page_resolved",
+    "lifetime_order_count_band",
+    "lt_ad_name",
+    "lt_adset_name",
+    "lt_campaign_id",
+    "lt_campaign_name",
+    "lt_channel",
+    "lt_platform",
+    "lt_utm_campaign",
+    "lt_utm_medium",
+    "lt_utm_source",
+    "neurohack_tag_codes",
+    "order_created_at_ist",
+    "order_date",
+    "order_name",
+    "order_seq",
+    "order_seq_band",
+    "order_status",
+    "os_family",
+    "page_path",
+    "page_title",
+    "payment_bucket",
+    "payment_gateway",
+    "payment_method",
+    "payment_status",
+    "platform_position",
+    "pnl_refund_class",
+    "primary_return_status",
+    "product_id",
+    "product_title",
+    "product_type",
+    "publisher_platform",
+    "refund_date",
+    "region",
+    "report_date",
+    "report_hour_ts",
+    "restock",
+    "restock_type",
+    "return_status",
+    "revenue_basis",
+    "row_type",
+    "session_date",
+    "session_day_of_week",
+    "session_hour",
+    "session_platform",
+    "shipping_city",
+    "shipping_country",
+    "shipping_pincode",
+    "shipping_region",
+    "shipping_state_code",
+    "shopify_order_id",
+    "shopify_return_status",
+    "sku",
+    "source_name",
+    "source_platform",
+    "utm_campaign",
+    "utm_content",
+    "utm_medium",
+    "utm_source",
+    "utm_term",
+    "variant_id",
+    "variant_title",
+    "vendor"
+  ]
+}

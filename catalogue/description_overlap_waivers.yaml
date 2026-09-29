@@ -1,0 +1,29 @@
+# Accepted metric-description overlaps (>= 0.80 similarity). The governance
+# gate fails on any NEW pair not listed here — keep new metrics distinct.
+# Reseed: py scripts/check_catalogue_governance.py --accept-descriptions
+accepted:
+- be_roas|gross_roas
+- be_roas|net_roas
+- event_cancel_revenue|event_return_revenue
+- google_clicks|google_impressions
+- google_clicks_hourly|google_impressions_hourly
+- google_clicks_hourly|google_spend_hourly
+- google_clicks_hourly|meta_clicks_hourly
+- google_cpc|meta_cpc
+- google_cpm|meta_cpm
+- google_ctr|meta_ctr
+- google_impressions_hourly|google_spend_hourly
+- google_impressions_hourly|meta_impressions_hourly
+- google_net_cogs|meta_net_cogs
+- google_spend_hourly|meta_clicks_hourly
+- gross_roas|net_roas
+- lifetime_gross_revenue|lifetime_net_revenue
+- lifetime_gross_revenue|lifetime_orders
+- lifetime_net_revenue|lifetime_orders
+- meta_breakdown_cpc|meta_breakdown_cpm
+- meta_breakdown_cpc|meta_breakdown_ctr
+- meta_breakdown_cpm|meta_breakdown_ctr
+- meta_clicks_hourly|meta_impressions_hourly
+- meta_cpc|meta_cpm
+- repeat_order_share|repeat_orders
+- session_avg_seconds_to_add_to_cart|session_avg_seconds_to_checkout

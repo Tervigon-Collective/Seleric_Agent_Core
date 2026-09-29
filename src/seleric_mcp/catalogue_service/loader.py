@@ -353,7 +353,17 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     for p in sorted((catalogue_dir / "dimensions").glob("*.yaml")):
         for raw in _read_yaml(p).get("dimensions", []):
             d = DimensionDef.model_validate(raw)
-            dimensions[d.id] = d
+            if d.id in dimensions:
+                # Same dimension declared in more than one file (e.g. a curated
+                # def in core.yaml plus extra view mappings in the generated
+                # coverage file). Merge the view mappings; the first (curated)
+                # definition wins on every scalar field.
+                dimensions[d.id].views.update(d.views)
+                for alias in d.aliases:
+                    if alias not in dimensions[d.id].aliases:
+                        dimensions[d.id].aliases.append(alias)
+            else:
+                dimensions[d.id] = d
 
     glossary = [
         GlossaryTerm.model_validate(raw)
@@ -434,6 +444,12 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     # still hand-maintained so the exception list shrinks instead of hiding.
     _apply_crosswalk(catalogue_dir, om_registry, views)
 
+    # Derive each metric's slicing surface from the dimensions its view actually
+    # carries, minus dimension_waivers.yaml. Curated supported_dimensions are always
+    # kept; derivation only ADDS same-grain axes so a new mart column becomes
+    # sliceable without hand-editing every metric. See catalogue/dimension_waivers.yaml.
+    _derive_supported_dimensions(catalogue_dir, metrics, dimensions)
+
     cat = Catalogue(
         version=version,
         metrics=metrics,
@@ -452,6 +468,48 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     _check_integrity(cat)
     return cat
 
+
+
+def _load_dimension_waivers(catalogue_dir: Path) -> "tuple[set[str], list]":
+    """Return (waived ids, compiled regex patterns) from dimension_waivers.yaml."""
+    import re as _re
+
+    waived: set[str] = set()
+    patterns: list = []
+    path = catalogue_dir / "dimension_waivers.yaml"
+    if path.exists():
+        for cls in (_read_yaml(path).get("waivers") or {}).values():
+            waived.update(cls.get("ids") or [])
+            patterns.extend(cls.get("patterns") or [])
+    return waived, [_re.compile(p) for p in patterns]
+
+
+def _derive_supported_dimensions(
+    catalogue_dir: Path,
+    metrics: dict[str, "MetricDef"],
+    dimensions: dict[str, "DimensionDef"],
+) -> None:
+    """Add every non-waived dimension mapped to a metric's view to its slicing
+    surface. Curated entries are preserved and always come first; derived axes are
+    appended in a stable (sorted) order so the surface is deterministic."""
+    waived, patterns = _load_dimension_waivers(catalogue_dir)
+
+    def is_waived(dim_id: str) -> bool:
+        return dim_id in waived or any(p.search(dim_id) for p in patterns)
+
+    for m in metrics.values():
+        view = m.cube_mapping.view
+        curated_dims = set(m.supported_dimensions)
+        curated_filters = set(m.supported_filters)
+        added = sorted(
+            d.id
+            for d in dimensions.values()
+            if view in d.views and d.id not in curated_dims and not is_waived(d.id)
+        )
+        m.supported_dimensions.extend(added)
+        # The filter gate only needs a view mapping, but keep the documented
+        # supported_filters in sync so catalogue introspection stays truthful.
+        m.supported_filters.extend(d for d in added if d not in curated_filters)
 
 
 def _apply_crosswalk(
