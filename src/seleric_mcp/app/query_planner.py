@@ -242,6 +242,52 @@ class QueryPlanner:
                 )
         return resolved, warnings
 
+    def _expand_declared_channel(
+        self, view: str, dim: DimensionDef, f: FilterSpec, values: list[str]
+    ) -> tuple[list[str], str | None]:
+        """Widen a canonical channel to the raw tokens a view actually stores.
+
+        ``catalogue/dimensions/channel_map.yaml`` declares which source tokens
+        ARE a canonical channel — "google" covers google_pmax, google_search and
+        google_shopping — and calls itself the only place a channel is declared.
+        The ``channel`` dimension separately records that its value space differs
+        by view: the P&L views store the canonical, while session_funnel,
+        funnel_daily and web_events store the fine tokens. Nothing read either
+        fact, so filtering a session view for "google" matched no row and the
+        answer reported the conversion rate as unavailable while the data was
+        there under three other names.
+
+        Widening is safe on a view that stores the canonical itself, because a
+        canonical is a member of its own match list. The catch-all entry is
+        skipped: it exists to keep unmapped sources from being dropped, not to
+        make every channel match everything.
+        """
+        if f.operator not in ("equals", "notEquals") or not values:
+            return values, None
+        entries = getattr(self.catalogue.cat, "channel_map", None) or []
+        by_canonical = {
+            e.canonical: [m for m in (e.matches or []) if m and m != "*"]
+            for e in entries
+            if getattr(e, "canonical", None) and "*" not in (e.matches or [])
+        }
+        widened: list[str] = []
+        expanded: list[str] = []
+        for v in values:
+            members = by_canonical.get(v)
+            if not members:
+                widened.append(v)
+                continue
+            members = [v, *[m for m in members if m != v]]
+            widened.extend(m for m in members if m not in widened)
+            expanded.append(v)
+        if not expanded:
+            return values, None
+        return widened, (
+            f"Filter value(s) {', '.join(expanded)} on '{dim.id}' widened to the "
+            f"members declared in channel_map ({', '.join(widened)}), because "
+            f"view '{view}' may store the fine channel tokens rather than the canonical."
+        )
+
     def _validate_filters(self, view: str, filters: list[FilterSpec]) -> tuple[list[dict], list[str]]:
         cube_filters: list[dict] = []
         warnings: list[str] = []
@@ -257,6 +303,9 @@ class QueryPlanner:
                 raise PlanError(f"Filter on '{f.dimension}' requires values.")
             values, value_warnings = self._resolve_filter_values(dim, f)
             warnings.extend(value_warnings)
+            values, alias_warning = self._expand_declared_channel(view, dim, f, values)
+            if alias_warning:
+                warnings.append(alias_warning)
             # Serve geo columns are upperUTF8-normalized across commerce /
             # all-channels / attribution / refunds. Uppercase filter values so
             # "Maharashtra" matches MAHARASHTRA and does not silently return 0.
