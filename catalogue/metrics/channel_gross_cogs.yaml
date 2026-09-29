@@ -1,0 +1,53 @@
+id: channel_gross_cogs
+display_name: Channel Gross COGS
+category: attribution
+status: certified
+description: >-
+  Placement-basis cost of goods per acquisition channel (meta / google / organic / unattributed) —
+  the Attribution Overview "Gross COGS" tile. Product + shipping + packaging + gateway on ALL placed
+  units, with NO return/refund/cancel adjustment and no RTO (returned/cancelled units keep their
+  placement cost). Ex-GST, INR. Not this: net-of-returns COGS incl. RTO → channel/google_net_cogs;
+  SKU-level → product_cogs.
+formula:
+  human_readable: SUM(gross_cogs)
+  authoritative_source: cube
+cube_mapping:
+  view: channel_pnl
+  measure: channel_pnl.gross_cogs
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+supported_filters:
+- date_range
+- brand_id
+- channel
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Gross COGS from Google channel last 30 days
+  request:
+    measures:
+    - channel_gross_cogs
+    filters:
+    - dimension: channel
+      operator: equals
+      values: [google]
+    time_range:
+      preset: last_30d
+validation_tests:
+- channel_gross_cogs >= product-cost portion of net_cogs for the same slice (gross keeps returned units)
+companion_measures:
+- channel_gross_profit
+- google_net_cogs

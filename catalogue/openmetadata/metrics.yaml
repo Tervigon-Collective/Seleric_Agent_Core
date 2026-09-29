@@ -2,7 +2,7 @@
 # Regenerate: py scripts/sync_openmetadata_catalogue.py
 
 generated_by: scripts/sync_openmetadata_catalogue.py
-count: 185
+count: 187
 metrics:
   active_orders:
     category: commerce
@@ -245,6 +245,20 @@ metrics:
     om_name: cancelledOrders
     dashboard_status: match
     dashboard_audited_on: '2026-07-21'
+  channel_gross_cogs:
+    category: attribution
+    cube_view: channel_pnl
+    contract: null
+    glossary: []
+    om_name: channelGrossCogs
+  channel_gross_profit:
+    category: attribution
+    cube_view: channel_pnl
+    contract: null
+    glossary: []
+    om_name: channelGrossProfit
+    dashboard_status: match
+    dashboard_audited_on: null
   channel_gross_revenue:
     category: attribution
     cube_view: channel_attribution

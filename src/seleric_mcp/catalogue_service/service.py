@@ -291,9 +291,12 @@ _AXIS_KEYWORDS: dict[str, list[tuple[str, str]]] = {
               ("contribution", "contribution"), ("per order", "per_order"),
               ("breakeven", "breakeven"), ("break even", "breakeven"), ("be roas", "breakeven"),
               ("gross", "gross"), ("net", "net"), ("total", "total")],
+    # first match wins (see fill loop `break`): specific "all channel(s)" must precede the
+    # bare "channel" hint so "all channels" -> company but "google channel" -> channel.
     "scope": [("all channel", "company"), ("all-channel", "company"), ("all channels", "company"),
               ("blended", "blended"), ("shopify", "shopify"), ("sku", "product"),
-              ("product", "product"), ("pnl", "pnl"), ("event", "event")],
+              ("product", "product"), ("pnl", "pnl"), ("event", "event"),
+              ("channel", "channel")],
     "attribution": [("last-touch", "last_touch"), ("last touch", "last_touch"),
                     ("attributed", "last_touch"), ("attribution", "last_touch"),
                     ("by channel", "channel"), ("channel-wise", "channel"),

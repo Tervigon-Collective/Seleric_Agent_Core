@@ -268,6 +268,38 @@ terms:
     canonical_id: gross_margin_pct
   - term: gross profit
     canonical_id: gross_profit
+    definition: >
+      Bare "gross profit" defaults to brand-day P&L Gross Profit (Net Sales − Net COGS,
+      no channel). When a channel is named (google/meta/organic), use channel_gross_profit
+      (Gross Sales − Ad Spend − Gross COGS, the Attribution Overview tile).
+  - term: gross profit by channel
+    canonical_id: channel_gross_profit
+  - term: channel gross profit
+    canonical_id: channel_gross_profit
+  - term: gross profit from google
+    canonical_id: channel_gross_profit
+  - term: gross profit from google channel
+    canonical_id: channel_gross_profit
+  - term: google channel gross profit
+    canonical_id: channel_gross_profit
+  - term: google gross profit
+    canonical_id: channel_gross_profit
+  - term: gross profit from meta
+    canonical_id: channel_gross_profit
+  - term: gross profit from meta channel
+    canonical_id: channel_gross_profit
+  - term: meta channel gross profit
+    canonical_id: channel_gross_profit
+  - term: meta gross profit
+    canonical_id: channel_gross_profit
+  - term: gross cogs by channel
+    canonical_id: channel_gross_cogs
+  - term: channel gross cogs
+    canonical_id: channel_gross_cogs
+  - term: google gross cogs
+    canonical_id: channel_gross_cogs
+  - term: meta gross cogs
+    canonical_id: channel_gross_cogs
   - term: MER
     canonical_id: mer
   - term: marketing efficiency ratio

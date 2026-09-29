@@ -1,0 +1,62 @@
+id: channel_gross_profit
+display_name: Channel Gross Profit
+category: attribution
+status: certified
+description: >-
+  Gross profit per acquisition channel (meta / google / organic / unattributed) — the Attribution
+  Overview "Gross Profit" tile. = Gross Sales − Ad Spend − Gross COGS, where Gross COGS is the
+  placement cost on ALL placed units with NO return/refund/cancel adjustment and no RTO (product +
+  shipping + packaging + gateway). Ex-GST, INR; can be negative. Slice by channel. Not this: profit
+  after returns → channel/google_net_profit (Net Sales − Net COGS − Ad Spend); brand-day P&L gross
+  profit (Net Sales − Net COGS, no channel) → gross_profit; per-campaign → ad_channel_net_profit.
+formula:
+  human_readable: gross_sales - ad_spend - gross_cogs
+  authoritative_source: cube
+  depends_on:
+  - channel_gross_cogs
+cube_mapping:
+  view: channel_pnl
+  measure: channel_pnl.gross_profit
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+supported_filters:
+- date_range
+- brand_id
+- channel
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Gross profit from Google channel Mar-Aug 2026
+  request:
+    measures:
+    - channel_gross_profit
+    filters:
+    - dimension: channel
+      operator: equals
+      values: [google]
+    time_range:
+      start: '2026-03-01'
+      end: '2026-08-31'
+validation_tests:
+- channel_gross_profit = gross_sales - ad_spend - channel_gross_cogs for the same slice
+- SUM over channels ties to the Attribution Overview Gross Profit tile per channel
+companion_measures:
+- channel_gross_cogs
+- google_net_profit
+- ad_channel_net_profit
+dashboard_alignment:
+  status: match
+  source: Seleric_Dashboard/Node-Backend getAttributionChannelPnl (Gross Profit tile)
