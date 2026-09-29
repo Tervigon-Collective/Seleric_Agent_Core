@@ -479,20 +479,30 @@ dimensions:
       web_events: web_events.sku
   - id: product_id
     display_name: Product ID
-    description: Shopify product identifier (stable key).
+    description: >
+      Shopify product identifier (stable key). Prefer over product_title for accurate
+      per-product aggregation: product_title can differ across renamed listings for the
+      same product, so grouping by title fragments the count.
     views:
       product_performance: product_performance.product_id
+      return_lifecycle: return_lifecycle.product_id
       web_events: web_events.product_id
   - id: variant_id
     display_name: Variant ID
-    description: Shopify variant identifier (stable key).
+    description: >
+      Shopify variant identifier (stable key). Prefer over variant_title when a variant
+      may have been renamed.
     views:
       product_performance: product_performance.variant_id
+      return_lifecycle: return_lifecycle.variant_id
   - id: product_title
     display_name: Product Title
     description: >
       Product Title: shared catalogue dimension for grouping and filters. Not a measure;
-      empty/null means unknown, never a separate bucket unless documented.
+      empty/null means unknown, never a separate bucket unless documented. Caveat: a
+      product's title can change over time (renamed listings), so the same product may
+      appear under two titles and grouping by title fragments its count — for an accurate
+      per-product total, group by product_id instead.
     aliases: [product, product name]
     views:
       product_performance: product_performance.product_title

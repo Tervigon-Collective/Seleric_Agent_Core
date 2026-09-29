@@ -23,6 +23,8 @@ supported_dimensions:
 - return_status
 - restock_type
 - sku
+- product_id
+- variant_id
 - product_title
 - variant_title
 - is_cod
