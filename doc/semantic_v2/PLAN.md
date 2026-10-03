@@ -78,10 +78,11 @@ and the serve views match the repo except `web_events*`. The **semantics are bro
 | pnl | brand × day × finance_channel × campaign × adset × ad | **event date** | `pnl_daily` (5-min snapshot of `ad_channel_pnl_daily`) |
 | pnl_channel | brand × day × finance_channel × is_paid | **event date** | `channel_pnl` (gross COGS; the only P&L fact with the paid / non-paid split) |
 
-### 3.3 Data products → agent views (35 → 14)
+### 3.3 Data products → agent views (35 → 18)
 commerce · product · paid_media · paid_media_hourly (binding) · paid_media_breakdowns (binding) ·
-paid_media_changes · web_sessions · web_events · attribution · customers · returns · payments ·
-pnl · pnl_channel (different grain: gross COGS, is_paid).
+paid_media_changes · web_sessions · web_funnel · web_events · web_event_detail · attribution ·
+attribution_paths · customers · unit_economics · returns · payments · pnl · pnl_channel
+(different grain: gross COGS, is_paid). One root fact per view (see §8).
 `finance_waterfall` is retired (broken upstream).
 
 ## 4. Metric rules (CI-enforced)
@@ -128,7 +129,7 @@ The full old → new id table lives in `catalogue/migrations/v2_id_map.yaml` (Ph
 | 0 | Baseline values, inventory gates (report-only in CI), Cube→ClickHouse trace, serve-only ClickHouse users |
 | 1 | Conformed dimensions: traffic (dynamic rules), brand, product; reuse ad dims |
 | 2 | Serve facts: DEFINER everywhere, traffic keys, unified ad delivery / changes, P&L snapshot, channel_pnl on finance_channel |
-| 3 | Cube v2 model (`mage-ai/infra/cube/model_v2`): fact + dim cubes with joins, hierarchies, drill members, fiscal year; 14 views; second Cube on 127.0.0.1:4002 (image pinned to `cubejs/cube:v1.6.48`) |
+| 3 | Cube v2 model (`mage-ai/infra/cube/model_v2`): fact + dim cubes with joins, hierarchies, drill members, fiscal year; 18 views; second Cube on 127.0.0.1:4002 (image pinned to `cubejs/cube:v1.6.48`); id map + parity script |
 | 4 | Catalogue v2 + MCP (one resolver, bindings, hierarchy drill, composites, valid_for, provenance v2, hard cut) + Seleric_Agent registry |
 | 5 | Cutover: MCP → Cube v2; gates blocking; inventory regenerated. v1 Cube stays up only for its remaining external consumer |
 
@@ -144,4 +145,7 @@ The full old → new id table lives in `catalogue/migrations/v2_id_map.yaml` (Ph
 | Retire v1 cubes and serve views at cutover | v1 Cube on :4001 stays; agent moves to v2 on :4002 | seleric_systems (outside scope) still reads v1 `daily_pnl.*` via nginx `/cube/` |
 | Channel split of P&L from `channel_pnl` `multiIf` | `channel_pnl` takes `finance_channel` from the traffic dimension | One classification for every fact |
 | Traffic drill path medium_group → platform → channel → sub_channel | platform → channel → sub_channel; medium_group and `is_paid` are channel attributes | User put Meta organic under meta and Google organic (search, free listings, YouTube) under google, so one platform holds paid and non-paid channels |
+| 12–14 agent views | 18 views, one root fact per view | The agent scopes a view by one `brand_id` member; a view holding two unjoined facts needs one per fact. Facts without a join (funnel mart, event grain, LTV/CAC, attribution paths) get their own view |
+| `pnl` fact without a paid split | `ad_channel_pnl_daily` / `pnl_daily` carry `is_paid` | Meta / Google organic roll up to their P&L channel (user decision), so paid-only ROAS needs the split at campaign grain too |
+| Old ids → new ids via the collapse table | `catalogue/migrations/v2_id_map.yaml` built and verified in Phase 3 (parity per id) | Cube member names are the v2 ids; Phase 4 consumes the map |
 | v1 attribution views keep their own `multiIf` until cutover | `order_attribution` (and the views built on it) take labels from the dimension now, plus `lt_is_paid` etc. | Otherwise `channel_pnl` (Meta incl. organic) and `order_attribution` (Meta organic = unattributed) would disagree on the live v1 surface |

@@ -27,6 +27,24 @@ services:
       - "clickhouse.seleric.com:72.61.228.168"
       - "host.docker.internal:host-gateway"
 
+  # Semantic v2 Cube (doc/semantic_v2): conformed model in mage-ai/infra/cube/model_v2, serve-only
+  # ClickHouse login (cube_serve via .env.v2), pinned image. The agent moves here at the Phase 5 cutover;
+  # v1 `cube` stays for seleric_systems (daily_pnl.* via nginx /cube/).
+  cube-v2:
+    image: cubejs/cube:v1.6.48
+    container_name: seleric-mcp-cube-v2-1
+    restart: unless-stopped
+    volumes:
+      - ../mage-ai/infra/cube/model_v2:/cube/conf/model:ro
+      - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
+    env_file:
+      - ../mage-ai/infra/cube/.env
+      - ../mage-ai/infra/cube/.env.v2
+    ports:
+      - "127.0.0.1:${CUBE_V2_HOST_PORT:-4002}:4000"
+    extra_hosts:
+      - "clickhouse.seleric.com:72.61.228.168"
+
   mcp:
     build: .
     image: seleric-mcp-mcp
