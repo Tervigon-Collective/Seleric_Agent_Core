@@ -1,17 +1,20 @@
 # Semantic v2 — progress log
 
-Plan: [PLAN.md](./PLAN.md). Branch `semantic-v2` in mage-ai and Seleric_Agent_Core (pushed;
-`main` untouched until cutover).
+Plan: [PLAN.md](./PLAN.md). Work happens on branch `semantic-v2` in mage-ai and Seleric_Agent_Core
+and is merged to `main` at each stable point (first merge 2026-10-03, after the channel decisions).
+Seleric_Agent work goes on its `gaurav` branch.
 
-**Paused 2026-10-03 at user request, in a consistent state.** The agent still runs on v1 Cube
-(:4001) and the v1 catalogue — nothing user-facing has switched. Everything applied to ClickHouse
-is committed on `semantic-v2` (working trees verified byte-identical to the pushed branches).
+**Status 2026-10-03 (evening):** Phases 0–2 done, open business decisions resolved and applied
+(below), both repos merged to `main`. The agent still runs on v1 Cube (:4001) and the v1 catalogue,
+but v1 now reads the new channel labels (WhatsApp channel, Meta organic under Meta, `is_paid`).
+Next: Phase 3 (Cube v2 YAML).
 
 | Phase | Status | Commits |
 |---|---|---|
 | 0 Baseline & guards | ✅ done 2026-10-03 | Agent_Core c52bc55 · mage-ai 150c044 |
 | 1 Conformed dimensions | ✅ done 2026-10-03 | mage-ai 150c044 |
 | 2 Serve facts | ✅ done 2026-10-03 | mage-ai e1f8b6c |
+| Channel decisions (pre-Phase 3) | ✅ done 2026-10-03 | mage-ai 393496b |
 | 3 Cube v2 model | ⏸ paused — serve ad dims done, Cube YAML not started | mage-ai 6f59a2e |
 | 4 Catalogue v2 + MCP + registry | ⏳ not started | — |
 | 5 Cutover | ⏳ not started | — |
@@ -55,7 +58,35 @@ Code: `mage-ai/serve/semantic/` (README there is the operating manual).
   `ad_changes`, `semantic.fct_pnl_daily` → `serve.pnl_daily` (5-min snapshot, equals live).
 - `web_events` / `web_events_daily` DDL captured into the repo.
 
-## Phase 3 — Cube v2 model ⏸ (paused)
+## Channel decisions applied (2026-10-03, user) ✅
+Rules 15–27 in `mage-ai/serve/semantic/traffic_source_rules.yaml`; full table and verification in
+`mage-ai/serve/semantic/README.md` ("Channel decisions 2026-10-03").
+- **WhatsApp** = own platform and own P&L channel (`finance_channel = whatsapp`). WhatsApp UTMs
+  (`utm_medium` whatsapp / wa, Bitespeed no-medium or "- wa" flows) win over dbt's meta / google label.
+  WhatsApp signatures 41 → 82.
+- **Meta organic** under platform meta, channel `meta_organic`, `medium_group = earned`, `is_paid = 0`;
+  rolls up to Meta in the P&L (was unattributed). Incl. igshopping and Pragma DM replies.
+- **Google** free listings (incl. `go/product_sync`) and YouTube organic under google, `is_paid = 0`;
+  paid Shopping unchanged; SEO stays platform organic.
+- product_card → organic `order_tracking_page`; hazlnut → organic `wishlist`; catch-all other →
+  organic `organic_other` (still reported in `serve.traffic_unmapped`). `utm_source=th` is NOT organic:
+  its UTMs are Meta campaign / ad ids ("TH-383-SUSPENDER-20JUNE") → paid Meta `meta_other` (1 session).
+- Model change: hierarchy is platform → channel → sub_channel; `medium_group` / `is_paid` are channel
+  attributes (rules may set medium_group); `traffic_hierarchy_conflicts` also checks medium_group and
+  finance_channel per channel. Unmapped: 0. Conflicts: none.
+- Serve views: `order_attribution` labels from the dimension + `lt_is_paid`, `lt_medium_group`,
+  `lt_sub_channel`, `lt_finance_channel`, `traffic_source_key`; `channel_attribution_daily` +whatsapp,
+  `is_paid` in grain; `platform_attribution_commerce` +whatsapp, `is_paid`; `meta_ad_attribution_daily`
+  paid clicks only; `channel_pnl` + `is_paid` (spend = 1).
+- Verified: brand-month totals unchanged in `channel_pnl` / `channel_attribution_daily` /
+  `platform_attribution_commerce`; `ad_channel_pnl_daily` and `pnl_daily` reconcile to `channel_pnl` in all
+  2,894 cells; `order_attribution.lt_finance_channel` order counts = `channel_pnl` placement orders;
+  v1 Cube serves the new labels. 987 orders relabelled (531 unattributed → Meta organic, ₹10.9L).
+  P&L net sales Jan–Sep 2026: meta +₹5.77L, google +₹0.73L, whatsapp +₹0.93L, organic −₹1.44L,
+  unattributed −₹5.99L. v1 `organic_*` / `meta_*` channel measures move accordingly (intended).
+- Phase 1 label diffs approved by the user (362 / 33 / 43 orders, 116,907 sessions).
+
+## Phase 3 — Cube v2 model ⏳ (next)
 Done:
 - `serve.dim_campaign / dim_adset / dim_ad` (DEFINER views over the conformed gold ad dims;
   `cube_serve` cannot read gold). `dim_campaign` adds the 52 historical Google campaigns
@@ -89,43 +120,44 @@ Collapse checks run against the baseline (brand 20, Sep 2026):
 1. **Phase 3** — write `mage-ai/infra/cube/model_v2/` (fact + dim cubes, joins, `drill_members`,
    `fiscal_year` granularity, hierarchies where all levels sit in one cube; ad hierarchy is
    cross-cube → declare in the catalogue). Copy measure SQL from v1 cubes, renamed per the id map.
-   Add a `cube-v2` service to `Seleric_Agent_Core/docker-compose.yml` on 127.0.0.1:4002 with
-   `CUBE_SERVE_DB_*` creds and default DB `serve`. Verify: every v2 metric = baseline (or documented diff).
+   Add a `cube-v2` service to `Seleric_Agent_Core/docker-compose.yml` on 127.0.0.1:4002, image pinned
+   to `cubejs/cube:v1.6.48` (v1 runs unpinned `latest` = 1.6.48), with `CUBE_SERVE_DB_*` creds (add
+   the host — `infra/cube/.env` has user/pass only) and default DB `serve`. Traffic dims expose
+   `is_paid` / `medium_group`. Verify: every v2 metric = baseline (or documented diff).
    First test that Cube 1.6.48 accepts custom `granularities` and `hierarchies`.
 2. **Phase 4** — `catalogue/migrations/v2_id_map.yaml` (from the collapse table above + PLAN §4),
    metric YAML schema v2 in `catalogue_service/loader.py`, one resolver (`resolve_concept`), planner:
    bindings / hierarchy drill / composites (gross_roas, cac, ltv_cac_ratio) / `valid_for` / hard-cut
    rejection, provenance v2 (trace via PHASE0.md method). Update `Seleric_Agent/config/metric_registry.yaml`
-   (drop aliases; ids must exist). Re-point `build_metric_inventory.py` gates at the v2 surface.
+   on the `gaurav` branch (drop aliases; ids must exist). Re-point `build_metric_inventory.py` gates at the v2 surface.
 3. **Phase 5** — MCP `config.yaml cube.api_url` → :4002; gates blocking in CI; regenerate inventory.
    Keep v1 Cube for seleric_systems (`daily_pnl.*` via nginx `/cube/`) until that consumer moves.
-4. **Merge** `semantic-v2` → `main` in both repos (mage-ai: a push to `main` triggers the Jenkins deploy
-   that recreates Mage — merge when no dbt run is active, or via PR).
+4. **Merge** `semantic-v2` → `main` at each stable point. mage-ai: a push to `main` triggers the Jenkins
+   deploy (CI gates → rsync into /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt
+   orchestrator runs back to back (~25 min, ~10 s gaps), so push right after a run completes.
 
 ## Known gaps / risks
-- **Uncommitted on `main`:** the live mage-ai checkout carries the semantic-v2 files uncommitted on
-  `main`. Any other push to mage-ai `main` triggers a Jenkins deploy that overwrites the checkout:
-  the files would disappear from disk (they remain on `origin/semantic-v2`). ClickHouse objects are
-  not affected, but re-running the old per-domain `apply_views.sh` from `main` would revert the serve
-  views to INVOKER / old `channel_pnl` buckets. Merge soon, or re-checkout files from the branch.
+- ~~Uncommitted on `main`~~ — resolved 2026-10-03: `semantic-v2` merged to `main` in both repos.
 - **Live ClickHouse changes already in effect (v1 consumers see them):** `channel_pnl` buckets from
   the traffic dimension (33 GA `(direct)` orders organic → unattributed; totals unchanged);
   `ad_channel_pnl_daily` reconciliation fix (adds offset rows; totals unchanged); all serve views
   are DEFINER views (same results). New objects: `semantic.*` (3 refreshable views every 5 min,
   ~0.6 s each), `serve.dim_* / cfg_* / traffic_* / product_hierarchy_conflicts / ad_delivery_* /
   ad_changes / pnl_daily / web_events*` (DDL now in repo).
-- **Business decisions open:** 10 unmapped traffic signatures (86 fact rows): product_card,
-  igshopping/social, youtube/organic, go/product_sync, hazlnut/wishlist, th + numeric medium.
-  Meta organic social is labelled platform `unattributed` / channel `meta_organic` for v1 parity —
-  could become its own earned platform. Sessions: 116,907 no-UTM non-search sessions now `unattributed`.
+- ~~Business decisions open~~ — resolved 2026-10-03 (see "Channel decisions applied").
+- **Open question (not blocking):** Google organic *search* (SEO, 171 orders / ₹4.5L gross in 2026)
+  stays platform organic while free listings / YouTube moved under google. Ask if SEO should follow.
+- **Email / SMS UTMs vs click ids:** only WhatsApp UTMs override dbt's meta / google label; an email or
+  SMS link that picked up an fbclid / gclid stays paid (e.g. 2 `pragma/sms` sessions under meta).
+- **`pnl_daily` / `ad_channel_pnl_daily` have no `is_paid`:** Meta organic orders sit in the Meta
+  reconciliation / unattributed rows there; only `channel_pnl` (pnl_channel) splits paid vs non-paid.
 - **Data quality:** 56 brand-20 products have no Shopify `product_type`; checkout-timing session metrics
   (`session_avg_seconds_to_checkout/_purchase`, `session_checkout_steps`) are null/zero Jul–Sep;
   ~4 % of Google campaigns (historical) missing from `gold.dim_campaign` (patched in serve, root cause in dbt).
 - **New-signature lag:** a brand-new UTM combination is unlabelled for up to 5 min (dimension refresh);
   `channel_pnl` falls back to the dbt platform's finance bucket meanwhile; Cube joins would show null.
 - **Gates** still measure the v1 surface (77 conflicts, 51 same-value ids, …); they only turn green once
-  Phase 4/5 re-point them at v2. CI step is report-only and lives in the uncommitted `ci_quality_gates.sh`
-  (on the branch).
+  Phase 4/5 re-point them at v2. CI step is report-only (`ci_quality_gates.sh`, on `main` since 2026-10-03).
 - **seleric_systems** depends on v1 Cube `daily_pnl.*` (outside the three repos) — v1 cannot be retired.
 - `product_ad_spend_daily.sql` stays in the repo but undeployed (as before); `apply_views.py` skips it.
 

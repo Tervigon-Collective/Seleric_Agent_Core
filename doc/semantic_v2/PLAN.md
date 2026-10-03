@@ -31,7 +31,17 @@ and the serve views match the repo except `web_events*`. The **semantics are bro
    metric ids carry the `pnl_` prefix. So `net_sales` (order date) ≠ dashboard Net Sales card;
    dashboard parity comes from `pnl_net_sales`.
 5. **Production Postgres (seleric_stag) is not touched** (user instruction, Phase 1).
-6. **Work stays in the three repos:** mage-ai, Seleric_Agent_Core, Seleric_Agent.
+6. **Work stays in the three repos:** mage-ai, Seleric_Agent_Core, Seleric_Agent. Seleric_Agent work
+   goes on its `gaurav` branch (synced to `origin/gaurav`, user 2026-10-03).
+7. **Channels (user, 2026-10-03):** WhatsApp is its own platform **and P&L channel**
+   (`finance_channel` meta | google | whatsapp | organic | unattributed). Meta organic sits under
+   platform meta (its presence is built by the paid spend) and rolls up to Meta in the P&L, marked
+   `is_paid = 0` / channel `meta_organic` everywhere. Google free listings and YouTube organic sit
+   under google the same way; search-engine SEO stays platform organic. Owned pages (order-tracking
+   product cards, wishlist) and unknown sources are organic.
+8. **Phase 1 label diffs approved** (2026-10-03): 362 orders unattributed → organic/google free
+   listing, 33 GA `(direct)` orders → unattributed, 43 orders other → whatsapp/email/sms,
+   116,907 no-UTM sessions organic → unattributed.
 
 ## 3. Target model
 
@@ -40,7 +50,7 @@ and the serve views match the repo except `web_events*`. The **semantics are bro
 |---|---|---|
 | brand | brand (+ coverage flags has_commerce / has_meta_ads / has_google_ads / has_sessions) | `serve.dim_brand` ← `mage-ai/serve/semantic/brands.yaml` |
 | time | year → fiscal_year (Apr–Mar) → quarter → month → week → day → hour* | Cube time dims + custom `fiscal_year` granularity, Asia/Kolkata |
-| traffic (dynamic) | medium_group → platform → channel → sub_channel; P&L rollup platform → finance_channel | `serve.dim_traffic_source` ← rules YAML + gold facts (5-min refresh) |
+| traffic (dynamic) | platform → channel → sub_channel; channel attributes medium_group (paid/owned/earned/none) and **is_paid**; P&L rollup platform → finance_channel | `serve.dim_traffic_source` ← rules YAML + gold facts (5-min refresh) |
 | ad | ad_platform → campaign → adset / ad group → ad (→ creative) | existing conformed `gold.dim_campaign / dim_adset / dim_ad / dim_creative` |
 | product | product_type → product → variant (sku) | `serve.dim_product_variant` (catalogue ∪ ordered variants) |
 | customer | acquisition cohort → customer | `serve.customer_ltv` / `customer_data` |
@@ -65,11 +75,12 @@ and the serve views match the repo except `web_events*`. The **semantics are bro
 | customers | customer | first order | `customer_ltv` |
 | refunds / refund_lines / payments | refund / line / txn | order_date | `refund_events` / `return_lifecycle` / `payments` |
 | pnl | brand × day × finance_channel × campaign × adset × ad | **event date** | `pnl_daily` (5-min snapshot of `ad_channel_pnl_daily`) |
-| pnl_channel | brand × day × finance_channel | **event date** | `channel_pnl` (gross COGS only) |
+| pnl_channel | brand × day × finance_channel × is_paid | **event date** | `channel_pnl` (gross COGS; the only P&L fact with the paid / non-paid split) |
 
-### 3.3 Data products → agent views (35 → 12)
-commerce · product · paid_media · paid_media_breakdowns · paid_media_changes · web_sessions ·
-web_events · attribution · customers · returns · payments · pnl.
+### 3.3 Data products → agent views (35 → 14)
+commerce · product · paid_media · paid_media_hourly (binding) · paid_media_breakdowns (binding) ·
+paid_media_changes · web_sessions · web_events · attribution · customers · returns · payments ·
+pnl · pnl_channel (different grain: gross COGS, is_paid).
 `finance_waterfall` is retired (broken upstream).
 
 ## 4. Metric rules (CI-enforced)
@@ -116,7 +127,7 @@ The full old → new id table lives in `catalogue/migrations/v2_id_map.yaml` (Ph
 | 0 | Baseline values, inventory gates (report-only in CI), Cube→ClickHouse trace, serve-only ClickHouse users |
 | 1 | Conformed dimensions: traffic (dynamic rules), brand, product; reuse ad dims |
 | 2 | Serve facts: DEFINER everywhere, traffic keys, unified ad delivery / changes, P&L snapshot, channel_pnl on finance_channel |
-| 3 | Cube v2 model (`mage-ai/infra/cube/model_v2`): fact + dim cubes with joins, hierarchies, drill members, fiscal year; 12 views; second Cube on 127.0.0.1:4002 |
+| 3 | Cube v2 model (`mage-ai/infra/cube/model_v2`): fact + dim cubes with joins, hierarchies, drill members, fiscal year; 14 views; second Cube on 127.0.0.1:4002 (image pinned to `cubejs/cube:v1.6.48`) |
 | 4 | Catalogue v2 + MCP (one resolver, bindings, hierarchy drill, composites, valid_for, provenance v2, hard cut) + Seleric_Agent registry |
 | 5 | Cutover: MCP → Cube v2; gates blocking; inventory regenerated. v1 Cube stays up only for its remaining external consumer |
 
@@ -131,3 +142,5 @@ The full old → new id table lives in `catalogue/migrations/v2_id_map.yaml` (Ph
 | `attribution_credit` fact | `touchpoints` + `attribution_paths` | No catalogue metric needs multi-model credit yet |
 | Retire v1 cubes and serve views at cutover | v1 Cube on :4001 stays; agent moves to v2 on :4002 | seleric_systems (outside scope) still reads v1 `daily_pnl.*` via nginx `/cube/` |
 | Channel split of P&L from `channel_pnl` `multiIf` | `channel_pnl` takes `finance_channel` from the traffic dimension | One classification for every fact |
+| Traffic drill path medium_group → platform → channel → sub_channel | platform → channel → sub_channel; medium_group and `is_paid` are channel attributes | User put Meta organic under meta and Google free listings under google, so one platform holds paid and non-paid channels |
+| v1 attribution views keep their own `multiIf` until cutover | `order_attribution` (and the views built on it) take labels from the dimension now, plus `lt_is_paid` etc. | Otherwise `channel_pnl` (Meta incl. organic) and `order_attribution` (Meta organic = unattributed) would disagree on the live v1 surface |

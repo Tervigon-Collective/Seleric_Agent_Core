@@ -8,7 +8,7 @@ one resolver, end-to-end provenance. Phase 0 = baselines and guards, no behaviou
 |---|---|
 | Scope | Shopify now; `sales_channel` keeps an `amazon` slot that errors as unsupported |
 | Old metric ids | Hard cut on the serve/agent surface; error names the replacement. Gold columns unchanged (Node reads gold) |
-| Channels | Dynamic: rules in PG `core.traffic_source_rules` → `gold.dim_traffic_source`; facts carry `traffic_source_key` |
+| Channels | Dynamic: rules in PG `core.traffic_source_rules` → `gold.dim_traffic_source`; facts carry `traffic_source_key`. **Superseded in Phase 1:** rules live in git (`mage-ai/serve/semantic/traffic_source_rules.yaml`) → `semantic.dim_traffic_source`; key computed at query time (PLAN.md §8) |
 | Date axis | Order date everywhere; event date only in Finance (`pnl_*` ids) |
 
 ## Baseline
