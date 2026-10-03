@@ -4,7 +4,8 @@ Plan: [PLAN.md](./PLAN.md). Work happens on branch `semantic-v2` in mage-ai and 
 and is merged to `main` at each stable point (first merge 2026-10-03, after the channel decisions).
 Seleric_Agent work goes on its `gaurav` branch.
 
-**Status 2026-10-04:** Phases 0–3 done. Cube v2 runs as `cube-v2` on 127.0.0.1:4002 next to v1
+**Status 2026-10-04:** Phases 0–3 done and closed; both repos merged to `main` and deployed (mage-ai Jenkins
+#224, Agent_Core #50). Cube v2 runs as `cube-v2` on 127.0.0.1:4002 next to v1
 (:4001); 149 / 151 certified v1 metrics equal on v2 in every cell, the 2 differences documented. The agent
 still runs on v1 Cube and the v1 catalogue — nothing user-facing has switched. Next: Phase 4 (catalogue v2 +
 MCP resolver on the id map).
@@ -15,7 +16,7 @@ MCP resolver on the id map).
 | 1 Conformed dimensions | ✅ done 2026-10-03 | mage-ai 150c044 |
 | 2 Serve facts | ✅ done 2026-10-03 | mage-ai e1f8b6c |
 | Channel decisions (pre-Phase 3) | ✅ done 2026-10-03 | mage-ai 393496b, c721983 |
-| 3 Cube v2 model | ✅ done 2026-10-04 | mage-ai 6f59a2e, f3361eb, (this merge) · Agent_Core 7e9bc17, (this merge) |
+| 3 Cube v2 model | ✅ closed 2026-10-04 | mage-ai 6f59a2e, f3361eb, 04e59a7 · Agent_Core 7e9bc17, 229d322 (all on `main`) |
 | 4 Catalogue v2 + MCP + registry | ⏳ not started | — |
 | 5 Cutover | ⏳ not started | — |
 
@@ -166,7 +167,9 @@ Collapse checks run against the baseline at the pause (brand 20, Sep 2026):
    (CI gates → rsync into /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt orchestrator runs back
    to back (~25 min, ~10 s gaps), so push right after a run completes. **Seleric_Agent_Core also deploys on a
    push to `main`** (Jenkins job `Seleric-Agent-Core`: rsync --delete into /opt/seleric/Seleric_Agent_Core +
-   `docker compose up -d --build` → MCP and v1 Cube restart, ~1 min) — even for doc-only commits.
+   `docker compose up -d --build` → MCP and v1 Cube restart, ~1 min) — even for doc-only commits. That deploy
+   reads `mage-ai/infra/cube/.env.v2` as the `jenkins` user: keep it group-readable (640, group tervigon) —
+   build #49 failed at compose config load while it was 600.
 
 ## Known gaps / risks
 - ~~Uncommitted on `main`~~ — resolved 2026-10-03: `semantic-v2` merged to `main` in both repos.
@@ -184,8 +187,16 @@ Collapse checks run against the baseline at the pause (brand 20, Sep 2026):
   SMS link that picked up an fbclid / gclid stays paid (e.g. 2 `pragma/sms` sessions under meta).
 - **`pnl_daily` / `ad_channel_pnl_daily` have no `is_paid`:** Meta organic orders sit in the Meta
   reconciliation / unattributed rows there; only `channel_pnl` (pnl_channel) splits paid vs non-paid.
-- **Checkout-timing metrics empty:** `avg_seconds_to_checkout`, `avg_seconds_to_purchase`, `checkout_steps` are
-  null / 0 for brands 20 and 28 (Jul–Sep) — kept in v2, should be flagged (data-quality waiver) in Phase 4.
+- **Checkout-timing metrics empty** (v2 `web_sessions.avg_seconds_to_checkout`, `avg_seconds_to_purchase`,
+  `checkout_steps`; v1 `session_avg_seconds_to_checkout`, `session_avg_seconds_to_purchase`,
+  `session_checkout_steps`). Brand 20 Jul–Sep (the only brand with sessions): 6,867 sessions reached checkout and
+  4,541 purchased, yet `first_checkout_at` / `checkout_step_count` are never set and `seconds_to_purchase` is never
+  > 0. Root cause (documented in dbt `fct_session_funnel.sql`, "KNOWN GAP"): Shopify's `checkout_started` pixel is
+  server-side (`platform='app'`, no Snowplow session id), so session-native checkout counters are structurally
+  zero; `stage_reached_checkout` uses the cart_token bridge instead. `avg_seconds_to_add_to_cart` works (≈96 % of
+  add-to-cart sessions timed). Fix = dbt: plumb `int_cart_journey.first_checkout_at` (cart_token grain) through
+  `attr_snowplow_sessions`. Until then Phase 4 marks the three as unavailable (data-quality waiver) so the agent
+  does not answer "0 seconds".
 - **`cube-v2` runs CUBEJS_DEV_MODE=true** like v1 (hot reload of model_v2; bound to 127.0.0.1). Revisit at cutover.
 - **Data quality:** 56 brand-20 products have no Shopify `product_type`; checkout-timing session metrics
   (`session_avg_seconds_to_checkout/_purchase`, `session_checkout_steps`) are null/zero Jul–Sep;
