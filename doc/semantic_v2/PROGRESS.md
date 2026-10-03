@@ -14,7 +14,7 @@ Next: Phase 3 (Cube v2 YAML).
 | 0 Baseline & guards | ✅ done 2026-10-03 | Agent_Core c52bc55 · mage-ai 150c044 |
 | 1 Conformed dimensions | ✅ done 2026-10-03 | mage-ai 150c044 |
 | 2 Serve facts | ✅ done 2026-10-03 | mage-ai e1f8b6c |
-| Channel decisions (pre-Phase 3) | ✅ done 2026-10-03 | mage-ai 393496b |
+| Channel decisions (pre-Phase 3) | ✅ done 2026-10-03 | mage-ai 393496b, c721983 |
 | 3 Cube v2 model | ⏸ paused — serve ad dims done, Cube YAML not started | mage-ai 6f59a2e |
 | 4 Catalogue v2 + MCP + registry | ⏳ not started | — |
 | 5 Cutover | ⏳ not started | — |
@@ -66,8 +66,11 @@ Rules 15–27 in `mage-ai/serve/semantic/traffic_source_rules.yaml`; full table 
   WhatsApp signatures 41 → 82.
 - **Meta organic** under platform meta, channel `meta_organic`, `medium_group = earned`, `is_paid = 0`;
   rolls up to Meta in the P&L (was unattributed). Incl. igshopping and Pragma DM replies.
-- **Google** free listings (incl. `go/product_sync`) and YouTube organic under google, `is_paid = 0`;
-  paid Shopping unchanged; SEO stays platform organic.
+- **Google organic** = one channel `google_organic` under google, `is_paid = 0` (mirrors `meta_organic`),
+  sub_channel `free_listing` (incl. `go/product_sync`) / `organic_search` (Google SEO, 294 orders) /
+  `youtube`; paid Shopping unchanged; non-Google engines stay platform organic. No-UTM sessions referred
+  by youtube.com → google_organic / youtube (469); by a search engine → organic_search (369; was
+  unattributed via rule 3).
 - product_card → organic `order_tracking_page`; hazlnut → organic `wishlist`; catch-all other →
   organic `organic_other` (still reported in `serve.traffic_unmapped`). `utm_source=th` is NOT organic:
   its UTMs are Meta campaign / ad ids ("TH-383-SUSPENDER-20JUNE") → paid Meta `meta_other` (1 session).
@@ -82,8 +85,8 @@ Rules 15–27 in `mage-ai/serve/semantic/traffic_source_rules.yaml`; full table 
   `platform_attribution_commerce`; `ad_channel_pnl_daily` and `pnl_daily` reconcile to `channel_pnl` in all
   2,894 cells; `order_attribution.lt_finance_channel` order counts = `channel_pnl` placement orders;
   v1 Cube serves the new labels. 987 orders relabelled (531 unattributed → Meta organic, ₹10.9L).
-  P&L net sales Jan–Sep 2026: meta +₹5.77L, google +₹0.73L, whatsapp +₹0.93L, organic −₹1.44L,
-  unattributed −₹5.99L. v1 `organic_*` / `meta_*` channel measures move accordingly (intended).
+  P&L net sales Jan–Sep 2026: meta +₹5.77L, google +₹3.60L, whatsapp +₹0.93L, organic −₹4.31L,
+  unattributed −₹5.99L (google / organic include the Google SEO move, ₹2.87L / 160 orders). v1 `organic_*` / `meta_*` channel measures move accordingly (intended).
 - Phase 1 label diffs approved by the user (362 / 33 / 43 orders, 116,907 sessions).
 
 ## Phase 3 — Cube v2 model ⏳ (next)
@@ -145,8 +148,9 @@ Collapse checks run against the baseline (brand 20, Sep 2026):
   ~0.6 s each), `serve.dim_* / cfg_* / traffic_* / product_hierarchy_conflicts / ad_delivery_* /
   ad_changes / pnl_daily / web_events*` (DDL now in repo).
 - ~~Business decisions open~~ — resolved 2026-10-03 (see "Channel decisions applied").
-- **Open question (not blocking):** Google organic *search* (SEO, 171 orders / ₹4.5L gross in 2026)
-  stays platform organic while free listings / YouTube moved under google. Ask if SEO should follow.
+- ~~Google organic search placement~~ — resolved 2026-10-03: in `google_organic` under google.
+- **Remaining no-UTM referrals still unattributed (sessions only):** `other_referral` 244,
+  `social_unpaid` 12 — the referrer domain is not in the signature, so they cannot be placed.
 - **Email / SMS UTMs vs click ids:** only WhatsApp UTMs override dbt's meta / google label; an email or
   SMS link that picked up an fbclid / gclid stays paid (e.g. 2 `pragma/sms` sessions under meta).
 - **`pnl_daily` / `ad_channel_pnl_daily` have no `is_paid`:** Meta organic orders sit in the Meta

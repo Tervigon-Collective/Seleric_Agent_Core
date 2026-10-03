@@ -36,9 +36,10 @@ and the serve views match the repo except `web_events*`. The **semantics are bro
 7. **Channels (user, 2026-10-03):** WhatsApp is its own platform **and P&L channel**
    (`finance_channel` meta | google | whatsapp | organic | unattributed). Meta organic sits under
    platform meta (its presence is built by the paid spend) and rolls up to Meta in the P&L, marked
-   `is_paid = 0` / channel `meta_organic` everywhere. Google free listings and YouTube organic sit
-   under google the same way; search-engine SEO stays platform organic. Owned pages (order-tracking
-   product cards, wishlist) and unknown sources are organic.
+   `is_paid = 0` / channel `meta_organic` everywhere. Google non-paid traffic — free listings,
+   YouTube organic and Google organic search — is one channel `google_organic` under google the same
+   way; non-Google search engines stay platform organic. Owned pages (order-tracking product cards,
+   wishlist) and unknown sources are organic.
 8. **Phase 1 label diffs approved** (2026-10-03): 362 orders unattributed → organic/google free
    listing, 33 GA `(direct)` orders → unattributed, 43 orders other → whatsapp/email/sms,
    116,907 no-UTM sessions organic → unattributed.
@@ -142,5 +143,5 @@ The full old → new id table lives in `catalogue/migrations/v2_id_map.yaml` (Ph
 | `attribution_credit` fact | `touchpoints` + `attribution_paths` | No catalogue metric needs multi-model credit yet |
 | Retire v1 cubes and serve views at cutover | v1 Cube on :4001 stays; agent moves to v2 on :4002 | seleric_systems (outside scope) still reads v1 `daily_pnl.*` via nginx `/cube/` |
 | Channel split of P&L from `channel_pnl` `multiIf` | `channel_pnl` takes `finance_channel` from the traffic dimension | One classification for every fact |
-| Traffic drill path medium_group → platform → channel → sub_channel | platform → channel → sub_channel; medium_group and `is_paid` are channel attributes | User put Meta organic under meta and Google free listings under google, so one platform holds paid and non-paid channels |
+| Traffic drill path medium_group → platform → channel → sub_channel | platform → channel → sub_channel; medium_group and `is_paid` are channel attributes | User put Meta organic under meta and Google organic (search, free listings, YouTube) under google, so one platform holds paid and non-paid channels |
 | v1 attribution views keep their own `multiIf` until cutover | `order_attribution` (and the views built on it) take labels from the dimension now, plus `lt_is_paid` etc. | Otherwise `channel_pnl` (Meta incl. organic) and `order_attribution` (Meta organic = unattributed) would disagree on the live v1 surface |
