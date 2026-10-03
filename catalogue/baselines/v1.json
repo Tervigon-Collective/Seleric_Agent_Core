@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-03T17:27:48",
+ "generated_at": "2026-10-03T23:56:57",
  "cube_url": "http://127.0.0.1:4001",
  "timezone": "Asia/Kolkata",
  "rows": [
@@ -128,7 +128,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 728927.8,
+   "value": 718636.8,
    "cube_measure": "order_attribution.attributed_refund_amount",
    "date_axis": "order_date",
    "unit": "currency"
@@ -178,7 +178,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 0.343017,
+   "value": 0.343005,
    "cube_measure": "funnel_daily.bounce_rate",
    "date_axis": "report_date",
    "unit": "ratio"
@@ -258,7 +258,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 48984.0,
+   "value": 48982.0,
    "cube_measure": "web_events_daily.collection_views",
    "date_axis": "report_date",
    "unit": "count"
@@ -348,7 +348,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 8.563555,
+   "value": 8.56351,
    "cube_measure": "web_events.events_per_session",
    "date_axis": "event_date",
    "unit": "ratio"
@@ -408,7 +408,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 139501.14512,
+   "value": 123478.42512,
    "cube_measure": "channel_pnl.google_net_sales",
    "date_axis": "report_date",
    "unit": "currency"
@@ -488,7 +488,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 216776.2786,
+   "value": 218917.0603,
    "cube_measure": "channel_pnl.google_net_cogs",
    "date_axis": "report_date",
    "unit": "currency"
@@ -498,7 +498,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": -415554.120947,
+   "value": -433717.622647,
    "cube_measure": "channel_pnl.google_net_profit",
    "date_axis": "report_date",
    "unit": "currency"
@@ -628,7 +628,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 308777.204827,
+   "value": 266814.694827,
    "cube_measure": "channel_pnl.meta_net_sales",
    "date_axis": "report_date",
    "unit": "currency"
@@ -728,7 +728,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 438240.6655,
+   "value": 440779.5362,
    "cube_measure": "channel_pnl.meta_net_cogs",
    "date_axis": "report_date",
    "unit": "currency"
@@ -738,7 +738,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": -984506.530673,
+   "value": -1029007.911373,
    "cube_measure": "channel_pnl.meta_net_profit",
    "date_axis": "report_date",
    "unit": "currency"
@@ -1218,7 +1218,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 1.644474,
+   "value": 1.644496,
    "cube_measure": "session_funnel.avg_page_depth",
    "date_axis": "session_date",
    "unit": "pages"
@@ -1278,7 +1278,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 0.49833,
+   "value": 0.497773,
    "cube_measure": "session_funnel.checkout_to_purchase_rate",
    "date_axis": "session_date",
    "unit": "ratio"
@@ -1298,7 +1298,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 0.010188,
+   "value": 0.010176,
    "cube_measure": "session_funnel.conversion_rate",
    "date_axis": "session_date",
    "unit": "ratio"
@@ -1308,7 +1308,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 0.656983,
+   "value": 0.656995,
    "cube_measure": "session_funnel.pdp_rate",
    "date_axis": "session_date",
    "unit": "ratio"
@@ -1318,7 +1318,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 104163.0,
+   "value": 104166.0,
    "cube_measure": "session_funnel.product_views",
    "date_axis": "session_date",
    "unit": "count"
@@ -1488,7 +1488,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 764460.0,
+   "value": 764457.0,
    "cube_measure": "web_events_daily.events",
    "date_axis": "report_date",
    "unit": "count"
@@ -1498,7 +1498,7 @@
    "brand_id": "20",
    "start": "2026-09-01",
    "end": "2026-09-30",
-   "value": 358736.0,
+   "value": 358735.0,
    "cube_measure": "web_events_daily.page_views",
    "date_axis": "report_date",
    "unit": "count"
@@ -1518,7 +1518,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": -879982.99976,
+   "value": -879982.999918,
    "cube_measure": "ad_channel_pnl.net_profit",
    "date_axis": "report_date",
    "unit": "INR"
@@ -1528,7 +1528,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": 2808328.724116,
+   "value": 2808328.723958,
    "cube_measure": "ad_channel_pnl.net_sales",
    "date_axis": "report_date",
    "unit": "INR"
@@ -1918,7 +1918,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": 705599.271408,
+   "value": 722064.760127,
    "cube_measure": "channel_pnl.google_net_sales",
    "date_axis": "report_date",
    "unit": "currency"
@@ -1998,7 +1998,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": 376365.44,
+   "value": 389950.07,
    "cube_measure": "channel_pnl.google_net_cogs",
    "date_axis": "report_date",
    "unit": "currency"
@@ -2008,7 +2008,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": -313937.322524,
+   "value": -311056.463805,
    "cube_measure": "channel_pnl.google_net_profit",
    "date_axis": "report_date",
    "unit": "currency"
@@ -2138,7 +2138,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": 1468591.309722,
+   "value": 1506447.142455,
    "cube_measure": "channel_pnl.meta_net_sales",
    "date_axis": "report_date",
    "unit": "currency"
@@ -2238,7 +2238,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": 759768.500034,
+   "value": 786487.090034,
    "cube_measure": "channel_pnl.meta_net_cogs",
    "date_axis": "report_date",
    "unit": "currency"
@@ -2248,7 +2248,7 @@
    "brand_id": "20",
    "start": "2026-08-01",
    "end": "2026-08-31",
-   "value": -903297.000312,
+   "value": -892159.757578,
    "cube_measure": "channel_pnl.meta_net_profit",
    "date_axis": "report_date",
    "unit": "currency"
@@ -3028,7 +3028,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 944020.759915,
+   "value": 944020.760262,
    "cube_measure": "ad_channel_pnl.net_profit",
    "date_axis": "report_date",
    "unit": "INR"
@@ -3038,7 +3038,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 4520244.173403,
+   "value": 4520244.17375,
    "cube_measure": "ad_channel_pnl.net_sales",
    "date_axis": "report_date",
    "unit": "INR"
@@ -3198,7 +3198,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 0.200962,
+   "value": 0.200955,
    "cube_measure": "funnel_daily.bounce_rate",
    "date_axis": "report_date",
    "unit": "ratio"
@@ -3328,7 +3328,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 1784.0,
+   "value": 1783.0,
    "cube_measure": "customer_ltv.customers",
    "date_axis": "last_order_at",
    "unit": "count"
@@ -3368,7 +3368,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 4.932049,
+   "value": 4.932083,
    "cube_measure": "web_events.events_per_session",
    "date_axis": "event_date",
    "unit": "ratio"
@@ -3398,7 +3398,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 0.018146,
+   "value": 0.018147,
    "cube_measure": "funnel_daily.funnel_conversion_rate",
    "date_axis": "report_date",
    "unit": "ratio"
@@ -3428,7 +3428,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 1277079.839912,
+   "value": 1330518.939912,
    "cube_measure": "channel_pnl.google_net_sales",
    "date_axis": "report_date",
    "unit": "currency"
@@ -3508,7 +3508,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 432541.61,
+   "value": 450926.13,
    "cube_measure": "channel_pnl.google_net_cogs",
    "date_axis": "report_date",
    "unit": "currency"
@@ -3518,7 +3518,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 248484.516242,
+   "value": 283539.096242,
    "cube_measure": "channel_pnl.google_net_profit",
    "date_axis": "report_date",
    "unit": "currency"
@@ -3648,7 +3648,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 2568318.390036,
+   "value": 2725609.080076,
    "cube_measure": "channel_pnl.meta_net_sales",
    "date_axis": "report_date",
    "unit": "currency"
@@ -3748,7 +3748,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 791645.39,
+   "value": 840817.58,
    "cube_measure": "channel_pnl.meta_net_cogs",
    "date_axis": "report_date",
    "unit": "currency"
@@ -3758,7 +3758,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 230639.640036,
+   "value": 338758.140076,
    "cube_measure": "channel_pnl.meta_net_profit",
    "date_axis": "report_date",
    "unit": "currency"
@@ -4098,7 +4098,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 349.0,
+   "value": 348.0,
    "cube_measure": "customer_ltv.repeat_customers",
    "date_axis": "last_order_at",
    "unit": "count"
@@ -4108,7 +4108,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 0.195628,
+   "value": 0.195177,
    "cube_measure": "customer_ltv.repeat_rate",
    "date_axis": "last_order_at",
    "unit": "percent"
@@ -4238,7 +4238,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 1.689683,
+   "value": 1.689689,
    "cube_measure": "session_funnel.avg_page_depth",
    "date_axis": "session_date",
    "unit": "pages"
@@ -4278,7 +4278,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 0.021673,
+   "value": 0.021674,
    "cube_measure": "session_funnel.checkout_rate",
    "date_axis": "session_date",
    "unit": "ratio"
@@ -4318,7 +4318,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 0.017132,
+   "value": 0.017133,
    "cube_measure": "session_funnel.conversion_rate",
    "date_axis": "session_date",
    "unit": "ratio"
@@ -4328,7 +4328,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 0.799038,
+   "value": 0.799045,
    "cube_measure": "session_funnel.pdp_rate",
    "date_axis": "session_date",
    "unit": "ratio"
@@ -4528,7 +4528,7 @@
    "brand_id": "20",
    "start": "2026-07-01",
    "end": "2026-07-31",
-   "value": 115395.0,
+   "value": 115394.0,
    "cube_measure": "session_funnel.sessions",
    "date_axis": "session_date",
    "unit": "count"
