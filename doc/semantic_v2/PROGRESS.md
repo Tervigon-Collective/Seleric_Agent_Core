@@ -7,8 +7,9 @@ Seleric_Agent work goes on its `gaurav` branch.
 **Status 2026-10-04:** Phases 0–3 done and closed; both repos merged to `main` and deployed (mage-ai Jenkins
 #224, Agent_Core #50). Cube v2 runs as `cube-v2` on 127.0.0.1:4002 next to v1
 (:4001); 149 / 151 certified v1 metrics equal on v2 in every cell, the 2 differences documented. The agent
-still runs on v1 Cube and the v1 catalogue — nothing user-facing has switched. Next: Phase 4 (catalogue v2 +
-MCP resolver on the id map).
+still runs on v1 Cube and the v1 catalogue — nothing user-facing has switched. Phase 4 (catalogue v2 + MCP +
+registry) is built and verified on branches (gates 0 / 0 / 0 / 0 / 0 live; test MCP on :8766 smoke-tested).
+Next: Phase 5 cutover — on request only.
 
 | Phase | Status | Commits |
 |---|---|---|
@@ -17,7 +18,7 @@ MCP resolver on the id map).
 | 2 Serve facts | ✅ done 2026-10-03 | mage-ai e1f8b6c |
 | Channel decisions (pre-Phase 3) | ✅ done 2026-10-03 | mage-ai 393496b, c721983 |
 | 3 Cube v2 model | ✅ closed 2026-10-04 | mage-ai 6f59a2e, f3361eb, 04e59a7 · Agent_Core 7e9bc17, 229d322 (all on `main`) |
-| 4 Catalogue v2 + MCP + registry | 🟡 in progress (paused 2026-10-04) | Agent_Core branch `semantic-v2-p4` · Seleric_Agent branch `semantic-v2` · mage-ai `semantic-v2` |
+| 4 Catalogue v2 + MCP + registry | ✅ built 2026-10-04 (branches, not on main) | Agent_Core `semantic-v2-p4` e9043db · Seleric_Agent `semantic-v2` 22e1d29 · mage-ai `semantic-v2` c4751e8 |
 | 5 Cutover | ⏳ not started | — |
 
 ## Phase 0 — baseline and guards ✅
@@ -152,7 +153,7 @@ Collapse checks run against the baseline at the pause (brand 20, Sep 2026):
 | candidate new-customer value 1,384.19 vs v1 `ltv` 1,729.78 | formula mismatch | port the exact v1 `ltv_cac_daily` definition before collapsing ❌ |
 | `refunded_amount_incl_tax` 726,428.80 vs v1 `attributed_refund_amount` 728,927.80 | Δ 2,499 | find the population difference before collapsing ❌ |
 
-## Phase 4 — catalogue v2 + MCP + registry 🟡 (paused 2026-10-04, resume here)
+## Phase 4 — catalogue v2 + MCP + registry ✅ (built 2026-10-04, on branches)
 Work lives on branches only (NOT on `main` — a push to Agent_Core / mage-ai `main` deploys):
 - Agent_Core worktree `/home/tervigon/work/agent_core_v2`, branch **`semantic-v2-p4`** (from main e7cc6b2).
 - Seleric_Agent worktree `/home/tervigon/work/seleric_agent_v2`, branch **`semantic-v2`** (from origin/gaurav 431ed60).
@@ -180,43 +181,79 @@ Done:
   own query part; `sales_channel = amazon` rejected; hierarchy drill (`metrics_drilldown hierarchy=`);
   v2 ontology; provenance v2 (metric versions, members, binding, Cube SQL, serve objects, ClickHouse
   `normalizedQueryHash` lookup SQL; `CubeClient.sql`).
-- **Tests**: `tests/test_semantic_v2.py` 40/40 pass; existing suite unchanged (296 pass, 8 pre-existing
+- **Tests**: `tests/test_semantic_v2.py` 52/52 pass; existing suite unchanged (296 pass, 8 pre-existing
   `test_canonical_model` failures from the moved Cube path).
 - **Seleric_Agent**: `scripts/migrate_metric_registry_v2.py` (line edits, comments kept) → registry on v2 ids,
   `catalogue_filters` for 15 platform entries + 4 legacy meta_attr_*; aliases kept only where the MCP v2
   resolver agrees (10 dropped, e.g. "roas" → net ROAS wins over the agent's gross). Agent code: `catalogue_filters`
   sent by series + runner; live overlay only from unfiltered entries. Business-state fixtures moved to v2 ids.
 
-Open (resume list):
-1. Seleric_Agent unit suite: 1 new failure `tests/unit/test_v3_ui_connect.py::test_v3_runner_ns_uses_live_catalogue_id_not_llm`
-   (expects a v1 id for "ns"; update to `pnl_net_sales`). The 2 drilldown failures are pre-existing on gaurav.
-2. Gate script `scripts/v2_gates.py` (not written yet): resolution conflicts on catalogue_v2 (v1 had 77),
-   registry drift, hard-cut coverage, live duplicate scan (use a relative tolerance — absolute 0.02 flags rates).
-3. Known resolver limit: "atc sessions" / "product view sessions" resolve to `sessions` via concept-in-text
-   (disclosed as a warning). 11 glossary terms dropped (targets retired without replacement).
-4. Test MCP instance on catalogue_v2 + cube-v2 (second container, e.g. :8766) and live smoke; verify the
-   provenance ClickHouse lookup against system.query_log.
-5. Docs: PLAN §4/§5 vs. what was built; then Phase 5 cutover (MCP → cube-v2 + catalogue_v2, merge
-   Seleric_Agent semantic-v2 into gaurav at the same time — v2 ids do not exist on the v1 MCP).
+- **One resolver everywhere:** in v2, `resolve_concept` without axes delegates to the term resolver (exact metric
+  names, retired ids and unavailable metrics answer identically on every tool); `search` keeps the resolver
+  answer as top hit through its grain filter.
+- **Meta breakdown slices (found by the live smoke, fixed):** `serve.meta_ads_breakdown_daily` repeats ALL Meta
+  delivery once per `breakdown_type` (age_and_gender / placement / platform_device / publisher_platform /
+  region — each sums to the same spend and impressions). An unpinned "impressions by age" returned a 6.3M null
+  bucket on 1.6M real impressions. Bindings now carry `slice_dimension` + `slices`: the planner pins the one
+  `breakdown_type` that carries the requested dims (publisher_platform alone → publisher_platform; with
+  position / impression_device → placement; with device_platform → platform_device), refuses mixes (age +
+  region), `country` (never populated) and a metric a slice lacks (`landing_page_views` by region sums to 0 at
+  Meta; `thruplays` too, not on the binding), and warns the binding is Meta-only. Grouping BY breakdown_type is
+  allowed with a "never sum across rows" warning.
+- **Gates** `scripts/v2_gates.py` (534 phrases: inventory probes + v1 glossary + v1/v2 concept aliases + v1/v2
+  registry aliases): resolution conflicts **0** (v1: 77), registry drift **0**, hard-cut coverage gaps **0**,
+  sliced bindings **0** (static + live full-copy check), duplicate numbers **0** (live, relative tolerance).
+  4 phrases resolve to nothing (dimension words). Run from a worktree with
+  `SELERIC_CUBE_ENV=/opt/seleric/mage-ai/infra/cube/.env … v2_gates.py --agent <v2 registry checkout> [--live]`.
+  mage-ai `ci_quality_gates.sh` runs it report-only (skips until the script is on Agent_Core main).
+- **Test MCP** `docker-compose.v2test.yml` (project `seleric-mcp-v2test`, 127.0.0.1:8766, own data volume,
+  joins `seleric-mcp_default` to reach `cube-v2`; not deployed by Jenkins). Startup drift check: 109 / 109
+  metrics on cube-v2, 0 broken. Live smoke over MCP (brand 20, Sep 2026): retired `meta_spend` refused naming
+  `ad_spend` + `ad_platform = meta`; "meta net sales" → `pnl_net_sales` + `finance_channel = meta` (266,815);
+  roas + {meta, paid} → `pnl_net_roas` + `finance_channel = meta, is_paid = true`; ad_spend + hook_rate composed
+  (hook_rate scoped to meta in its own part); hook_rate on google refused; hourly ad_spend → hourly binding
+  (24 rows); impressions by age → age_and_gender slice (sums to Meta's 1,585,690); amazon refused; checkout
+  timing refused with reason; orders 1,097 = Σ by platform = Σ drilled to channel (hierarchy traffic).
+- **Provenance trace verified:** the `clickhouse_trace.lookup_sql` of each part finds its query in
+  `system.query_log` (user `cube_serve`, tables `serve.pnl_daily` / `serve.ad_delivery_daily` only).
+- Seleric_Agent unit suite back to its gaurav baseline (745 pass, 2 pre-existing drilldown failures) after
+  `test_v3_ui_connect` moved to `pnl_net_sales`.
+
+Decisions taken in Phase 4 (catalogue wins over the agent registry):
+- "roas" = **net** ROAS (`pnl_net_roas`); the registry alias that meant gross was dropped. Gross ROAS is asked
+  explicitly ("gross roas").
+- `pnl_gross_sales` / `pnl_discounts` / `pnl_orders` hidden in Cube v2 (same numbers as `gross_sales` /
+  `discounts` / `orders`).
+- Checkout-timing metrics stay in the catalogue as `broken` with an `unavailable_reason` (refused, never 0).
+
+Known limits (accepted):
+- "atc sessions" / "product view sessions" resolve to `sessions` via concept-in-text (disclosed as a warning).
+- 11 v1 glossary terms dropped (their targets were retired without replacement).
+- Composites (CAC, LTV:CAC, gross ROAS) are composed inside Cube v2 views (`unit_economics`), not by the
+  planner; drill-through to records (`drill_members`) is not exposed by the MCP yet.
 
 ## Next steps
-1. **Phase 4** — catalogue v2 on `catalogue/migrations/v2_id_map.yaml` (`v2_metrics` = the 106 v2 ids with
-   member + date axis; `maps` = old → new + filters). Metric YAML schema v2 in `catalogue_service/loader.py`
-   (`home_product`, `fact`, `date_axis`, `additivity`, `bindings` — e.g. ad_spend → paid_media / paid_media_hourly /
-   paid_media_breakdowns —, `valid_for`, `version`), one resolver (`resolve_concept`), planner (bindings, hierarchy
-   drill, composites gross_roas / cac / ltv_cac_ratio, `valid_for`, hard-cut rejection naming `new` + filters),
-   brand member per v2 view, provenance v2 (trace via PHASE0.md). Update `Seleric_Agent/config/metric_registry.yaml`
-   on the `gaurav` branch (drop aliases; ids must exist) — the teammate's uncommitted files there must be
-   committed first. Re-point `build_metric_inventory.py` gates at the v2 surface; add `scripts/v2_parity.py` to CI.
-2. **Phase 5** — MCP `config.yaml cube.api_url` → :4002 (in-network: `http://cube-v2:4000`); gates blocking in CI;
-   regenerate inventory. Keep v1 Cube for seleric_systems (`daily_pnl.*` via nginx `/cube/`).
-3. **Merge** `semantic-v2` → `main` at each stable point. mage-ai: a push to `main` triggers the Jenkins deploy
-   (CI gates → rsync into /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt orchestrator runs back
-   to back (~25 min, ~10 s gaps), so push right after a run completes. **Seleric_Agent_Core also deploys on a
-   push to `main`** (Jenkins job `Seleric-Agent-Core`: rsync --delete into /opt/seleric/Seleric_Agent_Core +
-   `docker compose up -d --build` → MCP and v1 Cube restart, ~1 min) — even for doc-only commits. That deploy
-   reads `mage-ai/infra/cube/.env.v2` as the `jenkins` user: keep it group-readable (640, group tervigon) —
-   build #49 failed at compose config load while it was 600.
+1. **Phase 5 cutover** (only when asked; one window, both together — v2 ids do not exist on the v1 MCP):
+   - Agent_Core: merge `semantic-v2-p4` → `main` with `docker-compose.yml` `mcp` → `CUBE_API_URL:
+     http://cube-v2:4000`, `SELERIC_CATALOGUE_DIR: catalogue_v2`, `SELERIC_CATALOGUE_SHA`, `depends_on: cube-v2`
+     (the Dockerfile must also `COPY catalogue_v2`). The merge also lands the stable parent mount for cube-v2.
+     Push = Jenkins deploy (MCP restart ~1 min).
+   - Seleric_Agent: merge `semantic-v2` → `gaurav` right after the MCP is on v2 (the live checkout has a
+     teammate's uncommitted files — they must commit first); redeploy the agent.
+   - Make `v2_gates.py` blocking in CI; regenerate the inventory on the v2 surface; add `v2_parity.py` to CI.
+   - Then stop the test MCP (`docker compose -f docker-compose.v2test.yml down -v`).
+   - Rollback = revert the compose env (catalogue/ + cube) and the gaurav merge; v1 stays intact throughout.
+2. Keep v1 Cube (:4001) for seleric_systems (`daily_pnl.*` via nginx `/cube/`).
+3. **Deploy notes:** mage-ai: a push to `main` triggers the Jenkins deploy (CI gates → rsync into
+   /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt orchestrator runs back to back (~25 min,
+   ~10 s gaps), so push right after a run completes. **Seleric_Agent_Core also deploys on a push to `main`**
+   (Jenkins job `Seleric-Agent-Core`: rsync --delete into /opt/seleric/Seleric_Agent_Core + `docker compose up -d
+   --build` → MCP and v1 Cube restart, ~1 min) — even for doc-only commits. That deploy reads
+   `mage-ai/infra/cube/.env.v2` as the `jenkins` user: keep it group-readable (640, group tervigon) — build #49
+   failed at compose config load while it was 600.
+4. **Live compose drift:** until the Phase 4 merge, Agent_Core `main` still has the old `model_v2` bind mount for
+   cube-v2. The running container uses the stable parent mount (applied from the branch); any Agent_Core main
+   deploy before the merge recreates cube-v2 with the old mount (works, but goes stale on a mage-ai branch switch).
 
 ## Known gaps / risks
 - ~~Uncommitted on `main`~~ — resolved 2026-10-03: `semantic-v2` merged to `main` in both repos.
@@ -250,8 +287,9 @@ Open (resume list):
   ~4 % of Google campaigns (historical) missing from `gold.dim_campaign` (patched in serve, root cause in dbt).
 - **New-signature lag:** a brand-new UTM combination is unlabelled for up to 5 min (dimension refresh);
   `channel_pnl` falls back to the dbt platform's finance bucket meanwhile; Cube joins would show null.
-- **Gates** still measure the v1 surface (77 conflicts, 51 same-value ids, …); they only turn green once
-  Phase 4/5 re-point them at v2. CI step is report-only (`ci_quality_gates.sh`, on `main` since 2026-10-03).
+- **Gates:** the v1 inventory gates still measure the v1 surface (77 conflicts, 51 same-value ids, …) and stay
+  red by design; the v2 gates (`scripts/v2_gates.py`) are 0 on catalogue_v2. Both are report-only in CI until
+  the Phase 5 cutover.
 - **seleric_systems** depends on v1 Cube `daily_pnl.*` (outside the three repos) — v1 cannot be retired.
 - `product_ad_spend_daily.sql` stays in the repo but undeployed (as before); `apply_views.py` skips it.
 
