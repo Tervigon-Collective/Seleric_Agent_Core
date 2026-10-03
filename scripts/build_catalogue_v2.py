@@ -75,6 +75,17 @@ META_ONLY = {"landing_page_views", "cost_per_landing_page_view", "video_completi
 HOURLY = ["ad_spend", "impressions", "clicks", "link_clicks", "landing_page_views", "ctr", "cpc", "cpm"]
 BREAKDOWN_DIMS = ["breakdown_type", "age", "gender", "publisher_platform", "platform_position",
                   "impression_device", "device_platform", "country", "region"]
+# serve.meta_ads_breakdown_daily repeats ALL of Meta delivery once per breakdown_type, so a query must
+# pin exactly one. Dimension -> the breakdown_types that carry it (preferred first); [] = never populated.
+BREAKDOWN_SLICES = {
+    "age": ["age_and_gender"], "gender": ["age_and_gender"],
+    "platform_position": ["placement"], "impression_device": ["placement"],
+    "device_platform": ["platform_device"],
+    "publisher_platform": ["publisher_platform", "placement", "platform_device"],
+    "region": ["region"], "country": [],
+}
+# breakdown_types Meta returns without a field (sum 0, checked live by scripts/v2_gates.py --live)
+SLICE_GAPS = {"landing_page_views": {"region"}}
 UNAVAILABLE = {
     m: ("Not populated: Shopify's checkout_started pixel is server-side (no web-session id), so session "
         "checkout timestamps / step counts are always empty (dbt fct_session_funnel KNOWN GAP). "
@@ -310,7 +321,12 @@ def main() -> int:
             bindings.append({"name": "hourly", "view": "paid_media_hourly", "measure": f"paid_media_hourly.{member}",
                              "granularities": ["hour"]})
             bindings.append({"name": "breakdowns", "view": "paid_media_breakdowns",
-                             "measure": f"paid_media_breakdowns.{member}", "dimensions": BREAKDOWN_DIMS})
+                             "measure": f"paid_media_breakdowns.{member}", "dimensions": BREAKDOWN_DIMS,
+                             "slice_dimension": "breakdown_type",
+                             "slices": {d: [x for x in v if x not in SLICE_GAPS.get(member, ())]
+                                        for d, v in BREAKDOWN_SLICES.items()},
+                             "note": "Meta only: Google reports no audience breakdowns, so Google delivery "
+                                     "is not in these rows."})
         if bindings:
             doc["bindings"] = bindings
         wy(OUT / "metrics" / f"{mid}.yaml", doc, hdr)

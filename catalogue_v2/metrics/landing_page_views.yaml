@@ -49,3 +49,22 @@ bindings:
   - device_platform
   - country
   - region
+  slice_dimension: breakdown_type
+  slices:
+    age:
+    - age_and_gender
+    gender:
+    - age_and_gender
+    platform_position:
+    - placement
+    impression_device:
+    - placement
+    device_platform:
+    - platform_device
+    publisher_platform:
+    - publisher_platform
+    - placement
+    - platform_device
+    region: []
+    country: []
+  note: 'Meta only: Google reports no audience breakdowns, so Google delivery is not in these rows.'

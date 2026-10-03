@@ -182,6 +182,48 @@ async def test_breakdown_dimension_routes_to_breakdown_binding(planner, cube):
     q = cube.queries[-1]
     assert q["measures"] == ["paid_media_breakdowns.impressions"]
     assert "paid_media_breakdowns.age" in q["dimensions"]
+    # every breakdown_type repeats all of Meta delivery: exactly one is pinned
+    assert {"member": "paid_media_breakdowns.breakdown_type", "operator": "equals",
+            "values": ["age_and_gender"]} in q["filters"]
+
+
+@pytest.mark.parametrize("dims,slice_", [
+    (["publisher_platform"], "publisher_platform"),
+    (["publisher_platform", "platform_position"], "placement"),
+    (["publisher_platform", "device_platform"], "platform_device"),
+    (["region"], "region"),
+])
+async def test_breakdown_slice_follows_the_dimensions(planner, cube, dims, slice_):
+    await planner.run(QueryRequest(measures=["ad_spend"], dimensions=dims, time_range=SEP))
+    flt = [f for f in cube.queries[-1]["filters"] if f["member"] == "paid_media_breakdowns.breakdown_type"]
+    assert flt == [{"member": "paid_media_breakdowns.breakdown_type", "operator": "equals", "values": [slice_]}]
+
+
+async def test_breakdown_filter_alone_pins_its_slice(planner, cube):
+    req = QueryRequest(measures=["impressions"], time_range=SEP,
+                       filters=[FilterSpec(dimension="gender", operator="equals", values=["female"])])
+    await planner.run(req)
+    assert {"member": "paid_media_breakdowns.breakdown_type", "operator": "equals",
+            "values": ["age_and_gender"]} in cube.queries[-1]["filters"]
+
+
+@pytest.mark.parametrize("dims,filters,msg", [
+    (["age", "region"], [], "cannot be combined"),
+    (["country"], [], "not available"),
+    (["age"], [FilterSpec(dimension="breakdown_type", operator="equals", values=["region"])], "not in"),
+    ([], [FilterSpec(dimension="breakdown_type", operator="equals", values=["region", "placement"])],
+     "exactly one"),
+])
+async def test_breakdown_slices_that_would_double_count_are_refused(planner, dims, filters, msg):
+    with pytest.raises(PlanError) as exc:
+        await planner.run(QueryRequest(measures=["impressions"], dimensions=dims, filters=filters, time_range=SEP))
+    assert msg in str(exc.value)
+
+
+async def test_grouping_by_breakdown_type_is_allowed_with_warning(planner, cube):
+    out = await planner.run(QueryRequest(measures=["impressions"], dimensions=["breakdown_type"], time_range=SEP))
+    assert not any(f["member"].endswith("breakdown_type") for f in cube.queries[-1].get("filters", []))
+    assert any("never sum across" in w for w in out["warnings"])
 
 
 async def test_meta_only_metric_is_scoped_in_its_own_part(planner, cube):
@@ -250,3 +292,17 @@ async def test_provenance_v2_has_versions_sql_and_trace(planner, cube):
 def test_inline_params_skips_quoted_literals():
     sql = "SELECT 1 WHERE a = ? AND b = 'x?y' AND c = 'it''s?' AND d = ?"
     assert _inline_params(sql, ["1", "2"]) == "SELECT 1 WHERE a = '1' AND b = 'x?y' AND c = 'it''s?' AND d = '2'"
+
+
+async def test_breakdown_binding_says_it_is_meta_only(planner):
+    out = await planner.run(QueryRequest(measures=["impressions"], dimensions=["age"], time_range=SEP))
+    assert any("Meta only" in w for w in out["warnings"])
+
+
+async def test_metric_missing_from_a_slice_is_refused_not_zero(planner):
+    # Meta's region breakdown carries no landing_page_views (sums to 0): refuse, never answer 0
+    for kw in ({"dimensions": ["region"]},
+               {"filters": [FilterSpec(dimension="breakdown_type", operator="equals", values=["region"])]}):
+        with pytest.raises(PlanError) as exc:
+            await planner.run(QueryRequest(measures=["landing_page_views"], time_range=SEP, **kw))
+        assert "landing_page_views" in str(exc.value)

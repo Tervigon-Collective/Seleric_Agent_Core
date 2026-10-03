@@ -258,7 +258,10 @@ class QueryPlanner:
         out: list[MetricDef] = []
         forced: dict[str, list[FilterSpec]] = {}
         warnings: list[str] = []
-        asked = set(request.dimensions) | {f.dimension for f in request.filters}
+        asked = set()
+        for d in [*request.dimensions, *(f.dimension for f in request.filters)]:
+            dim = self.catalogue.resolve_dimension(d)
+            asked.add(dim.id if dim is not None else d)
         for m in metrics:
             for did, allowed in m.valid_for.items():
                 allowed_l = {a.lower() for a in allowed}
@@ -287,11 +290,56 @@ class QueryPlanner:
                     dims = [d.id for d in self.catalogue.cat.dimensions.values() if b.view in d.views]
                     bound.supported_dimensions = dims
                     bound.supported_filters = list(dims)
-                    warnings.append(f"'{m.id}' served from its '{b.name}' binding (view {b.view}).")
+                    warnings.append(f"'{m.id}' served from its '{b.name}' binding (view {b.view})."
+                                    + (f" {b.note}" if b.note else ""))
+                    if b.slice_dimension:
+                        pinned, note = self._pick_slice(m.id, b, asked, request)
+                        if pinned:
+                            forced.setdefault(m.id, []).append(
+                                FilterSpec(dimension=b.slice_dimension, operator="equals", values=[pinned])
+                            )
+                        if note:
+                            warnings.append(note)
                     m = bound
                     break
             out.append(m)
         return out, forced, warnings
+
+    def _pick_slice(self, metric_id: str, b, asked: set[str], request: QueryRequest) -> tuple[str | None, str | None]:
+        """A sliced binding repeats the full total once per slice (Meta breakdown_type), so the
+        query must pin exactly one: the slice every requested breakdown dimension lives in.
+        Returns (slice to force or None, warning)."""
+        sd = b.slice_dimension
+        if sd in request.dimensions:
+            return None, (f"Grouped by {sd}: each {sd} row is the SAME total cut a different way — "
+                          f"never sum across {sd} rows.")
+        wanted = sorted(d for d in asked if d in b.slices)
+        cands: list[str] | None = None
+        for d in wanted:
+            if not b.slices[d]:
+                raise PlanError(f"'{metric_id}' by '{d}' is not available: the source does not report "
+                                f"{metric_id} for that breakdown (view {b.view}).",
+                                suggestions=[x for x, s in b.slices.items() if s and x != d])
+            cands = list(b.slices[d]) if cands is None else [s for s in cands if s in b.slices[d]]
+        explicit = [f for f in request.filters if f.dimension == sd]
+        if explicit:
+            f = explicit[0]
+            if f.operator != "equals" or len(f.values) != 1:
+                raise PlanError(f"Filter {sd} to exactly one value (equals): each {sd} is a full copy of "
+                                f"the same total, so several would double-count.")
+            if f.values[0] not in {x for v in b.slices.values() for x in v}:
+                raise PlanError(f"'{metric_id}' is not reported for {sd} = {f.values[0]} (view {b.view}).")
+            if cands is not None and f.values[0] not in cands:
+                raise PlanError(f"{', '.join(wanted)} is not in {sd} = {f.values[0]} "
+                                f"(it is in: {', '.join(cands) or 'none'}).", suggestions=cands or [])
+            return None, None
+        if not cands:
+            raise PlanError(
+                f"{' and '.join(wanted)} come from different {sd}s (each a full copy of the same delivery), "
+                f"so they cannot be combined in one query — run one query per breakdown."
+            )
+        return cands[0], f"Pinned {sd} = {cands[0]} (the {sd} that carries {', '.join(wanted)}; " \
+                         f"each {sd} repeats the full total)."
 
     def _metrics_supporting_dimension(
         self, dimension_id: str, *, exclude: str | None = None

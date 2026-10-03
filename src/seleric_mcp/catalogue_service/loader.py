@@ -62,6 +62,12 @@ class Binding(BaseModel):
     datetime_dimension: str | None = None
     granularities: list[str] = Field(default_factory=list)
     dimensions: list[str] = Field(default_factory=list)
+    # A sliced fact repeats the full total once per value of ``slice_dimension`` (Meta
+    # breakdown_type): the planner pins exactly one slice. ``slices`` maps a dimension to the
+    # slice values that carry it, preferred first; [] = never populated on this binding.
+    slice_dimension: str | None = None
+    slices: dict[str, list[str]] = Field(default_factory=dict)
+    note: str | None = None  # scope caveat shown whenever the binding is used
 
 
 class MetricDef(BaseModel):

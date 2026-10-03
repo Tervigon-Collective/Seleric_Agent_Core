@@ -1,0 +1,40 @@
+# Semantic v2 test MCP (doc/semantic_v2 Phase 4): this checkout's code + catalogue_v2 against cube-v2.
+# Own project, own data volume, loopback :8766 only; joins the live seleric-mcp network to reach cube-v2.
+# Not part of the deployed stack (Jenkins runs docker-compose.yml only).
+#
+#   docker compose -f docker-compose.v2test.yml up -d --build
+#   docker compose -f docker-compose.v2test.yml down
+name: seleric-mcp-v2test
+
+services:
+  mcp-v2:
+    build: .
+    image: seleric-mcp-mcp-v2test
+    container_name: seleric-mcp-v2test
+    restart: "no"
+    env_file:
+      - /opt/seleric/Seleric_Agent_Core/.env
+    environment:
+      CUBE_API_URL: http://cube-v2:4000
+      SELERIC_CATALOGUE_DIR: catalogue_v2
+      SELERIC_CATALOGUE_SHA: ${SELERIC_CATALOGUE_SHA:-}
+      SELERIC_MCP_DB: /data/seleric_mcp.db
+      OPENMETADATA_BASE_URL: http://host.docker.internal:8585
+      MCP_ALLOWED_HOSTS: 127.0.0.1:*,localhost:*,mcp-v2:*
+      MCP_ALLOWED_ORIGINS: http://127.0.0.1:*,http://localhost:*
+    volumes:
+      - ./catalogue:/app/catalogue:ro
+      - ./catalogue_v2:/app/catalogue_v2:ro
+      - ./config.yaml:/app/config.yaml:ro
+      - mcp-v2-data:/data
+    ports:
+      - "127.0.0.1:8766:8765"
+    networks: [seleric-mcp]
+
+networks:
+  seleric-mcp:
+    name: seleric-mcp_default
+    external: true
+
+volumes:
+  mcp-v2-data:

@@ -8,6 +8,8 @@ Gates
                          Seleric_Agent registry aliases — a conflict is two resolvers naming different ids
   registry drift         registry catalogue_metric not in catalogue_v2, or catalogue_filters not on its view
   hard-cut coverage      every v1 metric id is a live v2 id or listed in deprecations.yaml
+  sliced bindings        every breakdown dimension of a sliced binding names its slice; (--live) every slice of
+                         an additive metric equals its home total for the slice's platform (one full copy each)
   duplicate numbers      (--live) two v2 metrics returning the same number for brand 20, last 3 full months
 Phrases: the inventory probe list + v1 glossary terms + v1 / v2 concept aliases + v1 and v2 registry aliases.
 """
@@ -90,12 +92,19 @@ def main() -> int:
     deprecated = {d.old for d in svc.cat.deprecations}
     uncovered = sorted(i for i in v1_ids if i not in svc.cat.metrics and i not in deprecated)
 
+    sliced = []
+    for m in svc.cat.metrics.values():
+        for b in m.bindings:
+            if b.slice_dimension:
+                sliced += [f"{m.id}/{b.name}: dimension {d} has no slice" for d in b.dimensions
+                           if d != b.slice_dimension and d not in b.slices]
     dups = []
     if args.live:
+        sliced += live_slices(svc)
         dups = live_duplicates(svc)
 
     gates = [("resolution conflicts", len(conflicts)), ("registry drift", len(drift)),
-             ("hard-cut coverage gaps", len(uncovered))] + ([("duplicate numbers", len(dups))] if args.live else [])
+             ("hard-cut coverage gaps", len(uncovered)), ("sliced bindings", len(sliced))] + ([("duplicate numbers", len(dups))] if args.live else [])
     print(f"semantic v2 gates (catalogue_v2 {svc.version}, {len(rows)} phrases):")
     for name, n in gates:
         print(f"  {'PASS' if n == 0 else 'FAIL'}  {name:26s} {n}")
@@ -106,13 +115,41 @@ def main() -> int:
         print("    drift", x)
     for x in uncovered:
         print("    uncovered v1 id", x)
+    for x in sliced:
+        print("    slice", x)
     for x in dups:
         print("    same number", x)
     unresolved = [r["phrase"] for r in rows if r["verdict"] == "UNRESOLVED"]
     print(f"  info: {len(unresolved)} phrases unresolved by every resolver (no metric — e.g. dimension words)")
     if args.json:
-        json.dump({"rows": rows, "drift": drift, "uncovered": uncovered, "duplicates": dups}, open(args.json, "w"), indent=1)
+        json.dump({"rows": rows, "drift": drift, "uncovered": uncovered, "sliced": sliced, "duplicates": dups}, open(args.json, "w"), indent=1)
     return 1 if any(n for _, n in gates) else 0
+
+
+def live_slices(svc) -> list[str]:
+    """Each slice of a sliced binding repeats the home total (brand 20, last full month): the planner
+    pins one slice, so a slice that is NOT a full copy would make breakdown answers wrong."""
+    from v2_parity import V2_URL, last_full_months, load, secret, token
+    tok = token(secret())
+    (s, e), = last_full_months(1)
+    bad = []
+    for m in svc.cat.metrics.values():
+        if m.formula and m.formula.depends_on or not m.is_queryable:
+            continue  # ratios follow from their additive parts
+        for b in m.bindings:
+            if not b.slice_dimension:
+                continue
+            home_view = m.cube_mapping.view
+            platform = {f"{home_view}.ad_platform": "meta"}  # sliced facts here are Meta-only (binding note)
+            axis = f"{home_view}.{svc.cat.views[home_view].date_dimension}"
+            want = load(V2_URL, tok, m.cube_mapping.measure, axis, "20", s, e, platform)
+            for sl in sorted({x for v in b.slices.values() for x in v}):
+                got = load(V2_URL, tok, b.measure, f"{b.view}.report_date", "20", s, e,
+                           {f"{b.view}.{b.slice_dimension}": sl})
+                if not (isinstance(want, float) and isinstance(got, float)
+                        and abs(want - got) <= max(0.011, 1e-6 * abs(want))):
+                    bad.append(f"{m.id}/{b.name} {b.slice_dimension}={sl}: {got} vs home {want}")
+    return bad
 
 
 def live_duplicates(svc) -> list[tuple]:
