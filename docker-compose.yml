@@ -7,8 +7,8 @@
 #   uv run python scripts/smoke_cube.py
 #
 # Public:
-#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core)
-#   https://mcp.seleric.com/cube/ → 127.0.0.1:4001  (this cube service)
+#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core, on cube-v2 + catalogue_v2)
+#   https://mcp.seleric.com/cube/ → 127.0.0.1:4001  (v1 cube service; seleric_systems daily_pnl.*)
 name: seleric-mcp
 
 services:
@@ -56,12 +56,14 @@ services:
     container_name: seleric-mcp-mcp-1
     restart: unless-stopped
     depends_on:
-      - cube
+      - cube-v2
     env_file:
       - .env
     environment:
-      # In-compose Cube (not host loopback)
-      CUBE_API_URL: http://cube:4000
+      # Semantic v2 (doc/semantic_v2, Phase 5 cutover 2026-10-04): catalogue_v2 on Cube v2.
+      # Rollback: CUBE_API_URL http://cube:4000 + drop SELERIC_CATALOGUE_DIR (v1 catalogue/ stays shipped).
+      CUBE_API_URL: http://cube-v2:4000
+      SELERIC_CATALOGUE_DIR: catalogue_v2
       SELERIC_MCP_DB: /data/seleric_mcp.db
       OPENMETADATA_BASE_URL: http://host.docker.internal:8585
       # FastMCP DNS-rebinding / CORS — same public domain via nginx
@@ -70,6 +72,7 @@ services:
       MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*
     volumes:
       - ./catalogue:/app/catalogue:ro
+      - ./catalogue_v2:/app/catalogue_v2:ro
       - ./config.yaml:/app/config.yaml:ro
       - mcp-data:/data
     ports:

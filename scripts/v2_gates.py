@@ -10,6 +10,8 @@ Gates
   hard-cut coverage      every v1 metric id is a live v2 id or listed in deprecations.yaml
   sliced bindings        every breakdown dimension of a sliced binding names its slice; (--live) every slice of
                          an additive metric equals its home total for the slice's platform (one full copy each)
+  live filters           (--live) every filter the catalogue or registry can emit (glossary, concept axes,
+                         retired-id replacements, registry catalogue_filters) runs on Cube v2 without error
   duplicate numbers      (--live) two v2 metrics returning the same number for brand 20, last 3 full months
 Phrases: the inventory probe list + v1 glossary terms + v1 / v2 concept aliases + v1 and v2 registry aliases.
 """
@@ -99,12 +101,14 @@ def main() -> int:
                 sliced += [f"{m.id}/{b.name}: dimension {d} has no slice" for d in b.dimensions
                            if d != b.slice_dimension and d not in b.slices]
     dups = []
+    filter_errors = []
     if args.live:
+        filter_errors = live_filters(svc, reg)
         sliced += live_slices(svc)
         dups = live_duplicates(svc)
 
     gates = [("resolution conflicts", len(conflicts)), ("registry drift", len(drift)),
-             ("hard-cut coverage gaps", len(uncovered)), ("sliced bindings", len(sliced))] + ([("duplicate numbers", len(dups))] if args.live else [])
+             ("hard-cut coverage gaps", len(uncovered)), ("sliced bindings", len(sliced))] + ([("live filters", len(filter_errors)), ("duplicate numbers", len(dups))] if args.live else [])
     print(f"semantic v2 gates (catalogue_v2 {svc.version}, {len(rows)} phrases):")
     for name, n in gates:
         print(f"  {'PASS' if n == 0 else 'FAIL'}  {name:26s} {n}")
@@ -117,13 +121,61 @@ def main() -> int:
         print("    uncovered v1 id", x)
     for x in sliced:
         print("    slice", x)
+    for x in filter_errors:
+        print("    filter", x)
     for x in dups:
         print("    same number", x)
     unresolved = [r["phrase"] for r in rows if r["verdict"] == "UNRESOLVED"]
     print(f"  info: {len(unresolved)} phrases unresolved by every resolver (no metric — e.g. dimension words)")
     if args.json:
-        json.dump({"rows": rows, "drift": drift, "uncovered": uncovered, "sliced": sliced, "duplicates": dups}, open(args.json, "w"), indent=1)
+        json.dump({"rows": rows, "drift": drift, "uncovered": uncovered, "sliced": sliced, "filters": filter_errors, "duplicates": dups}, open(args.json, "w"), indent=1)
     return 1 if any(n for _, n in gates) else 0
+
+
+def live_filters(svc, reg) -> list[str]:
+    """Run every (metric, filters) pair the surface can produce on Cube v2 (brand 20, last full month).
+    A type mismatch (e.g. boolean 'true' on a UInt8 column) only shows up when ClickHouse runs it."""
+    from v2_parity import V2_URL, last_full_months, load, secret, token
+    tok = token(secret())
+    (s, e), = last_full_months(1)
+    pairs: set[tuple[str, tuple]] = set()
+    for t in svc.cat.glossary:
+        if t.canonical_id and t.filter:
+            pairs.add((t.canonical_id, tuple(sorted(t.filter.items()))))
+    for d in svc.cat.deprecations:
+        if d.filters and d.new in svc.cat.metrics:
+            pairs.add((d.new, tuple(sorted(d.filters.items()))))
+    for r in reg:
+        if r.get("catalogue_metric") and r.get("catalogue_filters"):
+            pairs.add((r["catalogue_metric"], tuple(sorted((k, str(v)) for k, v in r["catalogue_filters"].items()))))
+    for c in svc.cat.concepts.values():
+        targets = {x.metric for x in c.resolves if getattr(x, "metric", None)}
+        for values in c.axis_filters.values():
+            for flt in values.values():
+                for mid in targets:
+                    m = svc.cat.metrics.get(mid)
+                    if m and all(m.cube_mapping.view in getattr(svc.cat.dimensions.get(k), "views", {}) for k in flt):
+                        pairs.add((mid, tuple(sorted(flt.items()))))
+    bad = []
+    for mid, flt in sorted(pairs):
+        m = svc.cat.metrics.get(mid)
+        if m is None or not m.is_queryable:
+            continue
+        view = m.cube_mapping.view
+        members = {}
+        for k, v in flt:
+            dim = svc.cat.dimensions.get(k)
+            if dim is None or view not in dim.views:
+                bad.append(f"{mid} {dict(flt)}: dimension {k} not on view {view}")
+                break
+            members[dim.views[view]] = v
+        else:
+            axis = m.cube_mapping.time_dimension or f"{view}.{svc.cat.views[view].date_dimension}"
+            got = load(V2_URL, tok, m.cube_mapping.measure, axis, "20", s, e, members)
+            if isinstance(got, str):
+                bad.append(f"{mid} {dict(flt)}: {got[:160]}")
+    print(f"  info: {len(pairs)} metric + filter pairs run live")
+    return bad
 
 
 def live_slices(svc) -> list[str]:
