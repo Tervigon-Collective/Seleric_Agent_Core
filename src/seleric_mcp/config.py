@@ -265,6 +265,12 @@ def load_settings(config_path: Path | None = None) -> Settings:
     db_path = Path(db_raw)
     if not db_path.is_absolute():
         db_path = PROJECT_ROOT / db_path
+    # Catalogue directory (semantic v2 runs a second instance on catalogue_v2/).
+    # Env override: SELERIC_CATALOGUE_DIR (relative paths are under the project root).
+    catalogue_raw = os.getenv("SELERIC_CATALOGUE_DIR", "").strip()
+    catalogue_dir = Path(catalogue_raw) if catalogue_raw else PROJECT_ROOT / "catalogue"
+    if not catalogue_dir.is_absolute():
+        catalogue_dir = PROJECT_ROOT / catalogue_dir
 
     scopes_cfg = _cfg_get(gateway, "scopes", ["metrics:read"])
     if isinstance(scopes_cfg, str):
@@ -391,6 +397,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         ads_tools_enabled=ads_tools_enabled,
         serve_db=serve_db,
         db_path=db_path,
+        catalogue_dir=catalogue_dir,
         resolve_auto_threshold=_tunable_float(
             "SELERIC_RESOLVE_AUTO_THRESHOLD", "resolve_auto_threshold"
         ),

@@ -963,10 +963,12 @@ def build_server(settings: Settings) -> FastMCP:
     @mcp.tool()
     async def metrics_drilldown(
         parent_query_id: str,
-        target_dimensions: list[str],
+        target_dimensions: list[str] | None = None,
         additional_filters: list[dict] | None = None,
         granularity: str | None = None,
         module: str | None = None,
+        hierarchy: str | None = None,
+        to_level: str | None = None,
     ) -> dict:
         """Drill into a prior metrics_query result: same metrics, time range,
         compare mode and filters, regrouped by target_dimensions. Additional
@@ -976,7 +978,11 @@ def build_server(settings: Settings) -> FastMCP:
         For composed multi-view parents, pass a part query_id from
         provenance.part_query_ids — not the parent composition id. module=<id>
         scopes the drilldown to a dashboard module (same rule as metrics_query);
-        a pinned instance forces its module regardless."""
+        a pinned instance forces its module regardless.
+        Semantic v2: pass hierarchy=<id> (traffic | product | geo | ad | campaign, see
+        catalogue_get_ontology) instead of target_dimensions to drill to the next level
+        (or to_level=<dimension id>); filter the parent level with additional_filters
+        (e.g. platform = meta, then hierarchy=traffic regroups by channel)."""
         trace_id = _log_call("metrics_drilldown", parent_query_id=parent_query_id, module=module)
         effective_module, mod_refusal = _resolve_module(module)
         if mod_refusal:
@@ -1016,6 +1022,10 @@ def build_server(settings: Settings) -> FastMCP:
                     )
                     return _stale_refusal(stale)
         try:
+            if hierarchy:
+                target_dimensions = ctx.planner.hierarchy_targets(parent_query_id, hierarchy, to_level)
+            if not target_dimensions:
+                raise PlanError("Pass target_dimensions or hierarchy (semantic v2).")
             return await ctx.planner.drilldown(
                 parent_query_id,
                 target_dimensions,

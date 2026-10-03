@@ -34,12 +34,17 @@ services:
     image: cubejs/cube:v1.6.48
     container_name: seleric-mcp-cube-v2-1
     restart: unless-stopped
+    # Mount the stable parent (tracked on every branch) and select model_v2 inside it: a
+    # directory bind mount of model_v2 itself goes stale when git deletes and recreates
+    # that folder on a branch switch (Cube then serves an empty model, 2026-10-04).
     volumes:
-      - ../mage-ai/infra/cube/model_v2:/cube/conf/model:ro
+      - ../mage-ai/infra/cube:/cube/conf/src:ro
       - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
     env_file:
       - ../mage-ai/infra/cube/.env
       - ../mage-ai/infra/cube/.env.v2
+    environment:
+      CUBEJS_SCHEMA_PATH: src/model_v2
     ports:
       - "127.0.0.1:${CUBE_V2_HOST_PORT:-4002}:4000"
     extra_hosts:

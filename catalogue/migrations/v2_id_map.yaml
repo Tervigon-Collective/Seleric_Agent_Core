@@ -73,6 +73,9 @@ v2_metrics:
   cost_per_landing_page_view:
     member: paid_media.cost_per_landing_page_view
     date_axis: paid_media.report_date
+  cost_per_link_click:
+    member: paid_media.cost_per_link_click
+    date_axis: paid_media.report_date
   cpc:
     member: paid_media.cpc
     date_axis: paid_media.report_date
@@ -100,11 +103,20 @@ v2_metrics:
   gross_sales:
     member: commerce.gross_sales
     date_axis: commerce.order_date
+  hold_rate_15s:
+    member: paid_media.hold_rate_15s
+    date_axis: paid_media.report_date
+  hook_rate:
+    member: paid_media.hook_rate
+    date_axis: paid_media.report_date
   impressions:
     member: paid_media.impressions
     date_axis: paid_media.report_date
   landing_page_views:
     member: paid_media.landing_page_views
+    date_axis: paid_media.report_date
+  link_clicks:
+    member: paid_media.link_clicks
     date_axis: paid_media.report_date
   ltv:
     member: unit_economics.ltv
@@ -154,9 +166,6 @@ v2_metrics:
   pnl_contribution_margin_pct:
     member: pnl.pnl_contribution_margin_pct
     date_axis: pnl.report_date
-  pnl_discounts:
-    member: pnl.pnl_discounts
-    date_axis: pnl.report_date
   pnl_gross_cogs:
     member: pnl_channel.pnl_gross_cogs
     date_axis: pnl_channel.report_date
@@ -165,9 +174,6 @@ v2_metrics:
     date_axis: pnl_channel.report_date
   pnl_gross_roas:
     member: pnl.pnl_gross_roas
-    date_axis: pnl.report_date
-  pnl_gross_sales:
-    member: pnl.pnl_gross_sales
     date_axis: pnl.report_date
   pnl_mer:
     member: pnl.pnl_mer
@@ -304,6 +310,9 @@ v2_metrics:
   status_changes:
     member: paid_media_changes.status_changes
     date_axis: paid_media_changes.changed_at
+  thruplays:
+    member: paid_media.thruplays
+    date_axis: paid_media.report_date
   total_sales:
     member: commerce.total_sales
     date_axis: commerce.order_date
@@ -1464,3 +1473,270 @@ maps:
   v1:
     member: session_funnel.sessions
     date_axis: session_funnel.session_date
+- old: channel_gross_revenue
+  new: order_value_incl_tax
+  member: commerce.order_value_incl_tax
+  date_axis: commerce.order_date
+  note: draft in v1; slice by platform (traffic) for the channel split
+  v1_status: draft
+  verify: false
+  v1:
+    member: channel_attribution.gross_revenue
+    date_axis: ''
+- old: channel_net_revenue
+  new: net_sales
+  member: commerce.net_sales
+  date_axis: commerce.order_date
+  note: draft in v1; slice by platform (traffic) for the channel split
+  v1_status: draft
+  verify: false
+  v1:
+    member: channel_attribution.net_revenue_excl_tax
+    date_axis: ''
+- old: meta_breakdown_clicks
+  new: clicks
+  member: paid_media.clicks
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1; group by a breakdown dimension (age, gender, publisher_platform …) — served from paid_media_breakdowns
+  v1_status: draft
+  verify: false
+  v1:
+    member: meta_ad_breakdown_performance.meta_clicks
+    date_axis: ''
+- old: meta_breakdown_cpc
+  new: cpc
+  member: paid_media.cpc
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1; group by a breakdown dimension (age, gender, publisher_platform …) — served from paid_media_breakdowns
+  v1_status: draft
+  verify: false
+  v1:
+    member: meta_ad_breakdown_performance.meta_cpc
+    date_axis: ''
+- old: meta_breakdown_cpm
+  new: cpm
+  member: paid_media.cpm
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1; group by a breakdown dimension (age, gender, publisher_platform …) — served from paid_media_breakdowns
+  v1_status: draft
+  verify: false
+  v1:
+    member: meta_ad_breakdown_performance.meta_cpm
+    date_axis: ''
+- old: meta_breakdown_ctr
+  new: ctr
+  member: paid_media.ctr
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1; group by a breakdown dimension (age, gender, publisher_platform …) — served from paid_media_breakdowns
+  v1_status: draft
+  verify: false
+  v1:
+    member: meta_ad_breakdown_performance.meta_ctr
+    date_axis: ''
+- old: meta_breakdown_impressions
+  new: impressions
+  member: paid_media.impressions
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1; group by a breakdown dimension (age, gender, publisher_platform …) — served from paid_media_breakdowns
+  v1_status: draft
+  verify: false
+  v1:
+    member: meta_ad_breakdown_performance.meta_impressions
+    date_axis: ''
+- old: meta_breakdown_spend
+  new: ad_spend
+  member: paid_media.ad_spend
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1; group by a breakdown dimension (age, gender, publisher_platform …) — served from paid_media_breakdowns
+  v1_status: draft
+  verify: false
+  v1:
+    member: meta_ad_breakdown_performance.meta_spend
+    date_axis: ''
+- old: meta_cost_per_link_click
+  new: cost_per_link_click
+  member: paid_media.cost_per_link_click
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1
+  v1_status: draft
+  v1:
+    member: meta_ad_performance.meta_cost_per_link_click
+    date_axis: ''
+- old: meta_hold_rate_15s
+  new: hold_rate_15s
+  member: paid_media.hold_rate_15s
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: approved in v1
+  v1_status: approved
+  v1:
+    member: meta_ad_performance.meta_hold_rate_15s
+    date_axis: ''
+- old: meta_hook_rate
+  new: hook_rate
+  member: paid_media.hook_rate
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: approved in v1
+  v1_status: approved
+  v1:
+    member: meta_ad_performance.meta_hook_rate
+    date_axis: ''
+- old: meta_link_clicks
+  new: link_clicks
+  member: paid_media.link_clicks
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: draft in v1
+  v1_status: draft
+  v1:
+    member: meta_ad_performance.meta_link_clicks
+    date_axis: ''
+- old: meta_thruplays
+  new: thruplays
+  member: paid_media.thruplays
+  date_axis: paid_media.report_date
+  filters:
+    paid_media.ad_platform: meta
+  note: approved in v1
+  v1_status: approved
+  v1:
+    member: meta_ad_performance.meta_thruplays
+    date_axis: ''
+- old: new_customer_orders
+  new: new_customers
+  member: commerce.new_customers
+  date_axis: commerce.order_date
+  note: approved in v1; same definition
+  v1_status: approved
+  v1:
+    member: commerce_orders.new_customer_orders
+    date_axis: ''
+retired_without_replacement:
+- old: active_orders
+  v1_status: draft
+  v1:
+    member: commerce_orders.active_orders
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: attribution_rate
+  v1_status: draft
+  v1:
+    member: order_attribution.attribution_rate
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: average_selling_price
+  v1_status: draft
+  v1:
+    member: product_performance.average_selling_price
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: avg_attribution_confidence
+  v1_status: draft
+  v1:
+    member: order_attribution.avg_attribution_confidence
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: avg_days_between_orders
+  v1_status: draft
+  v1:
+    member: purchase_sequence.avg_days_between_orders
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: avg_days_since_last_order
+  v1_status: draft
+  v1:
+    member: customer_ltv.avg_days_since_last_order
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: avg_ltv
+  v1_status: draft
+  v1:
+    member: customer_ltv.avg_ltv
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: avg_orders_per_customer
+  v1_status: draft
+  v1:
+    member: customer_ltv.avg_orders_per_customer
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: cost_coverage_pct
+  v1_status: draft
+  v1:
+    member: canonical_pnl.cost_coverage_pct
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: customer_profiles
+  v1_status: draft
+  v1:
+    member: customer_data.customers
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: gross_units_ordered
+  v1_status: draft
+  v1:
+    member: product_performance.gross_units_ordered
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: lifetime_gross_revenue
+  v1_status: draft
+  v1:
+    member: customer_ltv.lifetime_gross_revenue
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: lifetime_net_revenue
+  v1_status: draft
+  v1:
+    member: customer_ltv.lifetime_net_revenue
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: lifetime_orders
+  v1_status: draft
+  v1:
+    member: customer_ltv.lifetime_orders
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: meta_frequency
+  v1_status: draft
+  v1:
+    member: meta_ad_performance.meta_frequency
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: meta_reach
+  v1_status: draft
+  v1:
+    member: meta_ad_performance.meta_reach
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: product_cogs
+  v1_status: draft
+  v1:
+    member: product_performance.product_cogs
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: repeat_order_share
+  v1_status: draft
+  v1:
+    member: purchase_sequence.repeat_order_share
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: repeat_orders
+  v1_status: draft
+  v1:
+    member: purchase_sequence.repeat_orders
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: repeat_purchase_net_revenue
+  v1_status: draft
+  v1:
+    member: purchase_sequence.net_revenue
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: repeat_purchase_orders
+  v1_status: draft
+  v1:
+    member: purchase_sequence.orders
+  reason: draft in v1 (never certified); no v2 metric yet
+- old: touch_attributed_orders
+  v1_status: draft
+  v1:
+    member: order_attribution.touch_attributed_orders
+  reason: draft in v1 (never certified); no v2 metric yet

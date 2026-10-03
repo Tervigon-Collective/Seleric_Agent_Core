@@ -9,11 +9,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import re
 import uuid
 from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
-from ..catalogue_service.loader import DimensionDef, MetricDef
+from ..catalogue_service.loader import CubeMapping, DimensionDef, MetricDef
 from ..catalogue_service.service import CatalogueService
 from ..semantic_layer.cube_client import CubeClient
 from .models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
@@ -78,6 +80,41 @@ def derive_compare_range(start: date, end: date, mode: str) -> tuple[date, date]
     raise PlanError(f"Unknown compare_period: {mode}")
 
 
+def _sql_literal(text: str) -> str:
+    return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+
+def _inline_params(sql: str, params: list) -> str:
+    """Cube SQL uses positional ``?`` placeholders; inline the params in order (the literals
+    do not change normalizedQueryHash, which is what the ClickHouse trace keys on)."""
+    out: list[str] = []
+    it = iter(params)
+    quoted = False
+    i = 0
+    while i < len(sql):
+        ch = sql[i]
+        if quoted:
+            out.append(ch)
+            if ch == "\\" and i + 1 < len(sql):  # backslash escape inside a literal
+                out.append(sql[i + 1])
+                i += 1
+            elif ch == "'":
+                if i + 1 < len(sql) and sql[i + 1] == "'":  # '' escape
+                    out.append("'")
+                    i += 1
+                else:
+                    quoted = False
+        elif ch == "'":
+            quoted = True
+            out.append(ch)
+        elif ch == "?":
+            out.append(_sql_literal(str(next(it, ""))))
+        else:
+            out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 class QueryPlanner:
     def __init__(
         self,
@@ -130,16 +167,27 @@ class QueryPlanner:
 
     # ---------- validation ----------
 
-    def _resolve_metrics(self, metric_ids: list[str]) -> tuple[list[MetricDef], list[str]]:
+    def _resolve_metrics(
+        self, metric_ids: list[str]
+    ) -> tuple[list[MetricDef], list[str], list[FilterSpec]]:
         """Resolve catalogue ids (or Cube measure members) to MetricDefs.
 
-        Returns ``(metrics, warnings)``. Cube-qualified members from provenance
-        (e.g. ``sales_all_channels.total_sales``) are mapped to catalogue ids
-        with a warning so mistaken agent calls still succeed.
+        Returns ``(metrics, warnings, term_filters)``. Cube-qualified members from
+        provenance (e.g. ``sales_all_channels.total_sales``) are mapped to catalogue
+        ids with a warning so mistaken agent calls still succeed. Semantic v2: a
+        retired v1 id is REJECTED naming its replacement (hard cut), and a natural
+        term may resolve to a metric plus filters (``term_filters``).
         """
         metrics: list[MetricDef] = []
         warnings: list[str] = []
+        term_filters: list[FilterSpec] = []
+        v2 = self.catalogue.is_v2
         for mid in metric_ids:
+            if v2:
+                retired_msg = self.catalogue.retired_message(mid)
+                if retired_msg:
+                    d = self.catalogue.retired_metric(mid)
+                    raise PlanError(retired_msg, suggestions=[d.new] if d else [])
             resolved = self.catalogue.resolve_metric_id(mid)
             if resolved is None:
                 # Fall back to concept/glossary/alias resolution so natural names the
@@ -152,11 +200,23 @@ class QueryPlanner:
                     target
                     and target in self.catalogue.cat.metrics
                     and self.catalogue.cat.metrics[target].is_queryable
+                    and not (v2 and getattr(term, "auto_resolved", False))
                 ):
                     via = getattr(term, "matched_via", "term resolution")
-                    warnings.append(f"'{mid}' resolved to metric '{target}' via {via}.")
+                    flt = dict(getattr(term, "filter", None) or {})
+                    shown = f" with {', '.join(f'{k} = {v}' for k, v in flt.items())}" if flt else ""
+                    warnings.append(f"'{mid}' resolved to metric '{target}'{shown} via {via}.")
                     metrics.append(self.catalogue.get_metric(target))
+                    term_filters.extend(
+                        FilterSpec(dimension=k, operator="equals", values=[v]) for k, v in flt.items()
+                    )
                     continue
+                reason = getattr(term, "reason", None)
+                if v2 and reason:
+                    raise PlanError(
+                        f"Metric '{mid}' cannot be answered: {reason}",
+                        suggestions=list(getattr(term, "suggestions", []) or []),
+                    )
                 result = self.catalogue.search(mid)
                 hints = [s.id for s in result.matches] + result.suggestions
                 m = self.catalogue.get_metric(mid)
@@ -173,7 +233,65 @@ class QueryPlanner:
             m = self.catalogue.get_metric(canonical_id)
             assert m is not None  # resolve_metric_id only returns queryable ids
             metrics.append(m)
-        return metrics, warnings
+        return metrics, warnings, term_filters
+
+    # ---------- semantic v2: unsupported values, valid_for, bindings ----------
+
+    def _check_unsupported_values(self, filters: list[FilterSpec]) -> None:
+        """A dimension value the agent surface does not support yet (e.g. sales_channel =
+        amazon) is rejected with its reason — never answered as an empty / wrong slice."""
+        for f in filters:
+            dim = self.catalogue.cat.dimensions.get(f.dimension)
+            if dim is None or not dim.unsupported_values:
+                continue
+            lowered = {k.lower(): v for k, v in dim.unsupported_values.items()}
+            for v in f.values:
+                if str(v).lower() in lowered and f.operator in ("equals", "contains", "startsWith"):
+                    raise PlanError(f"{f.dimension} = {v} is not supported: {lowered[str(v).lower()]}")
+
+    def _apply_v2_rules(
+        self, metrics: list[MetricDef], request: QueryRequest
+    ) -> tuple[list[MetricDef], dict[str, list[FilterSpec]], list[str]]:
+        """valid_for (reject out-of-range filters; scope an unfiltered metric to its allowed
+        values in its OWN query part) and bindings (hour → hourly fact, breakdown dimension →
+        breakdown fact). Returns (metrics, forced filters per metric id, warnings)."""
+        out: list[MetricDef] = []
+        forced: dict[str, list[FilterSpec]] = {}
+        warnings: list[str] = []
+        asked = set(request.dimensions) | {f.dimension for f in request.filters}
+        for m in metrics:
+            for did, allowed in m.valid_for.items():
+                allowed_l = {a.lower() for a in allowed}
+                given = [f for f in request.filters if f.dimension == did]
+                for f in given:
+                    bad = [v for v in f.values if str(v).lower() not in allowed_l]
+                    if bad and f.operator == "equals":
+                        raise PlanError(
+                            f"Metric '{m.id}' is only valid for {did} = {', '.join(allowed)} "
+                            f"(asked: {', '.join(map(str, bad))}). {m.valid_for_reason or ''}".strip()
+                        )
+                if not given:
+                    forced.setdefault(m.id, []).append(
+                        FilterSpec(dimension=did, operator="equals", values=list(allowed))
+                    )
+                    warnings.append(
+                        f"'{m.id}' is valid only for {did} = {', '.join(allowed)}; scoped to it "
+                        f"(other metrics in this request are not). {m.valid_for_reason or ''}".strip()
+                    )
+            for b in m.bindings:
+                if request.granularity in b.granularities or (asked & set(b.dimensions)):
+                    bound = m.model_copy(deep=True)
+                    bound.cube_mapping = CubeMapping(
+                        view=b.view, measure=b.measure, time_dimension=b.time_dimension
+                    )
+                    dims = [d.id for d in self.catalogue.cat.dimensions.values() if b.view in d.views]
+                    bound.supported_dimensions = dims
+                    bound.supported_filters = list(dims)
+                    warnings.append(f"'{m.id}' served from its '{b.name}' binding (view {b.view}).")
+                    m = bound
+                    break
+            out.append(m)
+        return out, forced, warnings
 
     def _metrics_supporting_dimension(
         self, dimension_id: str, *, exclude: str | None = None
@@ -603,6 +721,9 @@ class QueryPlanner:
             currency=currency,
         )
 
+        if self.catalogue.is_v2:
+            provenance["semantic"] = await self._semantic_provenance(metrics, cube_query)
+
         # Expose catalogue metric ids as row keys (in addition to Cube member
         # names) so aliases like total_operating_cost → net_cogs SQL still
         # surface a column the host can narrate as "Total Operating Cost".
@@ -641,12 +762,46 @@ class QueryPlanner:
             "provenance": provenance,
         }
 
+    async def _semantic_provenance(self, metrics: list[MetricDef], cube_query: dict) -> dict:
+        """Semantic v2 lineage: metric versions + members (and binding), the Cube-generated SQL
+        with its serve objects, and a ready-to-run ClickHouse lookup of the execution
+        (normalizedQueryHash, doc/semantic_v2/PHASE0.md)."""
+        entries = []
+        for m in metrics:
+            home = self.catalogue.get_metric(m.id)
+            e = {"id": m.id, "version": m.version, "member": m.cube_mapping.measure,
+                 "view": m.cube_mapping.view}
+            if home is not None and home.cube_mapping.view != m.cube_mapping.view:
+                e["binding"] = next((b.name for b in home.bindings if b.view == m.cube_mapping.view), None)
+            entries.append(e)
+        info: dict = {
+            "semantic_version": self.catalogue.cat.semantic_version,
+            "metrics": entries,
+            "catalogue_sha": os.getenv("SELERIC_CATALOGUE_SHA") or None,
+        }
+        try:
+            res = await self.cube.sql(cube_query)
+            sql = _inline_params(res.get("sql") or "", res.get("params") or [])
+            info["cube_sql"] = sql
+            info["serve_objects"] = sorted(set(re.findall(r"serve\.`?(\w+)`?", sql)))
+            info["clickhouse_trace"] = {
+                "method": "normalizedQueryHash of the Cube SQL + ' \\nFORMAT JSON' (doc/semantic_v2/PHASE0.md)",
+                "lookup_sql": (
+                    "SELECT query_id, event_time, read_rows, query_duration_ms FROM system.query_log "
+                    "WHERE type = 'QueryFinish' AND normalized_query_hash = normalizedQueryHash("
+                    + _sql_literal(sql + " \nFORMAT JSON") + ") ORDER BY event_time DESC LIMIT 1"
+                ),
+            }
+        except Exception as exc:  # provenance must never fail the answer
+            info["cube_sql_error"] = str(exc)[:200]
+        return info
+
     async def run(self, request: QueryRequest, parent_query_id: str | None = None) -> dict:
         """Run a metrics query. Metrics on different Cube views are executed as
         parallel single-view queries (no cross-view SQL join) and returned as
         ``composed`` parts — each part has its own rows + provenance.
         """
-        metrics, alias_warnings = self._resolve_metrics(request.measures)
+        metrics, alias_warnings, term_filters = self._resolve_metrics(request.measures)
         # Prefer catalogue ids on the stored request (even when the caller
         # passed Cube members for measures, dimensions, or filters).
         canon_dims: list[str] = []
@@ -657,6 +812,9 @@ class QueryPlanner:
         for f in request.filters:
             dim_id = self.catalogue.resolve_dimension_id(f.dimension) or f.dimension
             canon_filters.append(f.model_copy(update={"dimension": dim_id}))
+        for tf in term_filters:
+            if not any(f.dimension == tf.dimension for f in canon_filters):
+                canon_filters.append(tf)
         request = request.model_copy(
             update={
                 "measures": [m.id for m in metrics],
@@ -664,19 +822,29 @@ class QueryPlanner:
                 "filters": canon_filters,
             }
         )
+        forced: dict[str, list[FilterSpec]] = {}
+        if self.catalogue.is_v2:
+            self._check_unsupported_values(request.filters)
+            metrics, forced, v2_warnings = self._apply_v2_rules(metrics, request)
+            alias_warnings = [*alias_warnings, *v2_warnings]
+
+        def _with_forced(req: QueryRequest, ms: list[MetricDef]) -> QueryRequest:
+            extra = forced.get(ms[0].id, [])
+            return req.model_copy(update={"filters": [*req.filters, *extra]}) if extra else req
         # Group by (view, effective time dimension): metrics on different views
         # can never share a Cube query, and metrics on the SAME view but a
         # different time axis (placement order_date vs event event_date) must
         # not share one date-range filter — mixing them silently answers a
         # different question (e.g. "June-placed orders that ever returned"
         # instead of "returns that happened in June").
-        by_view: dict[tuple[str, str | None], list[MetricDef]] = {}
+        by_view: dict[tuple, list[MetricDef]] = {}
         for m in metrics:
-            key = (m.cube_mapping.view, self._effective_time_dimension(m))
+            scope = tuple(sorted((f.dimension, tuple(f.values)) for f in forced.get(m.id, [])))
+            key = (m.cube_mapping.view, self._effective_time_dimension(m), scope)
             by_view.setdefault(key, []).append(m)
 
         if len(by_view) == 1:
-            out = await self._run_single_view(request, metrics, parent_query_id)
+            out = await self._run_single_view(_with_forced(request, metrics), metrics, parent_query_id)
             if alias_warnings:
                 out["warnings"] = [*alias_warnings, *(out.get("warnings") or [])]
             return out
@@ -705,10 +873,10 @@ class QueryPlanner:
             part_req = request.model_copy(
                 update={"measures": [m.id for m in ms], "sort": part_sort}
             )
-            return await self._run_single_view(part_req, ms, parent_query_id=parent_id)
+            return await self._run_single_view(_with_forced(part_req, ms), ms, parent_query_id=parent_id)
 
         parts = await asyncio.gather(
-            *[_part(ms) for _, ms in sorted(by_view.items())]
+            *[_part(ms) for _, ms in sorted(by_view.items(), key=lambda kv: repr(kv[0]))]
         )
         part_list = list(parts)
         views = [p["provenance"]["cube_view"] for p in part_list]
@@ -760,6 +928,39 @@ class QueryPlanner:
                 "catalogue_version": self.catalogue.version,
             },
         }
+
+    def hierarchy_targets(
+        self, parent_query_id: str, hierarchy: str, to_level: str | None = None
+    ) -> list[str]:
+        """Semantic v2 drill: the parent's dimensions with the hierarchy's current level replaced by
+        the next one (or ``to_level``). Validated against the hierarchy's views."""
+        h = self.catalogue.cat.hierarchies.get(hierarchy)
+        if h is None:
+            raise PlanError(f"Unknown hierarchy '{hierarchy}'.", suggestions=sorted(self.catalogue.cat.hierarchies))
+        stored = self.store.get(parent_query_id)
+        if stored is None:
+            raise PlanError(f"Query '{parent_query_id}' not found or expired; re-run metrics_query.")
+        parent = QueryRequest.model_validate_json(stored.request_json)
+        views = {
+            (self.catalogue.get_metric(mid).cube_mapping.view if self.catalogue.get_metric(mid) else None)
+            for mid in parent.measures
+        }
+        if not views <= set(h.views):
+            raise PlanError(
+                f"Hierarchy '{hierarchy}' ({' → '.join(h.levels)}) is not available on view(s) "
+                f"{', '.join(sorted(v for v in views if v))}; it covers {', '.join(h.views)}."
+            )
+        if to_level and to_level != "next":
+            if to_level not in h.levels:
+                raise PlanError(f"'{to_level}' is not a level of '{hierarchy}': {', '.join(h.levels)}.")
+            target = to_level
+        else:
+            current = [lvl for lvl in h.levels if lvl in parent.dimensions]
+            idx = h.levels.index(current[-1]) + 1 if current else 0
+            if idx >= len(h.levels):
+                raise PlanError(f"Already at the finest level of '{hierarchy}' ({h.levels[-1]}).")
+            target = h.levels[idx]
+        return [d for d in parent.dimensions if d not in h.levels] + [target]
 
     async def drilldown(
         self,

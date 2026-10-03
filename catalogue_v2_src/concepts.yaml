@@ -1,0 +1,384 @@
+# Semantic v2 concepts — hand-authored; scripts/build_catalogue_v2.py writes one catalogue_v2/concepts/<id>.yaml
+# per entry. A concept + axis selection resolves to exactly ONE metric. Scope / platform / channel / paid are
+# never separate metrics in v2: `axis_filters` turns those axes into dimension filters on the resolved metric
+# (and the resolver refuses a filter the metric's view cannot take, instead of answering a sibling).
+#
+# Shared axes
+#   date:    finance (EVENT date, = dashboard P&L; pnl_* ids) | order (ORDER date cohort)
+#   channel: finance_channel the traffic rolls up to — meta incl. Meta organic, google incl. Google organic
+#   paid:    all | paid (is_paid = true: paid Meta / Google clicks only)
+#   platform (ads): ad_platform meta | google
+
+_channel: &channel {values: [all, meta, google, whatsapp, organic, unattributed], default: all}
+_paid: &paid {values: [all, paid], default: all}
+_ad_platform: &ad_platform {values: [all, meta, google], default: all}
+_channel_filters: &channel_filters
+  channel:
+    meta: {finance_channel: meta}
+    google: {finance_channel: google}
+    whatsapp: {finance_channel: whatsapp}
+    organic: {finance_channel: organic}
+    unattributed: {finance_channel: unattributed}
+  paid:
+    paid: {is_paid: "true"}
+_ad_filters: &ad_filters
+  platform:
+    meta: {ad_platform: meta}
+    google: {ad_platform: google}
+
+concepts:
+  - id: sales
+    display_name: Sales
+    one_liner: Net sales on the P&L (event) date unless stated — the dashboard Net Sales number.
+    aliases: [sales, revenue, topline, turnover]
+    axes: {basis: {values: [net, gross, total], default: net}, date: {values: [finance, order], default: finance},
+           scope: {values: [all, product], default: all}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {basis: net, date: finance}, metric: pnl_net_sales}
+      - {when: {basis: net, date: order}, metric: net_sales}
+      - {when: {basis: gross}, metric: gross_sales}
+      - {when: {basis: total}, metric: total_sales}
+      - {when: {basis: net, scope: product}, metric: product_net_revenue}
+    disambiguation: >
+      Default net sales = pnl_net_sales: event date (returns / cancels on the day they happen), equal to the
+      dashboard Net Sales card. date=order (net_sales) answers "sales of the orders placed in the period".
+      Gross and total sales are booked at placement, so order and event date give the same number. A channel (meta / google / whatsapp / organic /
+      unattributed) filters finance_channel — Meta includes Meta organic; add paid=paid for paid clicks only.
+
+  - id: orders
+    display_name: Orders
+    one_liner: Orders placed (commerce placement cohort), by order date.
+    aliases: [orders, order count, total orders, purchases]
+    axes: {status: {values: [all, cod, prepaid, new, first, cancelled, returned, returned_or_cancelled], default: all},
+           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {status: all}, metric: orders}
+      - {when: {status: cod}, metric: cod_orders}
+      - {when: {status: prepaid}, metric: prepaid_orders}
+      - {when: {status: new}, metric: new_customers}
+      - {when: {status: first}, metric: new_customers}
+      - {when: {status: cancelled, date: order}, metric: cancelled_orders}
+      - {when: {status: returned, date: order}, metric: returned_orders}
+      - {when: {status: returned_or_cancelled, date: order}, metric: returned_or_cancelled_orders}
+      - {when: {status: cancelled, date: finance}, metric: pnl_cancelled_orders}
+      - {when: {status: returned, date: finance}, metric: pnl_returned_orders}
+      - {when: {status: returned_or_cancelled, date: finance}, metric: pnl_returned_or_cancelled_orders}
+    disambiguation: >
+      orders = dashboard Total Orders (placement cohort, order date). Cancelled / returned default to the orders
+      placed in the period (date=order); date=finance counts them on the day the cancel / return happened.
+
+  - id: profit
+    display_name: Profit
+    one_liner: Net profit = net sales − net COGS − ad spend, on the P&L (event) date.
+    aliases: [profit, net profit, np, earnings, bottom line]
+    axes: {basis: {values: [net, contribution, gross], default: net}, scope: {values: [all, product], default: all},
+           channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {basis: net}, metric: pnl_net_profit}
+      - {when: {basis: contribution}, metric: pnl_contribution_margin}
+      - {when: {basis: gross}, metric: pnl_gross_profit}
+      - {when: {scope: product}, metric: product_gross_profit}
+    disambiguation: >
+      contribution = net sales − net COGS (before ad spend; v1 called it gross_profit). gross = gross sales −
+      gross COGS − ad spend (the Attribution Overview Gross Profit tile). scope=product is line-level gross profit.
+
+  - id: margin
+    display_name: Margin
+    one_liner: Margin % of net sales (net profit ÷ net sales unless stated).
+    aliases: [margin, margin %, net margin, contribution margin %, gross margin]
+    axes: {basis: {values: [net, contribution, gross], default: net}, scope: {values: [all, product], default: all},
+           channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {basis: net}, metric: pnl_net_margin_pct}
+      - {when: {basis: contribution}, metric: pnl_contribution_margin_pct}
+      - {when: {basis: gross}, metric: pnl_contribution_margin_pct}
+      - {when: {scope: product}, metric: product_gross_margin_pct}
+    disambiguation: >
+      "gross margin" on the company P&L is contribution margin % (net sales − net COGS) ÷ net sales; product gross
+      margin is line-level (scope=product).
+
+  - id: roas
+    display_name: ROAS
+    one_liner: Return on ad spend from first-party net sales (not platform-reported ROAS).
+    aliases: [roas, return on ad spend, return on adspend, return on advertising spend]
+    axes: {basis: {values: [net, gross, breakeven, mer], default: net}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {basis: net}, metric: pnl_net_roas}
+      - {when: {basis: gross}, metric: pnl_gross_roas}
+      - {when: {basis: breakeven}, metric: pnl_be_roas}
+      - {when: {basis: mer}, metric: pnl_mer}
+    disambiguation: >
+      net ROAS = (net sales − net COGS) ÷ ad spend; gross ROAS = gross sales ÷ ad spend; MER = net sales ÷ ad
+      spend; break-even ROAS = net sales ÷ contribution margin. Channel ROAS (channel=meta) includes Meta organic
+      sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified.
+
+  - id: mer
+    display_name: MER
+    one_liner: Marketing efficiency ratio = net sales ÷ ad spend.
+    aliases: [mer, marketing efficiency ratio, blended roas]
+    axes: {channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {metric: pnl_mer}
+
+  - id: ad_spend
+    display_name: Ad spend
+    one_liner: Ad spend by delivery date (Meta + Google unless a platform is named).
+    aliases: [ad spend, spend, marketing spend, ads spend, media spend, budget spent, adspend, adsp]
+    axes: {platform: *ad_platform}
+    axis_filters: *ad_filters
+    resolves:
+      - {metric: ad_spend}
+    disambiguation: >
+      One id for every spend number; the platform is a filter (ad_platform). Hourly and audience-breakdown
+      questions use the same metric (the planner routes to the hourly / breakdown binding).
+
+  - id: clicks
+    display_name: Clicks
+    one_liner: Ad clicks (all clicks unless "link clicks").
+    aliases: [clicks, link clicks]
+    axes: {kind: {values: [all, link], default: all}, platform: *ad_platform}
+    axis_filters: *ad_filters
+    resolves:
+      - {when: {kind: all}, metric: clicks}
+      - {when: {kind: link}, metric: link_clicks}
+
+  - id: impressions
+    display_name: Impressions
+    one_liner: Ad impressions.
+    aliases: [impressions, impr]
+    axes: {platform: *ad_platform}
+    axis_filters: *ad_filters
+    resolves:
+      - {metric: impressions}
+
+  - id: cost_per
+    display_name: Ad efficiency (CTR / CPC / CPM)
+    one_liner: CTR, CPC, CPM and cost per landing page view / link click.
+    aliases: [ctr, cpc, cpm, click through rate, cost per click, cost per mille, cost per link click,
+              cost per landing page view]
+    axes: {metric_kind: {values: [ctr, cpc, cpm, link, landing_page], default: ctr}, platform: *ad_platform}
+    axis_filters: *ad_filters
+    resolves:
+      - {when: {metric_kind: ctr}, metric: ctr}
+      - {when: {metric_kind: cpc}, metric: cpc}
+      - {when: {metric_kind: cpm}, metric: cpm}
+      - {when: {metric_kind: link}, metric: cost_per_link_click}
+      - {when: {metric_kind: landing_page}, metric: cost_per_landing_page_view}
+
+  - id: video
+    display_name: Video engagement
+    one_liner: Meta video hook rate, hold rate, completion rate and ThruPlays.
+    aliases: [hook rate, hold rate, video completion rate, thruplays, video engagement]
+    axes: {measure: {values: [hook, hold, completion, thruplays], default: hook}}
+    resolves:
+      - {when: {measure: hook}, metric: hook_rate}
+      - {when: {measure: hold}, metric: hold_rate_15s}
+      - {when: {measure: completion}, metric: video_completion_rate}
+      - {when: {measure: thruplays}, metric: thruplays}
+
+  - id: cogs
+    display_name: COGS
+    one_liner: Net COGS on the P&L (event) date — product + operating cost, net of returns.
+    aliases: [cogs, net cogs, cost of goods, cost of goods sold, operating cost, total operating cost, gross cogs]
+    axes: {component: {values: [total, product, shipping, packaging, gateway, rto, operating, gross], default: total},
+           channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {component: total}, metric: pnl_net_cogs}
+      - {when: {component: product}, metric: pnl_product_cost}
+      - {when: {component: shipping}, metric: pnl_shipping_cost}
+      - {when: {component: packaging}, metric: pnl_packaging_cost}
+      - {when: {component: gateway}, metric: pnl_payment_gateway_fees}
+      - {when: {component: rto}, metric: pnl_rto_cost}
+      - {when: {component: operating}, metric: pnl_operating_cost}
+      - {when: {component: gross}, metric: pnl_gross_cogs}
+    disambiguation: >
+      "total operating cost" in v1 meant net COGS (component=total); operating cost alone is shipping + packaging +
+      gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment).
+
+  - id: returns_cancels
+    display_name: Returns and cancellations
+    one_liner: Return + cancellation revenue on the P&L (event) date unless stated.
+    aliases: [returns, cancels, returns and cancels, returns/cancels, cancellations, return revenue, cancel revenue]
+    axes: {action: {values: [both, return, cancel], default: both}, measure: {values: [revenue, orders], default: revenue},
+           date: {values: [finance, order], default: finance}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {action: both, measure: revenue, date: finance}, metric: pnl_return_cancel_revenue}
+      - {when: {action: return, measure: revenue, date: finance}, metric: pnl_return_revenue}
+      - {when: {action: cancel, measure: revenue, date: finance}, metric: pnl_cancel_revenue}
+      - {when: {action: both, measure: orders, date: finance}, metric: pnl_returned_or_cancelled_orders}
+      - {when: {action: return, measure: orders, date: finance}, metric: pnl_returned_orders}
+      - {when: {action: cancel, measure: orders, date: finance}, metric: pnl_cancelled_orders}
+      - {when: {action: both, measure: revenue, date: order}, metric: return_cancel_revenue}
+      - {when: {action: return, measure: revenue, date: order}, metric: return_revenue}
+      - {when: {action: cancel, measure: revenue, date: order}, metric: cancel_revenue}
+      - {when: {action: both, measure: orders, date: order}, metric: returned_or_cancelled_orders}
+      - {when: {action: return, measure: orders, date: order}, metric: returned_orders}
+      - {when: {action: cancel, measure: orders, date: order}, metric: cancelled_orders}
+    disambiguation: >
+      date=finance counts a return / cancel on the day it happened (P&L); date=order counts the returns / cancels
+      of the orders placed in the period (cohort). Refund amounts and lines are the refunds concept.
+
+  - id: refunds
+    display_name: Refunds
+    one_liner: Shopify refunds by refund date.
+    aliases: [refunds, refunded amount, refund amount, refund count, refund lines, recovered cogs]
+    axes: {measure: {values: [amount, count, lines, returns_value, recovered_cogs, order_cohort], default: amount}}
+    resolves:
+      - {when: {measure: amount}, metric: refunded_amount_excl_tax}
+      - {when: {measure: count}, metric: refund_count}
+      - {when: {measure: lines}, metric: refund_lines}
+      - {when: {measure: returns_value}, metric: returns_excl_tax}
+      - {when: {measure: recovered_cogs}, metric: return_recovered_cogs}
+      - {when: {measure: order_cohort}, metric: refund_amount}
+    disambiguation: >
+      Refund date by default (amount ex-GST). order_cohort = refund amount incl. GST of the orders placed in the
+      period (commerce, order date).
+
+  - id: aov
+    display_name: AOV
+    one_liner: Average order value incl. GST unless "net".
+    aliases: [aov, average order value, basket size]
+    axes: {basis: {values: [total, net], default: total}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {basis: total}, metric: aov}
+      - {when: {basis: net}, metric: net_aov}
+
+  - id: discounts
+    display_name: Discounts
+    one_liner: Discounts ex-GST (booked at placement — same on order and event date).
+    aliases: [discounts, discount, discount amount]
+    axes: {channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {metric: discounts}
+
+  - id: conversion_rate
+    display_name: Conversion rate
+    one_liner: Purchasing sessions ÷ sessions (web funnel stages on request).
+    aliases: [conversion rate, cvr, conversion, add to cart rate, checkout rate, funnel rate, atc rate, pdp rate,
+              purchase cvr, purchase conversion rate]
+    axes: {stage: {values: [purchase, add_to_cart, checkout, checkout_to_purchase, atc_to_checkout, product_view],
+                   default: purchase}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {stage: purchase}, metric: conversion_rate}
+      - {when: {stage: add_to_cart}, metric: add_to_cart_rate}
+      - {when: {stage: checkout}, metric: checkout_rate}
+      - {when: {stage: checkout_to_purchase}, metric: checkout_to_purchase_rate}
+      - {when: {stage: atc_to_checkout}, metric: add_to_cart_to_checkout_rate}
+      - {when: {stage: product_view}, metric: product_view_rate}
+
+  - id: sessions
+    display_name: Sessions
+    one_liner: Web sessions (Snowplow).
+    aliases: [sessions, visits, traffic, site visits, funnel base]
+    axes: {channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {metric: sessions}
+
+  - id: web_engagement
+    display_name: Web engagement
+    one_liner: Web event counts (product views unless stated).
+    aliases: [product views, pdp views, collection views, add to carts, page views, site searches, engagement,
+              web events, events per session, bounce rate]
+    axes: {event: {values: [pdp, collection, atc, pageview, search, all, per_session, bounce], default: pdp}}
+    resolves:
+      - {when: {event: pdp}, metric: product_view_events}
+      - {when: {event: collection}, metric: collection_view_events}
+      - {when: {event: atc}, metric: add_to_cart_events}
+      - {when: {event: pageview}, metric: page_views}
+      - {when: {event: search}, metric: site_search_events}
+      - {when: {event: all}, metric: web_events}
+      - {when: {event: per_session}, metric: events_per_session}
+      - {when: {event: bounce}, metric: bounce_rate}
+
+  - id: units
+    display_name: Units
+    one_liner: Net units sold (eligible product lines).
+    aliases: [units, units sold, quantity sold, returned units, units per order, best selling product,
+              best selling products, top selling product, top selling products]
+    axes: {basis: {values: [net, returned, per_order], default: net}, channel: *channel, paid: *paid}
+    axis_filters: *channel_filters
+    resolves:
+      - {when: {basis: net}, metric: units_sold}
+      - {when: {basis: returned}, metric: returned_units}
+      - {when: {basis: per_order}, metric: units_per_order}
+
+  - id: taxes
+    display_name: Taxes
+    one_liner: GST on net sales (flat 18 %).
+    aliases: [taxes, tax, gst]
+    resolves:
+      - {metric: pnl_taxes_on_net_sales}
+
+  - id: customers
+    display_name: Customers
+    one_liner: Customers with an order in the period (by last order).
+    aliases: [customers, buyers, new customers, repeat customers]
+    axes: {type: {values: [all, new, repeat], default: all}}
+    resolves:
+      - {when: {type: all}, metric: customers}
+      - {when: {type: new}, metric: new_customers}
+      - {when: {type: repeat}, metric: repeat_customers}
+
+  - id: repeat_rate
+    display_name: Repeat rate
+    one_liner: Repeat customers ÷ customers.
+    aliases: [repeat rate, repeat purchase rate, retention rate]
+    resolves:
+      - {metric: repeat_rate}
+
+  - id: ltv
+    display_name: LTV
+    one_liner: First-order net revenue per new customer (dashboard LTV basis).
+    aliases: [ltv, lifetime value, customer lifetime value, clv]
+    resolves:
+      - {metric: ltv}
+
+  - id: cac
+    display_name: CAC
+    one_liner: Customer acquisition cost = ad spend ÷ new customers.
+    aliases: [cac, customer acquisition cost, cost per acquisition, cpa]
+    resolves:
+      - {metric: cac}
+
+  - id: ltv_cac
+    display_name: LTV:CAC
+    one_liner: LTV ÷ CAC.
+    aliases: [ltv:cac, ltv cac, ltv to cac, ltv/cac]
+    resolves:
+      - {metric: ltv_cac_ratio}
+
+  - id: touchpoints
+    display_name: Touchpoints
+    one_liner: Pre-purchase touches and orders with recorded touches.
+    aliases: [touches, touchpoints, touch points, attribution paths, touches per order]
+    axes: {measure: {values: [touches, orders, per_path], default: touches}}
+    resolves:
+      - {when: {measure: touches}, metric: touches}
+      - {when: {measure: orders}, metric: orders_with_touchpoints}
+      - {when: {measure: per_path}, metric: avg_touch_count}
+
+aliases:
+  funnel step 1: {concept: conversion_rate, axes: {stage: product_view}}
+  funnel product view step: {concept: conversion_rate, axes: {stage: product_view}}
+  funnel step 2: {concept: conversion_rate, axes: {stage: add_to_cart}}
+  funnel add to cart step: {concept: conversion_rate, axes: {stage: add_to_cart}}
+  funnel step 3: {concept: conversion_rate, axes: {stage: checkout}}
+  funnel checkout step: {concept: conversion_rate, axes: {stage: checkout}}
+  funnel step 4: {concept: conversion_rate, axes: {stage: purchase}}
+  funnel purchase step: {concept: conversion_rate, axes: {stage: purchase}}
+  ns: {concept: sales, axes: {basis: net}}
+  np: {concept: profit, axes: {basis: net}}
+  gs: {concept: sales, axes: {basis: gross}}
+  ts: {concept: sales, axes: {basis: total}}

@@ -92,6 +92,22 @@ class CubeClient:
         )
         return CubeResult(data=data, raw=body)
 
+    async def sql(self, query: dict[str, Any]) -> dict:
+        """Cube-generated SQL for a load query: {"sql": str, "params": list} (semantic v2
+        provenance). Uses the same query normalisation as load()."""
+        query = dict(query)
+        query.setdefault("timezone", "Asia/Kolkata")
+        if query.get("limit") is None:
+            query.pop("limit", None)
+        resp = await self._client.post(
+            f"{self._base}/cubejs-api/v1/sql", json={"query": query}, headers=self._auth_headers()
+        )
+        if resp.status_code != 200:
+            raise CubeError(f"Cube sql failed: {resp.status_code} — {resp.text[:300]}")
+        body = resp.json().get("sql") or {}
+        sql = body.get("sql") or [None, []]
+        return {"sql": sql[0], "params": list(sql[1] or [])}
+
     async def meta(self) -> dict:
         resp = await self._client.get(
             f"{self._base}/cubejs-api/v1/meta", headers=self._auth_headers()

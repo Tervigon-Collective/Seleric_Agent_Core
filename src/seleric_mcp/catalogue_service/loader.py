@@ -49,6 +49,21 @@ class Freshness(BaseModel):
     expected_cadence: str
 
 
+class Binding(BaseModel):
+    """Semantic v2: an extra physical home for the SAME metric (same number), chosen
+    deterministically by the planner. ``granularities`` routes sub-daily requests (e.g.
+    hour → the hourly fact); ``dimensions`` routes requests that group or filter on a
+    dimension only that binding carries (e.g. age → the Meta breakdown fact). Each binding
+    is reconciled to the home mapping (scripts/v2_parity.py / doc/semantic_v2)."""
+    name: str
+    view: str
+    measure: str
+    time_dimension: str | None = None
+    datetime_dimension: str | None = None
+    granularities: list[str] = Field(default_factory=list)
+    dimensions: list[str] = Field(default_factory=list)
+
+
 class MetricDef(BaseModel):
     id: str
     display_name: str
@@ -74,6 +89,25 @@ class MetricDef(BaseModel):
     examples: list[dict] = Field(default_factory=list)
     validation_tests: list[str] = Field(default_factory=list)
     deprecated_aliases: list[str] = Field(default_factory=list)
+    # --- semantic v2 (catalogue_v2/, semantic_version >= 2) ---
+    version: str = "1.0.0"  # semver; major bump when the number changes
+    bindings: list[Binding] = Field(default_factory=list)
+    # dimension id -> allowed values. A filter outside them is rejected with the reason;
+    # a metric queried without that filter is scoped to the allowed values (disclosed).
+    valid_for: dict[str, list[str]] = Field(default_factory=dict)
+    valid_for_reason: str | None = None
+    unavailable_reason: str | None = None  # why a broken metric cannot be answered
+    replaces: list[str] = Field(default_factory=list)  # retired v1 ids that map here
+
+
+class HierarchyDef(BaseModel):
+    """Semantic v2: an ordered drill path of catalogue dimensions (coarse → fine),
+    usable on every listed view (all levels mapped there)."""
+    id: str
+    display_name: str
+    levels: list[str]
+    views: list[str] = Field(default_factory=list)
+    note: str | None = None
 
 
 class DimensionDef(BaseModel):
@@ -88,6 +122,9 @@ class DimensionDef(BaseModel):
     # equals/notEquals filters be case/typo-corrected instead of silently
     # matching zero rows. None means "no known enum" — filter values pass
     # through unvalidated, exactly as before this field existed.
+    # Semantic v2: values the agent surface does not support yet -> reason (e.g. sales_channel
+    # amazon). A filter on one is rejected with the reason, never answered as an empty slice.
+    unsupported_values: dict[str, str] = Field(default_factory=dict)
     stable_key: str | None = None  # id of the dimension that identifies the entity
     # this label names (e.g. a title's product id). Labels can change or collide
     # across periods; comparisons across periods should join on the key.
@@ -98,6 +135,9 @@ class GlossaryTerm(BaseModel):
     canonical_id: str | None = None  # catalogue metric id
     canonical_dimension_id: str | None = None  # catalogue dimension id (grain language)
     definition: str | None = None
+    # Semantic v2: a term may carry a dimension filter (e.g. "meta spend" -> ad_spend
+    # with ad_platform = meta), because scope / platform are filters, not metric ids.
+    filter: dict[str, str] = Field(default_factory=dict)
 
 
 class ConceptAxis(BaseModel):
@@ -145,6 +185,10 @@ class ConceptDef(BaseModel):
     resolves: list[ConceptResolve] = Field(default_factory=list)
     unsupported: list[ConceptUnsupported] = Field(default_factory=list)
     disambiguation: str | None = None
+    # Semantic v2: axis -> value -> dimension filter added to the resolved metric (scope / channel /
+    # platform / paid are filters, not metric ids). The resolver refuses a filter the metric's view
+    # cannot take rather than answering a sibling.
+    axis_filters: dict[str, dict[str, dict[str, str]]] = Field(default_factory=dict)
 
 
 class ConceptAlias(BaseModel):
@@ -205,6 +249,9 @@ class Deprecation(BaseModel):
     old: str
     new: str
     reason: str
+    # Semantic v2 hard cut: filters the replacement needs to give the same number
+    # (e.g. meta_spend -> ad_spend with ad_platform = meta).
+    filters: dict[str, str] = Field(default_factory=dict)
 
 
 class ModuleDef(BaseModel):
@@ -328,6 +375,12 @@ class Catalogue(BaseModel):
     concepts: dict[str, ConceptDef] = Field(default_factory=dict)
     concept_aliases: dict[str, ConceptAlias] = Field(default_factory=dict)
     channel_map: list[ChannelMapEntry] = Field(default_factory=list)
+    # Semantic v2 (catalogue.yaml manifest). 1 = the v1 catalogue, unchanged behaviour.
+    semantic_version: int = 1
+    hierarchies: dict[str, HierarchyDef] = Field(default_factory=dict)
+    # v2 hard cut: retired metric id -> its replacement (from deprecations whose `new`
+    # is a current metric id). Old ids are rejected, never silently mapped.
+    retired: dict[str, Deprecation] = Field(default_factory=dict)
 
 
 def _read_yaml(path: Path) -> dict:
@@ -414,6 +467,18 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         for aid, spec in (_read_yaml(aliases_path).get("aliases") or {}).items():
             concept_aliases[aid] = ConceptAlias.model_validate(spec or {})
 
+    manifest_path = catalogue_dir / "catalogue.yaml"
+    manifest = _read_yaml(manifest_path) if manifest_path.exists() else {}
+    semantic_version = int((manifest or {}).get("semantic_version") or 1)
+
+    hierarchies: dict[str, HierarchyDef] = {}
+    hierarchies_path = catalogue_dir / "hierarchies.yaml"
+    if hierarchies_path.exists():
+        for hid, spec in (_read_yaml(hierarchies_path).get("hierarchies") or {}).items():
+            spec = dict(spec or {})
+            spec["id"] = hid
+            hierarchies[hid] = HierarchyDef.model_validate(spec)
+
     channel_map: list[ChannelMapEntry] = []
     channel_map_path = catalogue_dir / "dimensions" / "channel_map.yaml"
     if channel_map_path.exists():
@@ -464,6 +529,14 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         concepts=concepts,
         concept_aliases=concept_aliases,
         channel_map=channel_map,
+        semantic_version=semantic_version,
+        hierarchies=hierarchies,
+        retired=(
+            # An id kept with a new meaning (e.g. return_revenue, now order-date) is a
+            # live metric, not a retired one.
+            {d.old: d for d in deprecations if d.new in metrics and d.old not in metrics}
+            if semantic_version >= 2 else {}
+        ),
     )
     _check_integrity(cat)
     return cat
@@ -644,7 +717,10 @@ def _check_integrity(cat: Catalogue) -> None:
             hr = (m.formula.human_readable or "").strip().upper()
             # AVG(...) cube rollups are ratios in the catalogue sense but are not
             # decomposable into additive numerator/denominator catalogue metrics.
-            if not hr.startswith("AVG("):
+            # Semantic v2: Cube recomputes every ratio from aggregates at any grain;
+            # formula.depends_on names the component metrics instead.
+            v2_declared = cat.semantic_version >= 2 and bool(m.formula.depends_on)
+            if not hr.startswith("AVG(") and not v2_declared:
                 problems.append(
                     f"metric {m.id}: aggregation=ratio requires ratio_components "
                     f"(numerator/denominator) so agents can decompose the formula"
@@ -655,6 +731,9 @@ def _check_integrity(cat: Catalogue) -> None:
         for companion in m.companion_measures:
             if companion not in cat.metrics:
                 problems.append(f"metric {m.id}: companion_measures unknown metric '{companion}'")
+
+    if cat.semantic_version >= 2:
+        problems.extend(_check_integrity_v2(cat))
 
     # Glossary terms are indexed case-insensitively — conflicting targets confuse agents.
     gloss_by_norm: dict[str, tuple[str, str | None]] = {}
@@ -791,6 +870,81 @@ def _check_integrity(cat: Catalogue) -> None:
 
     if problems:
         raise ValueError("Catalogue integrity check failed:\n" + "\n".join(problems))
+
+
+def _check_integrity_v2(cat: Catalogue) -> list[str]:
+    """Semantic v2 references: bindings, valid_for, hard-cut map, glossary filters,
+    hierarchies. Every reference must land on a real view / dimension mapping."""
+    problems: list[str] = []
+
+    def on_view(dim_id: str, view: str) -> bool:
+        d = cat.dimensions.get(dim_id)
+        return d is not None and view in d.views
+
+    for m in cat.metrics.values():
+        view = m.cube_mapping.view
+        if not m.cube_mapping.measure.startswith(f"{view}."):
+            problems.append(f"metric {m.id}: measure {m.cube_mapping.measure} is not on view {view}")
+        for b in m.bindings:
+            if b.view not in cat.views:
+                problems.append(f"metric {m.id}: binding {b.name} unknown view {b.view}")
+            if not b.measure.startswith(f"{b.view}."):
+                problems.append(f"metric {m.id}: binding {b.name} measure not on view {b.view}")
+            for td in (b.time_dimension, b.datetime_dimension):
+                if td and not td.startswith(f"{b.view}."):
+                    problems.append(f"metric {m.id}: binding {b.name} time axis {td} not on {b.view}")
+            for did in b.dimensions:
+                if not on_view(did, b.view):
+                    problems.append(f"metric {m.id}: binding {b.name} dimension {did} not on {b.view}")
+            if not b.granularities and not b.dimensions:
+                problems.append(f"metric {m.id}: binding {b.name} has no routing rule")
+        for did, values in m.valid_for.items():
+            if not on_view(did, view):
+                problems.append(f"metric {m.id}: valid_for dimension {did} not on view {view}")
+            if not values:
+                problems.append(f"metric {m.id}: valid_for {did} has no allowed values")
+        if m.status == "broken" and not m.unavailable_reason:
+            problems.append(f"metric {m.id}: broken metrics must state unavailable_reason")
+        for old in m.replaces:
+            if old in cat.metrics and old != m.id:
+                problems.append(f"metric {m.id}: replaces {old}, which is still a live metric id")
+    for old, d in cat.retired.items():
+        new = cat.metrics[d.new]
+        for did in d.filters:
+            if not on_view(did, new.cube_mapping.view):
+                problems.append(f"retired {old}: filter {did} not on view {new.cube_mapping.view}")
+    for t in cat.glossary:
+        if t.filter and t.canonical_id in cat.metrics:
+            view = cat.metrics[t.canonical_id].cube_mapping.view
+            for did in t.filter:
+                if not on_view(did, view):
+                    problems.append(f"glossary term '{t.term}': filter {did} not on view {view}")
+    for c in cat.concepts.values():
+        for axis, by_value in c.axis_filters.items():
+            if axis not in c.axes:
+                problems.append(f"concept {c.id}: axis_filters on undeclared axis '{axis}'")
+                continue
+            for value, flt in by_value.items():
+                if value not in c.axes[axis].values:
+                    problems.append(f"concept {c.id}: axis_filters {axis}={value!r} not an axis value")
+                for did in flt:
+                    if did not in cat.dimensions:
+                        problems.append(f"concept {c.id}: axis_filters dimension {did} unknown")
+        for i, r in enumerate(c.resolves):
+            m = cat.metrics.get(r.metric)
+            if m is not None:
+                for did in r.filter:
+                    if not on_view(did, m.cube_mapping.view):
+                        problems.append(f"concept {c.id}: resolve[{i}] filter {did} not on view {m.cube_mapping.view}")
+    for h in cat.hierarchies.values():
+        for lvl in h.levels:
+            if lvl not in cat.dimensions:
+                problems.append(f"hierarchy {h.id}: unknown level dimension {lvl}")
+        for view in h.views:
+            missing = [lvl for lvl in h.levels if not on_view(lvl, view)]
+            if view not in cat.views or missing:
+                problems.append(f"hierarchy {h.id}: view {view} lacks levels {missing}")
+    return problems
 
 
 def _contract_dp_refs(cat: Catalogue) -> dict[str, set[str]]:

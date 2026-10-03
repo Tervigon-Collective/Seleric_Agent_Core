@@ -126,6 +126,23 @@ class ResolvedTerm(BaseModel):
     matched_via: str | None = None  # e.g. "metric_id", "display_name", "glossary:topline"
     definition: str | None = None
     deprecation_notice: str | None = None
+    # Semantic v2: a term can resolve to a metric PLUS filters (scope / platform / channel
+    # are filters, not ids) and say which concept + axes produced it.
+    filter: dict[str, str] = Field(default_factory=dict)
+    concept: str | None = None
+    axes: dict[str, str] = Field(default_factory=dict)
+    defaults_applied: list[str] = Field(default_factory=list)
+
+
+class RetiredTerm(BaseModel):
+    """Semantic v2 hard cut: a v1 metric id that no longer exists. Never silently mapped —
+    the caller must re-ask with the replacement (and its filters)."""
+    kind: Literal["retired"] = "retired"
+    term: str
+    replacement: str | None
+    filters: dict[str, str] = Field(default_factory=dict)
+    reason: str
+    message: str
 
 
 class DefinitionOnlyTerm(BaseModel):
@@ -156,6 +173,7 @@ class UnknownTerm(BaseModel):
     kind: Literal["unknown"] = "unknown"
     term: str
     suggestions: list[str]
+    reason: str | None = None
     guidance: str = (
         "Term not in the catalogue. Do not guess a metric — ask the user to "
         "clarify, or pick from the suggestions if one clearly matches."
@@ -332,6 +350,34 @@ _AXIS_KEYWORDS: dict[str, list[tuple[str, str]]] = {
 }
 
 
+# Semantic v2 (catalogue_v2 concepts): extra hints tried before _AXIS_KEYWORDS, only when the loaded
+# catalogue is semantic_version >= 2, so the v1 catalogue resolves exactly as before.
+_AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
+    "channel": [("facebook", "meta"), ("instagram", "meta"), ("meta", "meta"), ("youtube", "google"),
+                ("google", "google"), ("whatsapp", "whatsapp"), ("unattributed", "unattributed"),
+                ("direct", "unattributed"), ("organic", "organic")],
+    # never the bare word "paid": it is a substring of "prepaid"
+    "paid": [("paid only", "paid"), ("paid-only", "paid"), ("paid traffic", "paid"), ("paid media", "paid"),
+             ("paid ads", "paid"), ("paid clicks", "paid"), ("from ads", "paid")],
+    "date": [("order date", "order"), ("orders placed", "order"), ("placed in", "order"), ("cohort", "order"),
+             ("event date", "finance"), ("p&l", "finance"), ("pnl", "finance")],
+    "stage": [("checkout to purchase", "checkout_to_purchase"), ("cart to checkout", "atc_to_checkout"),
+              ("atc to checkout", "atc_to_checkout"), ("add to cart", "add_to_cart"),
+              ("add-to-cart", "add_to_cart"), ("atc", "add_to_cart"), ("checkout", "checkout"),
+              ("product view", "product_view"), ("pdp", "product_view")],
+    "basis": [("blended roas", "mer"), ("marketing efficiency", "mer"), ("returned", "returned")],
+    "status": [("returned or cancelled", "returned_or_cancelled"), ("returns and cancel", "returned_or_cancelled")],
+    "measure": [("hook", "hook"), ("hold", "hold"), ("completion", "completion"), ("thruplay", "thruplays"),
+                ("number of refunds", "count"), ("refund count", "count"), ("refund lines", "lines"),
+                ("recovered", "recovered_cogs"), ("returns value", "returns_value"),
+                ("orders placed", "order_cohort"), ("per path", "per_path"), ("per order", "per_path")],
+    "component": [("total operating", "total"), ("operating", "operating"), ("gross", "gross")],
+    "metric_kind": [("link click", "link"), ("landing page", "landing_page")],
+    "event": [("events per session", "per_session"), ("per session", "per_session"), ("bounce", "bounce"),
+              ("all events", "all"), ("web events", "all")],
+}
+
+
 def _log_scope(s: ScopeSummary) -> None:
     logger.warning(
         "serve-db scope '%s': %d views / %d metrics visible; hidden: %d views, "
@@ -422,6 +468,42 @@ class CatalogueService:
     def version(self) -> str:
         return self.cat.version
 
+    @property
+    def is_v2(self) -> bool:
+        return self.cat.semantic_version >= 2
+
+    # ---- Semantic v2 hard cut -----------------------------------------------------
+    def retired_metric(self, ref: str):
+        """The hard-cut entry for a retired v1 metric id (v2 catalogues only), else None."""
+        if not self.is_v2:
+            return None
+        raw = (ref or "").strip()
+        return self.cat.retired.get(raw) or self.cat.retired.get(raw.lower())
+
+    def retired_message(self, old: str) -> str | None:
+        d = self.retired_metric(old)
+        if d is None:
+            for dep in self.cat.deprecations:  # retired without a replacement
+                if self.is_v2 and dep.old == (old or "").strip() and dep.new not in self.cat.metrics:
+                    return f"Metric '{dep.old}' was retired in semantic v2 with no replacement: {dep.reason}"
+            return None
+        flt = ", ".join(f"{k} = {v}" for k, v in d.filters.items())
+        return (
+            f"Metric '{d.old}' was retired in semantic v2. Use '{d.new}'"
+            + (f" with filter {flt}" if flt else "")
+            + f" — {d.reason}"
+        )
+
+    def retired_term(self, text: str) -> "RetiredTerm | None":
+        msg = self.retired_message(text)
+        if msg is None:
+            return None
+        d = self.retired_metric(text)
+        if d is not None:
+            return RetiredTerm(term=text, replacement=d.new, filters=dict(d.filters), reason=d.reason, message=msg)
+        dep = next(x for x in self.cat.deprecations if x.old == text.strip())
+        return RetiredTerm(term=text, replacement=None, reason=dep.reason, message=msg)
+
     # ---- Concept layer resolution ------------------------------------------------
     def resolve_concept(
         self, text: str, axes: dict[str, str] | None = None
@@ -485,6 +567,21 @@ class CatalogueService:
                 # No substitute: the draft metric IS the answer; flag it uncertified.
                 draft = True
                 note = f"{metric} is uncertified (draft); treat as directional."
+        # Semantic v2: axes like channel / paid / platform become dimension filters on the
+        # resolved metric. A filter its view cannot take is refused, never answered by a sibling.
+        resolved_m = self.cat.metrics.get(metric)
+        for axis, by_value in c.axis_filters.items():
+            for did, val in (by_value.get(filled.get(axis, "")) or {}).items():
+                dim = self.cat.dimensions.get(did)
+                view = resolved_m.cube_mapping.view if resolved_m else None
+                if dim is None or view not in dim.views:
+                    return UnsupportedConcept(
+                        concept=cid, axes=filled,
+                        reason=(f"{axis}={filled[axis]} needs a '{did}' filter, which {metric} "
+                                f"(view {view}) does not carry."),
+                        nearest_metrics=self._concept_metrics(c),
+                    )
+                flt[did] = val
         return ResolvedConcept(
             concept=cid, metric_id=metric, axes=filled,
             defaults_applied=defaults_applied, filter=flt,
@@ -529,8 +626,10 @@ class CatalogueService:
         for aname, axis in c.axes.items():
             if axis.default is not None:
                 filled[aname] = axis.default
+        v2 = self.cat.semantic_version >= 2
         for aname, axis in c.axes.items():
-            for kw, val in _AXIS_KEYWORDS.get(aname, []):
+            hints = (_AXIS_KEYWORDS_V2.get(aname, []) if v2 else []) + _AXIS_KEYWORDS.get(aname, [])
+            for kw, val in hints:
                 if val in axis.values and kw in t:
                     filled[aname] = val
                     explicitly_set.add(aname)
@@ -644,6 +743,9 @@ class CatalogueService:
 
     def lookup_metric(self, metric_id: str) -> tuple[MetricDef, str | None] | None:
         """Queryable resolve, or exact id including draft/broken (for get_metric)."""
+        retired = self.retired_metric(metric_id)
+        if retired is not None:
+            return self.cat.metrics[retired.new], self.retired_message(metric_id)
         resolved = self.resolve_metric_id(metric_id)
         if resolved is not None:
             mid, notice = resolved
@@ -690,6 +792,15 @@ class CatalogueService:
         q_tokens = set(q.replace(",", " ").split())
         q_content = q_tokens - _SEARCH_STOPWORDS
         q_platforms = {p for p, words in _PLATFORM_TOKENS.items() if q_tokens & words}
+
+        if self.is_v2:
+            # One resolver: whatever resolve_term answers is the top match, so search and
+            # resolution can never disagree on the first answer.
+            top = self._resolve_term_v2(query)
+            if isinstance(top, ResolvedTerm) and top.metric_id in self.cat.metrics:
+                add(self.cat.metrics[top.metric_id], top.matched_via or "resolver", 1000)
+            elif isinstance(top, RetiredTerm) and top.replacement in self.cat.metrics:
+                add(self.cat.metrics[top.replacement], f"retired:{top.term}", 1000)
 
         # 1. Glossary hits rank first (metric shortcuts and grain language). A
         # term matches when it is a substring of the query OR all of its words
@@ -805,6 +916,8 @@ class CatalogueService:
     ):
         if (kind or "").strip().lower() == "dimension":
             return self.resolve_dimension_term(text)
+        if self.is_v2:
+            return self._resolve_term_v2(text)
         t = text.strip().lower()
 
         # 0. Cube-qualified measure / deprecated Cube alias pasted from
@@ -892,6 +1005,89 @@ class CatalogueService:
                     auto_resolved=True,
                     matched_via=top.matched_via,
                 )
+        contenders = [c for c in ranked if c.confidence >= self.ambiguous_threshold][:5]
+        if contenders:
+            return AmbiguousTerm(term=text, candidates=contenders)
+        return UnknownTerm(
+            term=text,
+            suggestions=difflib.get_close_matches(norm, self._vocabulary(), n=5, cutoff=0.5),
+        )
+
+    def _resolve_term_v2(self, text: str):
+        """Semantic v2: ONE resolution order shared by every entry point (resolve_term, search,
+        the planner's fallback). Fuzzy matching only ever suggests.
+
+        retired id → exact metric id → exact concept alias → exact glossary term → normalized
+        metric / glossary name → concept named inside the text → (fuzzy) ambiguous / unknown."""
+        raw = (text or "").strip()
+        t = raw.lower()
+        retired = self.retired_term(raw)
+        if retired is not None:
+            return retired
+        m = self.cat.metrics.get(raw) or self.cat.metrics.get(t)
+        if m is not None:
+            if m.is_queryable:
+                return ResolvedTerm(term=text, metric_id=m.id, matched_via="metric_id")
+            return UnknownTerm(term=text, suggestions=list(m.formula.depends_on),
+                               reason=m.unavailable_reason or f"{m.id} is status={m.status}")
+
+        def concept_result(via: str):
+            rc = self.resolve_concept(raw)
+            if isinstance(rc, ResolvedConcept):
+                return ResolvedTerm(
+                    term=text, metric_id=rc.metric_id, matched_via=f"{via}:{rc.concept}",
+                    filter=rc.filter, concept=rc.concept, axes=rc.axes,
+                    defaults_applied=rc.defaults_applied, definition=rc.disambiguation,
+                    deprecation_notice=rc.note,
+                )
+            if isinstance(rc, UnsupportedConcept):
+                return UnknownTerm(term=text, suggestions=rc.nearest_metrics, reason=rc.reason)
+            return None
+
+        exact_concept = any(
+            cand in self.cat.concept_aliases or cand in self._concept_by_alias
+            for cand in _number_variants(t)
+        )
+        if exact_concept:
+            hit = concept_result("concept")
+            if hit is not None:
+                return hit
+        entry = self._glossary_index.get(t)
+        if entry is not None and entry.canonical_id in self.cat.metrics:
+            return ResolvedTerm(term=text, metric_id=entry.canonical_id, matched_via=f"glossary:{t}",
+                                definition=entry.definition, filter=dict(entry.filter))
+        if entry is not None and entry.canonical_dimension_id:
+            return DefinitionOnlyTerm(
+                term=text,
+                definition=entry.definition or (
+                    f"Grain language for dimension '{entry.canonical_dimension_id}'. "
+                    "Use catalogue_resolve_dimension; do not guess a metric."),
+            )
+        norm = _normalize(text)
+        entries = self._vocab_entries()
+        for form, metric_id, via in entries:
+            if form == norm:
+                g = self._glossary_index.get(via.split(":", 1)[1]) if via.startswith("glossary:") else None
+                return ResolvedTerm(term=text, metric_id=metric_id, matched_via=via,
+                                    filter=dict(g.filter) if g else {})
+        for other in self.cat.metrics.values():  # exact name of an unavailable metric: say why
+            if not other.is_queryable and norm in (_normalize(other.id), _normalize(other.display_name)):
+                return UnknownTerm(term=text, suggestions=list(other.formula.depends_on),
+                                   reason=other.unavailable_reason or f"{other.id} is status={other.status}")
+        hit = concept_result("concept_in_text")
+        if hit is not None:
+            return hit
+        best: dict[str, tuple[float, str]] = {}
+        for form, metric_id, via in entries:
+            ratio = difflib.SequenceMatcher(None, norm, form).ratio()
+            if metric_id not in best or ratio > best[metric_id][0]:
+                best[metric_id] = (ratio, via)
+        ranked = sorted(
+            (TermCandidate(metric_id=mid, display_name=self.cat.metrics[mid].display_name,
+                           confidence=round(sc, 2), matched_via=via)
+             for mid, (sc, via) in best.items()),
+            key=lambda c: c.confidence, reverse=True,
+        )
         contenders = [c for c in ranked if c.confidence >= self.ambiguous_threshold][:5]
         if contenders:
             return AmbiguousTerm(term=text, candidates=contenders)
@@ -1008,6 +1204,8 @@ class CatalogueService:
         domains. If this instance is pinned to a module, that scope is always
         applied. Contains no metric values — Cube/metrics_query executes numbers.
         """
+        if self.is_v2:
+            return self._ontology_v2(module)
         om = self.cat.openmetadata
         if om is None or om.ontology is None:
             return {"error": "Ontology not loaded (missing catalogue/openmetadata/ontology.yaml)."}
@@ -1108,6 +1306,42 @@ class CatalogueService:
         }
 
     # ---------------- modules (dashboard access scopes) ----------------
+
+    def _ontology_v2(self, module: str | None = None) -> dict:
+        """Semantic v2 ontology: views (data products) with their date axis, the drill
+        hierarchies, and the shared axes. Derived from the catalogue, no OpenMetadata."""
+        allowed = self.module_views(module) if module else None
+        if module and self.get_module(module) is None:
+            return {"error": f"Unknown module '{module}'.",
+                    "valid_modules": [m.id for m in self.list_modules()]}
+        views = []
+        for v in self.cat.views.values():
+            if allowed is not None and v.name not in allowed:
+                continue
+            ms = [m for m in self.cat.metrics.values() if m.cube_mapping.view == v.name]
+            views.append({"view": v.name, "title": v.title, "date_dimension": v.date_dimension,
+                          "datetime_dimension": v.datetime_dimension, "description": v.description,
+                          "metrics": sorted(m.id for m in ms if m.is_queryable)})
+        hierarchies = {
+            hid: {"levels": h.levels, "views": [x for x in h.views if allowed is None or x in allowed],
+                  "note": h.note}
+            for hid, h in self.cat.hierarchies.items()
+            if allowed is None or set(h.views) & allowed
+        }
+        return {
+            "semantic_version": self.cat.semantic_version,
+            "views": views,
+            "hierarchies": hierarchies,
+            "date_axes": {"order": "order / session / entity date (default)",
+                          "finance": "event date — pnl_* metrics only (= dashboard P&L)"},
+            "conventions": [
+                "One metric id per number; scope, platform and channel are filters, not ids.",
+                "finance_channel: meta (incl. Meta organic), google (incl. Google organic), whatsapp, organic, unattributed.",
+                "is_paid = true keeps paid Meta / Google clicks only.",
+                "sales_channel = amazon is not supported yet.",
+            ],
+            "catalogue_version": self.version,
+        }
 
     def list_modules(self) -> list[ModuleSummary]:
         return [
