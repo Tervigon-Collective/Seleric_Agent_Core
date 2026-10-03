@@ -508,6 +508,31 @@ class CatalogueService:
     def resolve_concept(
         self, text: str, axes: dict[str, str] | None = None
     ) -> "ResolvedConcept | UnsupportedConcept | UnknownConcept":
+        """Public concept resolution. Semantic v2: when no axes are given, the text goes through
+        the ONE resolver first, so a phrase that names a metric exactly (id, glossary term,
+        metric name) is answered with that metric, never with a concept word inside it."""
+        if self.is_v2 and not axes:
+            term = self._resolve_term_v2(text)
+            if isinstance(term, ResolvedTerm):
+                if term.concept:
+                    return ResolvedConcept(
+                        concept=term.concept, metric_id=term.metric_id, axes=term.axes,
+                        defaults_applied=term.defaults_applied, filter=term.filter,
+                        note=term.deprecation_notice, disambiguation=term.definition,
+                    )
+                return ResolvedConcept(concept="(metric)", metric_id=term.metric_id, axes={},
+                                       filter=term.filter, note=f"matched {term.matched_via}")
+            if isinstance(term, RetiredTerm):
+                return UnsupportedConcept(concept="(retired)", axes={}, reason=term.message,
+                                          nearest_metrics=[term.replacement] if term.replacement else [])
+            if isinstance(term, UnknownTerm) and term.reason:
+                return UnsupportedConcept(concept="(metric)", axes={}, reason=term.reason,
+                                          nearest_metrics=term.suggestions)
+        return self._resolve_concept_core(text, axes)
+
+    def _resolve_concept_core(
+        self, text: str, axes: dict[str, str] | None = None
+    ) -> "ResolvedConcept | UnsupportedConcept | UnknownConcept":
         """Deterministic: a business concept + axis selection -> exactly one metric.
 
         Unspecified axes take their declared default (disclosed in
@@ -793,13 +818,16 @@ class CatalogueService:
         q_content = q_tokens - _SEARCH_STOPWORDS
         q_platforms = {p for p, words in _PLATFORM_TOKENS.items() if q_tokens & words}
 
+        resolver_top: str | None = None
         if self.is_v2:
             # One resolver: whatever resolve_term answers is the top match, so search and
             # resolution can never disagree on the first answer.
             top = self._resolve_term_v2(query)
             if isinstance(top, ResolvedTerm) and top.metric_id in self.cat.metrics:
+                resolver_top = top.metric_id
                 add(self.cat.metrics[top.metric_id], top.matched_via or "resolver", 1000)
             elif isinstance(top, RetiredTerm) and top.replacement in self.cat.metrics:
+                resolver_top = top.replacement
                 add(self.cat.metrics[top.replacement], f"retired:{top.term}", 1000)
 
         # 1. Glossary hits rank first (metric shortcuts and grain language). A
@@ -871,6 +899,8 @@ class CatalogueService:
         if dim_matches:
             grain_ids = set(dim_matches)
             for mid, summary in list(matches.items()):
+                if mid == resolver_top:
+                    continue  # v2: the resolver's answer is never dropped (it stays first)
                 if not grain_ids.intersection(summary.supported_dimensions):
                     del matches[mid]
             for did in grain_ids:
@@ -1032,7 +1062,7 @@ class CatalogueService:
                                reason=m.unavailable_reason or f"{m.id} is status={m.status}")
 
         def concept_result(via: str):
-            rc = self.resolve_concept(raw)
+            rc = self._resolve_concept_core(raw)
             if isinstance(rc, ResolvedConcept):
                 return ResolvedTerm(
                     term=text, metric_id=rc.metric_id, matched_via=f"{via}:{rc.concept}",
