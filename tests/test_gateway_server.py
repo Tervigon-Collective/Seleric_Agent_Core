@@ -315,6 +315,20 @@ async def test_freshness_enforcement_can_be_disabled(built_server_fake_freshness
     assert "error" not in out  # gate off -> stale data still answers
 
 
+def test_freshness_probe_scoped_by_brand_only(built_server):
+    """A content filter must not scope the freshness probe: the newest
+    payment_method = other order can be weeks old on a pipeline that loaded
+    today, and probing that slice refused a live query as stale_data
+    (thread_e75c2615). The brand filter still scopes it."""
+    _mcp, ctx = built_server
+    content = [{"dimension": "payment_method", "operator": "equals", "values": ["other"]}]
+    assert ctx._translate_probe_filters("payments", content) == []
+    brand = [{"dimension": "brand_id", "operator": "equals", "values": ["20"]}]
+    assert ctx._translate_probe_filters("daily_pnl", brand + content) == [
+        {"member": "daily_pnl.brand_id", "operator": "equals", "values": ["20"]}
+    ]
+
+
 async def test_metrics_drilldown_refuses_when_parent_view_stale(built_server_fake_freshness, fake_cube):
     from datetime import date as _date
 

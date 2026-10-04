@@ -177,14 +177,17 @@ class AppContext:
         return payload
 
     def _translate_probe_filters(self, view_name: str, filters: list[dict] | None) -> list[dict]:
-        """Map request filter specs (catalogue dimension ids) to Cube member
-        filters for one view — same member mapping the planner uses. Filters
-        with unknown dimensions are skipped (the query itself would reject
-        them); a probe is never stiffer than the query it guards."""
+        """Map the request's brand filter to a Cube member filter for one view —
+        same member mapping the planner uses. Freshness is a property of a
+        brand's pipeline, so only ``brand_id`` scopes the probe: a content filter
+        (payment_method = other) narrows to a slice whose newest row can be weeks
+        old on a pipeline that loaded today, and probing that slice refused live
+        queries as stale_data (thread_e75c2615). Unknown dimensions are skipped;
+        a probe is never stiffer than the query it guards."""
         out: list[dict] = []
         for f in filters or []:
             dim = self.catalogue.resolve_dimension(str(f.get("dimension") or ""))
-            if dim is None or view_name not in dim.views:
+            if dim is None or dim.id != "brand_id" or view_name not in dim.views:
                 continue
             entry: dict = {"member": dim.views[view_name], "operator": f["operator"]}
             values = f.get("values")
@@ -199,8 +202,8 @@ class AppContext:
         """Latest value of the view's date dimension via a 1-row Cube probe
         (cached per view/filter-slice for freshness_cache_ttl_seconds). None
         when the view has no date dimension or the probe fails. Scoping the
-        probe by the query's filters means a fresh slice in one brand cannot
-        mask a stale slice in the brand actually being queried."""
+        probe by the query's brand means a fresh brand cannot mask a stale
+        pipeline for the brand actually being queried."""
         ttl = self.settings.freshness_cache_ttl_seconds
         key = view_name
         if filters:
