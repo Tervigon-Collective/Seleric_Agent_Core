@@ -643,6 +643,22 @@ class CatalogueService:
                 return best, {}, {}
         return None, {}, {}
 
+    def question_axes(self, text: str) -> dict[str, str]:
+        """Semantic v2: the concept axes the user's OWN words set (date, channel, paid, …), from the same
+        phrase table concept resolution uses, matched on word boundaries. A caller that resolves a term
+        the model extracted ("net profit") can merge these back in, so "net profit on the P&L" keeps
+        its Finance date axis. Empty for a v1 catalogue."""
+        if self.cat.semantic_version < 2:
+            return {}
+        t = f" {(text or '').strip().lower()} "
+        found: dict[str, str] = {}
+        for aname, hints in _AXIS_KEYWORDS_V2.items():
+            for kw, val in hints:
+                if re.search(rf"(?<![\w&]){re.escape(kw)}(?![\w&])", t):
+                    found[aname] = val
+                    break
+        return found
+
     def _fill_axes(
         self, c, text: str, preset_axes: dict, explicit_axes: dict | None
     ) -> tuple[dict[str, str], list[str]]:
@@ -791,8 +807,13 @@ class CatalogueService:
         return extra
 
     def _v2_metric_extras(self, m: MetricDef) -> dict:
-        """valid_for (e.g. Meta-only), extra granularities (hour) and binding notes — only when set."""
+        """valid_for (e.g. Meta-only), extra granularities (hour), binding notes and the date basis of a
+        metric that exists on both axes (pnl_X = finance / event date, X = order date) — only when set."""
         extra: dict = {}
+        if m.id.startswith("pnl_") and m.id[4:] in self.cat.metrics:
+            extra["date_basis"], extra["date_twin"] = "finance", m.id[4:]
+        elif f"pnl_{m.id}" in self.cat.metrics:
+            extra["date_basis"], extra["date_twin"] = "order", f"pnl_{m.id}"
         if m.valid_for:
             extra["valid_for"] = {k: list(v) for k, v in m.valid_for.items()}
             if m.valid_for_reason:

@@ -731,9 +731,10 @@ def build_server(settings: Settings) -> FastMCP:
         _log_call("catalogue_resolve_values", text=text, brand_id=brand_id)
         brand = brand_id or ctx.values.brand_in_text(text) or ctx.values.default_brand_id
         snap = await ctx.values.get(brand, wait_s=4.0)
+        axes = ctx.catalogue.question_axes(text)  # semantic v2: axes the question's own words set
         if snap is None:
-            return {"status": "warming", "brand_id": brand, "terms": [], "unmatched_terms": []}
-        return ctx.values.resolve(text, snap)
+            return {"status": "warming", "brand_id": brand, "terms": [], "unmatched_terms": [], "axes": axes}
+        return {**ctx.values.resolve(text, snap), "axes": axes}
 
     @mcp.tool()
     def catalogue_resolve_concept(text: str, axes: dict | None = None) -> dict:
