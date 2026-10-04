@@ -520,6 +520,7 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     # kept; derivation only ADDS same-grain axes so a new mart column becomes
     # sliceable without hand-editing every metric. See catalogue/dimension_waivers.yaml.
     _derive_supported_dimensions(catalogue_dir, metrics, dimensions)
+    _add_binding_dimensions(metrics, dimensions)
 
     cat = Catalogue(
         version=version,
@@ -589,6 +590,24 @@ def _derive_supported_dimensions(
         # The filter gate only needs a view mapping, but keep the documented
         # supported_filters in sync so catalogue introspection stays truthful.
         m.supported_filters.extend(d for d in added if d not in curated_filters)
+
+
+def _add_binding_dimensions(metrics: dict[str, "MetricDef"], dimensions: dict[str, "DimensionDef"]) -> None:
+    """Semantic v2: a dimension a metric reaches through a binding (e.g. ad_spend by age via the Meta
+    breakdown fact) is part of its slicing surface — the planner routes it — so catalogue introspection
+    (bootstrap, get_metric) must list it. A slice value the metric lacks ([] in ``slices``, e.g. country,
+    or landing_page_views by region) is left out: the planner refuses it."""
+    for m in metrics.values():
+        for b in m.bindings:
+            for did in b.dimensions:
+                if did not in dimensions or b.view not in dimensions[did].views:
+                    continue
+                if b.slice_dimension and did != b.slice_dimension and not b.slices.get(did):
+                    continue
+                if did not in m.supported_dimensions:
+                    m.supported_dimensions.append(did)
+                if did not in m.supported_filters:
+                    m.supported_filters.append(did)
 
 
 def _apply_crosswalk(
@@ -711,11 +730,14 @@ def _check_integrity(cat: Catalogue) -> None:
                 f"metric {m.id}: time_dimension {m.cube_mapping.time_dimension} "
                 f"is not on view {m.cube_mapping.view}"
             )
+        # semantic v2: a dimension may be reached through a binding's view (the planner routes it)
         for dim_id in m.supported_dimensions:
             dim = cat.dimensions.get(dim_id)
+            via_binding = dim is not None and any(
+                dim_id in b.dimensions and b.view in dim.views for b in m.bindings)
             if dim is None:
                 problems.append(f"metric {m.id}: unknown dimension {dim_id}")
-            elif m.cube_mapping.view not in dim.views:
+            elif m.cube_mapping.view not in dim.views and not via_binding:
                 problems.append(
                     f"metric {m.id}: dimension {dim_id} has no mapping for view {m.cube_mapping.view}"
                 )

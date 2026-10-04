@@ -758,13 +758,51 @@ class CatalogueService:
                     "products": [p.model_dump() for p in self._dimension_products(d)],
                 }
             )
+            if self.is_v2:
+                dimensions[-1].update(self._v2_dimension_extras(d))
         onto = self.get_ontology(module)
-        return {
-            "metrics": [m.model_dump() for m in listed.matches],
+        metrics = [m.model_dump() for m in listed.matches]
+        if self.is_v2:
+            for row in metrics:
+                row.update(self._v2_metric_extras(self.cat.metrics[row["id"]]))
+        out = {
+            "metrics": metrics,
             "dimensions": dimensions,
             "grain_defaults": onto.get("grain_defaults") if "error" not in onto else None,
             "catalogue_version": self.version,
         }
+        if self.is_v2:
+            out["semantic_version"] = self.cat.semantic_version
+            out["hierarchies"] = {h.id: list(h.levels) for h in self.cat.hierarchies.values()}
+        return out
+
+    def _v2_dimension_extras(self, d: DimensionDef) -> dict:
+        """Semantic v2 bootstrap fields an agent needs to use a dimension correctly (only when set)."""
+        extra: dict = {"description": d.description}
+        for hid, h in self.cat.hierarchies.items():
+            if d.id in h.levels:
+                extra["hierarchy"] = {"id": hid, "level": h.levels.index(d.id) + 1, "levels": list(h.levels)}
+                break
+        if d.allowed_values:
+            extra["allowed_values"] = list(d.allowed_values)
+        if d.unsupported_values:
+            extra["unsupported_values"] = dict(d.unsupported_values)
+        return extra
+
+    def _v2_metric_extras(self, m: MetricDef) -> dict:
+        """valid_for (e.g. Meta-only), extra granularities (hour) and binding notes — only when set."""
+        extra: dict = {}
+        if m.valid_for:
+            extra["valid_for"] = {k: list(v) for k, v in m.valid_for.items()}
+            if m.valid_for_reason:
+                extra["valid_for_reason"] = m.valid_for_reason
+        grains = sorted({g for b in m.bindings for g in b.granularities})
+        if grains:
+            extra["extra_granularities"] = grains
+        notes = [f"{b.name}: {b.note}" for b in m.bindings if b.note]
+        if notes:
+            extra["binding_notes"] = notes
+        return extra
 
     def lookup_metric(self, metric_id: str) -> tuple[MetricDef, str | None] | None:
         """Queryable resolve, or exact id including draft/broken (for get_metric)."""

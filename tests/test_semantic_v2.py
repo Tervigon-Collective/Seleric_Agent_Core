@@ -306,3 +306,29 @@ async def test_metric_missing_from_a_slice_is_refused_not_zero(planner):
         with pytest.raises(PlanError) as exc:
             await planner.run(QueryRequest(measures=["landing_page_views"], time_range=SEP, **kw))
         assert "landing_page_views" in str(exc.value)
+
+
+def test_binding_dimensions_are_on_the_metric_surface(v2):
+    # introspection (bootstrap / get_metric) must show what the planner can route
+    dims = set(v2.cat.metrics["ad_spend"].supported_dimensions)
+    assert {"age", "gender", "publisher_platform", "region", "breakdown_type"} <= dims
+    assert "country" not in dims  # never populated on the breakdown fact: refused, so not advertised
+    assert "region" not in v2.cat.metrics["landing_page_views"].supported_dimensions
+    assert "Meta delivery only" in v2.cat.dimensions["age"].description
+
+
+def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
+    b = v2.bootstrap()
+    assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
+    assert len(b["metrics"]) == 106  # 109 minus the 3 unavailable checkout-timing metrics
+    m = {x["id"]: x for x in b["metrics"]}
+    assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
+    assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
+    assert any("Meta only" in n for n in m["ad_spend"]["binding_notes"])
+    d = {x["id"]: x for x in b["dimensions"]}
+    assert d["channel"]["hierarchy"] == {"id": "traffic", "level": 2, "levels": ["platform", "channel", "sub_channel"]}
+    assert "amazon" in d["sales_channel"]["unsupported_values"]
+    assert "Meta delivery only" in d["age"]["description"]
+    # v1 bootstrap unchanged
+    assert "semantic_version" not in catalogue.bootstrap()
+    assert "description" not in catalogue.bootstrap()["dimensions"][0]

@@ -234,6 +234,12 @@ def main() -> int:
             entry["unsupported_values"] = {"amazon": SALES_CHANNEL_REASON}
         if not entry["description"]:
             entry["description"] = entry["display_name"]
+        if set(entry["views"]) == {"paid_media_breakdowns"} and did != "brand_id":
+            slices = BREAKDOWN_SLICES.get(did)
+            where = (f"breakdown_type {', '.join(slices)}" if slices else
+                     "never populated — not answerable" if slices == [] else "one breakdown_type per query")
+            entry["description"] = (f"Meta audience breakdown ({where}); Meta delivery only — Google reports no "
+                                    f"audience breakdowns. {entry['description']}").strip()
     # display names must be unique per dimension list for readability
     wy(OUT / "dimensions" / "core.yaml", {"dimensions": sorted(dims.values(), key=lambda x: x["id"])}, hdr)
 

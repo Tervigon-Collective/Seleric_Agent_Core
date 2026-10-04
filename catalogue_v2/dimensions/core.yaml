@@ -121,7 +121,8 @@ dimensions:
   aliases: []
 - id: age
   display_name: Age
-  description: Age bucket.
+  description: Meta audience breakdown (breakdown_type age_and_gender); Meta delivery only — Google reports no audience
+    breakdowns. Age bucket.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.age
@@ -173,7 +174,8 @@ dimensions:
   aliases: []
 - id: breakdown_type
   display_name: Breakdown Type
-  description: Which breakdown the row belongs to (age_gender, placement, device, region …).
+  description: Meta audience breakdown (one breakdown_type per query); Meta delivery only — Google reports no audience
+    breakdowns. Which breakdown the row belongs to (age_gender, placement, device, region …).
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.breakdown_type
@@ -300,7 +302,8 @@ dimensions:
   aliases: []
 - id: country
   display_name: Country
-  description: Country.
+  description: Meta audience breakdown (never populated — not answerable); Meta delivery only — Google reports no
+    audience breakdowns. Country.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.country
@@ -348,7 +351,8 @@ dimensions:
   aliases: []
 - id: device_platform
   display_name: Device Platform
-  description: mobile | desktop.
+  description: Meta audience breakdown (breakdown_type platform_device); Meta delivery only — Google reports no
+    audience breakdowns. mobile | desktop.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.device_platform
@@ -460,7 +464,8 @@ dimensions:
   aliases: []
 - id: gender
   display_name: Gender
-  description: Gender.
+  description: Meta audience breakdown (breakdown_type age_and_gender); Meta delivery only — Google reports no audience
+    breakdowns. Gender.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.gender
@@ -517,7 +522,8 @@ dimensions:
   aliases: []
 - id: impression_device
   display_name: Impression Device
-  description: Impression device.
+  description: Meta audience breakdown (breakdown_type placement); Meta delivery only — Google reports no audience
+    breakdowns. Impression device.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.impression_device
@@ -804,7 +810,8 @@ dimensions:
   aliases: []
 - id: platform_position
   display_name: Platform Position
-  description: Placement (feed, story, reels …).
+  description: Meta audience breakdown (breakdown_type placement); Meta delivery only — Google reports no audience
+    breakdowns. Placement (feed, story, reels …).
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.platform_position
@@ -851,7 +858,8 @@ dimensions:
   aliases: []
 - id: publisher_platform
   display_name: Publisher Platform
-  description: facebook | instagram | audience_network | messenger.
+  description: Meta audience breakdown (breakdown_type publisher_platform, placement, platform_device); Meta delivery
+    only — Google reports no audience breakdowns. facebook | instagram | audience_network | messenger.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.publisher_platform
@@ -874,7 +882,8 @@ dimensions:
   - refund event date
 - id: region
   display_name: Region
-  description: Region / state.
+  description: Meta audience breakdown (breakdown_type region); Meta delivery only — Google reports no audience
+    breakdowns. Region / state.
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.region
