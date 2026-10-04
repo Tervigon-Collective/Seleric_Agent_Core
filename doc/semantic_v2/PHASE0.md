@@ -17,6 +17,7 @@ each with the Cube member and date axis it was read from. v2 metrics must equal 
 or differ only by a documented, approved diff.
 
 Regenerate: `uv run --with openpyxl python scripts/build_metric_inventory.py --baseline catalogue/baselines/v1.json`
+(2026-10-04: that v1 tool is in `deprecated/scripts/`; the current inventory is `scripts/build_metric_inventory_v2.py` and the gates are `scripts/v2_gates.py`.)
 
 Data gap seen: `session_avg_seconds_to_checkout`, `session_avg_seconds_to_purchase`, `session_checkout_steps`
 are null/zero for brand 20 in all three months (checkout timing not populated).

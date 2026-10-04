@@ -157,7 +157,7 @@ def _print_report(report: dict) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--catalogue", type=Path, default=_REPO / "catalogue")
+    ap.add_argument("--catalogue", type=Path, default=_REPO / "catalogue_v2")
     ap.add_argument("--json", type=Path, default=None, help="write full report JSON here")
     args = ap.parse_args()
 

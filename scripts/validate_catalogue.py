@@ -15,14 +15,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from seleric_mcp.catalogue_service.loader import load_catalogue
 from seleric_mcp.catalogue_service.service import CatalogueService
 from seleric_mcp.catalogue_service.validate import validate_against_cube
-from seleric_mcp.config import PROJECT_ROOT, load_settings
+from seleric_mcp.config import load_settings
 from seleric_mcp.semantic_layer.cube_client import CubeClient
 
 
 async def main() -> int:
-    service = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue"))
+    settings = load_settings()
+    service = CatalogueService(load_catalogue(settings.catalogue_dir))
     print(f"catalogue version: {service.version} ({len(service.cat.metrics)} metrics)")
-    cube = CubeClient(load_settings())
+    cube = CubeClient(settings)
     drift = await validate_against_cube(service, cube)
     await cube.aclose()
     if drift["unreachable"]:

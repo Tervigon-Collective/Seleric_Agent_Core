@@ -34,6 +34,9 @@ def catalogue():
 @pytest.fixture()
 def settings(tmp_path):
     return Settings(
+        # v1 catalogue pinned: these unit tests exercise gateway / planner mechanics on v1 fixture
+        # ids; the semantic v2 surface (default catalogue_dir) is covered by test_semantic_v2.py.
+        catalogue_dir=CATALOGUE_DIR,
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",

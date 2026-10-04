@@ -2,9 +2,10 @@
 # Env vars still override any key here (useful for tests and one-off ops).
 
 cube:
-  # Cube model: data_platform/mage-ai/infra/cube/ (NOT Base_Agent/cube/).
-  # docker compose mounts that path at 127.0.0.1:4001.
-  api_url: http://127.0.0.1:4001
+  # Semantic v2 (doc/semantic_v2): Cube v2 model mage-ai/infra/cube/model_v2, compose service cube-v2 on
+  # 127.0.0.1:4002 (in compose the MCP uses http://cube-v2:4000 via CUBE_API_URL). v1 Cube on :4001 is
+  # frozen and serves only seleric_systems.
+  api_url: http://127.0.0.1:4002
 
 pipeboard:
   mcp_url: https://meta-ads.mcp.pipeboard.co

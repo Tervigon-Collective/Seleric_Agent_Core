@@ -162,9 +162,10 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
 def built_server_no_scopes(fake_cube, result_store, tmp_path):
     """Same as built_server but the caller has been granted no scopes at all —
     exercises the denial path without needing to alter any real metric file."""
-    from seleric_mcp.config import Settings
+    from seleric_mcp.config import PROJECT_ROOT, Settings
 
     settings = Settings(
+        catalogue_dir=PROJECT_ROOT / "catalogue",  # v1 fixture ids (see conftest.settings)
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",
@@ -562,9 +563,10 @@ async def test_scopes_apply_to_cube_member_measure_ref(built_server_no_scopes):
 # pass; out-of-module metrics are hard-refused before Cube is touched.
 
 def _pinned_settings(tmp_path, module):
-    from seleric_mcp.config import Settings
+    from seleric_mcp.config import PROJECT_ROOT, Settings
 
     return Settings(
+        catalogue_dir=PROJECT_ROOT / "catalogue",  # v1 fixture ids (see conftest.settings)
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",

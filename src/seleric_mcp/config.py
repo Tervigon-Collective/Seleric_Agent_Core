@@ -136,7 +136,7 @@ class Settings:
     # from search, resolve and query. Empty = no gating.
     # Env override: SELERIC_SERVE_DB.
     serve_db: str = ""
-    catalogue_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "catalogue")
+    catalogue_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "catalogue_v2")
 
     # --- behavior tunables ---
     resolve_auto_threshold: float = 0.85
@@ -265,10 +265,11 @@ def load_settings(config_path: Path | None = None) -> Settings:
     db_path = Path(db_raw)
     if not db_path.is_absolute():
         db_path = PROJECT_ROOT / db_path
-    # Catalogue directory (semantic v2 runs a second instance on catalogue_v2/).
+    # Catalogue directory.
     # Env override: SELERIC_CATALOGUE_DIR (relative paths are under the project root).
     catalogue_raw = os.getenv("SELERIC_CATALOGUE_DIR", "").strip()
-    catalogue_dir = Path(catalogue_raw) if catalogue_raw else PROJECT_ROOT / "catalogue"
+    # Default = semantic v2 (catalogue_v2); SELERIC_CATALOGUE_DIR=catalogue is the v1 rollback.
+    catalogue_dir = Path(catalogue_raw) if catalogue_raw else PROJECT_ROOT / "catalogue_v2"
     if not catalogue_dir.is_absolute():
         catalogue_dir = PROJECT_ROOT / catalogue_dir
 
@@ -323,7 +324,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
 
     return Settings(
         cube_api_url=str(
-            _env_or("CUBE_API_URL", _cfg_get(cube, "api_url", "http://127.0.0.1:4001"))
+            _env_or("CUBE_API_URL", _cfg_get(cube, "api_url", "http://127.0.0.1:4002"))
         ).rstrip("/"),
         seleric_api_key=_env_str("SELERIC_API_KEY"),
         cubejs_api_secret=_env_str("CUBEJS_API_SECRET"),

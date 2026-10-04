@@ -32,22 +32,18 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 
-def main() -> int:
-    from build_metric_inventory import PROBE_PHRASES
+def load_surface(agent: str):
+    """(CatalogueService on catalogue_v2, the agent's v2 registry entries)."""
     from seleric_mcp.catalogue_service.loader import load_catalogue
     from seleric_mcp.catalogue_service.service import CatalogueService
-
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--agent", default=os.environ.get("SELERIC_AGENT", "/opt/seleric/Seleric_Agent"),
-                    help="Seleric_Agent checkout whose config/metric_registry.yaml is on v2 ids")
-    ap.add_argument("--v1-agent", default="/opt/seleric/Seleric_Agent", help="registry whose aliases seed phrases")
-    ap.add_argument("--live", action="store_true")
-    ap.add_argument("--json")
-    args = ap.parse_args()
-
     svc = CatalogueService(load_catalogue(ROOT / "catalogue_v2"))
-    reg = yaml.safe_load(Path(args.agent, "config", "metric_registry.yaml").read_text())["metrics"]
-    v1_reg = yaml.safe_load(Path(args.v1_agent, "config", "metric_registry.yaml").read_text())["metrics"]
+    reg = yaml.safe_load(Path(agent, "config", "metric_registry.yaml").read_text())["metrics"]
+    return svc, reg
+
+
+def compute(svc, reg, v1_reg, live: bool) -> dict:
+    """Every gate's findings (lists) plus the per-phrase resolution rows."""
+    from probe_phrases import PROBE_PHRASES
     phrases = {p.lower() for p in PROBE_PHRASES}
     phrases |= {t["term"].lower() for t in yaml.safe_load((ROOT / "catalogue" / "glossary" / "terms.yaml").read_text())["terms"]}
     for d in ("catalogue/concepts", "catalogue_v2/concepts"):
@@ -102,13 +98,30 @@ def main() -> int:
                            if d != b.slice_dimension and d not in b.slices]
     dups = []
     filter_errors = []
-    if args.live:
+    if live:
         filter_errors = live_filters(svc, reg)
         sliced += live_slices(svc)
         dups = live_duplicates(svc)
-
     gates = [("resolution conflicts", len(conflicts)), ("registry drift", len(drift)),
-             ("hard-cut coverage gaps", len(uncovered)), ("sliced bindings", len(sliced))] + ([("live filters", len(filter_errors)), ("duplicate numbers", len(dups))] if args.live else [])
+             ("hard-cut coverage gaps", len(uncovered)), ("sliced bindings", len(sliced))] + (
+        [("live filters", len(filter_errors)), ("duplicate numbers", len(dups))] if live else [])
+    return {"gates": gates, "rows": rows, "conflicts": conflicts, "drift": drift, "uncovered": uncovered,
+            "sliced": sliced, "filters": filter_errors, "duplicates": dups}
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--agent", default=os.environ.get("SELERIC_AGENT", "/opt/seleric/Seleric_Agent"),
+                    help="Seleric_Agent checkout whose config/metric_registry.yaml is on v2 ids")
+    ap.add_argument("--v1-agent", default="/opt/seleric/Seleric_Agent", help="registry whose aliases seed phrases")
+    ap.add_argument("--live", action="store_true")
+    ap.add_argument("--json")
+    args = ap.parse_args()
+    svc, reg = load_surface(args.agent)
+    v1_reg = yaml.safe_load(Path(args.v1_agent, "config", "metric_registry.yaml").read_text())["metrics"]
+    r = compute(svc, reg, v1_reg, args.live)
+    gates, rows, conflicts = r["gates"], r["rows"], r["conflicts"]
+    drift, uncovered, sliced, filter_errors, dups = r["drift"], r["uncovered"], r["sliced"], r["filters"], r["duplicates"]
     print(f"semantic v2 gates (catalogue_v2 {svc.version}, {len(rows)} phrases):")
     for name, n in gates:
         print(f"  {'PASS' if n == 0 else 'FAIL'}  {name:26s} {n}")
@@ -128,7 +141,7 @@ def main() -> int:
     unresolved = [r["phrase"] for r in rows if r["verdict"] == "UNRESOLVED"]
     print(f"  info: {len(unresolved)} phrases unresolved by every resolver (no metric — e.g. dimension words)")
     if args.json:
-        json.dump({"rows": rows, "drift": drift, "uncovered": uncovered, "sliced": sliced, "filters": filter_errors, "duplicates": dups}, open(args.json, "w"), indent=1)
+        json.dump({k: v for k, v in r.items() if k != "gates"}, open(args.json, "w"), indent=1)
     return 1 if any(n for _, n in gates) else 0
 
 
@@ -138,44 +151,61 @@ def live_filters(svc, reg) -> list[str]:
     from v2_parity import V2_URL, last_full_months, load, secret, token
     tok = token(secret())
     (s, e), = last_full_months(1)
-    pairs: set[tuple[str, tuple]] = set()
-    for t in svc.cat.glossary:
-        if t.canonical_id and t.filter:
-            pairs.add((t.canonical_id, tuple(sorted(t.filter.items()))))
-    for d in svc.cat.deprecations:
-        if d.filters and d.new in svc.cat.metrics:
-            pairs.add((d.new, tuple(sorted(d.filters.items()))))
-    for r in reg:
-        if r.get("catalogue_metric") and r.get("catalogue_filters"):
-            pairs.add((r["catalogue_metric"], tuple(sorted((k, str(v)) for k, v in r["catalogue_filters"].items()))))
-    for c in svc.cat.concepts.values():
-        targets = {x.metric for x in c.resolves if getattr(x, "metric", None)}
-        for values in c.axis_filters.values():
-            for flt in values.values():
-                for mid in targets:
-                    m = svc.cat.metrics.get(mid)
-                    if m and all(m.cube_mapping.view in getattr(svc.cat.dimensions.get(k), "views", {}) for k in flt):
-                        pairs.add((mid, tuple(sorted(flt.items()))))
+    pairs = filter_pairs(svc, reg)
     bad = []
     for mid, flt in sorted(pairs):
         m = svc.cat.metrics.get(mid)
         if m is None or not m.is_queryable:
             continue
-        view = m.cube_mapping.view
-        members = {}
-        for k, v in flt:
-            dim = svc.cat.dimensions.get(k)
-            if dim is None or view not in dim.views:
-                bad.append(f"{mid} {dict(flt)}: dimension {k} not on view {view}")
-                break
-            members[dim.views[view]] = v
-        else:
-            axis = m.cube_mapping.time_dimension or f"{view}.{svc.cat.views[view].date_dimension}"
-            got = load(V2_URL, tok, m.cube_mapping.measure, axis, "20", s, e, members)
-            if isinstance(got, str):
-                bad.append(f"{mid} {dict(flt)}: {got[:160]}")
+        members, err = filter_members(svc, m, flt)
+        if err:
+            bad.append(f"{mid} {dict(flt)}: {err}")
+            continue
+        axis = m.cube_mapping.time_dimension or f"{m.cube_mapping.view}.{svc.cat.views[m.cube_mapping.view].date_dimension}"
+        got = load(V2_URL, tok, m.cube_mapping.measure, axis, "20", s, e, members)
+        if isinstance(got, str):
+            bad.append(f"{mid} {dict(flt)}: {got[:160]}")
     print(f"  info: {len(pairs)} metric + filter pairs run live")
     return bad
+
+
+def filter_members(svc, m, flt) -> tuple[dict, str | None]:
+    """Catalogue filter ids -> Cube members on the metric's view (or the reason it cannot be applied)."""
+    view, members = m.cube_mapping.view, {}
+    for k, v in flt:
+        dim = svc.cat.dimensions.get(k)
+        if dim is None or view not in dim.views:
+            return {}, f"dimension {k} not on view {view}"
+        members[dim.views[view]] = v
+    return members, None
+
+
+def filter_pairs(svc, reg) -> dict[tuple[str, tuple], set[str]]:
+    """Every (metric, filters) the surface can emit -> where it comes from
+    (glossary / retired-id replacement / agent registry / concept axis)."""
+    pairs: dict[tuple[str, tuple], set[str]] = {}
+
+    def add(mid: str, flt: dict, src: str) -> None:
+        pairs.setdefault((mid, tuple(sorted((k, str(v)) for k, v in flt.items()))), set()).add(src)
+
+    for t in svc.cat.glossary:
+        if t.canonical_id and t.filter:
+            add(t.canonical_id, t.filter, f"glossary: {t.term}")
+    for d in svc.cat.deprecations:
+        if d.filters and d.new in svc.cat.metrics:
+            add(d.new, d.filters, f"retired: {d.old}")
+    for r in reg:
+        if r.get("catalogue_metric") and r.get("catalogue_filters"):
+            add(r["catalogue_metric"], r["catalogue_filters"], f"registry: {r['id']}")
+    for c in svc.cat.concepts.values():
+        targets = {x.metric for x in c.resolves if getattr(x, "metric", None)}
+        for axis, values in c.axis_filters.items():
+            for value, flt in values.items():
+                for mid in targets:
+                    m = svc.cat.metrics.get(mid)
+                    if m and all(m.cube_mapping.view in getattr(svc.cat.dimensions.get(k), "views", {}) for k in flt):
+                        add(mid, flt, f"concept: {c.id} {axis}={value}")
+    return pairs
 
 
 def live_slices(svc) -> list[str]:

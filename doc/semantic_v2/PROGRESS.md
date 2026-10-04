@@ -261,16 +261,37 @@ Known limits (accepted):
      - Agent answer arithmetic: the "impressions by age" narration said 1,572,690 while its rows sum to 1,585,690
        (answer_audit did not catch it); the agent also did not say the breakdown is Meta-only although the MCP
        warning says so. Seleric_Agent-side.
-     - Regenerate the inventory on the v2 surface; add `v2_parity.py` to CI.
-2. Keep v1 Cube (:4001) for seleric_systems (`daily_pnl.*` via nginx `/cube/`).
-3. **Deploy notes:** mage-ai: a push to `main` triggers the Jenkins deploy (CI gates → rsync into
+     - ~~Regenerate the inventory on the v2 surface~~ — done (below). Add `v2_parity.py` to CI (needs uv for jenkins).
+2. **Post-cutover cleanup (2026-10-04):**
+   - **New inventory** `doc/METRIC_INVENTORY.xlsx` from `scripts/build_metric_inventory_v2.py`, read entirely from the
+     live surface (catalogue_v2, Cube v2 meta / generated SQL / values, ClickHouse DDL lineage, agent registry,
+     gates, v1 parity): README · Metrics (109: member, axis, bindings, valid_for, serve objects, gold sources,
+     former v1 ids, concepts, glossary, registry entries, Sep / Aug values, Cube SQL) · Metric Variants (347
+     metric + filter pairs with sources and values) · Retired v1 ids (146: 108 equal, 2 known diffs, 14 not
+     comparable — v1 side has no axis —, 22 without replacement) · Views · Dimensions · Hierarchies · Concepts ·
+     Glossary · Agent Registry · Resolution (529 phrases) · Gates · Lineage (18 serve objects → gold). The v1
+     workbook is `deprecated/doc/METRIC_INVENTORY_v1.xlsx`.
+   - **Deprecated** (moved to `deprecated/`, manifest in deprecated/README.md; nothing live imports, mounts or runs
+     them): 16 v1 scripts (v1 inventory/gates, v1 catalogue authoring loop, v1 reconciliations, one-off
+     verifications, golden-question suites), 6 v1 design docs + `doc/serve-revamp/`, 18 v1 catalogue audit
+     reports, the v1 inventory workbook, the Phase 4 test-MCP compose file. `scripts/probe_phrases.py` keeps the
+     probe list the gates need.
+   - **Defaults now v2:** `config.py` `catalogue_dir` → `catalogue_v2`, Cube default → :4002 (`config.yaml` too);
+     `smoke_cube.py`, `validate_catalogue.py`, `capability_audit.py` run on v2. v1 unit tests pin
+     `catalogue_dir=catalogue` explicitly (conftest `settings`, two gateway-test fixtures). `catalogue/DEPRECATED.md`
+     marks the v1 catalogue frozen (rollback + id map + phrase seeds). README rewritten for v2.
+   - **Kept on purpose:** v1 `cube` service + `mage-ai/infra/cube/model` (seleric_systems queries canonical_pnl,
+     daily_pnl, channel_pnl, meta/google ad performance, order_attribution, … through nginx `/cube/`), `cube/`
+     (Jenkins checks `cube/.env`), `catalogue/`, `sync_openmetadata_catalogue.py` (v1 tests).
+3. Keep v1 Cube (:4001) for seleric_systems (`daily_pnl.*` via nginx `/cube/`).
+4. **Deploy notes:** mage-ai: a push to `main` triggers the Jenkins deploy (CI gates → rsync into
    /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt orchestrator runs back to back (~25 min,
    ~10 s gaps), so push right after a run completes. **Seleric_Agent_Core also deploys on a push to `main`**
    (Jenkins job `Seleric-Agent-Core`: rsync --delete into /opt/seleric/Seleric_Agent_Core + `docker compose up -d
    --build` → MCP and v1 Cube restart, ~1 min) — even for doc-only commits. That deploy reads
    `mage-ai/infra/cube/.env.v2` as the `jenkins` user: keep it group-readable (640, group tervigon) — build #49
    failed at compose config load while it was 600.
-4. ~~Live compose drift~~ — resolved by the Phase 5 merge (cube-v2 stable parent mount is on main).
+5. ~~Live compose drift~~ — resolved by the Phase 5 merge (cube-v2 stable parent mount is on main).
 
 ## Known gaps / risks
 - ~~Uncommitted on `main`~~ — resolved 2026-10-03: `semantic-v2` merged to `main` in both repos.
