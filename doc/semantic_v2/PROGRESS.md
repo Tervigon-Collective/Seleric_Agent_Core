@@ -4,12 +4,10 @@ Plan: [PLAN.md](./PLAN.md). Work happens on branch `semantic-v2` in mage-ai and 
 and is merged to `main` at each stable point (first merge 2026-10-03, after the channel decisions).
 Seleric_Agent work goes on its `gaurav` branch.
 
-**Status 2026-10-04:** Phases 0–3 done and closed; both repos merged to `main` and deployed (mage-ai Jenkins
-#224, Agent_Core #50). Cube v2 runs as `cube-v2` on 127.0.0.1:4002 next to v1
-(:4001); 149 / 151 certified v1 metrics equal on v2 in every cell, the 2 differences documented. The agent
-still runs on v1 Cube and the v1 catalogue — nothing user-facing has switched. Phase 4 (catalogue v2 + MCP +
-registry) is built and verified on branches (gates 0 / 0 / 0 / 0 / 0 live; test MCP on :8766 smoke-tested).
-Next: Phase 5 cutover — on request only.
+**Status 2026-10-04 (Phase 5):** the agent surface is on semantic v2. The MCP (`seleric-mcp-mcp-1`, :8765 /
+mcp.seleric.com) serves `catalogue_v2` on `cube-v2` (:4002); Seleric_Agent `gaurav` carries the v2 registry.
+v1 Cube (:4001) stays up for seleric_systems only. All repos on their deploy branches (mage-ai `main`,
+Agent_Core `main`, Seleric_Agent `gaurav`).
 
 | Phase | Status | Commits |
 |---|---|---|
@@ -19,7 +17,7 @@ Next: Phase 5 cutover — on request only.
 | Channel decisions (pre-Phase 3) | ✅ done 2026-10-03 | mage-ai 393496b, c721983 |
 | 3 Cube v2 model | ✅ closed 2026-10-04 | mage-ai 6f59a2e, f3361eb, 04e59a7 · Agent_Core 7e9bc17, 229d322 (all on `main`) |
 | 4 Catalogue v2 + MCP + registry | ✅ built 2026-10-04 (branches, not on main) | Agent_Core `semantic-v2-p4` e9043db · Seleric_Agent `semantic-v2` 22e1d29 · mage-ai `semantic-v2` c4751e8 |
-| 5 Cutover | ⏳ not started | — |
+| 5 Cutover | ✅ 2026-10-04 | mage-ai 2c2655d (main, Jenkins #225) · Agent_Core main (this commit) · Seleric_Agent gaurav 22e1d29 |
 
 ## Phase 0 — baseline and guards ✅
 Details: [PHASE0.md](./PHASE0.md).
@@ -233,16 +231,24 @@ Known limits (accepted):
   planner; drill-through to records (`drill_members`) is not exposed by the MCP yet.
 
 ## Next steps
-1. **Phase 5 cutover** (only when asked; one window, both together — v2 ids do not exist on the v1 MCP):
-   - Agent_Core: merge `semantic-v2-p4` → `main` with `docker-compose.yml` `mcp` → `CUBE_API_URL:
-     http://cube-v2:4000`, `SELERIC_CATALOGUE_DIR: catalogue_v2`, `SELERIC_CATALOGUE_SHA`, `depends_on: cube-v2`
-     (the Dockerfile must also `COPY catalogue_v2`). The merge also lands the stable parent mount for cube-v2.
-     Push = Jenkins deploy (MCP restart ~1 min).
-   - Seleric_Agent: merge `semantic-v2` → `gaurav` right after the MCP is on v2 (the live checkout has a
-     teammate's uncommitted files — they must commit first); redeploy the agent.
-   - Make `v2_gates.py` blocking in CI; regenerate the inventory on the v2 surface; add `v2_parity.py` to CI.
-   - Then stop the test MCP (`docker compose -f docker-compose.v2test.yml down -v`).
-   - Rollback = revert the compose env (catalogue/ + cube) and the gaurav merge; v1 stays intact throughout.
+1. **Phase 5 cutover — done 2026-10-04:**
+   - mage-ai `semantic-v2` → `main` (2c2655d, pushed right after an orchestrator run; Jenkins #225 green). Includes
+     the `is_paid` fix: Cube sends boolean filters as 'true'/'false' and the serve columns are UInt8, so every
+     paid-only filter failed until `sql: toBool({CUBE}.is_paid)` (found by the pre-cutover registry sweep).
+   - Pre-cutover checks: registry sweep over the test MCP (every registry entry + its catalogue_filters: 86 ok,
+     3 = the refused checkout-timing metrics); v2 gates incl. the new **live filters** gate (347 metric + filter
+     pairs run on Cube v2) all 0; agent code/config scanned for retired ids (only comments / the test fake LLM).
+   - Agent_Core `semantic-v2-p4` → `main`: `mcp` on `CUBE_API_URL http://cube-v2:4000` + `SELERIC_CATALOGUE_DIR
+     catalogue_v2` (Dockerfile ships catalogue_v2; cube-v2 stable parent mount now on main).
+   - Seleric_Agent `semantic-v2` fast-forwarded into `gaurav`. The live checkout held a teammate's uncommitted
+     (already deployed) edits in 6 files: backed up to `/home/tervigon/work/backup_seleric_agent_wip_20261004T063343Z`
+     (patch + files + SHA256SUMS), stashed, fast-forwarded, restored (no overlapping hunks; dry-run first);
+     they remain uncommitted and live, exactly as before.
+   - **Rollback:** Agent_Core — revert the `mcp` env in `docker-compose.yml` (`CUBE_API_URL http://cube:4000`, drop
+     `SELERIC_CATALOGUE_DIR`; catalogue/ is still shipped) and push; Seleric_Agent — `git reset --hard 431ed60` on a
+     stash of the WIP (or revert the commits 431ed60..22e1d29) and rebuild. v1 Cube and catalogue/ are untouched.
+   - Follow-ups: make `v2_gates.py` blocking in mage-ai CI; regenerate the inventory on the v2 surface; add
+     `v2_parity.py` to CI; stop the test MCP (`docker compose -f docker-compose.v2test.yml down -v`).
 2. Keep v1 Cube (:4001) for seleric_systems (`daily_pnl.*` via nginx `/cube/`).
 3. **Deploy notes:** mage-ai: a push to `main` triggers the Jenkins deploy (CI gates → rsync into
    /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt orchestrator runs back to back (~25 min,
@@ -251,9 +257,7 @@ Known limits (accepted):
    --build` → MCP and v1 Cube restart, ~1 min) — even for doc-only commits. That deploy reads
    `mage-ai/infra/cube/.env.v2` as the `jenkins` user: keep it group-readable (640, group tervigon) — build #49
    failed at compose config load while it was 600.
-4. **Live compose drift:** until the Phase 4 merge, Agent_Core `main` still has the old `model_v2` bind mount for
-   cube-v2. The running container uses the stable parent mount (applied from the branch); any Agent_Core main
-   deploy before the merge recreates cube-v2 with the old mount (works, but goes stale on a mage-ai branch switch).
+4. ~~Live compose drift~~ — resolved by the Phase 5 merge (cube-v2 stable parent mount is on main).
 
 ## Known gaps / risks
 - ~~Uncommitted on `main`~~ — resolved 2026-10-03: `semantic-v2` merged to `main` in both repos.
@@ -282,6 +286,9 @@ Known limits (accepted):
   `attr_snowplow_sessions`. Until then Phase 4 marks the three as unavailable (data-quality waiver) so the agent
   does not answer "0 seconds".
 - **`cube-v2` runs CUBEJS_DEV_MODE=true** like v1 (hot reload of model_v2; bound to 127.0.0.1). Revisit at cutover.
+- **Brand 20 September returns (seen during Phase 5, not a v2 issue — v1 identical):** 747 returned orders on
+  1,097 orders, return revenue ₹1.53M on event date (Jul 134, Aug 487) → net sales ₹528k < net COGS ₹883k, so
+  net ROAS is negative. Possibly exchanges counted as returns (Logisy exchange tags) — investigate upstream.
 - **Data quality:** 56 brand-20 products have no Shopify `product_type`; checkout-timing session metrics
   (`session_avg_seconds_to_checkout/_purchase`, `session_checkout_steps`) are null/zero Jul–Sep;
   ~4 % of Google campaigns (historical) missing from `gold.dim_campaign` (patched in serve, root cause in dbt).
