@@ -247,8 +247,21 @@ Known limits (accepted):
    - **Rollback:** Agent_Core — revert the `mcp` env in `docker-compose.yml` (`CUBE_API_URL http://cube:4000`, drop
      `SELERIC_CATALOGUE_DIR`; catalogue/ is still shipped) and push; Seleric_Agent — `git reset --hard 431ed60` on a
      stash of the WIP (or revert the commits 431ed60..22e1d29) and rebuild. v1 Cube and catalogue/ are untouched.
-   - Follow-ups: make `v2_gates.py` blocking in mage-ai CI; regenerate the inventory on the v2 surface; add
-     `v2_parity.py` to CI; stop the test MCP (`docker compose -f docker-compose.v2test.yml down -v`).
+   - **Switch (2026-10-04 06:39–06:41 UTC):** agent images pre-built; Agent_Core main pushed (Jenkins #51 green,
+     MCP recreated 06:40:34, drift check 109 / 0 broken), agent restarted 06:41:21 — ~47 s with MCP v2 / agent v1.
+   - **Verified after the switch:** smoke + registry sweep on https://mcp.seleric.com/mcp identical to the test MCP
+     (orders 1,097 = Σ platform = Σ channel); agent end-to-end (thread user `semantic-v2-smoke`): "net sales last
+     month" ₹528,106.92 (= `pnl_net_sales`), "Meta ad spend + Meta paid orders" ₹855,043.07 / 587, "impressions by
+     age" rows = the age_and_gender slice; no retired-id / PlanError / traceback in agent or MCP logs. Test MCP
+     removed (container, volume, image).
+   - Follow-ups:
+     - **CI gates cannot block yet:** the `jenkins` user cannot reach uv (`/home/tervigon/.local` is 700), so
+       both semantic steps in `ci_quality_gates.sh` SKIP in Jenkins. Install uv for jenkins (e.g. /usr/local/bin,
+       root) and give it a writable uv cache, then turn the v2 step blocking.
+     - Agent answer arithmetic: the "impressions by age" narration said 1,572,690 while its rows sum to 1,585,690
+       (answer_audit did not catch it); the agent also did not say the breakdown is Meta-only although the MCP
+       warning says so. Seleric_Agent-side.
+     - Regenerate the inventory on the v2 surface; add `v2_parity.py` to CI.
 2. Keep v1 Cube (:4001) for seleric_systems (`daily_pnl.*` via nginx `/cube/`).
 3. **Deploy notes:** mage-ai: a push to `main` triggers the Jenkins deploy (CI gates → rsync into
    /opt/seleric/mage-ai → rebuild + restart `mageai-local`); the dbt orchestrator runs back to back (~25 min,
