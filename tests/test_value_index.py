@@ -347,3 +347,24 @@ def test_one_entry_per_dimension_so_other_kinds_of_match_are_not_crowded_out(cat
     campaign = next(d for d in term["dimensions"] if d["dimension"] == "campaign_name")
     assert set(campaign["views"]) == {"meta_ad_performance", "session_funnel", "ad_channel_pnl"}
     assert {v["value"] for v in campaign["values"]} == {"TH-1-ACMEBOT-7JULY", "TH-1-ACMEBOT-1SEP"}
+
+
+def test_v2_catalogue_filter_values_are_scope_not_vocabulary(catalogue):
+    """Semantic v2: "meta spend" is ad_spend + ad_platform = meta, so "meta" in a question is a value
+    the answer must be filtered to — the catalogue's own filters say so (no word list). "orders" is
+    still vocabulary; the v1 catalogue (no filters) is unchanged."""
+    from pathlib import Path
+
+    from seleric_mcp.catalogue_service.loader import load_catalogue
+    from seleric_mcp.catalogue_service.service import CatalogueService
+    from seleric_mcp.config import PROJECT_ROOT
+
+    v2 = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v2"))
+    snap = _snap({("platform", "commerce"): {"meta": 588, "google": 254, "whatsapp": 23}})
+    out = _index(v2).resolve("which channels drove our meta orders", snap)
+    meta = next(t for t in out["terms"] if t["term"] == "meta")
+    assert meta["catalogue_vocabulary"] is False and meta["best_match"] == "exact"
+    assert not any(t["term"] == "orders" for t in out["terms"])
+    assert {"meta", "google", "whatsapp", "organic"} <= _index(v2)._filter_value_words()
+    assert "true" not in _index(v2)._filter_value_words()  # is_paid literal is not a name
+    assert "meta" in _index(catalogue)._vocabulary()  # v1 unchanged

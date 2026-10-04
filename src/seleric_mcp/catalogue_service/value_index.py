@@ -203,6 +203,18 @@ class Snapshot:
         return self._by_norm
 
 
+def _is_literal(value: str) -> bool:
+    """A boolean or numeric literal (by type, not by a word list)."""
+    v = value.strip().lower()
+    if v in ("true", "false"):
+        return True
+    try:
+        float(v)
+        return True
+    except ValueError:
+        return False
+
+
 class ValueIndex:
     def __init__(
         self,
@@ -532,6 +544,30 @@ class ValueIndex:
             texts.append(g.term)
         for t in texts:
             words.update(normalize(t).split())
+        # A word the catalogue itself uses as a FILTER VALUE is scope, not vocabulary: in semantic v2
+        # "meta spend" is ad_spend + ad_platform = meta, so "meta" in a question must stay a value the
+        # answer is filtered to (callers drop vocabulary terms from their required scope).
+        return frozenset(words - self._filter_value_words())
+
+    def _filter_value_words(self) -> frozenset[str]:
+        """Words that appear as values in the catalogue's own filters: glossary term filters, concept
+        axis filters and retired-id replacement filters. Derived from the catalogue, never listed by
+        hand; empty for a catalogue without filters (v1), which keeps its behaviour unchanged."""
+        cat = self.catalogue.cat
+        values: list[str] = []
+        for g in cat.glossary:
+            values += [str(v) for v in (g.filter or {}).values()]
+        for c in cat.concepts.values():
+            for by_value in (c.axis_filters or {}).values():
+                for flt in by_value.values():
+                    values += [str(v) for v in flt.values()]
+        for d in cat.deprecations:
+            values += [str(v) for v in (getattr(d, "filters", None) or {}).values()]
+        words: set[str] = set()
+        for v in values:
+            if _is_literal(v):
+                continue  # boolean / numeric filter values (is_paid = true) are not names a user says
+            words.update(normalize(v).split())
         return frozenset(words)
 
     def _brand_words(self) -> frozenset[str]:
