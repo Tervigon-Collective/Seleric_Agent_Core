@@ -20,6 +20,11 @@ axes:
     - all
     - product
     default: all
+  date:
+    values:
+    - order
+    - finance
+    default: order
   channel:
     values:
     - all
@@ -52,12 +57,27 @@ axis_filters:
 resolves:
 - when:
     basis: net
+    date: order
+  metric: net_margin_pct
+- when:
+    basis: contribution
+    date: order
+  metric: contribution_margin_pct
+- when:
+    basis: gross
+    date: order
+  metric: contribution_margin_pct
+- when:
+    basis: net
+    date: finance
   metric: pnl_net_margin_pct
 - when:
     basis: contribution
+    date: finance
   metric: pnl_contribution_margin_pct
 - when:
     basis: gross
+    date: finance
   metric: pnl_contribution_margin_pct
 - when:
     scope: product

@@ -3,7 +3,8 @@ id: pnl_payment_gateway_fees
 display_name: P&L payment gateway fees
 category: finance
 status: certified
-description: 'Payment gateway fees. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Payment gateway fees. Date axis: report_date (event date); grain: brand_day_channel_ad. Also the home
+  of the v1 meaning of: payment_gateway_fees.'
 formula:
   human_readable: Payment gateway fees.
   authoritative_source: cube
@@ -23,5 +24,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- payment_gateway_fees
+replaces: []

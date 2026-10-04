@@ -42,6 +42,7 @@ hierarchies:
     - paid_media_breakdowns
     - paid_media_changes
     - pnl
+    - order_pnl
     note: Cross-cube drill path (fact → ad dims).
   campaign:
     display_name: Campaign

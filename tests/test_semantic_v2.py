@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 109
+    assert len(v2.cat.metrics) == 123
     assert len(v2.cat.views) == 18
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -80,7 +80,7 @@ def test_checkout_timing_metrics_are_unavailable_with_reason(v2):
 def test_every_retired_v1_id_is_rejected_naming_its_replacement(v2, planner):
     maps = yaml.safe_load(ID_MAP.read_text())["maps"]
     retired = [m for m in maps if m["old"] != m["new"] and m["old"] not in v2.cat.metrics]
-    assert len(retired) == len(v2.cat.retired) == 124
+    assert len(retired) == len(v2.cat.retired) == 111
     for m in retired:
         term = v2.resolve_term(m["old"])
         assert isinstance(term, RetiredTerm), m["old"]
@@ -117,17 +117,23 @@ def test_get_metric_on_retired_id_returns_replacement_with_notice(v2):
 # ---------------------------------------------------------------- one resolver
 
 @pytest.mark.parametrize("text,metric,flt", [
-    ("net sales", "pnl_net_sales", {}),
-    ("sales", "pnl_net_sales", {}),
+    ("net sales", "net_sales", {}),
+    ("sales", "net_sales", {}),
     ("gross sales", "gross_sales", {}),
-    ("roas", "pnl_net_roas", {}),
+    ("roas", "net_roas", {}),
     ("meta spend", "ad_spend", {"ad_platform": "meta"}),
     ("google ad spend", "ad_spend", {"ad_platform": "google"}),
-    ("net profit", "pnl_net_profit", {}),
-    ("meta net sales", "pnl_net_sales", {"finance_channel": "meta"}),
+    ("net profit", "net_profit", {}),
+    ("meta net sales", "net_sales", {"finance_channel": "meta"}),
     ("orders", "orders", {}),
     ("cancelled orders", "cancelled_orders", {}),
-    ("ns", "pnl_net_sales", {}),
+    ("ns", "net_sales", {}),
+    # Finance (event date) only when asked for explicitly
+    ("p&l net sales", "pnl_net_sales", {}),
+    ("finance net profit", "pnl_net_profit", {}),
+    ("p&l roas", "pnl_net_roas", {}),
+    ("meta roas", "mer", {"finance_channel": "meta"}),
+    ("meta orders", "orders", {"finance_channel": "meta"}),
     ("cac", "cac", {}),
 ])
 def test_resolver_answers(v2, text, metric, flt):
@@ -155,8 +161,10 @@ def test_fuzzy_never_auto_resolves(v2):
 def test_concept_axis_filters_channel_and_paid(v2):
     rc = v2.resolve_concept("roas", {"channel": "meta", "paid": "paid"})
     assert isinstance(rc, ResolvedConcept)
-    assert rc.metric_id == "pnl_net_roas"
+    assert rc.metric_id == "net_roas"  # order date unless Finance is asked
     assert rc.filter == {"finance_channel": "meta", "is_paid": "true"}
+    fin = v2.resolve_concept("roas", {"channel": "meta", "date": "finance"})
+    assert fin.metric_id == "pnl_net_roas"
 
 
 def test_concept_text_detects_paid_without_tripping_on_prepaid(v2):
@@ -257,8 +265,8 @@ async def test_term_filters_flow_into_the_query(planner, cube):
     req = QueryRequest(measures=["meta net sales"], time_range=SEP)
     out = await planner.run(req)
     q = cube.queries[-1]
-    assert q["measures"] == ["pnl.pnl_net_sales"]
-    assert {"member": "pnl.finance_channel", "operator": "equals", "values": ["meta"]} in q["filters"]
+    assert q["measures"] == ["commerce.net_sales"]
+    assert {"member": "commerce.finance_channel", "operator": "equals", "values": ["meta"]} in q["filters"]
     assert any("finance_channel = meta" in w for w in out["warnings"])
 
 
@@ -320,7 +328,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 106  # 109 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 120  # 123 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -345,3 +353,21 @@ async def test_hierarchy_drill_from_a_filtered_level_goes_to_the_next(planner, c
         measures=["orders"], dimensions=["channel"], time_range=SEP,
         filters=[FilterSpec(dimension="platform", operator="equals", values=["meta"])]))
     assert planner.hierarchy_targets(out2["query_id"], "traffic") == ["sub_channel"]
+
+
+
+def test_order_date_is_the_default_and_only_finance_reads_the_event_date(v2):
+    """Decision 2026-10-04: performance, ads and every non-Finance domain read the ORDER date; only Finance
+    (pnl_* ids, event date) — reached only when the question asks for it."""
+    for c in v2.cat.concepts.values():
+        axis = c.axes.get("date")
+        if axis is not None:
+            assert axis.default == "order", c.id
+    pnl_terms = [t.term for t in v2.cat.glossary if t.canonical_id and t.canonical_id.startswith("pnl_")]
+    assert pnl_terms and all(any(k in t.lower() for k in ("pnl", "p&l", "finance", "event date")) for t in pnl_terms)
+    # every pnl_ metric has its order-date twin (same id without the prefix)
+    for mid in v2.cat.metrics:
+        if mid.startswith("pnl_"):
+            assert mid[4:] in v2.cat.metrics, mid
+    m = v2.cat.metrics["net_roas"]
+    assert m.version == "2.0.0" and m.cube_mapping.view == "order_pnl"

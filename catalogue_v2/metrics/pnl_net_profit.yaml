@@ -4,7 +4,7 @@ display_name: P&L net profit
 category: finance
 status: certified
 description: 'Net profit = net sales − net COGS − ad spend. = dashboard Net Profit. Date axis: report_date (event
-  date); grain: brand_day_channel_ad.'
+  date); grain: brand_day_channel_ad. Also the home of the v1 meaning of: net_profit.'
 formula:
   human_readable: Net profit = net sales − net COGS − ad spend. = dashboard Net Profit.
   authoritative_source: cube
@@ -32,6 +32,5 @@ replaces:
 - finance_waterfall_net_profit
 - google_net_profit
 - meta_net_profit
-- net_profit
 - net_profit_all_channels
 - net_profit_blended

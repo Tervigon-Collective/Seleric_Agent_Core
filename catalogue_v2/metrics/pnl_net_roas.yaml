@@ -3,7 +3,8 @@ id: pnl_net_roas
 display_name: P&L net ROAS
 category: finance
 status: certified
-description: 'Net ROAS = (net sales − net COGS) ÷ ad spend. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Net ROAS = (net sales − net COGS) ÷ ad spend. Date axis: report_date (event date); grain: brand_day_channel_ad.
+  Also the home of the v1 meaning of: net_roas.'
 formula:
   human_readable: Net ROAS = (net sales − net COGS) ÷ ad spend.
   authoritative_source: cube
@@ -26,5 +27,4 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces:
-- net_roas
 - net_roas_all_channels

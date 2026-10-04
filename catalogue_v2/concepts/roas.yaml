@@ -15,6 +15,11 @@ axes:
     - breakeven
     - mer
     default: net
+  date:
+    values:
+    - order
+    - finance
+    default: order
   channel:
     values:
     - all
@@ -47,18 +52,39 @@ axis_filters:
 resolves:
 - when:
     basis: net
+    date: order
+  metric: net_roas
+- when:
+    basis: gross
+    date: order
+  metric: gross_roas
+- when:
+    basis: breakeven
+    date: order
+  metric: be_roas
+- when:
+    basis: mer
+    date: order
+  metric: mer
+- when:
+    basis: net
+    date: finance
   metric: pnl_net_roas
 - when:
     basis: gross
-  metric: pnl_gross_roas
+    date: finance
+  metric: gross_roas
 - when:
     basis: breakeven
+    date: finance
   metric: pnl_be_roas
 - when:
     basis: mer
+    date: finance
   metric: pnl_mer
 disambiguation: 'net ROAS = (net sales − net COGS) ÷ ad spend; gross ROAS = gross sales ÷ ad spend; MER = net sales
   ÷ ad spend; break-even ROAS = net sales ÷ contribution margin. Channel ROAS (channel=meta) includes Meta organic
-  sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified.
+  sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified. Default is the
+  order date (sales of the orders placed ÷ spend delivered in the period); date=finance is the P&L ROAS.
 
   '

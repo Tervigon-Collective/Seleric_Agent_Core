@@ -3,7 +3,8 @@ id: pnl_net_margin_pct
 display_name: P&L net margin pct
 category: finance
 status: certified
-description: 'Net profit ÷ net sales. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Net profit ÷ net sales. Date axis: report_date (event date); grain: brand_day_channel_ad. Also the
+  home of the v1 meaning of: net_margin_pct.'
 formula:
   human_readable: Net profit ÷ net sales.
   authoritative_source: cube
@@ -24,5 +25,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- net_margin_pct
+replaces: []

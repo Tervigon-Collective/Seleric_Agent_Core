@@ -4,7 +4,7 @@ display_name: P&L operating cost
 category: finance
 status: certified
 description: 'Operating cost = shipping + packaging + gateway fees + RTO. Date axis: report_date (event date); grain:
-  brand_day_channel_ad.'
+  brand_day_channel_ad. Also the home of the v1 meaning of: operating_cost.'
 formula:
   human_readable: Operating cost = shipping + packaging + gateway fees + RTO.
   authoritative_source: cube
@@ -24,5 +24,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- operating_cost
+replaces: []

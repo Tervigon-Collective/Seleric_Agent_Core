@@ -293,6 +293,39 @@ Known limits (accepted):
    failed at compose config load while it was 600.
 5. ~~Live compose drift~~ — resolved by the Phase 5 merge (cube-v2 stable parent mount is on main).
 
+## Order date by default — only Finance on event date (2026-10-04, user decision) ✅
+Performance, ads and every non-Finance domain read the ORDER date; only Finance reads the event date. v2 had
+inherited the v1 glossary, which sent 163 terms ("revenue", "net sales", "ROAS", "campaign roas", "how are my
+ads doing", "returns", …) to event-date `pnl_*` metrics, and the sales / returns concepts defaulted to finance.
+- **Data (mage-ai, ClickHouse live):** `serve.channel_pnl` arms also carry `order_id` + the order's placement
+  date (`order_date`; ad spend: delivery date) — event-date numbers and row count unchanged (12 measures,
+  89,518 rows checked). `semantic.fct_order_pnl_daily` (5-min refresh) → `serve.order_pnl_daily`: the same arms
+  grouped by order date, with each order's last-touch campaign / adset / ad; spend per campaign from
+  `ad_delivery_daily` (= channel_pnl spend). Brand 20 Sep 2026 on order date: net sales (P&L basis) ₹17.5 L,
+  net COGS ₹6.8 L, spend ₹11.9 L, net profit −₹1.2 L, net ROAS 0.90, MER 1.47 (event date: net profit −₹15.5 L —
+  July / August returns land in September).
+- **Cube v2:** view `order_pnl` (order date) — net COGS and its parts, operating cost, contribution margin (+%),
+  net profit, net margin %, gross profit, gross COGS, taxes, MER, gross / net / break-even ROAS. Ids are the
+  `pnl_*` names without the prefix: `pnl_X` = event date (Finance), `X` = order date. 17 of them are v1 ids
+  redefined at version 2.0.0 (their v1 event-date meaning is `pnl_X`). Gross COGS, gross profit, gross ROAS and
+  product cost are booked at placement, so both axes are identical: one id (the order-date one); `pnl_gross_cogs`,
+  `pnl_gross_profit`, `pnl_gross_roas`, `pnl_product_cost` retired, view `pnl_channel` removed (still 18 views).
+- **Catalogue:** every concept date axis defaults to `order`; finance rows keep `pnl_*`. Glossary terms move to
+  the order-date twin unless the term itself asks for Finance (the resolver's date-axis phrases: p&l, pnl, event
+  date, profit and loss, finance, financial — one source). Channel-named terms ("meta roas", "meta orders",
+  "google new customers" — 21) now carry their channel filter (the concepts' channel axis_filters). 123 metrics,
+  111 retired ids.
+- **Agent registry:** entries follow their own domain — commerce / performance (`metric.net_sales`,
+  `metric.net_roas`, `metric.gross_roas`) → order date; Finance entries keep `pnl_*`; 5 Finance aliases ("np",
+  "net profit", "blended roas", …) dropped because the resolver now answers them on order date.
+- **Checks:** gates 0 / 0 / 0 / 0 / 0 / 0 live (425 metric + filter pairs; the duplicate gate caught the 4
+  identical-on-both-axes ids); parity 149 / 165 equal (the 2 known diffs; the rest have no v1 date axis);
+  MCP suite 359 pass (8 known), agent suite 745 / 0.
+- **Open — two "net sales on order date":** `net_sales` (commerce, the dashboard Commerce figure: order-level
+  post-refund net revenue, cancelled → 0) is the order-date net sales; the order-date P&L uses the P&L basis
+  (gross − discounts − returns − cancels, returns incl. pending) — Sep 2026 ₹19.5 L vs ₹17.5 L. Profit / ROAS are
+  on the P&L basis so their components add up; aligning the two definitions is a business decision.
+
 ## Known gaps / risks
 - ~~Uncommitted on `main`~~ — resolved 2026-10-03: `semantic-v2` merged to `main` in both repos.
 - **Live ClickHouse changes already in effect (v1 consumers see them):** `channel_pnl` buckets from

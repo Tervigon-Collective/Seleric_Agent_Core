@@ -3,7 +3,8 @@ id: pnl_mer
 display_name: P&L MER
 category: finance
 status: certified
-description: 'Marketing efficiency ratio = net sales ÷ ad spend. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Marketing efficiency ratio = net sales ÷ ad spend. Date axis: report_date (event date); grain: brand_day_channel_ad.
+  Also the home of the v1 meaning of: mer.'
 formula:
   human_readable: Marketing efficiency ratio = net sales ÷ ad spend.
   authoritative_source: cube
@@ -28,4 +29,3 @@ access_policy:
 version: 1.0.0
 replaces:
 - ad_channel_roas
-- mer

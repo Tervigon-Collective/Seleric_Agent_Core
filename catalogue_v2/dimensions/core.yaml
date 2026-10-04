@@ -26,6 +26,7 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_format
     web_sessions: web_sessions.ad_format
     pnl: pnl.ad_format
+    order_pnl: order_pnl.ad_format
   aliases: []
 - id: ad_id
   display_name: Ad Id
@@ -39,6 +40,7 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_id
     web_sessions: web_sessions.ad_id
     pnl: pnl.ad_id
+    order_pnl: order_pnl.ad_id
   aliases: []
 - id: ad_name
   display_name: Ad Name
@@ -52,6 +54,7 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_name
     web_sessions: web_sessions.ad_name
     pnl: pnl.ad_name
+    order_pnl: order_pnl.ad_name
   aliases: []
 - id: ad_platform
   display_name: Ad Platform
@@ -63,6 +66,7 @@ dimensions:
     paid_media_breakdowns: paid_media_breakdowns.ad_platform
     paid_media_changes: paid_media_changes.ad_platform
     pnl: pnl.ad_platform
+    order_pnl: order_pnl.ad_platform
   aliases: []
   allowed_values:
   - meta
@@ -79,6 +83,7 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_status
     web_sessions: web_sessions.ad_status
     pnl: pnl.ad_status
+    order_pnl: order_pnl.ad_status
   aliases: []
 - id: adset_id
   display_name: Adset Id
@@ -92,6 +97,7 @@ dimensions:
     paid_media_changes: paid_media_changes.adset_id
     web_sessions: web_sessions.adset_id
     pnl: pnl.adset_id
+    order_pnl: order_pnl.adset_id
   aliases: []
 - id: adset_name
   display_name: Adset Name
@@ -105,6 +111,7 @@ dimensions:
     paid_media_changes: paid_media_changes.adset_name
     web_sessions: web_sessions.adset_name
     pnl: pnl.adset_name
+    order_pnl: order_pnl.adset_name
   aliases: []
 - id: adset_status
   display_name: Adset Status
@@ -118,6 +125,7 @@ dimensions:
     paid_media_changes: paid_media_changes.adset_status
     web_sessions: web_sessions.adset_status
     pnl: pnl.adset_status
+    order_pnl: order_pnl.adset_status
   aliases: []
 - id: age
   display_name: Age
@@ -163,7 +171,7 @@ dimensions:
     returns: returns.brand_id
     payments: payments.brand_id
     pnl: pnl.brand_id
-    pnl_channel: pnl_channel.brand_id
+    order_pnl: order_pnl.brand_id
   aliases: []
 - id: brand_name
   display_name: Brand Name
@@ -205,6 +213,7 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_id
     web_sessions: web_sessions.campaign_id
     pnl: pnl.campaign_id
+    order_pnl: order_pnl.campaign_id
   aliases: []
 - id: campaign_name
   display_name: Campaign Name
@@ -218,6 +227,7 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_name
     web_sessions: web_sessions.campaign_name
     pnl: pnl.campaign_name
+    order_pnl: order_pnl.campaign_name
   aliases:
   - by campaign
   - campaign-wise
@@ -235,6 +245,7 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_objective
     web_sessions: web_sessions.campaign_objective
     pnl: pnl.campaign_objective
+    order_pnl: order_pnl.campaign_objective
   aliases: []
 - id: campaign_status
   display_name: Campaign Status
@@ -248,6 +259,7 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_status
     web_sessions: web_sessions.campaign_status
     pnl: pnl.campaign_status
+    order_pnl: order_pnl.campaign_status
   aliases: []
 - id: campaign_type
   display_name: Campaign Type
@@ -261,6 +273,7 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_type
     web_sessions: web_sessions.campaign_type
     pnl: pnl.campaign_type
+    order_pnl: order_pnl.campaign_type
   aliases: []
 - id: changed_at
   display_name: Changed at
@@ -320,6 +333,7 @@ dimensions:
     paid_media_changes: paid_media_changes.creative_type
     web_sessions: web_sessions.creative_type
     pnl: pnl.creative_type
+    order_pnl: order_pnl.creative_type
   aliases: []
 - id: days_since_prev_order
   display_name: Days Since Prev Order
@@ -420,7 +434,7 @@ dimensions:
     web_sessions: web_sessions.finance_channel
     attribution: attribution.finance_channel
     pnl: pnl.finance_channel
-    pnl_channel: pnl_channel.finance_channel
+    order_pnl: order_pnl.finance_channel
   aliases: []
   allowed_values:
   - meta
@@ -600,7 +614,7 @@ dimensions:
     web_sessions: web_sessions.is_paid
     attribution: attribution.is_paid
     pnl: pnl.is_paid
-    pnl_channel: pnl_channel.is_paid
+    order_pnl: order_pnl.is_paid
   aliases: []
 - id: is_placement_order
   display_name: Is Placement Order
@@ -706,6 +720,7 @@ dimensions:
     attribution: attribution.order_date
     attribution_paths: attribution_paths.order_date
     returns: returns.order_date
+    order_pnl: order_pnl.order_date
   aliases: []
 - id: order_event_type
   display_name: Event Type
@@ -900,7 +915,6 @@ dimensions:
     web_events: web_events.report_date
     unit_economics: unit_economics.report_date
     pnl: pnl.report_date
-    pnl_channel: pnl_channel.report_date
   aliases: []
 - id: report_hour
   display_name: Report Hour
@@ -931,6 +945,7 @@ dimensions:
   is_time: false
   views:
     pnl: pnl.row_type
+    order_pnl: order_pnl.row_type
   aliases: []
   allowed_values:
   - detail
@@ -944,6 +959,7 @@ dimensions:
     product: product.sales_channel
     web_sessions: web_sessions.sales_channel
     pnl: pnl.sales_channel
+    order_pnl: order_pnl.sales_channel
   aliases: []
   allowed_values:
   - shopify

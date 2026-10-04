@@ -48,10 +48,10 @@ deprecations:
   new: pnl_cancel_revenue
   reason: 'id kept with a NEW meaning: cancel_revenue is now order-date (commerce)'
 - old: channel_gross_cogs
-  new: pnl_gross_cogs
+  new: gross_cogs
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: channel_gross_profit
-  new: pnl_gross_profit
+  new: gross_profit
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: channel_orders
   new: orders
@@ -157,11 +157,8 @@ deprecations:
 - old: gross_profit
   new: pnl_contribution_margin
   reason: v1 gross_profit = net sales − net COGS; v2 pnl_gross_profit is the Overview tile
-- old: gross_roas
-  new: pnl_gross_roas
-  reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: gross_roas_all_channels
-  new: pnl_gross_roas
+  new: gross_roas
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: gross_sales_all_channels
   new: gross_sales
@@ -288,11 +285,8 @@ deprecations:
 - old: pre_purchase_touches
   new: touches
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
-- old: product_cost
-  new: pnl_product_cost
-  reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: product_cost_all_channels
-  new: pnl_product_cost
+  new: product_cost
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: product_orders
   new: orders
@@ -460,6 +454,22 @@ deprecations:
 - old: new_customer_orders
   new: new_customers
   reason: approved in v1; same definition
+- old: pnl_gross_cogs
+  new: gross_cogs
+  reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
+    are identical — one id, the order-date one'
+- old: pnl_gross_profit
+  new: gross_profit
+  reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
+    are identical — one id, the order-date one'
+- old: pnl_gross_roas
+  new: gross_roas
+  reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
+    are identical — one id, the order-date one'
+- old: pnl_product_cost
+  new: product_cost
+  reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
+    are identical — one id, the order-date one'
 - old: active_orders
   new: (none)
   reason: draft in v1 (never certified); no v2 metric yet

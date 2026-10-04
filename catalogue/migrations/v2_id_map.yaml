@@ -37,6 +37,9 @@ v2_metrics:
   avg_touch_count:
     member: attribution_paths.avg_touch_count
     date_axis: attribution_paths.order_date
+  be_roas:
+    member: order_pnl.be_roas
+    date_axis: order_pnl.order_date
   bounce_rate:
     member: web_funnel.bounce_rate
     date_axis: web_funnel.report_date
@@ -67,6 +70,12 @@ v2_metrics:
   collection_view_events:
     member: web_events.collection_view_events
     date_axis: web_events.report_date
+  contribution_margin:
+    member: order_pnl.contribution_margin
+    date_axis: order_pnl.order_date
+  contribution_margin_pct:
+    member: order_pnl.contribution_margin_pct
+    date_axis: order_pnl.order_date
   conversion_rate:
     member: web_sessions.conversion_rate
     date_axis: web_sessions.session_date
@@ -100,6 +109,15 @@ v2_metrics:
   funnel_revenue:
     member: web_funnel.funnel_revenue
     date_axis: web_funnel.report_date
+  gross_cogs:
+    member: order_pnl.gross_cogs
+    date_axis: order_pnl.order_date
+  gross_profit:
+    member: order_pnl.gross_profit
+    date_axis: order_pnl.order_date
+  gross_roas:
+    member: order_pnl.gross_roas
+    date_axis: order_pnl.order_date
   gross_sales:
     member: commerce.gross_sales
     date_axis: commerce.order_date
@@ -124,15 +142,33 @@ v2_metrics:
   ltv_cac_ratio:
     member: unit_economics.ltv_cac_ratio
     date_axis: unit_economics.report_date
+  mer:
+    member: order_pnl.mer
+    date_axis: order_pnl.order_date
   net_aov:
     member: commerce.net_aov
     date_axis: commerce.order_date
+  net_cogs:
+    member: order_pnl.net_cogs
+    date_axis: order_pnl.order_date
+  net_margin_pct:
+    member: order_pnl.net_margin_pct
+    date_axis: order_pnl.order_date
+  net_profit:
+    member: order_pnl.net_profit
+    date_axis: order_pnl.order_date
+  net_roas:
+    member: order_pnl.net_roas
+    date_axis: order_pnl.order_date
   net_sales:
     member: commerce.net_sales
     date_axis: commerce.order_date
   new_customers:
     member: commerce.new_customers
     date_axis: commerce.order_date
+  operating_cost:
+    member: order_pnl.operating_cost
+    date_axis: order_pnl.order_date
   order_value_incl_tax:
     member: commerce.order_value_incl_tax
     date_axis: commerce.order_date
@@ -142,12 +178,18 @@ v2_metrics:
   orders_with_touchpoints:
     member: attribution.orders_with_touchpoints
     date_axis: attribution.order_date
+  packaging_cost:
+    member: order_pnl.packaging_cost
+    date_axis: order_pnl.order_date
   page_views:
     member: web_events.page_views
     date_axis: web_events.report_date
   payment_amount:
     member: payments.payment_amount
     date_axis: payments.transaction_date
+  payment_gateway_fees:
+    member: order_pnl.payment_gateway_fees
+    date_axis: order_pnl.order_date
   payment_orders:
     member: commerce.payment_orders
     date_axis: commerce.order_date
@@ -165,15 +207,6 @@ v2_metrics:
     date_axis: pnl.report_date
   pnl_contribution_margin_pct:
     member: pnl.pnl_contribution_margin_pct
-    date_axis: pnl.report_date
-  pnl_gross_cogs:
-    member: pnl_channel.pnl_gross_cogs
-    date_axis: pnl_channel.report_date
-  pnl_gross_profit:
-    member: pnl_channel.pnl_gross_profit
-    date_axis: pnl_channel.report_date
-  pnl_gross_roas:
-    member: pnl.pnl_gross_roas
     date_axis: pnl.report_date
   pnl_mer:
     member: pnl.pnl_mer
@@ -202,9 +235,6 @@ v2_metrics:
   pnl_payment_gateway_fees:
     member: pnl.pnl_payment_gateway_fees
     date_axis: pnl.report_date
-  pnl_product_cost:
-    member: pnl.pnl_product_cost
-    date_axis: pnl.report_date
   pnl_return_cancel_revenue:
     member: pnl.pnl_return_cancel_revenue
     date_axis: pnl.report_date
@@ -232,6 +262,9 @@ v2_metrics:
   product_cancel_revenue:
     member: product.product_cancel_revenue
     date_axis: product.order_date
+  product_cost:
+    member: order_pnl.product_cost
+    date_axis: order_pnl.order_date
   product_gross_margin_pct:
     member: product.product_gross_margin_pct
     date_axis: product.order_date
@@ -292,6 +325,9 @@ v2_metrics:
   returns_excl_tax:
     member: returns.returns_excl_tax
     date_axis: returns.refund_date
+  rto_cost:
+    member: order_pnl.rto_cost
+    date_axis: order_pnl.order_date
   session_collection_views:
     member: web_sessions.session_collection_views
     date_axis: web_sessions.session_date
@@ -301,6 +337,9 @@ v2_metrics:
   sessions:
     member: web_sessions.sessions
     date_axis: web_sessions.session_date
+  shipping_cost:
+    member: order_pnl.shipping_cost
+    date_axis: order_pnl.order_date
   site_search_events:
     member: web_events.site_search_events
     date_axis: web_events.report_date
@@ -310,6 +349,9 @@ v2_metrics:
   status_changes:
     member: paid_media_changes.status_changes
     date_axis: paid_media_changes.changed_at
+  taxes_on_net_sales:
+    member: order_pnl.taxes_on_net_sales
+    date_axis: order_pnl.order_date
   thruplays:
     member: paid_media.thruplays
     date_axis: paid_media.report_date
@@ -482,16 +524,16 @@ maps:
     member: commerce_orders.cancelled_orders
     date_axis: commerce_orders.order_date
 - old: channel_gross_cogs
-  new: pnl_gross_cogs
-  member: pnl_channel.pnl_gross_cogs
-  date_axis: pnl_channel.report_date
+  new: gross_cogs
+  member: order_pnl.gross_cogs
+  date_axis: order_pnl.order_date
   v1:
     member: channel_pnl.gross_cogs
     date_axis: channel_pnl.report_date
 - old: channel_gross_profit
-  new: pnl_gross_profit
-  member: pnl_channel.pnl_gross_profit
-  date_axis: pnl_channel.report_date
+  new: gross_profit
+  member: order_pnl.gross_profit
+  date_axis: order_pnl.order_date
   v1:
     member: channel_pnl.gross_profit
     date_axis: channel_pnl.report_date
@@ -757,16 +799,16 @@ maps:
     member: canonical_pnl.gross_profit
     date_axis: canonical_pnl.report_date
 - old: gross_roas
-  new: pnl_gross_roas
-  member: pnl.pnl_gross_roas
-  date_axis: pnl.report_date
+  new: gross_roas
+  member: order_pnl.gross_roas
+  date_axis: order_pnl.order_date
   v1:
     member: canonical_pnl.gross_roas
     date_axis: canonical_pnl.report_date
 - old: gross_roas_all_channels
-  new: pnl_gross_roas
-  member: pnl.pnl_gross_roas
-  date_axis: pnl.report_date
+  new: gross_roas
+  member: order_pnl.gross_roas
+  date_axis: order_pnl.order_date
   v1:
     member: canonical_pnl.gross_roas_all_channels
     date_axis: canonical_pnl.report_date
@@ -1078,16 +1120,16 @@ maps:
     member: product_performance.product_cancel_revenue
     date_axis: product_performance.order_date
 - old: product_cost
-  new: pnl_product_cost
-  member: pnl.pnl_product_cost
-  date_axis: pnl.report_date
+  new: product_cost
+  member: order_pnl.product_cost
+  date_axis: order_pnl.order_date
   v1:
     member: canonical_pnl.product_cost
     date_axis: canonical_pnl.report_date
 - old: product_cost_all_channels
-  new: pnl_product_cost
-  member: pnl.pnl_product_cost
-  date_axis: pnl.report_date
+  new: product_cost
+  member: order_pnl.product_cost
+  date_axis: order_pnl.order_date
   v1:
     member: canonical_pnl.product_cost_all_channels
     date_axis: canonical_pnl.report_date
@@ -1629,6 +1671,34 @@ maps:
   v1:
     member: commerce_orders.new_customer_orders
     date_axis: ''
+- old: pnl_gross_cogs
+  new: gross_cogs
+  member: order_pnl.gross_cogs
+  date_axis: order_pnl.order_date
+  note: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers are identical
+    — one id, the order-date one'
+  verify: false
+- old: pnl_gross_profit
+  new: gross_profit
+  member: order_pnl.gross_profit
+  date_axis: order_pnl.order_date
+  note: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers are identical
+    — one id, the order-date one'
+  verify: false
+- old: pnl_gross_roas
+  new: gross_roas
+  member: order_pnl.gross_roas
+  date_axis: order_pnl.order_date
+  note: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers are identical
+    — one id, the order-date one'
+  verify: false
+- old: pnl_product_cost
+  new: product_cost
+  member: order_pnl.product_cost
+  date_axis: order_pnl.order_date
+  note: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers are identical
+    — one id, the order-date one'
+  verify: false
 retired_without_replacement:
 - old: active_orders
   v1_status: draft

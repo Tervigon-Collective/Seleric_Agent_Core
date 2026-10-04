@@ -3,7 +3,8 @@ id: pnl_contribution_margin_pct
 display_name: P&L contribution margin pct
 category: finance
 status: certified
-description: 'Contribution margin ÷ net sales. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Contribution margin ÷ net sales. Date axis: report_date (event date); grain: brand_day_channel_ad.
+  Also the home of the v1 meaning of: contribution_margin_pct.'
 formula:
   human_readable: Contribution margin ÷ net sales.
   authoritative_source: cube
@@ -25,5 +26,4 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces:
-- contribution_margin_pct
 - gross_margin_pct

@@ -4,7 +4,7 @@ display_name: P&L contribution margin
 category: finance
 status: certified
 description: 'Contribution margin = net sales − net COGS (before ad spend). Date axis: report_date (event date);
-  grain: brand_day_channel_ad.'
+  grain: brand_day_channel_ad. Also the home of the v1 meaning of: contribution_margin, gross_profit.'
 formula:
   human_readable: Contribution margin = net sales − net COGS (before ad spend).
   authoritative_source: cube
@@ -24,6 +24,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- contribution_margin
-- gross_profit
+replaces: []

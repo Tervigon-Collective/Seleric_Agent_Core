@@ -58,16 +58,17 @@ VIEW_INFO = {
     "returns": ("operations", "refund", "refund_events", None, "Commerce Ops"),
     "payments": ("operations", "transaction", "payments", None, "Finance"),
     "pnl": ("finance", "brand_day_channel_ad", "canonical_pnl", None, "Finance"),
-    "pnl_channel": ("finance", "brand_day_channel", "channel_pnl", None, "Finance"),
+    # order-date P&L (decision 2026-10-04): every non-Finance domain reads the order date
+    "order_pnl": ("finance", "brand_order_day_channel_ad", "channel_pnl", None, "Growth / Finance"),
 }
 MODULES = {  # v1 module id -> v2 views (no ontology in v2; extra_views is the scope)
     "webanalytics": ["web_sessions", "web_funnel", "web_events", "web_event_detail"],
     "commerce": ["commerce", "returns", "payments"],
     "product": ["product"],
-    "paidmedia": ["paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes"],
+    "paidmedia": ["paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes", "order_pnl"],
     "attribution": ["attribution", "attribution_paths", "commerce"],
     "customer": ["customers", "unit_economics", "commerce"],
-    "finance": ["pnl", "pnl_channel"],
+    "finance": ["pnl", "order_pnl"],
     "operations": ["returns", "payments"],
 }
 META_ONLY = {"landing_page_views", "cost_per_landing_page_view", "video_completion_rate", "thruplays",
@@ -93,7 +94,13 @@ UNAVAILABLE = {
     for m in ("avg_seconds_to_checkout", "avg_seconds_to_purchase", "checkout_steps")
 }
 NOT_CERTIFIED = {"link_clicks", "thruplays", "hook_rate", "hold_rate_15s", "cost_per_link_click"}  # approved
-REDEFINED = {"return_revenue": "2.0.0", "cancel_revenue": "2.0.0"}  # kept id, number changed (event → order date)
+# kept id, number changed (event → order date). The P&L ids came back on 2026-10-04 as the ORDER-date twins of
+# pnl_* (decision: every non-Finance domain reads the order date); their v1 event-date meaning is pnl_<id>.
+ORDER_DATE_PNL = ["net_profit", "net_cogs", "product_cost", "shipping_cost", "packaging_cost", "payment_gateway_fees",
+                  "rto_cost", "operating_cost", "contribution_margin", "contribution_margin_pct", "net_margin_pct",
+                  "gross_profit", "taxes_on_net_sales", "mer", "gross_roas", "net_roas", "be_roas", "gross_cogs"]
+REDEFINED = {"return_revenue": "2.0.0", "cancel_revenue": "2.0.0",
+             **{m: "2.0.0" for m in ORDER_DATE_PNL if m != "gross_cogs"}}
 RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from aggregates)
     "aov": ["total_sales", "orders"], "net_aov": ["net_sales", "orders"],
     "ctr": ["clicks", "impressions"], "cpc": ["ad_spend", "clicks"], "cpm": ["ad_spend", "impressions"],
@@ -111,6 +118,11 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
     "pnl_gross_roas": ["gross_sales", "ad_spend"], "pnl_net_roas": ["pnl_contribution_margin", "ad_spend"],
     "pnl_be_roas": ["pnl_net_sales", "pnl_contribution_margin"],
+    # order-date P&L: its net sales (P&L basis) = contribution_margin + net_cogs on the same view
+    "contribution_margin_pct": ["contribution_margin", "net_cogs"],
+    "net_margin_pct": ["net_profit", "contribution_margin", "net_cogs"],
+    "mer": ["contribution_margin", "net_cogs", "ad_spend"], "gross_roas": ["gross_sales", "ad_spend"],
+    "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["contribution_margin", "net_cogs"],
 }
 DIM_RENAME = {("commerce", "event_type"): "order_event_type"}  # same member name, different meaning
 V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_status",
@@ -121,7 +133,11 @@ ALLOWED = {"finance_channel": ["meta", "google", "whatsapp", "organic", "unattri
 SALES_CHANNEL_REASON = "Amazon is a reserved sales channel; it is not yet supported on the agent surface."
 DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm": "CPM", "ltv": "LTV", "cac": "CAC",
            "ltv_cac_ratio": "LTV:CAC ratio", "pnl_mer": "P&L MER", "pnl_gross_roas": "P&L gross ROAS",
-           "pnl_net_roas": "P&L net ROAS", "pnl_be_roas": "P&L break-even ROAS", "hold_rate_15s": "Hold rate (15 s)"}
+           "pnl_net_roas": "P&L net ROAS", "pnl_be_roas": "P&L break-even ROAS",
+           "mer": "MER", "gross_roas": "Gross ROAS", "net_roas": "Net ROAS", "be_roas": "Break-even ROAS",
+           "net_cogs": "Net COGS", "gross_cogs": "Gross COGS", "rto_cost": "RTO cost",
+           "contribution_margin_pct": "Contribution margin %", "net_margin_pct": "Net margin %",
+           "taxes_on_net_sales": "Taxes on net sales", "hold_rate_15s": "Hold rate (15 s)"}
 
 
 def human(mid: str) -> str:
@@ -192,7 +208,7 @@ def main() -> int:
                         "attribution": "order_date", "attribution_paths": "order_date",
                         "customers": "last_order_at", "unit_economics": "report_date",
                         "returns": "refund_date", "payments": "transaction_date",
-                        "pnl": "report_date", "pnl_channel": "report_date"}[name]
+                        "pnl": "report_date", "order_pnl": "order_date"}[name]
         assert default_axis in time_dims, (name, default_axis, time_dims)
         if dt:
             assert dt in time_dims, (name, dt, time_dims)
@@ -356,6 +372,27 @@ def main() -> int:
     retired_ids = sorted((m["old"] for m in maps if m["old"] != m["new"] and m["old"] not in v2), key=len, reverse=True)
     id_re = re.compile(r"\b(" + "|".join(map(re.escape, retired_ids)) + r")\b")
 
+    from seleric_mcp.catalogue_service.service import _AXIS_KEYWORDS_V2
+
+    finance_phrases = [kw for kw, val in _AXIS_KEYWORDS_V2["date"] if val == "finance"]
+
+    channel_words = _AXIS_KEYWORDS_V2["channel"]
+    concept_src = ry(ROOT / "catalogue_v2_src" / "concepts.yaml")
+    channel_axis_filters = concept_src["_channel_filters"]["channel"]  # value -> {dimension: value}
+
+    def channel_filter(term: str, metric_id: str) -> dict | None:
+        low = f" {term.lower()} "
+        value = next((v for kw, v in channel_words if f" {kw} " in low), None)
+        if value is None or value not in channel_axis_filters or metric_id not in v2:
+            return None
+        view = v2[metric_id]["member"].split(".", 1)[0]
+        flt = dict(channel_axis_filters[value])
+        return flt if all(view in dims.get(d, {}).get("views", {}) for d in flt) else None
+
+    def finance_explicit(term: str) -> bool:
+        low = f" {term.lower()} "
+        return any(f" {kw} " in low or low.strip().startswith(kw) for kw in finance_phrases)
+
     def modernize(text: str | None) -> str | None:
         return id_re.sub(lambda mo: old_to[mo.group(1)]["new"], text) if text else text
 
@@ -376,6 +413,18 @@ def main() -> int:
                 pass
             else:
                 dropped.append((t["term"], cid)); continue
+            # Order date is the default for every domain; Finance (pnl_*) only when the term itself asks for
+            # the event-date P&L (the resolver's own date-axis phrases — one source, no second list).
+            new = t["canonical_id"]
+            if new.startswith("pnl_") and new[4:] in v2 and not finance_explicit(t["term"]):
+                t["canonical_id"] = new[4:]
+            # A term that names a channel ("meta orders", "google roas") must carry that channel's filter: v1
+            # encoded it in the id, v2 does not. Channel words = the resolver's channel axis; the filter = the
+            # concepts' channel axis_filters; applied only where the metric's view carries that dimension.
+            if not t.get("filter"):
+                flt = channel_filter(t["term"], t["canonical_id"])
+                if flt:
+                    t["filter"] = flt
         if did:
             new_did = did if did in dims else next((k for k, v in V1_DIM_ALIASES.items() if v == did and k in dims), None)
             if new_did is None:

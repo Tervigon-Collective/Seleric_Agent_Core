@@ -6,5 +6,16 @@ aliases:
 - taxes
 - tax
 - gst
+axes:
+  date:
+    values:
+    - order
+    - finance
+    default: order
 resolves:
-- metric: pnl_taxes_on_net_sales
+- when:
+    date: order
+  metric: taxes_on_net_sales
+- when:
+    date: finance
+  metric: pnl_taxes_on_net_sales

@@ -131,10 +131,12 @@ views:
     expected_cadence: hourly after gold sync; costs lag ~1 day (is_final = report_date <= today-3)
   description: 'Finance P&L on EVENT date (= dashboard): net sales, COGS, contribution margin, net profit, ROAS
     / MER. Slice by finance_channel and is_paid; drill campaign → ad set → ad.'
-- name: pnl_channel
-  title: Pnl Channel
-  date_dimension: report_date
+- name: order_pnl
+  title: Order Pnl
+  date_dimension: order_date
   freshness:
-    source: Cube v2 view pnl_channel (serve.* via cube_serve)
+    source: Cube v2 view order_pnl (serve.* via cube_serve)
     expected_cadence: hourly after gold sync, IST
-  description: 'Channel P&L extras on event date: gross COGS and gross profit by finance_channel and is_paid.'
+  description: 'P&L on ORDER date for performance and every non-Finance domain: COGS, contribution margin, net profit,
+    ROAS / MER of the orders placed in the period (ad spend on delivery date). Slice by finance_channel and is_paid;
+    drill campaign → ad set → ad. Finance (event date) is the pnl view.'

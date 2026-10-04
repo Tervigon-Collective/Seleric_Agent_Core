@@ -3,7 +3,8 @@ id: pnl_shipping_cost
 display_name: P&L shipping cost
 category: finance
 status: certified
-description: 'Shipping cost. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Shipping cost. Date axis: report_date (event date); grain: brand_day_channel_ad. Also the home of
+  the v1 meaning of: shipping_cost.'
 formula:
   human_readable: Shipping cost.
   authoritative_source: cube
@@ -23,5 +24,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- shipping_cost
+replaces: []

@@ -4,7 +4,9 @@
 # (and the resolver refuses a filter the metric's view cannot take, instead of answering a sibling).
 #
 # Shared axes
-#   date:    finance (EVENT date, = dashboard P&L; pnl_* ids) | order (ORDER date cohort)
+#   date:    order (ORDER date — DEFAULT for every domain) | finance (EVENT date, Finance only; pnl_* ids)
+#            Decision 2026-10-04 (user): performance, ads and all other domains read the order date; only
+#            Finance reads the event date. pnl_X = event date, X = its order-date twin.
 #   channel: finance_channel the traffic rolls up to — meta incl. Meta organic, google incl. Google organic
 #   paid:    all | paid (is_paid = true: paid Meta / Google clicks only)
 #   platform (ads): ad_platform meta | google
@@ -29,9 +31,9 @@ _ad_filters: &ad_filters
 concepts:
   - id: sales
     display_name: Sales
-    one_liner: Net sales on the P&L (event) date unless stated — the dashboard Net Sales number.
+    one_liner: Net sales of the orders placed in the period (order date) unless Finance / P&L is asked.
     aliases: [sales, revenue, topline, turnover]
-    axes: {basis: {values: [net, gross, total], default: net}, date: {values: [finance, order], default: finance},
+    axes: {basis: {values: [net, gross, total], default: net}, date: {values: [order, finance], default: order},
            scope: {values: [all, product], default: all}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
@@ -41,8 +43,8 @@ concepts:
       - {when: {basis: total}, metric: total_sales}
       - {when: {basis: net, scope: product}, metric: product_net_revenue}
     disambiguation: >
-      Default net sales = pnl_net_sales: event date (returns / cancels on the day they happen), equal to the
-      dashboard Net Sales card. date=order (net_sales) answers "sales of the orders placed in the period".
+      Default net sales = net_sales: the orders placed in the period (order date). date=finance (pnl_net_sales,
+      "P&L net sales") books returns / cancels on the day they happen — the Finance dashboard Net Sales card.
       Gross and total sales are booked at placement, so order and event date give the same number. A channel (meta / google / whatsapp / organic /
       unattributed) filters finance_channel — Meta includes Meta organic; add paid=paid for paid clicks only.
 
@@ -71,15 +73,18 @@ concepts:
 
   - id: profit
     display_name: Profit
-    one_liner: Net profit = net sales − net COGS − ad spend, on the P&L (event) date.
+    one_liner: Net profit = net sales − net COGS − ad spend of the orders placed in the period (order date).
     aliases: [profit, net profit, np, earnings, bottom line]
     axes: {basis: {values: [net, contribution, gross], default: net}, scope: {values: [all, product], default: all},
-           channel: *channel, paid: *paid}
+           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
-      - {when: {basis: net}, metric: pnl_net_profit}
-      - {when: {basis: contribution}, metric: pnl_contribution_margin}
-      - {when: {basis: gross}, metric: pnl_gross_profit}
+      - {when: {basis: net, date: order}, metric: net_profit}
+      - {when: {basis: contribution, date: order}, metric: contribution_margin}
+      - {when: {basis: gross, date: order}, metric: gross_profit}
+      - {when: {basis: net, date: finance}, metric: pnl_net_profit}
+      - {when: {basis: contribution, date: finance}, metric: pnl_contribution_margin}
+      - {when: {basis: gross, date: finance}, metric: gross_profit}
       - {when: {scope: product}, metric: product_gross_profit}
     disambiguation: >
       contribution = net sales − net COGS (before ad spend; v1 called it gross_profit). gross = gross sales −
@@ -90,12 +95,15 @@ concepts:
     one_liner: Margin % of net sales (net profit ÷ net sales unless stated).
     aliases: [margin, margin %, net margin, contribution margin %, gross margin]
     axes: {basis: {values: [net, contribution, gross], default: net}, scope: {values: [all, product], default: all},
-           channel: *channel, paid: *paid}
+           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
-      - {when: {basis: net}, metric: pnl_net_margin_pct}
-      - {when: {basis: contribution}, metric: pnl_contribution_margin_pct}
-      - {when: {basis: gross}, metric: pnl_contribution_margin_pct}
+      - {when: {basis: net, date: order}, metric: net_margin_pct}
+      - {when: {basis: contribution, date: order}, metric: contribution_margin_pct}
+      - {when: {basis: gross, date: order}, metric: contribution_margin_pct}
+      - {when: {basis: net, date: finance}, metric: pnl_net_margin_pct}
+      - {when: {basis: contribution, date: finance}, metric: pnl_contribution_margin_pct}
+      - {when: {basis: gross, date: finance}, metric: pnl_contribution_margin_pct}
       - {when: {scope: product}, metric: product_gross_margin_pct}
     disambiguation: >
       "gross margin" on the company P&L is contribution margin % (net sales − net COGS) ÷ net sales; product gross
@@ -105,26 +113,32 @@ concepts:
     display_name: ROAS
     one_liner: Return on ad spend from first-party net sales (not platform-reported ROAS).
     aliases: [roas, return on ad spend, return on adspend, return on advertising spend]
-    axes: {basis: {values: [net, gross, breakeven, mer], default: net}, channel: *channel, paid: *paid}
+    axes: {basis: {values: [net, gross, breakeven, mer], default: net}, date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
-      - {when: {basis: net}, metric: pnl_net_roas}
-      - {when: {basis: gross}, metric: pnl_gross_roas}
-      - {when: {basis: breakeven}, metric: pnl_be_roas}
-      - {when: {basis: mer}, metric: pnl_mer}
+      - {when: {basis: net, date: order}, metric: net_roas}
+      - {when: {basis: gross, date: order}, metric: gross_roas}
+      - {when: {basis: breakeven, date: order}, metric: be_roas}
+      - {when: {basis: mer, date: order}, metric: mer}
+      - {when: {basis: net, date: finance}, metric: pnl_net_roas}
+      - {when: {basis: gross, date: finance}, metric: gross_roas}
+      - {when: {basis: breakeven, date: finance}, metric: pnl_be_roas}
+      - {when: {basis: mer, date: finance}, metric: pnl_mer}
     disambiguation: >
       net ROAS = (net sales − net COGS) ÷ ad spend; gross ROAS = gross sales ÷ ad spend; MER = net sales ÷ ad
       spend; break-even ROAS = net sales ÷ contribution margin. Channel ROAS (channel=meta) includes Meta organic
-      sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified.
+      sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified. Default is
+      the order date (sales of the orders placed ÷ spend delivered in the period); date=finance is the P&L ROAS.
 
   - id: mer
     display_name: MER
     one_liner: Marketing efficiency ratio = net sales ÷ ad spend.
     aliases: [mer, marketing efficiency ratio, blended roas]
-    axes: {channel: *channel, paid: *paid}
+    axes: {date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
-      - {metric: pnl_mer}
+      - {when: {date: order}, metric: mer}
+      - {when: {date: finance}, metric: pnl_mer}
 
   - id: ad_spend
     display_name: Ad spend
@@ -184,30 +198,38 @@ concepts:
 
   - id: cogs
     display_name: COGS
-    one_liner: Net COGS on the P&L (event) date — product + operating cost, net of returns.
+    one_liner: Net COGS of the orders placed in the period (order date) — product + operating cost, net of returns.
     aliases: [cogs, net cogs, cost of goods, cost of goods sold, operating cost, total operating cost, gross cogs]
     axes: {component: {values: [total, product, shipping, packaging, gateway, rto, operating, gross], default: total},
-           channel: *channel, paid: *paid}
+           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
-      - {when: {component: total}, metric: pnl_net_cogs}
-      - {when: {component: product}, metric: pnl_product_cost}
-      - {when: {component: shipping}, metric: pnl_shipping_cost}
-      - {when: {component: packaging}, metric: pnl_packaging_cost}
-      - {when: {component: gateway}, metric: pnl_payment_gateway_fees}
-      - {when: {component: rto}, metric: pnl_rto_cost}
-      - {when: {component: operating}, metric: pnl_operating_cost}
-      - {when: {component: gross}, metric: pnl_gross_cogs}
+      - {when: {component: total, date: order}, metric: net_cogs}
+      - {when: {component: product, date: order}, metric: product_cost}
+      - {when: {component: shipping, date: order}, metric: shipping_cost}
+      - {when: {component: packaging, date: order}, metric: packaging_cost}
+      - {when: {component: gateway, date: order}, metric: payment_gateway_fees}
+      - {when: {component: rto, date: order}, metric: rto_cost}
+      - {when: {component: operating, date: order}, metric: operating_cost}
+      - {when: {component: gross, date: order}, metric: gross_cogs}
+      - {when: {component: total, date: finance}, metric: pnl_net_cogs}
+      - {when: {component: product, date: finance}, metric: product_cost}
+      - {when: {component: shipping, date: finance}, metric: pnl_shipping_cost}
+      - {when: {component: packaging, date: finance}, metric: pnl_packaging_cost}
+      - {when: {component: gateway, date: finance}, metric: pnl_payment_gateway_fees}
+      - {when: {component: rto, date: finance}, metric: pnl_rto_cost}
+      - {when: {component: operating, date: finance}, metric: pnl_operating_cost}
+      - {when: {component: gross, date: finance}, metric: gross_cogs}
     disambiguation: >
       "total operating cost" in v1 meant net COGS (component=total); operating cost alone is shipping + packaging +
       gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment).
 
   - id: returns_cancels
     display_name: Returns and cancellations
-    one_liner: Return + cancellation revenue on the P&L (event) date unless stated.
+    one_liner: Return + cancellation revenue of the orders placed in the period (order date) unless Finance is asked.
     aliases: [returns, cancels, returns and cancels, returns/cancels, cancellations, return revenue, cancel revenue]
     axes: {action: {values: [both, return, cancel], default: both}, measure: {values: [revenue, orders], default: revenue},
-           date: {values: [finance, order], default: finance}, channel: *channel, paid: *paid}
+           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
       - {when: {action: both, measure: revenue, date: finance}, metric: pnl_return_cancel_revenue}
@@ -318,8 +340,10 @@ concepts:
     display_name: Taxes
     one_liner: GST on net sales (flat 18 %).
     aliases: [taxes, tax, gst]
+    axes: {date: {values: [order, finance], default: order}}
     resolves:
-      - {metric: pnl_taxes_on_net_sales}
+      - {when: {date: order}, metric: taxes_on_net_sales}
+      - {when: {date: finance}, metric: pnl_taxes_on_net_sales}
 
   - id: customers
     display_name: Customers

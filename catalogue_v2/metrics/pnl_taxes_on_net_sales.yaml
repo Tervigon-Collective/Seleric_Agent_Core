@@ -3,7 +3,8 @@ id: pnl_taxes_on_net_sales
 display_name: P&L taxes on net sales
 category: finance
 status: certified
-description: 'GST on net sales at the flat 18 % rate. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'GST on net sales at the flat 18 % rate. Date axis: report_date (event date); grain: brand_day_channel_ad.
+  Also the home of the v1 meaning of: taxes_on_net_sales.'
 formula:
   human_readable: GST on net sales at the flat 18 % rate.
   authoritative_source: cube
@@ -23,5 +24,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- taxes_on_net_sales
+replaces: []

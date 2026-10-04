@@ -102,7 +102,8 @@ def main() -> int:
     ap.add_argument("--only", help="comma-separated old ids")
     ap.add_argument("--json", help="write every cell here")
     args = ap.parse_args()
-    maps = yaml.safe_load(open(ID_MAP))["maps"]
+    # v2 -> v2 consolidations (e.g. pnl_gross_cogs -> gross_cogs) carry no v1 member: nothing to compare
+    maps = [m for m in yaml.safe_load(open(ID_MAP))["maps"] if m.get("v1")]
     if args.only:
         keep = set(args.only.split(","))
         maps = [m for m in maps if m["old"] in keep]

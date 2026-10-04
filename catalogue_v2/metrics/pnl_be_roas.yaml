@@ -4,7 +4,7 @@ display_name: P&L break-even ROAS
 category: finance
 status: certified
 description: 'Break-even ROAS = net sales ÷ (net sales − net COGS). Date axis: report_date (event date); grain:
-  brand_day_channel_ad.'
+  brand_day_channel_ad. Also the home of the v1 meaning of: be_roas.'
 formula:
   human_readable: Break-even ROAS = net sales ÷ (net sales − net COGS).
   authoritative_source: cube
@@ -27,5 +27,4 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces:
-- be_roas
 - be_roas_all_channels

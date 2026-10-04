@@ -7,6 +7,11 @@ aliases:
 - marketing efficiency ratio
 - blended roas
 axes:
+  date:
+    values:
+    - order
+    - finance
+    default: order
   channel:
     values:
     - all
@@ -37,4 +42,9 @@ axis_filters:
     paid:
       is_paid: 'true'
 resolves:
-- metric: pnl_mer
+- when:
+    date: order
+  metric: mer
+- when:
+    date: finance
+  metric: pnl_mer

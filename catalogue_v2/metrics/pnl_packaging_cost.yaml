@@ -3,7 +3,8 @@ id: pnl_packaging_cost
 display_name: P&L packaging cost
 category: finance
 status: certified
-description: 'Packaging cost. Date axis: report_date (event date); grain: brand_day_channel_ad.'
+description: 'Packaging cost. Date axis: report_date (event date); grain: brand_day_channel_ad. Also the home of
+  the v1 meaning of: packaging_cost.'
 formula:
   human_readable: Packaging cost.
   authoritative_source: cube
@@ -23,5 +24,4 @@ access_policy:
   scopes:
   - metrics:read
 version: 1.0.0
-replaces:
-- packaging_cost
+replaces: []
