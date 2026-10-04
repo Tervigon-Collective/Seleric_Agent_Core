@@ -994,9 +994,15 @@ class QueryPlanner:
             for mid in parent.measures
         }
         if not views <= set(h.views):
+            # Name the hierarchy that does cover these views: the agent asked for 'campaign'
+            # on ad spend (paid_media), where the campaign levels live under 'ad' (live
+            # 2026-10-04 MS3-c3099ecf87), and the bare refusal sent it off to guess.
+            covering = sorted(name for name, other in self.catalogue.cat.hierarchies.items() if views <= set(other.views))
             raise PlanError(
                 f"Hierarchy '{hierarchy}' ({' → '.join(h.levels)}) is not available on view(s) "
                 f"{', '.join(sorted(v for v in views if v))}; it covers {', '.join(h.views)}."
+                + (f" Use hierarchy {' or '.join(repr(c) for c in covering)} for this metric." if covering else ""),
+                suggestions=covering,
             )
         if to_level and to_level != "next":
             if to_level not in h.levels:

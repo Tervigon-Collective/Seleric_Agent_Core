@@ -286,6 +286,15 @@ async def test_hierarchy_drill_goes_to_next_level(planner, cube):
         planner.hierarchy_targets(out["query_id"], "ad")  # commerce has no ad_platform level
 
 
+async def test_wrong_hierarchy_names_the_one_that_covers_the_view(planner, cube):
+    # live 2026-10-04: 'campaign' asked on ad spend; the campaign levels of paid_media live under 'ad'
+    cube.by_prefix["paid_media"] = [{"paid_media.ad_spend": "5", "paid_media.ad_platform": "meta"}]
+    out = await planner.run(QueryRequest(measures=["ad_spend"], dimensions=["ad_platform"], time_range=SEP))
+    with pytest.raises(PlanError) as exc:
+        planner.hierarchy_targets(out["query_id"], "campaign")
+    assert "Use hierarchy 'ad'" in str(exc.value) and exc.value.suggestions == ["ad"]
+
+
 async def test_provenance_v2_has_versions_sql_and_trace(planner, cube):
     out = await planner.run(QueryRequest(measures=["pnl_net_profit"], time_range=SEP))
     sem = out["provenance"]["semantic"]
