@@ -1026,12 +1026,15 @@ def build_server(settings: Settings) -> FastMCP:
                 target_dimensions = ctx.planner.hierarchy_targets(parent_query_id, hierarchy, to_level)
             if not target_dimensions:
                 raise PlanError("Pass target_dimensions or hierarchy (semantic v2).")
-            return await ctx.planner.drilldown(
+            result = await ctx.planner.drilldown(
                 parent_query_id,
                 target_dimensions,
                 [FilterSpec.model_validate(f) for f in (additional_filters or [])],
                 granularity,
             )
+            if hierarchy and isinstance(result, dict):
+                result["drilled_to"] = {"hierarchy": hierarchy, "dimensions": list(target_dimensions)}
+            return result
         except PlanError as e:
             return e.to_payload()
         except Exception as e:

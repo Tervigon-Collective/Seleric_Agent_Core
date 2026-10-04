@@ -332,3 +332,16 @@ def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     # v1 bootstrap unchanged
     assert "semantic_version" not in catalogue.bootstrap()
     assert "description" not in catalogue.bootstrap()["dimensions"][0]
+
+
+async def test_hierarchy_drill_from_a_filtered_level_goes_to_the_next(planner, cube):
+    # "Meta orders" (platform pinned by a filter) drilled on traffic -> channel, not platform again
+    cube.by_prefix["commerce"] = [{"commerce.orders": "5"}]
+    out = await planner.run(QueryRequest(
+        measures=["orders"], time_range=SEP,
+        filters=[FilterSpec(dimension="platform", operator="equals", values=["meta"])]))
+    assert planner.hierarchy_targets(out["query_id"], "traffic") == ["channel"]
+    out2 = await planner.run(QueryRequest(
+        measures=["orders"], dimensions=["channel"], time_range=SEP,
+        filters=[FilterSpec(dimension="platform", operator="equals", values=["meta"])]))
+    assert planner.hierarchy_targets(out2["query_id"], "traffic") == ["sub_channel"]

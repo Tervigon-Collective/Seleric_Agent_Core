@@ -1003,7 +1003,10 @@ class QueryPlanner:
                 raise PlanError(f"'{to_level}' is not a level of '{hierarchy}': {', '.join(h.levels)}.")
             target = to_level
         else:
-            current = [lvl for lvl in h.levels if lvl in parent.dimensions]
+            # the current level is the finest one the parent groups by OR pins with an equals filter
+            # (orders where platform = meta, drilled -> channel)
+            pinned = {f.dimension for f in parent.filters if f.operator == "equals" and len(f.values) == 1}
+            current = [lvl for lvl in h.levels if lvl in parent.dimensions or lvl in pinned]
             idx = h.levels.index(current[-1]) + 1 if current else 0
             if idx >= len(h.levels):
                 raise PlanError(f"Already at the finest level of '{hierarchy}' ({h.levels[-1]}).")
