@@ -151,6 +151,11 @@ class Settings:
     anomaly_sigma: float = 3.0
     anomaly_min_points: int = 14
     freshness_cache_ttl_seconds: int = 600
+    # catalogue_list_metrics loop breaker: max calls per 60 s across ALL callers (one shared counter).
+    # 0 = off (default since 2026-10-04: health probes tripped it for every client, and a looping LLM
+    # client costs its own tokens, not server resources — a call is ~30 ms). Env
+    # SELERIC_LIST_METRICS_RATE_LIMIT re-enables it without a code change.
+    list_metrics_rate_limit: int = 0
     freshness_enforcement: bool = True
     freshness_grace_days: int = 1
     default_brand_id: str = "20"
@@ -426,6 +431,9 @@ def load_settings(config_path: Path | None = None) -> Settings:
         anomaly_min_points=_tunable_int("SELERIC_ANOMALY_MIN_POINTS", "anomaly_min_points"),
         freshness_cache_ttl_seconds=_tunable_int(
             "SELERIC_FRESHNESS_CACHE_TTL_S", "freshness_cache_ttl_seconds"
+        ),
+        list_metrics_rate_limit=_tunable_int(
+            "SELERIC_LIST_METRICS_RATE_LIMIT", "list_metrics_rate_limit"
         ),
         freshness_enforcement=freshness_enforcement,
         freshness_grace_days=_tunable_int(

@@ -687,3 +687,18 @@ async def test_pinned_instance_allows_in_module_metric(built_server_pinned, fake
     out = await fn(measures=["add_to_cart_events"], time_range={"preset": "last_7d"})
     assert "out_of_module_metrics" not in out
     assert "pinned_module" not in out
+
+
+async def test_list_metrics_rate_limit_is_off_by_default_and_configurable(built_server):
+    """A shared loop breaker on catalogue_list_metrics starved every caller once a 15 s health probe
+    used it (2026-10-04): it is off unless settings.list_metrics_rate_limit > 0."""
+    mcp, ctx = built_server
+    fn = _tool_fn(mcp, "catalogue_list_metrics")
+    assert ctx.settings.list_metrics_rate_limit == 0
+    assert all("matches" in fn() for _ in range(10))
+    import dataclasses
+
+    ctx.settings = dataclasses.replace(ctx.settings, list_metrics_rate_limit=3)
+    ctx._tool_call_times.clear()
+    outs = [fn() for _ in range(4)]
+    assert all("matches" in o for o in outs[:3]) and outs[3].get("success") is False

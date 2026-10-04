@@ -503,10 +503,15 @@ def build_server(settings: Settings) -> FastMCP:
         (e.g., "product_net_revenue in Aug" and "product_net_revenue in Sep")
         and describe the delta calculation."""
         _log_call("catalogue_list_metrics", module=module)
-        # Fail if called more than 3 times in 60s — tool loop breaker.
-        should_continue, message = ctx.check_tool_call_rate("catalogue_list_metrics", max_calls=3, window_seconds=60)
-        if not should_continue:
-            return {"error": message, "success": False}
+        # Optional loop breaker (settings.list_metrics_rate_limit calls / 60 s, shared by all callers);
+        # 0 = off.
+        limit = ctx.settings.list_metrics_rate_limit
+        if limit > 0:
+            should_continue, message = ctx.check_tool_call_rate(
+                "catalogue_list_metrics", max_calls=limit, window_seconds=60
+            )
+            if not should_continue:
+                return {"error": message, "success": False}
         effective, refusal = _resolve_module(module)
         if refusal:
             return refusal
