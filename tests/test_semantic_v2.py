@@ -380,3 +380,14 @@ def test_order_date_is_the_default_and_only_finance_reads_the_event_date(v2):
             assert mid[4:] in v2.cat.metrics, mid
     m = v2.cat.metrics["net_roas"]
     assert m.version == "2.0.0" and m.cube_mapping.view == "order_pnl"
+
+
+def test_concept_axis_keyed_by_its_dimension_is_placed_by_value(v2):
+    # live 2026-10-05: axes={"ad_platform": "meta"} was dropped and platform defaulted to "all"
+    by_axis = v2.resolve_concept("ad spend", {"platform": "meta"})
+    by_dim = v2.resolve_concept("ad spend", {"ad_platform": "meta"})
+    assert by_dim.metric_id == by_axis.metric_id
+    assert by_dim.filter == by_axis.filter == {"ad_platform": "meta"}
+    assert "platform" not in by_dim.defaults_applied
+    # a key no axis can take is still ignored (the question's own axes ride along on every call)
+    assert v2.resolve_concept("ad spend", {"date": "order"}).metric_id == "ad_spend"

@@ -551,6 +551,18 @@ class CatalogueService:
             )
             return UnknownConcept(text=text, suggestions=sugg)
         c = self.cat.concepts[cid]
+        axes, unplaced = self._place_axes(c, axes)
+        if unplaced:
+            # Never default an axis the caller tried to set: "ad_platform=meta" was dropped
+            # and the platform axis silently defaulted to "all", so a Meta question got
+            # Meta + Google numbers (live 2026-10-05 MS3-c97c9fea15).
+            listing = "; ".join(f"{a} ({', '.join(ax.values)})" for a, ax in c.axes.items()) or "none"
+            return UnsupportedConcept(
+                concept=cid, axes={},
+                reason=(f"unknown axis {', '.join(repr(k) for k in unplaced)} for concept '{cid}'; "
+                        f"its axes are: {listing}. Pass axes by these names."),
+                nearest_metrics=self._concept_metrics(c),
+            )
         filled, defaults_applied = self._fill_axes(c, text, preset_axes, axes)
         for u in c.unsupported:
             if all(filled.get(k) == v for k, v in u.when.items()):
@@ -661,6 +673,26 @@ class CatalogueService:
                     found[aname] = val
                     break
         return found
+
+    @staticmethod
+    def _place_axes(c, axes: dict[str, str] | None) -> tuple[dict[str, str], list[str]]:
+        """Axes keyed by the concept's own axis names pass through. Any other key (often the
+        dimension the axis binds, e.g. ``ad_platform``) is placed on the one axis whose values
+        contain its value. A key whose value fits several axes is returned as unplaced (ambiguous);
+        one that fits none is ignored as before — the agent sends the question's own axes (e.g.
+        date=order) with every call, and a concept without that axis must still resolve."""
+        placed: dict[str, str] = {}
+        unplaced: list[str] = []
+        for k, v in (axes or {}).items():
+            if k in c.axes:
+                placed[k] = v
+                continue
+            fits = [a for a, ax in c.axes.items() if v in ax.values and a not in (axes or {})]
+            if len(fits) == 1:
+                placed.setdefault(fits[0], v)
+            elif fits:
+                unplaced.append(k)
+        return placed, unplaced
 
     def _fill_axes(
         self, c, text: str, preset_axes: dict, explicit_axes: dict | None
