@@ -258,7 +258,10 @@ class UnknownDimension(BaseModel):
     )
 
 
-# Polymorphic `channel` value spaces by Cube view (from dimensions/core.yaml).
+# Polymorphic `channel` value spaces by Cube view -- v1 catalogue only (frozen
+# `catalogue/`, kept for rollback). v2 has one conformed channel dimension
+# (serve.dim_traffic_source) whose views are not keyed here, so lookups miss
+# and the dimension's own description carries the value space.
 _CHANNEL_VIEW_VALUE_SPACE: dict[str, str] = {
     "channel_attribution": (
         "closed set (meta/google/organic_shopify/unattributed)"

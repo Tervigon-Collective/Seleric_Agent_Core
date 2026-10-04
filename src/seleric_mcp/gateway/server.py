@@ -1044,8 +1044,11 @@ def build_server(settings: Settings) -> FastMCP:
         except PlanError as e:
             return e.to_payload()
         except Exception as e:
-            logger.error("metrics_drilldown_failed", trace_id=trace_id, error=str(e))
-            return {"error": str(e)}
+            # Same as metrics_query: a Cube read-timeout stringifies to "", and an
+            # empty "error" is falsy to callers -- the agent read it as success
+            # with zero rows. Always return the type plus a non-empty message.
+            logger.error("metrics_drilldown_failed", trace_id=trace_id, error=repr(e), exc_info=True)
+            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()
     def insights_explain(query_id: str) -> dict:
@@ -1121,8 +1124,8 @@ def build_server(settings: Settings) -> FastMCP:
         except (ValueError, PermissionError) as e:
             return {"error": str(e)}
         except Exception as e:
-            logger.error("actions_propose_failed", trace_id=trace_id, error=str(e))
-            return {"error": str(e)}
+            logger.error("actions_propose_failed", trace_id=trace_id, error=repr(e), exc_info=True)
+            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()
     async def actions_commit(confirmation_token: str) -> dict:
@@ -1134,8 +1137,8 @@ def build_server(settings: Settings) -> FastMCP:
             result = await ctx.broker.commit(confirmation_token, ctx.actor)
             return result.model_dump(mode="json")
         except Exception as e:
-            logger.error("actions_commit_failed", trace_id=trace_id, error=str(e))
-            return {"error": str(e)}
+            logger.error("actions_commit_failed", trace_id=trace_id, error=repr(e), exc_info=True)
+            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()
     def actions_status(action_request_id: str) -> dict:

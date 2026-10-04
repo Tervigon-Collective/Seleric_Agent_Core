@@ -230,6 +230,20 @@ async def test_metrics_drilldown_denied_without_required_scope(built_server_no_s
     assert out["missing_scopes_by_metric"]["orders"] == ["metrics:read"]
 
 
+async def test_metrics_drilldown_timeout_returns_non_empty_error(built_server, fake_cube):
+    """A Cube read-timeout stringifies to "" -- an empty "error" is falsy, so the
+    agent read the drilldown as a successful zero-row result."""
+    mcp, ctx = built_server
+
+    async def _timeout(*_a, **_kw):
+        raise TimeoutError()
+
+    ctx.planner.drilldown = _timeout
+    fn = _tool_fn(mcp, "metrics_drilldown")
+    out = await fn("missing-parent", target_dimensions=["payment_method"])
+    assert out["error"].startswith("TimeoutError")
+
+
 # ---------- freshness fail-closed gate (metrics_query / metrics_drilldown) ----------
 # Views declare expected_cadence in catalogue/views.yaml (e.g. "daily, T-1, IST");
 # previously freshness was only *reported* (docs://data-freshness) and never
