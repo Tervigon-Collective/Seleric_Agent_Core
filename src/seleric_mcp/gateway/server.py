@@ -40,6 +40,7 @@ from ..config import Settings
 from ..observability.audit import AuditLog
 from ..observability.logging import new_trace_id
 from ..semantic_layer.cube_client import CubeClient
+from ..semantic_layer.semantic_sql import run_semantic_sql, SqlValidationError
 from ..storage.db import Database
 from . import prompts as prompt_templates
 
@@ -967,6 +968,40 @@ def build_server(settings: Settings) -> FastMCP:
             # type + repr fallback so the model (and the UI) get a real message,
             # and log the traceback (not just str) for diagnosis.
             logger.error("metrics_query_failed", trace_id=trace_id, error=repr(e), exc_info=True)
+            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
+
+    @mcp.tool()
+    async def semantic_sql(sql: str, max_rows: int | None = None) -> dict:
+        """READ-ONLY ad-hoc analysis via Cube Core's Semantic SQL (Postgres
+        protocol). Use when metrics_query cannot express the derivation (e.g.
+        multi-level CTEs, cross-view ratios, window functions). Rules:
+        single SELECT statement only; no DDL/DML; no dangerous functions; must
+        reference governed Cube view members or MEASURE(); rows capped at
+        5000 (50k hard max); 30s statement timeout. Prefer metrics_query for
+        certified business metrics — numbers from here still route through
+        Cube's governed model, never raw ClickHouse. Returns {data, columns,
+        row_count, elapsed_ms, query_sha, limited} plus freshness/provenance."""
+        trace_id = _log_call("semantic_sql", sql_len=len(sql or ""))
+        allowed, message = ctx.check_tool_call_rate("semantic_sql", max_calls=6, window_seconds=60)
+        if not allowed:
+            logger.warning("semantic_sql_rate_limited", trace_id=trace_id)
+            return {"error": message}
+        try:
+            result = await run_semantic_sql(sql, ctx.settings, max_rows=max_rows)
+            return {
+                "data": result.data,
+                "columns": result.columns,
+                "row_count": result.row_count,
+                "elapsed_ms": result.elapsed_ms,
+                "query_sha": result.query_sha,
+                "limited": result.limited,
+                "catalogue_version": ctx.catalogue.version,
+            }
+        except SqlValidationError as e:
+            logger.warning("semantic_sql_rejected", trace_id=trace_id, error=str(e))
+            return {"error": f"validation: {e}"}
+        except Exception as e:
+            logger.error("semantic_sql_failed", trace_id=trace_id, error=repr(e), exc_info=True)
             return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()

@@ -4,7 +4,7 @@ Plan: [PLAN.md](./PLAN.md). Work happens on branch `semantic-v2` in mage-ai and 
 and is merged to `main` at each stable point (first merge 2026-10-03, after the channel decisions).
 Seleric_Agent work goes on its `gaurav` branch.
 
-**Status 2026-10-04 (Phase 5):** the agent surface is on semantic v2. The MCP (`seleric-mcp-mcp-1`, :8765 /
+**Status 2026-10-06 (Phase 6):** Semantic SQL enabled end-to-end (Cube Postgres SQL API on :15432 + new `semantic_sql` MCP tool, agent tool registered; pre-aggs on hot grains + Cube Store added — see [PHASE6.md](./PHASE6.md)).  **Status 2026-10-04 (Phase 5):** the agent surface is on semantic v2. The MCP (`seleric-mcp-mcp-1`, :8765 /
 mcp.seleric.com) serves `catalogue_v2` on `cube-v2` (:4002); Seleric_Agent `gaurav` carries the v2 registry.
 v1 Cube (:4001) stays up for seleric_systems only. All repos on their deploy branches (mage-ai `main`,
 Agent_Core `main`, Seleric_Agent `gaurav`).

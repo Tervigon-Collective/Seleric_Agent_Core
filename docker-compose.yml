@@ -45,8 +45,13 @@ services:
       - ../mage-ai/infra/cube/.env.v2
     environment:
       CUBEJS_SCHEMA_PATH: src/model_v2
+      # Semantic SQL (Postgres-protocol). Agent talks via /cubejs-api/v1/cubesql REST;
+      # psql/BI clients use this port. See doc/semantic_v2/PHASE6.md.
+      CUBEJS_PG_SQL_PORT: "15432"
+      CUBEJS_CUBESTORE_URL: ws://cubestore:3030
     ports:
       - "127.0.0.1:${CUBE_V2_HOST_PORT:-4002}:4000"
+      - "127.0.0.1:${CUBE_V2_SQL_PORT:-15432}:15432"
     extra_hosts:
       - "clickhouse.seleric.com:72.61.228.168"
 
@@ -63,6 +68,9 @@ services:
       # Semantic v2 (doc/semantic_v2, Phase 5 cutover 2026-10-04): catalogue_v2 on Cube v2.
       # Rollback: CUBE_API_URL http://cube:4000 + drop SELERIC_CATALOGUE_DIR (v1 catalogue/ stays shipped).
       CUBE_API_URL: http://cube-v2:4000
+      # Semantic SQL (Phase 6): Postgres-protocol SQL API on cube-v2:15432.
+      # Dev default matches CUBEJS_DEV_MODE=true (user/password). Prod: set a real DSN.
+      CUBE_SQL_DSN: postgresql://user:password@cube-v2:15432/cube
       SELERIC_CATALOGUE_DIR: catalogue_v2
       SELERIC_MCP_DB: /data/seleric_mcp.db
       OPENMETADATA_BASE_URL: http://host.docker.internal:8585
@@ -78,5 +86,16 @@ services:
     ports:
       - "127.0.0.1:8765:8765"
 
+  # Cube Store: pre-aggregation cache for model_v2 (Phase 6).
+  cubestore:
+    image: cubejs/cubestore
+    container_name: seleric-mcp-cubestore-1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3030:3030"
+    volumes:
+      - cubestore-data:/cube/conf/.cubestore
+
 volumes:
   mcp-data:
+  cubestore-data:

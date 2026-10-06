@@ -145,6 +145,9 @@ class Settings:
     default_row_limit: int = 0
     max_row_limit: int = 100_000
     cube_timeout_seconds: float = 30.0
+    # Semantic SQL (Cube Postgres-protocol SQL API) DSN for the `semantic_sql` MCP tool.
+    # Dev default matches CUBEJS_DEV_MODE=true; override with CUBE_SQL_DSN in prod.
+    cube_sql_dsn: str = "postgresql://user:password@127.0.0.1:15432/cube"
     result_ttl_minutes: int = 60
     idempotency_window_hours: int = 24
     top_movers_limit: int = 10
@@ -416,6 +419,12 @@ def load_settings(config_path: Path | None = None) -> Settings:
         default_row_limit=_tunable_int("SELERIC_DEFAULT_ROW_LIMIT", "default_row_limit"),
         max_row_limit=_tunable_int("SELERIC_MAX_ROW_LIMIT", "max_row_limit"),
         cube_timeout_seconds=_tunable_float("SELERIC_CUBE_TIMEOUT_S", "cube_timeout_seconds"),
+        cube_sql_dsn=str(
+            _env_or(
+                "CUBE_SQL_DSN",
+                _cfg_get(cube, "sql_dsn", "postgresql://user:password@127.0.0.1:15432/cube"),
+            )
+        ),
         result_ttl_minutes=_tunable_int("SELERIC_RESULT_TTL_MINUTES", "result_ttl_minutes"),
         idempotency_window_hours=_tunable_int(
             "SELERIC_IDEMPOTENCY_WINDOW_HOURS", "idempotency_window_hours"
