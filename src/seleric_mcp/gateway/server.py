@@ -971,7 +971,7 @@ def build_server(settings: Settings) -> FastMCP:
             return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()
-    async def semantic_sql(sql: str, max_rows: int | None = None) -> dict:
+    async def semantic_sql(sql: str, max_rows: int | None = None, brand_id: str | None = None) -> dict:
         """READ-ONLY ad-hoc analysis via Cube Core's Semantic SQL (Postgres
         protocol). Use when metrics_query cannot express the derivation (e.g.
         multi-level CTEs, cross-view ratios, window functions). Rules:
@@ -980,15 +980,20 @@ def build_server(settings: Settings) -> FastMCP:
         5000 (50k hard max); 30s statement timeout. Prefer metrics_query for
         certified business metrics — numbers from here still route through
         Cube's governed model, never raw ClickHouse. Returns {data, columns,
-        row_count, elapsed_ms, query_sha, limited} plus freshness/provenance."""
-        trace_id = _log_call("semantic_sql", sql_len=len(sql or ""))
+        row_count, elapsed_ms, query_sha, limited} plus freshness/provenance.
+        brand_id scopes EVERY cube/view in the query to that brand (enforced by
+        Cube, not by your WHERE clause); omitted -> the default brand. A cube
+        without a brand_id member cannot be brand-scoped, so it is not queryable
+        here — use the views that carry its attributes as columns."""
+        trace_id = _log_call("semantic_sql", sql_len=len(sql or ""), brand_id=brand_id)
         allowed, message = ctx.check_tool_call_rate("semantic_sql", max_calls=6, window_seconds=60)
         if not allowed:
             logger.warning("semantic_sql_rate_limited", trace_id=trace_id)
             return {"error": message}
         try:
-            result = await run_semantic_sql(sql, ctx.settings, max_rows=max_rows)
+            result = await run_semantic_sql(sql, ctx.settings, max_rows=max_rows, brand_id=brand_id)
             return {
+                "brand_id": str(brand_id or ctx.settings.default_brand_id),
                 "data": result.data,
                 "columns": result.columns,
                 "row_count": result.row_count,

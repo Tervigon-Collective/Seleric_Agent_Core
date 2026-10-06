@@ -15,6 +15,7 @@ import re
 import time
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import structlog
 
@@ -52,6 +53,23 @@ _GOVERNED_HINT = re.compile(
 
 class SqlValidationError(ValueError):
     pass
+
+
+def brand_scoped_dsn(dsn: str, brand_id: str) -> str:
+    """Connect as ``brand_<id>``: Cube's checkSqlAuth turns that user into the
+    security context and queryRewrite (mage-ai infra/cube/cube.js) filters every
+    cube the query touches to that brand — inside CTEs and window functions too,
+    so the scope does not depend on the SQL the model wrote."""
+    brand = str(brand_id).strip()
+    if not brand.isdigit():
+        raise SqlValidationError(f"brand_id must be a numeric brand id, got {brand_id!r}")
+    parts = urlsplit(dsn)
+    host = parts.hostname or ""
+    if parts.port:
+        host = f"{host}:{parts.port}"
+    password = parts.password or ""
+    auth = f"brand_{brand}" + (f":{password}" if password else "")
+    return urlunsplit((parts.scheme, f"{auth}@{host}", parts.path, parts.query, parts.fragment))
 
 
 @dataclass
@@ -112,23 +130,24 @@ def _run(sql: str, dsn: str, max_rows: int, timeout_ms: int) -> tuple[list[dict]
 
 
 async def run_semantic_sql(
-    sql: str, settings: Settings, max_rows: int | None = None
+    sql: str, settings: Settings, max_rows: int | None = None, brand_id: str | None = None
 ) -> SemanticSqlResult:
     cleaned = validate_semantic_sql(sql)
-    # Enforce a row cap unless the query already self-limits below our default.
+    brand = str(brand_id or settings.default_brand_id)
+    dsn = brand_scoped_dsn(settings.cube_sql_dsn, brand)
+    # Row cap: _run returns at most `cap` rows (fetchmany) and flags `limited`;
+    # Cube itself caps every query at CUBEJS_DB_QUERY_LIMIT (= _MAX_ROWS_HARD).
+    # The statement is sent as written — wrapping it in SELECT * FROM (...) LIMIT
+    # broke statements Cube cannot nest (EXPLAIN) and added nothing to the cap.
     cap = min(max_rows or _MAX_ROWS_DEFAULT, _MAX_ROWS_HARD)
-    if not re.search(r"\bLIMIT\s+\d+", cleaned, re.IGNORECASE):
-        cleaned = f"SELECT * FROM ({cleaned}) AS _t LIMIT {cap}"
-        cap = cap  # rows all capped by the wrapper
     sha = hashlib.sha256(cleaned.encode()).hexdigest()[:16]
     t0 = time.monotonic()
-    rows, columns, limited = await asyncio.to_thread(
-        _run, cleaned, settings.cube_sql_dsn, cap, _STATEMENT_TIMEOUT_MS
-    )
+    rows, columns, limited = await asyncio.to_thread(_run, cleaned, dsn, cap, _STATEMENT_TIMEOUT_MS)
     elapsed = int((time.monotonic() - t0) * 1000)
     logger.info(
         "semantic_sql",
         query_sha=sha,
+        brand_id=brand,
         rows=len(rows),
         limited=limited,
         elapsed_ms=elapsed,
