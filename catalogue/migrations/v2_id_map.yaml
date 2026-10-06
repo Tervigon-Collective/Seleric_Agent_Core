@@ -271,6 +271,24 @@ v2_metrics:
   product_gross_profit:
     member: product.product_gross_profit
     date_axis: product.order_date
+  product_gross_sale:
+    member: product.product_gross_sale
+    date_axis: product.order_date
+  product_line_cost:
+    member: product.product_line_cost
+    date_axis: product.order_date
+  product_discounts:
+    member: product.product_discounts
+    date_axis: product.order_date
+  units_ordered:
+    member: product.units_ordered
+    date_axis: product.order_date
+  product_gross_cogs:
+    member: product.product_gross_cogs
+    date_axis: product.order_date
+  product_net_cogs:
+    member: product.product_net_cogs
+    date_axis: product.order_date
   product_net_revenue:
     member: product.product_net_revenue
     date_axis: product.order_date
@@ -1699,6 +1717,22 @@ maps:
   note: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers are identical
     — one id, the order-date one'
   verify: false
+- old: gross_units_ordered
+  new: units_ordered
+  member: product.units_ordered
+  date_axis: product.order_date
+  v1:
+    member: product_performance.gross_units_ordered
+    date_axis: product_performance.order_date
+  note: v1 draft, certified in v2 as the product-grain units_ordered (2026-10-06).
+- old: product_cogs
+  new: product_net_cogs
+  member: product.product_net_cogs
+  date_axis: product.order_date
+  v1:
+    member: product_performance.product_cogs
+    date_axis: product_performance.order_date
+  note: v1 draft, certified in v2 as the product-grain product_net_cogs (2026-10-06).
 retired_without_replacement:
 - old: active_orders
   v1_status: draft
@@ -1750,11 +1784,6 @@ retired_without_replacement:
   v1:
     member: customer_data.customers
   reason: draft in v1 (never certified); no v2 metric yet
-- old: gross_units_ordered
-  v1_status: draft
-  v1:
-    member: product_performance.gross_units_ordered
-  reason: draft in v1 (never certified); no v2 metric yet
 - old: lifetime_gross_revenue
   v1_status: draft
   v1:
@@ -1779,11 +1808,6 @@ retired_without_replacement:
   v1_status: draft
   v1:
     member: meta_ad_performance.meta_reach
-  reason: draft in v1 (never certified); no v2 metric yet
-- old: product_cogs
-  v1_status: draft
-  v1:
-    member: product_performance.product_cogs
   reason: draft in v1 (never certified); no v2 metric yet
 - old: repeat_order_share
   v1_status: draft

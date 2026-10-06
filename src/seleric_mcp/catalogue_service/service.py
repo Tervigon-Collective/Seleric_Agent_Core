@@ -375,7 +375,16 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
                 ("number of refunds", "count"), ("refund count", "count"), ("refund lines", "lines"),
                 ("recovered", "recovered_cogs"), ("returns value", "returns_value"),
                 ("orders placed", "order_cohort"), ("per path", "per_path"), ("per order", "per_path")],
-    "component": [("total operating", "total"), ("operating", "operating"), ("gross", "gross")],
+    # "cogs per product" is the TOTAL cogs split by product, not the product-cost component: the v1 bare
+    # "product" hint must not win, so the components are named here first and a plain "cogs" means total.
+    "component": [("total operating", "total"), ("operating", "operating"), ("gross", "gross"),
+                  ("product cost", "product"), ("cost of product", "product"), ("shipping", "shipping"),
+                  ("packaging", "packaging"), ("payment gateway", "gateway"), ("gateway", "gateway"),
+                  ("rto", "rto"), ("cogs", "total"), ("cost of goods", "total")],
+    # product grain: any question by product / variant / SKU is line level (product view). Also carried by
+    # question_axes, so "SKU wise gross sale" keeps scope=product when the model resolves "gross sales".
+    # "product cost" is the COGS component, not the grain: matched first so the bare "product" does not fire.
+    "scope": [("product cost", "all"), ("sku", "product"), ("variant", "product"), ("product", "product")],
     "metric_kind": [("link click", "link"), ("landing page", "landing_page")],
     "event": [("events per session", "per_session"), ("per session", "per_session"), ("bounce", "bounce"),
               ("all events", "all"), ("web events", "all")],
@@ -849,6 +858,17 @@ class CatalogueService:
             extra["date_basis"], extra["date_twin"] = "finance", m.id[4:]
         elif f"pnl_{m.id}" in self.cat.metrics:
             extra["date_basis"], extra["date_twin"] = "order", f"pnl_{m.id}"
+        twins = self.grain_twins(m.id)
+        if twins:
+            extra["grain_twins"] = twins
+        if m.aggregation == "ratio":
+            # The additive component a leaderboard of this ratio is selected by ("top campaigns by CTR" over a
+            # long tail would otherwise be won by a 1-impression campaign): its formula's last additive input
+            # (ctr -> impressions, aov -> orders, product_gross_margin_pct -> product_net_revenue).
+            vol = next((d for d in reversed(m.formula.depends_on)
+                        if (dm := self.cat.metrics.get(d)) is not None and dm.aggregation == "additive"), None)
+            if vol:
+                extra["volume_metric"] = vol
         if m.valid_for:
             extra["valid_for"] = {k: list(v) for k, v in m.valid_for.items()}
             if m.valid_for_reason:
@@ -860,6 +880,28 @@ class CatalogueService:
         if notes:
             extra["binding_notes"] = notes
         return extra
+
+    def grain_twins(self, metric_id: str) -> list[str]:
+        """Metrics that answer the same concept selection at another grain, from the concepts' own ``scope``
+        axis: a row resolving to *metric_id* and a scope=<grain> row agreeing on every other axis it states
+        (net_sales {basis: net, date: order} -> product_net_revenue {basis: net, scope: product, date: order}).
+        An order-grain metric cannot carry a product breakdown; its twin can — the agent redirects there."""
+        out: list[str] = []
+        for c in self.cat.concepts.values():
+            scope = c.axes.get("scope")
+            if scope is None:
+                continue
+            for r in c.resolves:
+                if r.metric != metric_id or r.when.get("scope", scope.default) != scope.default:
+                    continue
+                base = {k: v for k, v in r.when.items() if k != "scope"}
+                for t in c.resolves:
+                    grain = t.when.get("scope")
+                    if (grain and grain != scope.default and t.metric != metric_id and t.metric not in out
+                            and t.metric in self.cat.metrics
+                            and all(t.when.get(k, v) == v for k, v in base.items())):
+                        out.append(t.metric)
+        return out
 
     def lookup_metric(self, metric_id: str) -> tuple[MetricDef, str | None] | None:
         """Queryable resolve, or exact id including draft/broken (for get_metric)."""

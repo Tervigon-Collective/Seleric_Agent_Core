@@ -213,6 +213,8 @@ terms:
   canonical_id: product_cost
 - term: shopify product cost
   canonical_id: product_cost
+- term: product COGS
+  canonical_id: product_net_cogs
 - term: total operating cost
   canonical_id: net_cogs
 - term: total operating cost (all channels)
@@ -838,6 +840,8 @@ terms:
   canonical_id: net_sales
 - term: shopify only orders
   canonical_id: orders
+- term: gross units
+  canonical_id: units_ordered
 - term: cancelled orders
   canonical_id: cancelled_orders
 - term: cancellations

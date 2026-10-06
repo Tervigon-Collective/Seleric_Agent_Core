@@ -16,6 +16,7 @@ axes:
   basis:
     values:
     - net
+    - ordered
     - returned
     - per_order
     default: net
@@ -52,6 +53,9 @@ resolves:
 - when:
     basis: net
   metric: units_sold
+- when:
+    basis: ordered
+  metric: units_ordered
 - when:
     basis: returned
   metric: returned_units

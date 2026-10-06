@@ -600,6 +600,7 @@ dimensions:
   views:
     commerce: commerce.is_new_customer
     product: product.is_new_customer
+    order_pnl: order_pnl.is_new_customer
   aliases:
   - new customer
   - first order customer
@@ -783,6 +784,7 @@ dimensions:
     commerce: commerce.payment_bucket
     product: product.payment_bucket
     returns: returns.payment_bucket
+    order_pnl: order_pnl.payment_bucket
   aliases:
   - cod vs prepaid
   - payment mix
@@ -1025,6 +1027,21 @@ dimensions:
   - zip
   - zipcode
   - shipping zip
+- id: shipping_region
+  display_name: Shipping Region
+  description: Shipping state / region of the order (NULL on ad spend rows).
+  is_time: false
+  views:
+    order_pnl: order_pnl.shipping_region
+  aliases:
+  - region
+  - state
+  - province
+  - shipping state
+  - shipping province
+  - ship state
+  - ship province
+  - ship_to_state
 - id: shipping_state
   display_name: Shipping State
   description: Shipping state / region.
@@ -1068,6 +1085,7 @@ dimensions:
     product: product.sub_channel
     web_sessions: web_sessions.sub_channel
     attribution: attribution.sub_channel
+    order_pnl: order_pnl.sub_channel
   aliases: []
 - id: touch_count
   display_name: Touch Count

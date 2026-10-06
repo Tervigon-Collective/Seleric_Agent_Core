@@ -7,6 +7,11 @@ aliases:
 - discount
 - discount amount
 axes:
+  scope:
+    values:
+    - all
+    - product
+    default: all
   channel:
     values:
     - all
@@ -37,4 +42,9 @@ axis_filters:
     paid:
       is_paid: 'true'
 resolves:
-- metric: discounts
+- when:
+    scope: all
+  metric: discounts
+- when:
+    scope: product
+  metric: product_discounts

@@ -4,9 +4,12 @@ display_name: Sales
 one_liner: Net sales of the orders placed in the period (order date) unless Finance / P&L is asked.
 aliases:
 - sales
+- sale
 - revenue
 - topline
 - turnover
+- gross sale
+- net sale
 axes:
   basis:
     values:
@@ -71,11 +74,36 @@ resolves:
 - when:
     basis: net
     scope: product
+    date: order
   metric: product_net_revenue
+- when:
+    basis: gross
+    scope: product
+    date: order
+  metric: product_gross_sale
+- when:
+    basis: gross
+    scope: product
+    date: finance
+  metric: product_gross_sale
+unsupported:
+- when:
+    basis: total
+    scope: product
+  reason: Total sales (incl. GST) is order level only. By product use gross (product_gross_sale) or net (product_net_revenue)
+    — both ex-GST.
+- when:
+    basis: net
+    scope: product
+    date: finance
+  reason: 'Product sales exist on ORDER date only (product_net_revenue: each line''s returns / cancels land on the
+    day it was ordered). Finance (event-date) net sales has no product split.'
 disambiguation: 'Default net sales = net_sales: the orders placed in the period (order date). date=finance (pnl_net_sales,
   "P&L net sales") books returns / cancels on the day they happen — the Finance dashboard Net Sales card. Gross
   and total sales are booked at placement, so order and event date give the same number. A channel (meta / google
   / whatsapp / organic / unattributed) filters finance_channel — Meta includes Meta organic; add paid=paid for paid
-  clicks only.
+  clicks only. scope=product (any breakdown / filter by product, variant, SKU or product type) is line level, ex-GST:
+  gross = product_gross_sale (before discounts / returns / cancels), net = product_net_revenue (after them). The
+  order-level ids (net_sales, gross_sales) cannot be split by product — an order holds several products.
 
   '

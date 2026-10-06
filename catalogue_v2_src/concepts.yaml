@@ -32,7 +32,7 @@ concepts:
   - id: sales
     display_name: Sales
     one_liner: Net sales of the orders placed in the period (order date) unless Finance / P&L is asked.
-    aliases: [sales, revenue, topline, turnover]
+    aliases: [sales, sale, revenue, topline, turnover, gross sale, net sale]
     axes: {basis: {values: [net, gross, total], default: net}, date: {values: [order, finance], default: order},
            scope: {values: [all, product], default: all}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
@@ -41,12 +41,28 @@ concepts:
       - {when: {basis: net, date: order}, metric: net_sales}
       - {when: {basis: gross}, metric: gross_sales}
       - {when: {basis: total}, metric: total_sales}
-      - {when: {basis: net, scope: product}, metric: product_net_revenue}
+      # scope=product rows carry 3 keys so they out-rank the 2-key order-grain rows (most-specific wins; a
+      # 2-key product row tied with {basis: net, date: order} and lost, so "sales per product" got net_sales).
+      - {when: {basis: net, scope: product, date: order}, metric: product_net_revenue}
+      - {when: {basis: gross, scope: product, date: order}, metric: product_gross_sale}
+      - {when: {basis: gross, scope: product, date: finance}, metric: product_gross_sale}
+    unsupported:
+      - when: {basis: total, scope: product}
+        reason: >-
+          Total sales (incl. GST) is order level only. By product use gross (product_gross_sale) or net
+          (product_net_revenue) — both ex-GST.
+      - when: {basis: net, scope: product, date: finance}
+        reason: >-
+          Product sales exist on ORDER date only (product_net_revenue: each line's returns / cancels land on the
+          day it was ordered). Finance (event-date) net sales has no product split.
     disambiguation: >
       Default net sales = net_sales: the orders placed in the period (order date). date=finance (pnl_net_sales,
       "P&L net sales") books returns / cancels on the day they happen — the Finance dashboard Net Sales card.
       Gross and total sales are booked at placement, so order and event date give the same number. A channel (meta / google / whatsapp / organic /
       unattributed) filters finance_channel — Meta includes Meta organic; add paid=paid for paid clicks only.
+      scope=product (any breakdown / filter by product, variant, SKU or product type) is line level, ex-GST:
+      gross = product_gross_sale (before discounts / returns / cancels), net = product_net_revenue (after them).
+      The order-level ids (net_sales, gross_sales) cannot be split by product — an order holds several products.
 
   - id: orders
     display_name: Orders
@@ -85,10 +101,17 @@ concepts:
       - {when: {basis: net, date: finance}, metric: pnl_net_profit}
       - {when: {basis: contribution, date: finance}, metric: pnl_contribution_margin}
       - {when: {basis: gross, date: finance}, metric: gross_profit}
-      - {when: {scope: product}, metric: product_gross_profit}
+      - {when: {basis: net, scope: product, date: order}, metric: product_gross_profit}
+      - {when: {basis: contribution, scope: product, date: order}, metric: product_gross_profit}
+      - {when: {basis: gross, scope: product, date: order}, metric: product_gross_profit}
+    unsupported:
+      - when: {scope: product, date: finance}
+        reason: Product profit exists on ORDER date only (product_gross_profit); Finance P&L has no product split.
     disambiguation: >
       contribution = net sales − net COGS (before ad spend; v1 called it gross_profit). gross = gross sales −
-      gross COGS − ad spend (the Attribution Overview Gross Profit tile). scope=product is line-level gross profit.
+      gross COGS − ad spend (the Attribution Overview Gross Profit tile). scope=product (by product / variant /
+      SKU) is line-level product_gross_profit = product net revenue − product net COGS, ex-GST; ad spend is not
+      allocated to products, so product profit is before ad spend whatever the basis.
 
   - id: margin
     display_name: Margin
@@ -104,7 +127,9 @@ concepts:
       - {when: {basis: net, date: finance}, metric: pnl_net_margin_pct}
       - {when: {basis: contribution, date: finance}, metric: pnl_contribution_margin_pct}
       - {when: {basis: gross, date: finance}, metric: pnl_contribution_margin_pct}
-      - {when: {scope: product}, metric: product_gross_margin_pct}
+      - {when: {basis: net, scope: product, date: order}, metric: product_gross_margin_pct}
+      - {when: {basis: contribution, scope: product, date: order}, metric: product_gross_margin_pct}
+      - {when: {basis: gross, scope: product, date: order}, metric: product_gross_margin_pct}
     disambiguation: >
       "gross margin" on the company P&L is contribution margin % (net sales − net COGS) ÷ net sales; product gross
       margin is line-level (scope=product).
@@ -201,9 +226,13 @@ concepts:
     one_liner: Net COGS of the orders placed in the period (order date) — product + operating cost, net of returns.
     aliases: [cogs, net cogs, cost of goods, cost of goods sold, operating cost, total operating cost, gross cogs]
     axes: {component: {values: [total, product, shipping, packaging, gateway, rto, operating, gross], default: total},
+           scope: {values: [all, product], default: all},
            date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
+      - {when: {component: total, scope: product, date: order}, metric: product_net_cogs}
+      - {when: {component: product, scope: product, date: order}, metric: product_line_cost}
+      - {when: {component: gross, scope: product, date: order}, metric: product_gross_cogs}
       - {when: {component: total, date: order}, metric: net_cogs}
       - {when: {component: product, date: order}, metric: product_cost}
       - {when: {component: shipping, date: order}, metric: shipping_cost}
@@ -222,7 +251,9 @@ concepts:
       - {when: {component: gross, date: finance}, metric: gross_cogs}
     disambiguation: >
       "total operating cost" in v1 meant net COGS (component=total); operating cost alone is shipping + packaging +
-      gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment).
+      gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment). scope=product (by
+      product / variant / SKU, order date): total = product_net_cogs, product = product_line_cost, gross =
+      product_gross_cogs; the shipping / packaging / gateway / RTO components are not split by product.
 
   - id: returns_cancels
     display_name: Returns and cancellations
@@ -278,10 +309,11 @@ concepts:
     display_name: Discounts
     one_liner: Discounts ex-GST (booked at placement — same on order and event date).
     aliases: [discounts, discount, discount amount]
-    axes: {channel: *channel, paid: *paid}
+    axes: {scope: {values: [all, product], default: all}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
-      - {metric: discounts}
+      - {when: {scope: all}, metric: discounts}
+      - {when: {scope: product}, metric: product_discounts}
 
   - id: conversion_rate
     display_name: Conversion rate
@@ -329,10 +361,11 @@ concepts:
     one_liner: Net units sold (eligible product lines).
     aliases: [units, units sold, quantity sold, returned units, units per order, best selling product,
               best selling products, top selling product, top selling products]
-    axes: {basis: {values: [net, returned, per_order], default: net}, channel: *channel, paid: *paid}
+    axes: {basis: {values: [net, ordered, returned, per_order], default: net}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
       - {when: {basis: net}, metric: units_sold}
+      - {when: {basis: ordered}, metric: units_ordered}
       - {when: {basis: returned}, metric: returned_units}
       - {when: {basis: per_order}, metric: units_per_order}
 

@@ -80,7 +80,19 @@ resolves:
     date: finance
   metric: pnl_contribution_margin_pct
 - when:
+    basis: net
     scope: product
+    date: order
+  metric: product_gross_margin_pct
+- when:
+    basis: contribution
+    scope: product
+    date: order
+  metric: product_gross_margin_pct
+- when:
+    basis: gross
+    scope: product
+    date: order
   metric: product_gross_margin_pct
 disambiguation: '"gross margin" on the company P&L is contribution margin % (net sales − net COGS) ÷ net sales;
   product gross margin is line-level (scope=product).

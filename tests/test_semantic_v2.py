@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 123
+    assert len(v2.cat.metrics) == 129
     assert len(v2.cat.views) == 18
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -80,7 +80,7 @@ def test_checkout_timing_metrics_are_unavailable_with_reason(v2):
 def test_every_retired_v1_id_is_rejected_naming_its_replacement(v2, planner):
     maps = yaml.safe_load(ID_MAP.read_text())["maps"]
     retired = [m for m in maps if m["old"] != m["new"] and m["old"] not in v2.cat.metrics]
-    assert len(retired) == len(v2.cat.retired) == 111
+    assert len(retired) == len(v2.cat.retired) == 113
     for m in retired:
         term = v2.resolve_term(m["old"])
         assert isinstance(term, RetiredTerm), m["old"]
@@ -337,7 +337,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 120  # 123 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 126  # 129 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -391,3 +391,48 @@ def test_concept_axis_keyed_by_its_dimension_is_placed_by_value(v2):
     assert "platform" not in by_dim.defaults_applied
     # a key no axis can take is still ignored (the question's own axes ride along on every call)
     assert v2.resolve_concept("ad spend", {"date": "order"}).metric_id == "ad_spend"
+
+
+# ---------------------------------------------------------------- product grain (2026-10-06)
+
+@pytest.mark.parametrize("text, axes, metric", [
+    ("net sales", None, "net_sales"),                          # order grain stays the default
+    ("net sales", {"scope": "product"}, "product_net_revenue"),  # a 2-key product row used to tie and lose
+    ("gross sales", {"scope": "product"}, "product_gross_sale"),
+    ("SKU wise gross sale", None, "product_gross_sale"),
+    ("gross sale per product", None, "product_gross_sale"),
+    ("revenue by variant", None, "product_net_revenue"),
+    ("cogs per product", None, "product_net_cogs"),          # total COGS split by product, not product cost
+    ("product cost", None, "product_cost"),                  # the order-date COGS component, not the grain
+    ("net profit", {"scope": "product"}, "product_gross_profit"),
+    ("margin", {"scope": "product"}, "product_gross_margin_pct"),
+    ("discounts per sku", None, "product_discounts"),
+])
+def test_product_scope_resolves_to_the_product_grain_metric(v2, text, axes, metric):
+    r = v2.resolve_concept(text, axes)
+    assert isinstance(r, ResolvedConcept), r
+    assert r.metric_id == metric
+
+
+def test_product_scope_without_a_product_metric_is_refused_not_answered_at_order_grain(v2):
+    for axes in ({"basis": "net", "scope": "product", "date": "finance"}, {"basis": "total", "scope": "product"}):
+        r = v2.resolve_concept("sales", axes)
+        assert r.kind == "unsupported_concept", (axes, r)
+
+
+def test_grain_twins_come_from_the_concepts_scope_axis(v2):
+    assert v2.grain_twins("net_sales") == ["product_net_revenue"]
+    assert v2.grain_twins("gross_sales") == ["product_gross_sale"]
+    assert v2.grain_twins("net_cogs") == ["product_net_cogs"]
+    assert v2.grain_twins("net_profit") == ["product_gross_profit"]
+    assert v2.grain_twins("pnl_net_sales") == []      # Finance has no product split
+    assert v2.grain_twins("total_sales") == []        # incl. GST: no product twin
+    rows = {m["id"]: m for m in v2.bootstrap()["metrics"]}
+    assert rows["net_sales"]["grain_twins"] == ["product_net_revenue"]
+    for twin in ("product_net_revenue", "product_gross_sale", "product_net_cogs"):
+        assert "product_title" in v2.cat.metrics[twin].supported_dimensions
+
+
+def test_order_pnl_carries_sub_channel_and_order_attributes(v2):
+    dims = set(v2.cat.metrics["net_profit"].supported_dimensions)
+    assert {"sub_channel", "is_new_customer", "shipping_region", "payment_bucket", "campaign_name"} <= dims

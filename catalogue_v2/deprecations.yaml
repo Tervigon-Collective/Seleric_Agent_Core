@@ -470,6 +470,12 @@ deprecations:
   new: product_cost
   reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
     are identical — one id, the order-date one'
+- old: gross_units_ordered
+  new: units_ordered
+  reason: v1 draft, certified in v2 as the product-grain units_ordered (2026-10-06).
+- old: product_cogs
+  new: product_net_cogs
+  reason: v1 draft, certified in v2 as the product-grain product_net_cogs (2026-10-06).
 - old: active_orders
   new: (none)
   reason: draft in v1 (never certified); no v2 metric yet
@@ -500,9 +506,6 @@ deprecations:
 - old: customer_profiles
   new: (none)
   reason: draft in v1 (never certified); no v2 metric yet
-- old: gross_units_ordered
-  new: (none)
-  reason: draft in v1 (never certified); no v2 metric yet
 - old: lifetime_gross_revenue
   new: (none)
   reason: draft in v1 (never certified); no v2 metric yet
@@ -516,9 +519,6 @@ deprecations:
   new: (none)
   reason: draft in v1 (never certified); no v2 metric yet
 - old: meta_reach
-  new: (none)
-  reason: draft in v1 (never certified); no v2 metric yet
-- old: product_cogs
   new: (none)
   reason: draft in v1 (never certified); no v2 metric yet
 - old: repeat_order_share
