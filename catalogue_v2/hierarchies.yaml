@@ -19,7 +19,9 @@ hierarchies:
     - commerce
     - product
     - web_sessions
+    - web_event_detail
     - attribution
+    - returns
   product:
     display_name: Product
     levels:
@@ -37,10 +39,15 @@ hierarchies:
     - adset_name
     - ad_name
     views:
+    - commerce
+    - product
     - paid_media
     - paid_media_hourly
     - paid_media_breakdowns
     - paid_media_changes
+    - web_sessions
+    - web_event_detail
+    - returns
     - pnl
     - order_pnl
     note: Cross-cube drill path (fact → ad dims).
@@ -52,5 +59,15 @@ hierarchies:
     - ad_name
     views:
     - commerce
+    - product
+    - paid_media
+    - paid_media_hourly
+    - paid_media_breakdowns
+    - paid_media_changes
     - web_sessions
-    note: Orders / sessions by their last-touch campaign.
+    - web_event_detail
+    - returns
+    - pnl
+    - order_pnl
+    note: Campaign drill (orders / sessions / refunds by their last-touch campaign; ad delivery and P&L by their
+      own).

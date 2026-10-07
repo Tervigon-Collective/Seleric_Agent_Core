@@ -25,7 +25,36 @@ axes:
     - per_session
     - bounce
     default: pdp
+  scope:
+    values:
+    - all
+    - session
+    default: all
 resolves:
+- when:
+    event: pdp
+    scope: session
+  metric: session_product_views
+- when:
+    event: collection
+    scope: session
+  metric: session_collection_views
+- when:
+    event: atc
+    scope: session
+  metric: add_to_carts
+- when:
+    event: pageview
+    scope: session
+  metric: session_page_views
+- when:
+    event: search
+    scope: session
+  metric: site_searches
+- when:
+    event: bounce
+    scope: session
+  metric: session_bounce_rate
 - when:
     event: pdp
   metric: product_view_events

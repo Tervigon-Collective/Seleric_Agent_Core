@@ -14,17 +14,48 @@ dimensions:
   views:
     paid_media: paid_media.account_id
   aliases: []
+- id: acquisition_campaign
+  display_name: Acquisition Campaign
+  description: Campaign the customer was acquired through (first order's last-touch campaign).
+  is_time: false
+  views:
+    customers: customers.acquisition_campaign
+  aliases: []
+  family: campaign
+  family_rank: 1
+- id: acquisition_channel
+  display_name: Acquisition Channel
+  description: Channel the customer was acquired through (first order's traffic, e.g. ig_feed, google_pmax, organic).
+  is_time: false
+  views:
+    customers: customers.acquisition_channel
+  aliases: []
+  family: channel
+  family_rank: 1
+- id: acquisition_platform
+  display_name: Acquisition Platform
+  description: 'Platform the customer was acquired through (first order''s traffic): meta, google, organic, unattributed,
+    …'
+  is_time: false
+  views:
+    customers: customers.acquisition_platform
+  aliases: []
+  family: platform
+  family_rank: 3
 - id: ad_format
   display_name: Ad Format
   description: Ad format.
   is_time: false
   views:
     commerce: commerce.ad_format
+    product: product.ad_format
     paid_media: paid_media.ad_format
     paid_media_hourly: paid_media_hourly.ad_format
     paid_media_breakdowns: paid_media_breakdowns.ad_format
     paid_media_changes: paid_media_changes.ad_format
     web_sessions: web_sessions.ad_format
+    web_event_detail: web_event_detail.ad_format
+    returns: returns.ad_format
     pnl: pnl.ad_format
     order_pnl: order_pnl.ad_format
   aliases: []
@@ -34,11 +65,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.ad_id
+    product: product.ad_id
     paid_media: paid_media.ad_id
     paid_media_hourly: paid_media_hourly.ad_id
     paid_media_breakdowns: paid_media_breakdowns.ad_id
     paid_media_changes: paid_media_changes.ad_id
     web_sessions: web_sessions.ad_id
+    web_event_detail: web_event_detail.ad_id
+    returns: returns.ad_id
     pnl: pnl.ad_id
     order_pnl: order_pnl.ad_id
   aliases: []
@@ -48,40 +82,55 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.ad_name
+    product: product.ad_name
     paid_media: paid_media.ad_name
     paid_media_hourly: paid_media_hourly.ad_name
     paid_media_breakdowns: paid_media_breakdowns.ad_name
     paid_media_changes: paid_media_changes.ad_name
     web_sessions: web_sessions.ad_name
+    web_event_detail: web_event_detail.ad_name
+    returns: returns.ad_name
     pnl: pnl.ad_name
     order_pnl: order_pnl.ad_name
   aliases: []
 - id: ad_platform
   display_name: Ad Platform
-  description: 'Ad platform: meta | google.'
+  description: 'Ad platform the traffic rolls up to: meta | google (NULL for other channels) — as on paid_media
+    and order_pnl.'
   is_time: false
   views:
+    commerce: commerce.ad_platform
+    product: product.ad_platform
     paid_media: paid_media.ad_platform
     paid_media_hourly: paid_media_hourly.ad_platform
     paid_media_breakdowns: paid_media_breakdowns.ad_platform
     paid_media_changes: paid_media_changes.ad_platform
+    web_sessions: web_sessions.ad_platform
+    web_event_detail: web_event_detail.ad_platform
+    attribution: attribution.ad_platform
+    returns: returns.ad_platform
     pnl: pnl.ad_platform
     order_pnl: order_pnl.ad_platform
   aliases: []
   allowed_values:
   - meta
   - google
+  family: platform
+  family_rank: 2
 - id: ad_status
   display_name: Ad Status
   description: Current ad status.
   is_time: false
   views:
     commerce: commerce.ad_status
+    product: product.ad_status
     paid_media: paid_media.ad_status
     paid_media_hourly: paid_media_hourly.ad_status
     paid_media_breakdowns: paid_media_breakdowns.ad_status
     paid_media_changes: paid_media_changes.ad_status
     web_sessions: web_sessions.ad_status
+    web_event_detail: web_event_detail.ad_status
+    returns: returns.ad_status
     pnl: pnl.ad_status
     order_pnl: order_pnl.ad_status
   aliases: []
@@ -91,11 +140,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.adset_id
+    product: product.adset_id
     paid_media: paid_media.adset_id
     paid_media_hourly: paid_media_hourly.adset_id
     paid_media_breakdowns: paid_media_breakdowns.adset_id
     paid_media_changes: paid_media_changes.adset_id
     web_sessions: web_sessions.adset_id
+    web_event_detail: web_event_detail.adset_id
+    returns: returns.adset_id
     pnl: pnl.adset_id
     order_pnl: order_pnl.adset_id
   aliases: []
@@ -105,11 +157,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.adset_name
+    product: product.adset_name
     paid_media: paid_media.adset_name
     paid_media_hourly: paid_media_hourly.adset_name
     paid_media_breakdowns: paid_media_breakdowns.adset_name
     paid_media_changes: paid_media_changes.adset_name
     web_sessions: web_sessions.adset_name
+    web_event_detail: web_event_detail.adset_name
+    returns: returns.adset_name
     pnl: pnl.adset_name
     order_pnl: order_pnl.adset_name
   aliases: []
@@ -119,11 +174,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.adset_status
+    product: product.adset_status
     paid_media: paid_media.adset_status
     paid_media_hourly: paid_media_hourly.adset_status
     paid_media_breakdowns: paid_media_breakdowns.adset_status
     paid_media_changes: paid_media_changes.adset_status
     web_sessions: web_sessions.adset_status
+    web_event_detail: web_event_detail.adset_status
+    returns: returns.adset_status
     pnl: pnl.adset_status
     order_pnl: order_pnl.adset_status
   aliases: []
@@ -207,11 +265,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.campaign_id
+    product: product.campaign_id
     paid_media: paid_media.campaign_id
     paid_media_hourly: paid_media_hourly.campaign_id
     paid_media_breakdowns: paid_media_breakdowns.campaign_id
     paid_media_changes: paid_media_changes.campaign_id
     web_sessions: web_sessions.campaign_id
+    web_event_detail: web_event_detail.campaign_id
+    returns: returns.campaign_id
     pnl: pnl.campaign_id
     order_pnl: order_pnl.campaign_id
   aliases: []
@@ -221,11 +282,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.campaign_name
+    product: product.campaign_name
     paid_media: paid_media.campaign_name
     paid_media_hourly: paid_media_hourly.campaign_name
     paid_media_breakdowns: paid_media_breakdowns.campaign_name
     paid_media_changes: paid_media_changes.campaign_name
     web_sessions: web_sessions.campaign_name
+    web_event_detail: web_event_detail.campaign_name
+    returns: returns.campaign_name
     pnl: pnl.campaign_name
     order_pnl: order_pnl.campaign_name
   aliases:
@@ -233,17 +297,22 @@ dimensions:
   - campaign-wise
   - campaign wise
   - campaign name
+  family: campaign
+  family_rank: 0
 - id: campaign_objective
   display_name: Campaign Objective
   description: Campaign objective.
   is_time: false
   views:
     commerce: commerce.campaign_objective
+    product: product.campaign_objective
     paid_media: paid_media.campaign_objective
     paid_media_hourly: paid_media_hourly.campaign_objective
     paid_media_breakdowns: paid_media_breakdowns.campaign_objective
     paid_media_changes: paid_media_changes.campaign_objective
     web_sessions: web_sessions.campaign_objective
+    web_event_detail: web_event_detail.campaign_objective
+    returns: returns.campaign_objective
     pnl: pnl.campaign_objective
     order_pnl: order_pnl.campaign_objective
   aliases: []
@@ -253,11 +322,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.campaign_status
+    product: product.campaign_status
     paid_media: paid_media.campaign_status
     paid_media_hourly: paid_media_hourly.campaign_status
     paid_media_breakdowns: paid_media_breakdowns.campaign_status
     paid_media_changes: paid_media_changes.campaign_status
     web_sessions: web_sessions.campaign_status
+    web_event_detail: web_event_detail.campaign_status
+    returns: returns.campaign_status
     pnl: pnl.campaign_status
     order_pnl: order_pnl.campaign_status
   aliases: []
@@ -267,11 +339,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.campaign_type
+    product: product.campaign_type
     paid_media: paid_media.campaign_type
     paid_media_hourly: paid_media_hourly.campaign_type
     paid_media_breakdowns: paid_media_breakdowns.campaign_type
     paid_media_changes: paid_media_changes.campaign_type
     web_sessions: web_sessions.campaign_type
+    web_event_detail: web_event_detail.campaign_type
+    returns: returns.campaign_type
     pnl: pnl.campaign_type
     order_pnl: order_pnl.campaign_type
   aliases: []
@@ -297,8 +372,12 @@ dimensions:
     commerce: commerce.channel
     product: product.channel
     web_sessions: web_sessions.channel
+    web_event_detail: web_event_detail.channel
     attribution: attribution.channel
+    returns: returns.channel
   aliases: []
+  family: channel
+  family_rank: 0
 - id: collection
   display_name: Collection
   description: Collection.
@@ -327,11 +406,14 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.creative_type
+    product: product.creative_type
     paid_media: paid_media.creative_type
     paid_media_hourly: paid_media_hourly.creative_type
     paid_media_breakdowns: paid_media_breakdowns.creative_type
     paid_media_changes: paid_media_changes.creative_type
     web_sessions: web_sessions.creative_type
+    web_event_detail: web_event_detail.creative_type
+    returns: returns.creative_type
     pnl: pnl.creative_type
     order_pnl: order_pnl.creative_type
   aliases: []
@@ -377,6 +459,7 @@ dimensions:
   is_time: false
   views:
     web_sessions: web_sessions.device_type
+    web_event_detail: web_event_detail.device_type
   aliases: []
 - id: entity_id
   display_name: Entity Id
@@ -431,8 +514,13 @@ dimensions:
   views:
     commerce: commerce.finance_channel
     product: product.finance_channel
+    paid_media: paid_media.finance_channel
+    paid_media_hourly: paid_media_hourly.finance_channel
+    paid_media_breakdowns: paid_media_breakdowns.finance_channel
     web_sessions: web_sessions.finance_channel
+    web_event_detail: web_event_detail.finance_channel
     attribution: attribution.finance_channel
+    returns: returns.finance_channel
     pnl: pnl.finance_channel
     order_pnl: order_pnl.finance_channel
   aliases: []
@@ -442,6 +530,8 @@ dimensions:
   - whatsapp
   - organic
   - unattributed
+  family: platform
+  family_rank: 1
 - id: financial_status
   display_name: Financial Status
   description: Shopify financial status.
@@ -569,6 +659,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.is_cod
+    product: product.is_cod
     returns: returns.is_cod
     payments: payments.is_cod
   aliases: []
@@ -600,6 +691,7 @@ dimensions:
   views:
     commerce: commerce.is_new_customer
     product: product.is_new_customer
+    returns: returns.is_new_customer
     order_pnl: order_pnl.is_new_customer
   aliases:
   - new customer
@@ -612,8 +704,13 @@ dimensions:
   views:
     commerce: commerce.is_paid
     product: product.is_paid
+    paid_media: paid_media.is_paid
+    paid_media_hourly: paid_media_hourly.is_paid
+    paid_media_breakdowns: paid_media_breakdowns.is_paid
     web_sessions: web_sessions.is_paid
+    web_event_detail: web_event_detail.is_paid
     attribution: attribution.is_paid
+    returns: returns.is_paid
     pnl: pnl.is_paid
     order_pnl: order_pnl.is_paid
   aliases: []
@@ -666,6 +763,7 @@ dimensions:
   is_time: false
   views:
     web_sessions: web_sessions.landing_page_path
+    web_event_detail: web_event_detail.landing_page_path
   aliases: []
 - id: last_order_at
   display_name: Last Order at
@@ -696,7 +794,9 @@ dimensions:
     commerce: commerce.medium_group
     product: product.medium_group
     web_sessions: web_sessions.medium_group
+    web_event_detail: web_event_detail.medium_group
     attribution: attribution.medium_group
+    returns: returns.medium_group
   aliases: []
   allowed_values:
   - paid
@@ -746,6 +846,16 @@ dimensions:
   aliases:
   - order number
   - order
+- id: order_pnl_row_type
+  display_name: Row Type
+  description: orders (order arms) | ad_spend (delivery rows).
+  is_time: false
+  views:
+    order_pnl: order_pnl.row_type
+  aliases: []
+  allowed_values:
+  - orders
+  - ad_spend
 - id: order_seq
   display_name: Order Seq
   description: Order number within the customer's history (1 = first).
@@ -805,6 +915,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.payment_gateway
+    product: product.payment_gateway
     payments: payments.payment_gateway
   aliases: []
 - id: payment_method
@@ -813,6 +924,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.payment_method
+    product: product.payment_method
     payments: payments.payment_method
   aliases: []
 - id: platform
@@ -822,9 +934,16 @@ dimensions:
   views:
     commerce: commerce.platform
     product: product.platform
+    paid_media: paid_media.platform
+    paid_media_hourly: paid_media_hourly.platform
+    paid_media_breakdowns: paid_media_breakdowns.platform
     web_sessions: web_sessions.platform
+    web_event_detail: web_event_detail.platform
     attribution: attribution.platform
+    returns: returns.platform
   aliases: []
+  family: platform
+  family_rank: 0
 - id: platform_position
   display_name: Platform Position
   description: Meta audience breakdown (breakdown_type placement); Meta delivery only — Google reports no audience
@@ -947,7 +1066,6 @@ dimensions:
   is_time: false
   views:
     pnl: pnl.row_type
-    order_pnl: order_pnl.row_type
   aliases: []
   allowed_values:
   - detail
@@ -1084,7 +1202,9 @@ dimensions:
     commerce: commerce.sub_channel
     product: product.sub_channel
     web_sessions: web_sessions.sub_channel
+    web_event_detail: web_event_detail.sub_channel
     attribution: attribution.sub_channel
+    returns: returns.sub_channel
     order_pnl: order_pnl.sub_channel
   aliases: []
 - id: touch_count

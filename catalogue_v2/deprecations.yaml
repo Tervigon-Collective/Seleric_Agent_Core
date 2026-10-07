@@ -53,9 +53,6 @@ deprecations:
 - old: channel_gross_profit
   new: gross_profit
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
-- old: channel_orders
-  new: orders
-  reason: 'Semantic v2: one id per number; scope / platform are filters.'
 - old: collection_views
   new: collection_view_events
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
@@ -288,9 +285,6 @@ deprecations:
 - old: product_cost_all_channels
   new: product_cost
   reason: 'Semantic v2: one id per number; scope / platform are filters.'
-- old: product_orders
-  new: orders
-  reason: orders sliced by product (eligible lines)
 - old: product_views
   new: product_view_events
   reason: 'Semantic v2: one id per number; scope / platform are filters.'

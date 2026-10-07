@@ -69,10 +69,18 @@ concepts:
     one_liner: Orders placed (commerce placement cohort), by order date.
     aliases: [orders, order count, total orders, purchases]
     axes: {status: {values: [all, cod, prepaid, new, first, cancelled, returned, returned_or_cancelled], default: all},
-           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
+           date: {values: [order, finance], default: order},
+           scope: {values: [all, product, attributed], default: all}, channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
       - {when: {status: all}, metric: orders}
+      # product grain: orders containing the product (an order with two products counts for both)
+      - {when: {status: all, scope: product}, metric: product_orders}
+      # attributed grain: the order counts beside ad spend on the order-date channel P&L (sub-channel incl. the
+      # spend split, campaign → ad set → ad) — what cost per order / CAC by campaign divide by
+      - {when: {status: all, scope: attributed}, metric: channel_orders}
+      - {when: {status: new, scope: attributed}, metric: channel_new_customers}
+      - {when: {status: first, scope: attributed}, metric: channel_new_customers}
       - {when: {status: cod}, metric: cod_orders}
       - {when: {status: prepaid}, metric: prepaid_orders}
       - {when: {status: new}, metric: new_customers}
@@ -260,9 +268,13 @@ concepts:
     one_liner: Return + cancellation revenue of the orders placed in the period (order date) unless Finance is asked.
     aliases: [returns, cancels, returns and cancels, returns/cancels, cancellations, return revenue, cancel revenue]
     axes: {action: {values: [both, return, cancel], default: both}, measure: {values: [revenue, orders], default: revenue},
-           date: {values: [order, finance], default: order}, channel: *channel, paid: *paid}
+           date: {values: [order, finance], default: order}, scope: {values: [all, product], default: all},
+           channel: *channel, paid: *paid}
     axis_filters: *channel_filters
     resolves:
+      # product grain (line level, ex-GST, order date): the order-level ids cannot be split by product
+      - {when: {action: return, measure: revenue, date: order, scope: product}, metric: product_return_revenue}
+      - {when: {action: cancel, measure: revenue, date: order, scope: product}, metric: product_cancel_revenue}
       - {when: {action: both, measure: revenue, date: finance}, metric: pnl_return_cancel_revenue}
       - {when: {action: return, measure: revenue, date: finance}, metric: pnl_return_revenue}
       - {when: {action: cancel, measure: revenue, date: finance}, metric: pnl_cancel_revenue}
@@ -283,9 +295,14 @@ concepts:
     display_name: Refunds
     one_liner: Shopify refunds by refund date.
     aliases: [refunds, refunded amount, refund amount, refund count, refund lines, recovered cogs]
-    axes: {measure: {values: [amount, count, lines, returns_value, recovered_cogs, order_cohort], default: amount}}
+    axes: {measure: {values: [amount, count, lines, returns_value, recovered_cogs, order_cohort], default: amount},
+           scope: {values: [all, product], default: all}}
     resolves:
       - {when: {measure: amount}, metric: refunded_amount_excl_tax}
+      # product grain: a refund-level amount split by product repeats the whole refund on every product in it
+      # (live: 300 % "return rates"); the line-level returned revenue (order date, ex-GST) is the product answer
+      - {when: {measure: amount, scope: product}, metric: product_return_revenue}
+      - {when: {measure: returns_value, scope: product}, metric: product_return_revenue}
       - {when: {measure: count}, metric: refund_count}
       - {when: {measure: lines}, metric: refund_lines}
       - {when: {measure: returns_value}, metric: returns_excl_tax}
@@ -345,8 +362,17 @@ concepts:
     one_liner: Web event counts (product views unless stated).
     aliases: [product views, pdp views, collection views, add to carts, page views, site searches, engagement,
               web events, events per session, bounce rate]
-    axes: {event: {values: [pdp, collection, atc, pageview, search, all, per_session, bounce], default: pdp}}
+    axes: {event: {values: [pdp, collection, atc, pageview, search, all, per_session, bounce], default: pdp},
+           scope: {values: [all, session], default: all}}
     resolves:
+      # session grain: the same counts on web_sessions, where traffic source / campaign / device / landing page
+      # slice them (the daily mart is brand × day × event type only)
+      - {when: {event: pdp, scope: session}, metric: session_product_views}
+      - {when: {event: collection, scope: session}, metric: session_collection_views}
+      - {when: {event: atc, scope: session}, metric: add_to_carts}
+      - {when: {event: pageview, scope: session}, metric: session_page_views}
+      - {when: {event: search, scope: session}, metric: site_searches}
+      - {when: {event: bounce, scope: session}, metric: session_bounce_rate}
       - {when: {event: pdp}, metric: product_view_events}
       - {when: {event: collection}, metric: collection_view_events}
       - {when: {event: atc}, metric: add_to_cart_events}
@@ -405,9 +431,18 @@ concepts:
   - id: cac
     display_name: CAC
     one_liner: Customer acquisition cost = ad spend ÷ new customers.
-    aliases: [cac, customer acquisition cost, cost per acquisition, cpa]
+    aliases: [cac, customer acquisition cost, cost per acquisition, cpa, cost per order, cost per purchase]
+    axes: {basis: {values: [new_customer, order], default: new_customer},
+           scope: {values: [all, attributed], default: all}}
     resolves:
-      - {metric: cac}
+      - {when: {basis: new_customer}, metric: cac}
+      # attributed grain: spend and new customers on the order-date channel P&L, so CAC splits by channel /
+      # sub-channel / campaign → ad set → ad (brand total = cac)
+      - {when: {basis: new_customer, scope: attributed}, metric: channel_cac}
+      - {when: {basis: order}, metric: cost_per_order}
+    disambiguation: >
+      CAC = ad spend ÷ new customers (cac, brand × day). By channel, platform or campaign it is channel_cac (same
+      total). Cost per order / per purchase (CPA on orders, not new customers) is cost_per_order.
 
   - id: ltv_cac
     display_name: LTV:CAC

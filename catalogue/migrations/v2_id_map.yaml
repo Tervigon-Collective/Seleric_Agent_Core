@@ -4,6 +4,29 @@ generated: '2026-10-04'
 description: 'Semantic v2 hard cut: every certified v1 metric id → its v2 metric. Old ids are rejected on the agent surface
   with an error naming `new` (+ filters). Members are Cube v2 view members.'
 v2_metrics:
+  # 2026-10-08 conformed-dimension pass: channel/campaign-grain order counts, CAC and CPA; session-grain
+  # twins of the web marts; product-grain order count.
+  channel_orders:
+    member: order_pnl.channel_orders
+    date_axis: order_pnl.order_date
+  channel_new_customers:
+    member: order_pnl.channel_new_customers
+    date_axis: order_pnl.order_date
+  channel_cac:
+    member: order_pnl.channel_cac
+    date_axis: order_pnl.order_date
+  cost_per_order:
+    member: order_pnl.cost_per_order
+    date_axis: order_pnl.order_date
+  session_page_views:
+    member: web_sessions.session_page_views
+    date_axis: web_sessions.session_date
+  session_bounce_rate:
+    member: web_sessions.session_bounce_rate
+    date_axis: web_sessions.session_date
+  product_orders:
+    member: product.product_orders
+    date_axis: product.order_date
   ad_spend:
     member: paid_media.ad_spend
     date_axis: paid_media.report_date
@@ -556,9 +579,10 @@ maps:
     member: channel_pnl.gross_profit
     date_axis: channel_pnl.report_date
 - old: channel_orders
-  new: orders
-  member: commerce.orders
-  date_axis: commerce.order_date
+  new: channel_orders
+  member: order_pnl.channel_orders
+  date_axis: order_pnl.order_date
+  note: '2026-10-08 back as its own v2 metric (same meaning, orders sliced by channel / campaign)'
   v1:
     member: channel_attribution.orders
     date_axis: channel_attribution.report_date
@@ -1173,11 +1197,11 @@ maps:
     member: product_performance.net_line_revenue_ex_gst
     date_axis: product_performance.order_date
 - old: product_orders
-  new: orders
-  member: commerce.orders
-  date_axis: commerce.order_date
-  verify_member: product.orders
-  note: orders sliced by product (eligible lines)
+  new: product_orders
+  member: product.product_orders
+  date_axis: product.order_date
+  verify_member: product.product_orders
+  note: orders sliced by product (eligible lines); its own v2 metric again since 2026-10-08
   v1:
     member: product_performance.product_orders
     date_axis: product_performance.order_date

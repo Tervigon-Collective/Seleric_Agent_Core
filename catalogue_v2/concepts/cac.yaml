@@ -7,5 +7,31 @@ aliases:
 - customer acquisition cost
 - cost per acquisition
 - cpa
+- cost per order
+- cost per purchase
+axes:
+  basis:
+    values:
+    - new_customer
+    - order
+    default: new_customer
+  scope:
+    values:
+    - all
+    - attributed
+    default: all
 resolves:
-- metric: cac
+- when:
+    basis: new_customer
+  metric: cac
+- when:
+    basis: new_customer
+    scope: attributed
+  metric: channel_cac
+- when:
+    basis: order
+  metric: cost_per_order
+disambiguation: 'CAC = ad spend ÷ new customers (cac, brand × day). By channel, platform or campaign it is channel_cac
+  (same total). Cost per order / per purchase (CPA on orders, not new customers) is cost_per_order.
+
+  '

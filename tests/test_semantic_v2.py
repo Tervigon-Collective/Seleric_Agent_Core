@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 129
+    assert len(v2.cat.metrics) == 136
     assert len(v2.cat.views) == 18
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -80,7 +80,7 @@ def test_checkout_timing_metrics_are_unavailable_with_reason(v2):
 def test_every_retired_v1_id_is_rejected_naming_its_replacement(v2, planner):
     maps = yaml.safe_load(ID_MAP.read_text())["maps"]
     retired = [m for m in maps if m["old"] != m["new"] and m["old"] not in v2.cat.metrics]
-    assert len(retired) == len(v2.cat.retired) == 113
+    assert len(retired) == len(v2.cat.retired) == 111  # channel_orders / product_orders are v2 ids again
     for m in retired:
         term = v2.resolve_term(m["old"])
         assert isinstance(term, RetiredTerm), m["old"]
@@ -282,17 +282,26 @@ async def test_hierarchy_drill_goes_to_next_level(planner, cube):
     out = await planner.run(QueryRequest(measures=["orders"], dimensions=["platform"], time_range=SEP))
     dims = planner.hierarchy_targets(out["query_id"], "traffic")
     assert dims == ["channel"]
+    # conformed 2026-10-08: commerce carries ad_platform, so the ad drill is available on orders too
+    assert planner.hierarchy_targets(out["query_id"], "ad")
     with pytest.raises(PlanError):
-        planner.hierarchy_targets(out["query_id"], "ad")  # commerce has no ad_platform level
+        planner.hierarchy_targets(out["query_id"], "product")  # an order has several products: no product drill
+
+
+async def test_campaign_drill_works_on_ad_spend(planner, cube):
+    # live 2026-10-04: 'campaign' asked on ad spend was refused ("its levels live under 'ad'"); 2026-10-08 every
+    # view carrying the campaign levels has the campaign drill
+    cube.by_prefix["paid_media"] = [{"paid_media.ad_spend": "5", "paid_media.ad_platform": "meta"}]
+    out = await planner.run(QueryRequest(measures=["ad_spend"], dimensions=["ad_platform"], time_range=SEP))
+    assert planner.hierarchy_targets(out["query_id"], "campaign")
 
 
 async def test_wrong_hierarchy_names_the_one_that_covers_the_view(planner, cube):
-    # live 2026-10-04: 'campaign' asked on ad spend; the campaign levels of paid_media live under 'ad'
     cube.by_prefix["paid_media"] = [{"paid_media.ad_spend": "5", "paid_media.ad_platform": "meta"}]
     out = await planner.run(QueryRequest(measures=["ad_spend"], dimensions=["ad_platform"], time_range=SEP))
     with pytest.raises(PlanError) as exc:
-        planner.hierarchy_targets(out["query_id"], "campaign")
-    assert "Use hierarchy 'ad'" in str(exc.value) and exc.value.suggestions == ["ad"]
+        planner.hierarchy_targets(out["query_id"], "traffic")  # ad delivery has no channel / sub_channel
+    assert "Use hierarchy" in str(exc.value) and exc.value.suggestions
 
 
 async def test_provenance_v2_has_versions_sql_and_trace(planner, cube):
@@ -337,7 +346,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 126  # 129 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 133  # 136 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -436,3 +445,95 @@ def test_grain_twins_come_from_the_concepts_scope_axis(v2):
 def test_order_pnl_carries_sub_channel_and_order_attributes(v2):
     dims = set(v2.cat.metrics["net_profit"].supported_dimensions)
     assert {"sub_channel", "is_new_customer", "shipping_region", "payment_bucket", "campaign_name"} <= dims
+
+
+# ---- 2026-10-08 conformed-dimension pass: every slice the warehouse can answer has a metric that carries it
+
+def test_grain_twins_cover_marts_cac_orders_and_refunds(v2):
+    # brand × day marts -> session grain (traffic / campaign / device slices)
+    assert v2.grain_twins("page_views") == ["session_page_views"]
+    assert v2.grain_twins("bounce_rate") == ["session_bounce_rate"]
+    # CAC -> the order-date channel P&L (channel / campaign slices); brand total identical
+    assert v2.grain_twins("cac") == ["channel_cac"]
+    # order-level -> product-level (an order holds several products)
+    assert v2.grain_twins("orders") == ["product_orders", "channel_orders"]
+    assert v2.grain_twins("new_customers") == ["channel_new_customers"]
+    assert v2.grain_twins("refunded_amount_excl_tax") == ["product_return_revenue"]
+    assert v2.grain_twins("return_revenue") == ["product_return_revenue"]
+
+
+def test_twins_carry_the_slices_their_base_metric_lacks(v2):
+    cat = v2.cat
+    for base, twin, dims in (("page_views", "session_page_views", {"platform", "ad_platform", "campaign_name"}),
+                             ("cac", "channel_cac", {"finance_channel", "ad_platform", "campaign_name"}),
+                             ("orders", "product_orders", {"product_title", "sku"})):
+        assert not dims <= set(cat.metrics[base].supported_dimensions)
+        assert dims <= set(cat.metrics[twin].supported_dimensions), (twin, dims)
+
+
+def test_platform_family_is_conformed_across_domains(v2):
+    cat = v2.cat
+    # one "meta" filter name works on orders, sessions, page views, spend, P&L, refunds and product lines
+    for mid in ("orders", "net_sales", "sessions", "session_page_views", "ad_spend", "ctr", "net_profit",
+                "channel_cac", "refund_count", "product_net_revenue"):
+        assert "ad_platform" in cat.metrics[mid].supported_dimensions, mid
+        assert "finance_channel" in cat.metrics[mid].supported_dimensions, mid
+    assert {d.id for d in cat.dimensions.values() if d.family == "platform"} == {
+        "ad_platform", "finance_channel", "platform", "acquisition_platform"}
+    b = v2.bootstrap()
+    fam = {d["id"]: d.get("family") for d in b["dimensions"]}
+    assert fam["ad_platform"] == fam["acquisition_platform"] == "platform" and fam["campaign_name"] == "campaign"
+
+
+def test_row_type_is_split_by_value_domain(v2):
+    cat = v2.cat
+    assert cat.dimensions["row_type"].allowed_values == ["detail", "reconciliation"]
+    assert set(cat.dimensions["row_type"].views) == {"pnl"}
+    assert cat.dimensions["order_pnl_row_type"].allowed_values == ["orders", "ad_spend"]
+
+
+def test_cost_per_order_and_campaign_cac_resolve(v2):
+    assert v2.resolve_concept("cost per order").metric_id == "cost_per_order"
+    assert v2.resolve_concept("cac").metric_id == "cac"
+    assert v2.resolve_concept("cac", {"scope": "attributed"}).metric_id == "channel_cac"
+    assert v2.resolve_concept("page views", {"scope": "session"}).metric_id == "session_page_views"
+
+
+async def test_conformed_sibling_answers_a_dimension_the_view_lacks(planner, cube):
+    # order_pnl has no traffic `platform`: its conformed sibling finance_channel answers "net profit by platform"
+    cube.by_prefix["order_pnl"] = [{"order_pnl.net_profit": "5", "order_pnl.finance_channel": "meta"}]
+    out = await planner.run(QueryRequest(measures=["net_profit"], dimensions=["platform"], time_range=SEP,
+                                         filters=[FilterSpec(dimension="platform", values=["meta"])]))
+    q = cube.queries[-1]
+    assert "order_pnl.finance_channel" in q["dimensions"]
+    assert {"member": "order_pnl.finance_channel", "operator": "equals", "values": ["meta"]} in q["filters"]
+    assert any("conformed sibling 'finance_channel'" in w for w in out["warnings"])
+    # customers: the acquisition platform is the only platform member
+    cube.by_prefix["customers"] = [{"customers.repeat_rate": "0.3"}]
+    await planner.run(QueryRequest(measures=["repeat_rate"], time_range=SEP,
+                                   filters=[FilterSpec(dimension="ad_platform", values=["meta"])]))
+    assert {"member": "customers.acquisition_platform", "operator": "equals",
+            "values": ["meta"]} in cube.queries[-1]["filters"]
+
+
+async def test_conformed_sibling_never_holds_a_value_it_lacks(planner, cube):
+    # email is a traffic platform, not a P&L channel: refused, never silently answered as another slice
+    with pytest.raises(PlanError):
+        await planner.run(QueryRequest(measures=["net_profit"], time_range=SEP,
+                                       filters=[FilterSpec(dimension="platform", values=["email"])]))
+
+
+async def test_measure_filter_and_text_operators(planner, cube):
+    cube.by_prefix["paid_media"] = [{"paid_media.ad_spend": "5", "paid_media.campaign_name": "TH-1"}]
+    await planner.run(QueryRequest(
+        measures=["ad_spend"], dimensions=["campaign_name"], time_range=SEP,
+        filters=[FilterSpec(dimension="ad_spend", operator="gt", values=["10,000"]),
+                 FilterSpec(dimension="campaign_name", operator="starts_with", values=["TH-"]),
+                 FilterSpec(dimension="campaign_name", operator="notContains", values=["TEST"])]))
+    flt = cube.queries[-1]["filters"]
+    assert {"member": "paid_media.ad_spend", "operator": "gt", "values": ["10000"]} in flt
+    assert {"member": "paid_media.campaign_name", "operator": "startsWith", "values": ["TH-"]} in flt
+    assert {"member": "paid_media.campaign_name", "operator": "notContains", "values": ["TEST"]} in flt
+    with pytest.raises(PlanError):  # a metric filter is a comparison on a number
+        await planner.run(QueryRequest(measures=["ad_spend"], time_range=SEP,
+                                       filters=[FilterSpec(dimension="ad_spend", operator="contains", values=["x"])]))

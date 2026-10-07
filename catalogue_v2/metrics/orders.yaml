@@ -29,6 +29,4 @@ version: 1.0.0
 replaces:
 - ad_channel_orders
 - attributed_orders
-- channel_orders
-- product_orders
 - total_orders

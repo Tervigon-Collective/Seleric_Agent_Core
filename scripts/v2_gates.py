@@ -252,9 +252,18 @@ def live_duplicates(svc) -> list[tuple]:
             vec[m.id] = vals
     groups = collections.defaultdict(list)
     ids = sorted(vec)
+    # grain twins answer the same number at another grain (orders vs product_orders / channel_orders): equal at
+    # brand level by construction, so a pair inside one twin group is not a duplicate
+    groups_of = collections.defaultdict(set)
+    for mid in svc.cat.metrics:
+        group = frozenset([mid, *svc.grain_twins(mid)])
+        for x in group:
+            groups_of[x].add(group)
     out = []
     for i, a in enumerate(ids):
         for b in ids[i + 1:]:
+            if any(b in g for g in groups_of[a]):
+                continue
             # relative tolerance (rates are small); 1 paisa slack only for money-sized numbers
             if all(abs(x - y) <= max(0.011 if abs(x) > 100 else 0.0, 1e-6 * abs(x)) for x, y in zip(vec[a], vec[b])):
                 out.append((a, b, vec[a]))

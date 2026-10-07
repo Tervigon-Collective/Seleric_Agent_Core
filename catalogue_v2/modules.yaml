@@ -46,6 +46,7 @@ modules:
     - customers
     - unit_economics
     - commerce
+    - order_pnl
   finance:
     display_name: Finance / P&L
     description: Canonical daily P&L — spend, COGS, contribution, net profit, MER.

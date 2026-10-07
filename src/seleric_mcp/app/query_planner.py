@@ -22,6 +22,14 @@ from .models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from .provenance import build_provenance
 from .result_store import ResultStore, StoredResult
 
+
+def _is_number(value: str) -> bool:
+    try:
+        float(str(value).replace(",", ""))
+    except ValueError:
+        return False
+    return True
+
 IST = ZoneInfo("Asia/Kolkata")
 
 # Granularities finer than a day require an intraday timestamp axis; the view's
@@ -346,8 +354,35 @@ class QueryPlanner:
     ) -> list[str]:
         return self.catalogue.metrics_supporting_dimension(dimension_id, exclude=exclude)
 
-    def _validate_dimensions(self, metrics: list[MetricDef], dimension_ids: list[str]) -> list[str]:
-        """Returns qualified cube dimension members."""
+    def _conformed_sibling(
+        self, dim: DimensionDef, view: str, values: list[str] | None = None,
+        metrics: list[MetricDef] | None = None,
+    ) -> DimensionDef | None:
+        """The member of *dim*'s conformed family (catalogue ``family``: platform / channel / campaign) that
+        *view* carries and every metric supports, whose declared values cover *values* — so "ad_platform =
+        meta" on a view that slices by finance_channel is answered there instead of refused. None when the
+        dimension has no family, the view has no sibling, or no sibling can hold the values."""
+        if not dim.family:
+            return None
+        siblings = sorted(
+            (d for d in self.catalogue.cat.dimensions.values()
+             if d.family == dim.family and d.id != dim.id and view in d.views
+             and all(d.id in m.supported_dimensions for m in metrics or [])),
+            key=lambda d: d.family_rank,
+        )
+        for sib in siblings:
+            if not values or sib.allowed_values is None:
+                return sib
+            allowed = {v.lower() for v in sib.allowed_values}
+            if all(str(v).lower() in allowed for v in values):
+                return sib
+        return None
+
+    def _validate_dimensions(
+        self, metrics: list[MetricDef], dimension_ids: list[str], warnings: list[str] | None = None
+    ) -> list[str]:
+        """Returns qualified cube dimension members. A dimension the view lacks is answered by its conformed
+        sibling when the view has one (recorded in *warnings*)."""
         view = metrics[0].cube_mapping.view
         qualified: list[str] = []
         for did in dimension_ids:
@@ -357,6 +392,13 @@ class QueryPlanner:
                     f"Unknown dimension '{did}'.",
                     suggestions=[d.id for d in self.catalogue.list_dimensions(view)],
                 )
+            if any(dim.id not in m.supported_dimensions for m in metrics):
+                sib = self._conformed_sibling(dim, view, metrics=metrics)
+                if sib is not None:
+                    if warnings is not None:
+                        warnings.append(f"Breakdown '{dim.id}' answered by its conformed sibling '{sib.id}' "
+                                        f"(view '{view}' has no {dim.id}).")
+                    dim = sib
             canonical = dim.id
             for m in metrics:
                 if canonical not in m.supported_dimensions:
@@ -459,6 +501,17 @@ class QueryPlanner:
         warnings: list[str] = []
         for f in filters:
             dim = self.catalogue.resolve_dimension(f.dimension)
+            if dim is not None and view not in dim.views:
+                sib = self._conformed_sibling(dim, view, f.values if f.operator in ("equals", "notEquals") else None)
+                if sib is not None:
+                    warnings.append(f"Filter '{dim.id}' answered by its conformed sibling '{sib.id}' "
+                                    f"(view '{view}' has no {dim.id}).")
+                    dim = sib
+            if dim is None:
+                measure = self._measure_filter(view, f)
+                if measure is not None:
+                    cube_filters.append(measure)
+                    continue
             if dim is None or view not in dim.views:
                 valid = [d.id for d in self.catalogue.list_dimensions(view)]
                 raise PlanError(
@@ -512,6 +565,28 @@ class QueryPlanner:
             cube_filters.append(entry)
         self._guard_breakdown(view, filters)
         return cube_filters, warnings
+
+    _MEASURE_FILTER_OPERATORS = ("equals", "notEquals", "gt", "gte", "lt", "lte", "set", "notSet")
+
+    def _measure_filter(self, view: str, f: FilterSpec) -> dict | None:
+        """A filter on a metric of the query's view filters the aggregated value (Cube measure filter, i.e.
+        HAVING): "campaigns with ad_spend gt 10000". None when the field is not a metric of this view."""
+        m = self.catalogue.cat.metrics.get(f.dimension)
+        if m is None or m.cube_mapping.view != view:
+            return None
+        if f.operator not in self._MEASURE_FILTER_OPERATORS:
+            raise PlanError(
+                f"Filter on metric '{m.id}' takes a comparison ({', '.join(self._MEASURE_FILTER_OPERATORS)}), "
+                f"not '{f.operator}'."
+            )
+        if f.operator not in ("set", "notSet"):
+            bad = [v for v in f.values if not _is_number(v)]
+            if bad or not f.values:
+                raise PlanError(f"Filter on metric '{m.id}' needs numeric values, got {f.values}.")
+        entry: dict = {"member": m.cube_mapping.measure, "operator": f.operator}
+        if f.values:
+            entry["values"] = [str(v).replace(",", "") for v in f.values]
+        return entry
 
     def _validate_sort(self, metrics: list[MetricDef], view: str, sort: list[SortSpec]) -> dict[str, str]:
         """Returns an ordered Cube 'order' dict. A sort field must be one of
@@ -695,8 +770,10 @@ class QueryPlanner:
         # Normalize measure refs on the request so sort fields that still use
         # Cube members (or mixed catalogue/Cube ids) resolve cleanly.
         request = request.model_copy(update={"measures": [m.id for m in metrics]})
-        qualified_dims = self._validate_dimensions(metrics, request.dimensions)
+        dimension_warnings: list[str] = []
+        qualified_dims = self._validate_dimensions(metrics, request.dimensions, dimension_warnings)
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)
+        filter_warnings = [*dimension_warnings, *filter_warnings]
         sort_order = self._validate_sort(metrics, view, request.sort)
         current_range = resolve_time_range(request.time_range)
         time_dimension = self._time_dimension_for(metrics[0], request.granularity)

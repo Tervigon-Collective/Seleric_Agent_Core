@@ -369,7 +369,8 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
               ("atc to checkout", "atc_to_checkout"), ("add to cart", "add_to_cart"),
               ("add-to-cart", "add_to_cart"), ("atc", "add_to_cart"), ("checkout", "checkout"),
               ("product view", "product_view"), ("pdp", "product_view")],
-    "basis": [("blended roas", "mer"), ("marketing efficiency", "mer"), ("returned", "returned")],
+    "basis": [("blended roas", "mer"), ("marketing efficiency", "mer"), ("returned", "returned"),
+              ("cost per order", "order"), ("cost per purchase", "order")],
     "status": [("returned or cancelled", "returned_or_cancelled"), ("returns and cancel", "returned_or_cancelled")],
     "measure": [("hook", "hook"), ("hold", "hold"), ("completion", "completion"), ("thruplay", "thruplays"),
                 ("number of refunds", "count"), ("refund count", "count"), ("refund lines", "lines"),
@@ -848,12 +849,18 @@ class CatalogueService:
             extra["allowed_values"] = list(d.allowed_values)
         if d.unsupported_values:
             extra["unsupported_values"] = dict(d.unsupported_values)
+        if d.family:
+            extra["family"] = d.family
+            extra["family_rank"] = d.family_rank
         return extra
 
     def _v2_metric_extras(self, m: MetricDef) -> dict:
         """valid_for (e.g. Meta-only), extra granularities (hour), binding notes and the date basis of a
         metric that exists on both axes (pnl_X = finance / event date, X = order date) — only when set."""
         extra: dict = {}
+        if m.unit:
+            # the agent labels values with it (a currency unit equal to the query's currency → "118840.44 INR")
+            extra["unit"] = m.unit
         if m.id.startswith("pnl_") and m.id[4:] in self.cat.metrics:
             extra["date_basis"], extra["date_twin"] = "finance", m.id[4:]
         elif f"pnl_{m.id}" in self.cat.metrics:

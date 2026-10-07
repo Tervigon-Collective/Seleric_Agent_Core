@@ -184,8 +184,11 @@ NON-NEGOTIABLE RULES
    - "more than N items" / "multi-item" → filter
      {dimension: "item_count", operator: "gt", values: ["N"]}.
      More than 1 item → values ["1"]. At least 2 items → operator gte, values ["2"].
-   - Filter operators are ONLY: equals, notEquals, contains, gt, gte, lt, lte,
-     set, notSet. Never send greater_than / less_than / greaterThan.
+   - Filter operators are ONLY: equals, notEquals, contains, notContains,
+     startsWith, endsWith, gt, gte, lt, lte, set, notSet. A filter whose
+     dimension is a metric id of the same view filters the aggregated value
+     (comparison operators only): {dimension: <metric id>, operator: gt,
+     values: ["N"]} with an entity breakdown keeps the entities above N.
    - To LIST those orders: dimensions [order_name, item_count], set limit
      (50 unless the user asks for more). Do not dump unbounded order_id lists.
    Combine in one metrics_query: measures=[refunded_orders],

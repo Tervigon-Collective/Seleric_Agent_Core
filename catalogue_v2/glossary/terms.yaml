@@ -949,7 +949,7 @@ terms:
 - term: new customer orders
   canonical_id: new_customers
 - term: product orders
-  canonical_id: orders
+  canonical_id: product_orders
 - term: units per order
   canonical_id: units_per_order
 - term: meta link clicks

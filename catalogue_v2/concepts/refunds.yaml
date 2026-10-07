@@ -19,10 +19,23 @@ axes:
     - recovered_cogs
     - order_cohort
     default: amount
+  scope:
+    values:
+    - all
+    - product
+    default: all
 resolves:
 - when:
     measure: amount
   metric: refunded_amount_excl_tax
+- when:
+    measure: amount
+    scope: product
+  metric: product_return_revenue
+- when:
+    measure: returns_value
+    scope: product
+  metric: product_return_revenue
 - when:
     measure: count
   metric: refund_count

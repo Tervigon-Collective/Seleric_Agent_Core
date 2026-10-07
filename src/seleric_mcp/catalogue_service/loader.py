@@ -131,6 +131,10 @@ class DimensionDef(BaseModel):
     # Semantic v2: values the agent surface does not support yet -> reason (e.g. sales_channel
     # amazon). A filter on one is rejected with the reason, never answered as an empty slice.
     unsupported_values: dict[str, str] = Field(default_factory=dict)
+    # Semantic v2 conformed family (platform / channel / campaign): members carrying the same value
+    # vocabulary on different views, so a slice on one can be answered by a sibling on a view that lacks it.
+    family: str | None = None
+    family_rank: int = 0  # preference within the family (0 first) when a view carries several members
     stable_key: str | None = None  # id of the dimension that identifies the entity
     # this label names (e.g. a title's product id). Labels can change or collide
     # across periods; comparisons across periods should join on the key.

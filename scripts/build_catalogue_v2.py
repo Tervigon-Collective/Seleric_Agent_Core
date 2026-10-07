@@ -67,7 +67,7 @@ MODULES = {  # v1 module id -> v2 views (no ontology in v2; extra_views is the s
     "product": ["product"],
     "paidmedia": ["paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes", "order_pnl"],
     "attribution": ["attribution", "attribution_paths", "commerce"],
-    "customer": ["customers", "unit_economics", "commerce"],
+    "customer": ["customers", "unit_economics", "commerce", "order_pnl"],
     "finance": ["pnl", "order_pnl"],
     "operations": ["returns", "payments"],
 }
@@ -114,7 +114,9 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "avg_seconds_to_purchase": ["sessions"], "bounce_rate": ["funnel_purchases"],
     "events_per_session": ["web_events"], "avg_touch_count": ["touches"],
     "repeat_rate": ["repeat_customers", "customers"], "ltv": ["new_customers"], "cac": ["ad_spend", "new_customers"],
-    "ltv_cac_ratio": ["ltv", "cac"], "pnl_contribution_margin_pct": ["pnl_contribution_margin", "pnl_net_sales"],
+    "ltv_cac_ratio": ["ltv", "cac"],
+    "channel_cac": ["ad_spend", "channel_new_customers"], "cost_per_order": ["ad_spend", "channel_orders"],
+    "session_bounce_rate": ["sessions"], "pnl_contribution_margin_pct": ["pnl_contribution_margin", "pnl_net_sales"],
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
     "pnl_gross_roas": ["gross_sales", "ad_spend"], "pnl_net_roas": ["pnl_contribution_margin", "ad_spend"],
     "pnl_be_roas": ["pnl_net_sales", "pnl_contribution_margin"],
@@ -124,12 +126,28 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "mer": ["contribution_margin", "net_cogs", "ad_spend"], "gross_roas": ["gross_sales", "ad_spend"],
     "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["contribution_margin", "net_cogs"],
 }
-DIM_RENAME = {("commerce", "event_type"): "order_event_type"}  # same member name, different meaning
+DIM_RENAME = {("commerce", "event_type"): "order_event_type",  # same member name, different meaning
+              ("order_pnl", "row_type"): "order_pnl_row_type"}  # orders | ad_spend, not pnl's detail | reconciliation
+# Conformed dimension families: members that carry the SAME value vocabulary on different views (checked live
+# 2026-10-08: ad_platform / finance_channel / platform agree on meta + google, acquisition_platform uses the traffic
+# platform labels, acquisition_campaign holds campaign names). A filter / breakdown on one member is answered on a
+# view that lacks it by the first family member that view has whose values cover it (agent side). Members listed
+# in preference order. Regions are NOT a family: shipping (upper-case) vs IP geo vs customer province differ.
+FAMILIES = {
+    "platform": ["platform", "finance_channel", "ad_platform", "acquisition_platform"],
+    "channel": ["channel", "acquisition_channel"],
+    "campaign": ["campaign_name", "acquisition_campaign"],
+}
 V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_status",
                   "platform": "lt_platform", "channel": "lt_channel", "product_title": "product_title"}
 ALLOWED = {"finance_channel": ["meta", "google", "whatsapp", "organic", "unattributed"],
            "ad_platform": ["meta", "google"], "sales_channel": ["shopify", "amazon"],
+           "row_type": ["detail", "reconciliation"], "order_pnl_row_type": ["orders", "ad_spend"],
            "medium_group": ["paid", "owned", "earned", "none", "unclassified"]}
+# v1 glossary ids that are live v2 ids again but whose v1 TERMS read best on another metric: "orders by channel" /
+# "meta orders" need the full traffic hierarchy (commerce.orders carries platform → channel → sub_channel; the
+# order-date channel P&L has no channel). channel_orders stays reachable by id and via the cac concept's grain.
+GLOSSARY_REDIRECT = {"channel_orders": "orders"}
 SALES_CHANNEL_REASON = "Amazon is a reserved sales channel; it is not yet supported on the agent surface."
 DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm": "CPM", "ltv": "LTV", "cac": "CAC",
            "ltv_cac_ratio": "LTV:CAC ratio", "pnl_mer": "P&L MER", "pnl_gross_roas": "P&L gross ROAS",
@@ -137,7 +155,12 @@ DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm"
            "mer": "MER", "gross_roas": "Gross ROAS", "net_roas": "Net ROAS", "be_roas": "Break-even ROAS",
            "net_cogs": "Net COGS", "gross_cogs": "Gross COGS", "rto_cost": "RTO cost",
            "contribution_margin_pct": "Contribution margin %", "net_margin_pct": "Net margin %",
-           "taxes_on_net_sales": "Taxes on net sales", "hold_rate_15s": "Hold rate (15 s)"}
+           "taxes_on_net_sales": "Taxes on net sales", "hold_rate_15s": "Hold rate (15 s)",
+           "channel_orders": "Orders (by channel / campaign)",
+           "channel_new_customers": "New customers (by channel / campaign)",
+           "channel_cac": "CAC (by channel / campaign)", "cost_per_order": "Cost per order (CPA)",
+           "session_page_views": "Page views (sessions)", "session_bounce_rate": "Bounce rate (sessions)",
+           "product_orders": "Orders with the product"}
 
 
 def human(mid: str) -> str:
@@ -246,6 +269,10 @@ def main() -> int:
                 entry["allowed_values"] = old["allowed_values"]
         if did in ALLOWED:
             entry["allowed_values"] = ALLOWED[did]
+        family = next((f for f, members in FAMILIES.items() if did in members), None)
+        if family:
+            entry["family"] = family
+            entry["family_rank"] = FAMILIES[family].index(did)
         if did == "sales_channel":
             entry["unsupported_values"] = {"amazon": SALES_CHANNEL_REASON}
         if not entry["description"]:
@@ -274,11 +301,12 @@ def main() -> int:
             e["views"].append(vname)
     for hid, levels, note in (
         ("ad", ["ad_platform", "campaign_name", "adset_name", "ad_name"], "Cross-cube drill path (fact → ad dims)."),
-        ("campaign", ["campaign_name", "adset_name", "ad_name"], "Orders / sessions by their last-touch campaign."),
+        ("campaign", ["campaign_name", "adset_name", "ad_name"], "Campaign drill (orders / sessions / refunds by "
+         "their last-touch campaign; ad delivery and P&L by their own)."),
     ):
+        # every view carrying all levels: a campaign drill must work on paid_media too, not only where the
+        # ad drill is missing (live: "Hierarchy 'campaign' is not available on view(s) paid_media")
         vs = [v for v in views_meta if all(v in dims.get(lv, {}).get("views", {}) for lv in levels)]
-        if hid == "campaign":
-            vs = [v for v in vs if v not in hier.get("ad", {}).get("views", [])]
         hier[hid] = {"display_name": hid.capitalize(), "levels": levels, "views": vs, "note": note}
     wy(OUT / "hierarchies.yaml", {"hierarchies": hier}, hdr)
 
@@ -402,6 +430,12 @@ def main() -> int:
         if t.get("definition"):
             t["definition"] = " ".join(modernize(t["definition"]).split())
         cid, did = t.get("canonical_id"), t.get("canonical_dimension_id")
+        if cid in GLOSSARY_REDIRECT:
+            cid = t["canonical_id"] = GLOSSARY_REDIRECT[cid]
+        if t.get("definition"):
+            for old, new in GLOSSARY_REDIRECT.items():
+                t["definition"] = " ".join(
+                    new + w[len(old):] if w.rstrip(".,;:)") == old else w for w in t["definition"].split(" "))
         if cid:
             if cid in old_to:
                 m = old_to[cid]

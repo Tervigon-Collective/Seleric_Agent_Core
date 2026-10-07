@@ -13,7 +13,8 @@ TimePreset = Literal[
 Granularity = Literal["hour", "day", "week", "month", "none"]
 ComparePeriod = Literal["previous_period", "previous_year"]
 FilterOperator = Literal[
-    "equals", "notEquals", "contains", "gt", "gte", "lt", "lte", "set", "notSet"
+    "equals", "notEquals", "contains", "notContains", "startsWith", "endsWith",
+    "gt", "gte", "lt", "lte", "set", "notSet"
 ]
 _FILTER_OPERATOR_ALIASES = {
     "greater_than": "gt",
@@ -37,6 +38,9 @@ _FILTER_OPERATOR_ALIASES = {
     "lt": "lt",
     "lte": "lte",
     "contains": "contains",
+    "not_contains": "notContains",
+    "starts_with": "startsWith",
+    "ends_with": "endsWith",
     "set": "set",
     "notSet": "notSet",
     "not_set": "notSet",
@@ -61,7 +65,9 @@ class TimeRange(BaseModel):
 
 
 class FilterSpec(BaseModel):
-    dimension: str  # catalogue dimension id
+    # catalogue dimension id — or a metric id of the query's view, which filters on the aggregated value
+    # (Cube measure filter: "campaigns with ad_spend gt 10000")
+    dimension: str
     operator: FilterOperator = "equals"
     values: list[str] = Field(default_factory=list)
 

@@ -27,6 +27,11 @@ axes:
     - order
     - finance
     default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
   channel:
     values:
     - all
@@ -57,6 +62,18 @@ axis_filters:
     paid:
       is_paid: 'true'
 resolves:
+- when:
+    action: return
+    measure: revenue
+    date: order
+    scope: product
+  metric: product_return_revenue
+- when:
+    action: cancel
+    measure: revenue
+    date: order
+    scope: product
+  metric: product_cancel_revenue
 - when:
     action: both
     measure: revenue

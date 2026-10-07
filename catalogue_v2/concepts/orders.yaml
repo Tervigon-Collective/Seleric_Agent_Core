@@ -24,6 +24,12 @@ axes:
     - order
     - finance
     default: order
+  scope:
+    values:
+    - all
+    - product
+    - attributed
+    default: all
   channel:
     values:
     - all
@@ -57,6 +63,22 @@ resolves:
 - when:
     status: all
   metric: orders
+- when:
+    status: all
+    scope: product
+  metric: product_orders
+- when:
+    status: all
+    scope: attributed
+  metric: channel_orders
+- when:
+    status: new
+    scope: attributed
+  metric: channel_new_customers
+- when:
+    status: first
+    scope: attributed
+  metric: channel_new_customers
 - when:
     status: cod
   metric: cod_orders
