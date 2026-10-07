@@ -115,10 +115,10 @@ llm:
     reasoning: [gpt-5-mini, DeepSeek-V4-Pro]
   # Last resort for any tier when everything above is exhausted.
   fallback: Kimi-K2.6
-  # Per-model limits (each model independent). Provider caps: 20k TPM, 20 RPM.
-  limits:
-    requests_per_minute: 20
-    tokens_per_minute: 20000
+  # Per-model limits (each model independent). Configure via model_limits overrides or env.
+  # limits:
+  #   requests_per_minute: 20
+  #   tokens_per_minute: 20000
   # Tokens reserved per call for the not-yet-generated completion.
   completion_reserve: 1024
   # Rate-limit wait behavior: wait for buckets to refill instead of failing.
