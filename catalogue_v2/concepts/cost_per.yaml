@@ -11,6 +11,9 @@ aliases:
 - cost per mille
 - cost per link click
 - cost per landing page view
+- click-through rate
+- cost per lpv
+- cost per thousand impressions
 axes:
   metric_kind:
     values:

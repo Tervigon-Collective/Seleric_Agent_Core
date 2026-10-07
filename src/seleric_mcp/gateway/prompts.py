@@ -185,7 +185,8 @@ NON-NEGOTIABLE RULES
      {dimension: "item_count", operator: "gt", values: ["N"]}.
      More than 1 item → values ["1"]. At least 2 items → operator gte, values ["2"].
    - Filter operators are ONLY: equals, notEquals, contains, notContains,
-     startsWith, endsWith, gt, gte, lt, lte, set, notSet. A filter whose
+     startsWith, endsWith, gt, gte, lt, lte, set, notSet. Never send
+     greater_than / less_than / greaterThan. A filter whose
      dimension is a metric id of the same view filters the aggregated value
      (comparison operators only): {dimension: <metric id>, operator: gt,
      values: ["N"]} with an entity breakdown keeps the entities above N.

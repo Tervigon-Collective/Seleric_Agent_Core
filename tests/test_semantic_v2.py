@@ -554,3 +554,12 @@ async def test_refund_level_amount_is_never_split_by_its_lines_product(planner, 
     with pytest.raises(PlanError):
         await planner.run(QueryRequest(measures=["refunded_amount_excl_tax"], dimensions=["product_title"],
                                        time_range=SEP))
+
+
+def test_spelled_out_ad_ratios_and_lpvs_resolve_to_their_own_metric(v2):
+    # the planner's slot reader spells abbreviations out; "cost per click" fell to CTR and was deduped away
+    for text, mid in (("cost per click", "cpc"), ("cost per mille", "cpm"),
+                      ("cost per thousand impressions", "cpm"), ("click-through rate", "ctr"),
+                      ("LPVs (landing page views)", "landing_page_views"), ("lpvs", "landing_page_views"),
+                      ("page views", "page_views"), ("impressions", "impressions")):
+        assert v2.resolve_concept(text).metric_id == mid, text

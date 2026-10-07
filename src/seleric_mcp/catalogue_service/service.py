@@ -386,7 +386,11 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
     # question_axes, so "SKU wise gross sale" keeps scope=product when the model resolves "gross sales".
     # "product cost" is the COGS component, not the grain: matched first so the bare "product" does not fire.
     "scope": [("product cost", "all"), ("sku", "product"), ("variant", "product"), ("product", "product")],
-    "metric_kind": [("link click", "link"), ("landing page", "landing_page")],
+    # spelled-out forms (the planner's slot reader expands abbreviations): without them "cost per click" fell to
+    # the concept default (CTR) and the planner deduped CPC / CPM away (live 2026-10-08)
+    "metric_kind": [("link click", "link"), ("landing page", "landing_page"), ("cost per lpv", "landing_page"),
+                    ("cost per click", "cpc"), ("cost per mille", "cpm"), ("cost per thousand", "cpm"),
+                    ("click through", "ctr"), ("click-through", "ctr")],
     "event": [("events per session", "per_session"), ("per session", "per_session"), ("bounce", "bounce"),
               ("all events", "all"), ("web events", "all")],
 }

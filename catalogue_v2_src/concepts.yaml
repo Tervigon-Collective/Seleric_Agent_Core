@@ -195,6 +195,15 @@ concepts:
       - {when: {kind: all}, metric: clicks}
       - {when: {kind: link}, metric: link_clicks}
 
+  - id: landing_page_views
+    display_name: Landing page views
+    one_liner: Landing page views reported by Meta (LPVs) — not site page views.
+    aliases: [landing page views, landing page view, lpv, lpvs]
+    axes: {platform: *ad_platform}
+    axis_filters: *ad_filters
+    resolves:
+      - {metric: landing_page_views}
+
   - id: impressions
     display_name: Impressions
     one_liner: Ad impressions.
@@ -208,7 +217,7 @@ concepts:
     display_name: Ad efficiency (CTR / CPC / CPM)
     one_liner: CTR, CPC, CPM and cost per landing page view / link click.
     aliases: [ctr, cpc, cpm, click through rate, cost per click, cost per mille, cost per link click,
-              cost per landing page view]
+              cost per landing page view, click-through rate, cost per lpv, cost per thousand impressions]
     axes: {metric_kind: {values: [ctr, cpc, cpm, link, landing_page], default: ctr}, platform: *ad_platform}
     axis_filters: *ad_filters
     resolves:
