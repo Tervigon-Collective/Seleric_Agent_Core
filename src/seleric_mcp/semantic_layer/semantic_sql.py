@@ -5,11 +5,20 @@ Runs LLM-issued SQL through Cube Core's Postgres-protocol SQL API
 single SELECT statement, no DDL/DML, no blocking/dangerous functions, capped
 rows, per-query statement timeout. Every call logs a SHA + first 500 chars of
 the query for provenance — never the full SQL body.
+
+Grounding (2026-10-07): the model writes this SQL without seeing the views'
+column names, so most failures were "column not found" from Cube, returned as a
+raw error it could not act on. ``check_against_schema`` parses the statement
+(sqlglot, Postgres dialect) and checks every table against the governed views
+and every view-qualified column against that view's members, from Cube's own
+``/meta`` — before Cube runs anything — and the error names the valid columns
+and the closest matches. A query that reads no governed view is rejected.
 """
 
 from __future__ import annotations
 
 import asyncio
+import difflib
 import hashlib
 import re
 import time
@@ -82,7 +91,7 @@ class SemanticSqlResult:
     limited: bool
 
 
-def validate_semantic_sql(sql: str) -> str:
+def validate_semantic_sql(sql: str, *, governed_check: bool = True) -> str:
     if not sql or not sql.strip():
         raise SqlValidationError("sql must be non-empty")
     if len(sql) > _MAX_SQL_LEN:
@@ -98,11 +107,110 @@ def validate_semantic_sql(sql: str) -> str:
     if _BLOCKED_FUNCTIONS.search(stripped):
         m = _BLOCKED_FUNCTIONS.search(stripped)
         raise SqlValidationError(f"blocked function: {m.group(0)}")
-    if not _GOVERNED_HINT.search(stripped):
+    # Keyword heuristic, only when Cube's schema is unavailable: with the schema,
+    # check_against_schema proves the query reads a governed view instead.
+    if governed_check and not _GOVERNED_HINT.search(stripped):
         raise SqlValidationError(
             "query must reference Cube view members / MEASURE() on the governed semantic surface"
         )
     return stripped
+
+
+def schema_from_meta(meta: dict) -> dict[str, frozenset[str]]:
+    """Columns the SQL API exposes per cube/view: each member's short name."""
+    schema: dict[str, frozenset[str]] = {}
+    for cube in meta.get("cubes", []) or []:
+        name = str(cube.get("name") or "")
+        if not name:
+            continue
+        cols = {
+            str(m.get("name", "")).split(".", 1)[-1]
+            for kind in ("measures", "dimensions", "segments")
+            for m in cube.get(kind, []) or []
+        }
+        schema[name] = frozenset(c for c in cols if c)
+    return schema
+
+
+# Columns the Cube SQL API adds to every table.
+_SQL_API_COLUMNS = frozenset({"__user", "__cubejoinfield"})
+
+
+def _suggest(name: str, options: frozenset[str]) -> str:
+    close = difflib.get_close_matches(name, sorted(options), n=3, cutoff=0.5)
+    return f" Did you mean: {', '.join(close)}?" if close else ""
+
+
+def _columns_listing(view: str, schema: dict[str, frozenset[str]], limit: int = 60) -> str:
+    cols = sorted(schema.get(view, ()))
+    more = f" (+{len(cols) - limit} more)" if len(cols) > limit else ""
+    return f"{view} columns: {', '.join(cols[:limit])}{more}"
+
+
+def check_against_schema(sql: str, schema: dict[str, frozenset[str]]) -> list[str]:
+    """Reject tables/columns Cube does not have, with the valid names in the error.
+
+    Returns the governed views the statement reads. Only checks what it can prove
+    wrong: a view-qualified column (or an unqualified one when every source is a
+    governed view and the name is no CTE/select alias) that is not a member."""
+    import sqlglot
+    from sqlglot import exp
+
+    try:
+        statements = [s for s in sqlglot.parse(sql, read="postgres") if s is not None]
+    except sqlglot.errors.ParseError as exc:
+        raise SqlValidationError(f"SQL does not parse: {str(exc).splitlines()[0]}") from exc
+    if len(statements) != 1:
+        raise SqlValidationError("exactly one statement is allowed")
+    tree = statements[0]
+    if isinstance(tree, exp.Command):  # EXPLAIN …: validate the explained statement only
+        return []
+    ctes = {c.alias_or_name.lower() for c in tree.find_all(exp.CTE)}
+    known = {name.lower(): name for name in schema}
+    aliases: dict[str, str] = {}
+    views: list[str] = []
+    for table in tree.find_all(exp.Table):
+        name = table.name.lower()
+        if name in ctes:
+            continue
+        if name not in known:
+            raise SqlValidationError(
+                f"unknown view '{table.name}'. Governed views: {', '.join(sorted(schema))}."
+                + _suggest(table.name, frozenset(schema))
+            )
+        view = known[name]
+        views.append(view)
+        aliases[(table.alias or table.name).lower()] = view
+    if not views:
+        raise SqlValidationError(
+            "the query reads no governed view; FROM must name a view such as "
+            + ", ".join(sorted(schema)[:12])
+        )
+    projected = {a.alias.lower() for a in tree.find_all(exp.Alias) if a.alias}
+    only_views = not ctes and not any(isinstance(s, exp.Subquery) for s in tree.find_all(exp.Subquery))
+    for column in tree.find_all(exp.Column):
+        name = column.name.lower()
+        if not name or name in _SQL_API_COLUMNS or isinstance(column.this, exp.Star):
+            continue
+        qualifier = column.table.lower()
+        if qualifier:
+            view = aliases.get(qualifier)
+            if view is None:
+                continue  # a CTE or subquery alias: its columns are the query's own
+            candidates = [view]
+        elif only_views and name not in projected:
+            candidates = list(dict.fromkeys(views))
+        else:
+            continue
+        members = frozenset(c.lower() for v in candidates for c in schema.get(v, ()))
+        if name not in members:
+            raise SqlValidationError(
+                f"column '{column.name}' is not in {' / '.join(candidates)}."
+                + _suggest(name, members)
+                + " "
+                + "; ".join(_columns_listing(v, schema) for v in candidates)
+            )
+    return list(dict.fromkeys(views))
 
 
 def _run(sql: str, dsn: str, max_rows: int, timeout_ms: int) -> tuple[list[dict], list[str], bool]:
@@ -130,9 +238,15 @@ def _run(sql: str, dsn: str, max_rows: int, timeout_ms: int) -> tuple[list[dict]
 
 
 async def run_semantic_sql(
-    sql: str, settings: Settings, max_rows: int | None = None, brand_id: str | None = None
+    sql: str,
+    settings: Settings,
+    max_rows: int | None = None,
+    brand_id: str | None = None,
+    schema: dict[str, frozenset[str]] | None = None,
 ) -> SemanticSqlResult:
-    cleaned = validate_semantic_sql(sql)
+    cleaned = validate_semantic_sql(sql, governed_check=not schema)
+    if schema:
+        check_against_schema(cleaned, schema)
     brand = str(brand_id or settings.default_brand_id)
     dsn = brand_scoped_dsn(settings.cube_sql_dsn, brand)
     # Row cap: _run returns at most `cap` rows (fetchmany) and flags `limited`;

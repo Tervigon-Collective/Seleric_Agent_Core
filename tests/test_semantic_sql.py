@@ -66,3 +66,64 @@ def test_statement_is_sent_as_written_and_capped_by_fetch(monkeypatch):
     asyncio.run(run_semantic_sql(sql, SETTINGS, max_rows=10))
     assert calls["sql"] == sql
     assert calls["cap"] == 10
+
+
+# --- grounding: tables and columns are checked against Cube's schema first ------
+
+from seleric_mcp.semantic_layer.semantic_sql import check_against_schema, schema_from_meta  # noqa: E402
+
+META = {
+    "cubes": [
+        {
+            "name": "order_pnl",
+            "measures": [{"name": "order_pnl.net_sales"}, {"name": "order_pnl.orders"}],
+            "dimensions": [{"name": "order_pnl.order_date"}, {"name": "order_pnl.finance_channel"}],
+        },
+        {"name": "paid_media", "measures": [{"name": "paid_media.spend"}], "dimensions": []},
+    ]
+}
+SCHEMA = schema_from_meta(META)
+
+
+def test_schema_is_read_from_cube_meta():
+    assert SCHEMA["order_pnl"] == {"net_sales", "orders", "order_date", "finance_channel"}
+    assert SCHEMA["paid_media"] == {"spend"}
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "SELECT order_date, MEASURE(net_sales) FROM order_pnl GROUP BY 1",
+        "SELECT o.order_date, MEASURE(o.net_sales) AS ns FROM order_pnl o GROUP BY 1 ORDER BY ns DESC",
+        "WITH d AS (SELECT DATE_TRUNC('day', order_date) AS day, MEASURE(net_sales) AS ns "
+        "FROM order_pnl GROUP BY 1) SELECT day, SUM(ns) OVER (ORDER BY day) AS running FROM d",
+        "SELECT MEASURE(net_sales) / NULLIF(MEASURE(orders), 0) AS aov FROM order_pnl",
+    ],
+)
+def test_valid_statements_pass(sql):
+    assert check_against_schema(sql, SCHEMA) == ["order_pnl"]
+
+
+@pytest.mark.parametrize(
+    ("sql", "expected"),
+    [
+        ("SELECT MEASURE(net_sale) FROM order_pnl", "Did you mean: net_sales"),
+        ("SELECT MEASURE(net_sales) FROM orders_pnl", "unknown view 'orders_pnl'"),
+        ("SELECT o.spend FROM order_pnl o", "order_pnl columns:"),
+        ("SELECT 1", "reads no governed view"),
+        ("SELECT 1; SELECT 2", "exactly one statement"),
+    ],
+)
+def test_invalid_names_are_rejected_with_the_valid_ones(sql, expected):
+    with pytest.raises(SqlValidationError, match=expected):
+        check_against_schema(sql, SCHEMA)
+
+
+def test_run_checks_the_schema_before_cube_runs_anything(monkeypatch):
+    calls = _capture(monkeypatch)
+    with pytest.raises(SqlValidationError):
+        asyncio.run(run_semantic_sql("SELECT MEASURE(nope) FROM order_pnl", SETTINGS, schema=SCHEMA))
+    assert calls == {}
+    # With the schema, a query on a governed view no longer needs the keyword heuristic.
+    asyncio.run(run_semantic_sql("SELECT MEASURE(spend) FROM paid_media", SETTINGS, schema=SCHEMA))
+    assert calls["sql"].startswith("SELECT MEASURE(spend)")

@@ -731,3 +731,39 @@ async def test_list_metrics_rate_limit_is_off_by_default_and_configurable(built_
     ctx._tool_call_times.clear()
     outs = [fn() for _ in range(4)]
     assert all("matches" in o for o in outs[:3]) and outs[3].get("success") is False
+
+
+async def test_semantic_sql_rate_limit_is_per_mission_and_says_why(built_server, monkeypatch):
+    import seleric_mcp.gateway.server as server_mod
+
+    mcp, ctx = built_server
+
+    async def _schema(ttl_s: float = 600.0):
+        return {}
+
+    async def _run(sql, settings, max_rows=None, brand_id=None, schema=None):
+        from seleric_mcp.semantic_layer.semantic_sql import SemanticSqlResult
+
+        return SemanticSqlResult(data=[], columns=[], row_count=0, elapsed_ms=1, query_sha="x", limited=False)
+
+    monkeypatch.setattr(ctx, "sql_schema", _schema)
+    monkeypatch.setattr(server_mod, "run_semantic_sql", _run)
+    fn = _tool_fn(mcp, "semantic_sql")
+    sql = "SELECT MEASURE(net_sales) FROM order_pnl"
+    for _ in range(6):
+        assert "error" not in await fn(sql=sql, session_key="MS3-a")
+    limited = await fn(sql=sql, session_key="MS3-a")
+    assert "rate limit" in limited["error"] and "No metric supports" not in limited["error"]
+    # Another mission sharing the same service token is not throttled by MS3-a.
+    assert "error" not in await fn(sql=sql, session_key="MS3-b")
+
+
+async def test_semantic_sql_validation_error_is_marked_correctable(built_server, monkeypatch):
+    mcp, ctx = built_server
+
+    async def _schema(ttl_s: float = 600.0):
+        return {"order_pnl": frozenset({"net_sales", "order_date"})}
+
+    monkeypatch.setattr(ctx, "sql_schema", _schema)
+    out = await _tool_fn(mcp, "semantic_sql")(sql="SELECT MEASURE(net_sale) FROM order_pnl", session_key="MS3-c")
+    assert out["retryable"] is True and "Did you mean: net_sales" in out["error"]

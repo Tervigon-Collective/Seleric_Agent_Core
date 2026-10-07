@@ -40,7 +40,7 @@ from ..config import Settings
 from ..observability.audit import AuditLog
 from ..observability.logging import new_trace_id
 from ..semantic_layer.cube_client import CubeClient
-from ..semantic_layer.semantic_sql import run_semantic_sql, SqlValidationError
+from ..semantic_layer.semantic_sql import run_semantic_sql, schema_from_meta, SqlValidationError
 from ..storage.db import Database
 from . import prompts as prompt_templates
 
@@ -127,6 +127,22 @@ class AppContext:
         self.ads_ops = OperationLog(self.db)
         self._freshness_cache: tuple[float, dict] | None = None
         self._view_latest_cache: dict[str, tuple[float, str | None]] = {}
+        self._sql_schema_cache: tuple[float, dict[str, frozenset[str]]] | None = None
+
+    async def sql_schema(self, ttl_s: float = 600.0) -> dict[str, frozenset[str]]:
+        """Columns per governed view from Cube's /meta (what semantic_sql may name).
+        Cached; an unreachable Cube returns the last schema or {} (then the
+        keyword check in validate_semantic_sql still applies)."""
+        cached = self._sql_schema_cache
+        if cached and time.monotonic() - cached[0] < ttl_s:
+            return cached[1]
+        try:
+            schema = schema_from_meta(await self.cube.meta())
+        except Exception as exc:  # noqa: BLE001 - fall back to the cached/keyword check
+            logger.warning("semantic_sql_schema_unavailable", error=repr(exc))
+            return cached[1] if cached else {}
+        self._sql_schema_cache = (time.monotonic(), schema)
+        return schema
 
     @property
     def actor(self) -> str:
@@ -971,7 +987,9 @@ def build_server(settings: Settings) -> FastMCP:
             return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
 
     @mcp.tool()
-    async def semantic_sql(sql: str, max_rows: int | None = None, brand_id: str | None = None) -> dict:
+    async def semantic_sql(
+        sql: str, max_rows: int | None = None, brand_id: str | None = None, session_key: str | None = None
+    ) -> dict:
         """READ-ONLY ad-hoc analysis via Cube Core's Semantic SQL (Postgres
         protocol). Use when metrics_query cannot express the derivation (e.g.
         multi-level CTEs, cross-view ratios, window functions). Rules:
@@ -984,14 +1002,28 @@ def build_server(settings: Settings) -> FastMCP:
         brand_id scopes EVERY cube/view in the query to that brand (enforced by
         Cube, not by your WHERE clause); omitted -> the default brand. A cube
         without a brand_id member cannot be brand-scoped, so it is not queryable
-        here — use the views that carry its attributes as columns."""
+        here — use the views that carry its attributes as columns. Tables and
+        columns are checked against Cube's schema before anything runs; an
+        invalid name comes back with that view's columns and the closest
+        matches. session_key (the caller's mission id) scopes the rate limit to
+        one mission instead of every caller sharing the service token."""
         trace_id = _log_call("semantic_sql", sql_len=len(sql or ""), brand_id=brand_id)
-        allowed, message = ctx.check_tool_call_rate("semantic_sql", max_calls=6, window_seconds=60)
+        key = f"semantic_sql:{session_key}" if session_key else "semantic_sql"
+        allowed, _ = ctx.check_tool_call_rate(key, max_calls=6, window_seconds=60)
         if not allowed:
-            logger.warning("semantic_sql_rate_limited", trace_id=trace_id)
-            return {"error": message}
+            logger.warning("semantic_sql_rate_limited", trace_id=trace_id, session_key=session_key)
+            return {
+                "error": (
+                    "semantic_sql rate limit: more than 6 calls in 60s for this mission. Answer "
+                    "from the results you already have, or use metrics_query for certified metrics."
+                ),
+                "retryable": False,
+            }
         try:
-            result = await run_semantic_sql(sql, ctx.settings, max_rows=max_rows, brand_id=brand_id)
+            schema = await ctx.sql_schema()
+            result = await run_semantic_sql(
+                sql, ctx.settings, max_rows=max_rows, brand_id=brand_id, schema=schema
+            )
             return {
                 "brand_id": str(brand_id or ctx.settings.default_brand_id),
                 "data": result.data,
@@ -1004,7 +1036,8 @@ def build_server(settings: Settings) -> FastMCP:
             }
         except SqlValidationError as e:
             logger.warning("semantic_sql_rejected", trace_id=trace_id, error=str(e))
-            return {"error": f"validation: {e}"}
+            # Correctable: the message names the valid views/columns.
+            return {"error": f"validation: {e}", "retryable": True}
         except Exception as e:
             logger.error("semantic_sql_failed", trace_id=trace_id, error=repr(e), exc_info=True)
             return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}

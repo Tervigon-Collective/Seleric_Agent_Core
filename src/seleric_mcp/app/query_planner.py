@@ -733,12 +733,25 @@ class QueryPlanner:
                 request.granularity, request.limit, sort_order=sort_order,
                 time_dimension=time_dimension,
             )
-            current_res, compare_res = await asyncio.gather(
-                self.cube.load(cube_query), self.cube.load(compare_query)
-            )
-        else:
-            current_res = await self.cube.load(cube_query)
-            compare_res = None
+        # Semantic-v2 lineage (the Cube-generated SQL) needs only the query, not its
+        # result: fetch it alongside the load instead of after it.
+        lineage = (
+            asyncio.ensure_future(self._semantic_provenance(metrics, cube_query))
+            if self.catalogue.is_v2
+            else None
+        )
+        try:
+            if request.compare_period:
+                current_res, compare_res = await asyncio.gather(
+                    self.cube.load(cube_query), self.cube.load(compare_query)
+                )
+            else:
+                current_res = await self.cube.load(cube_query)
+                compare_res = None
+        except BaseException:
+            if lineage is not None:
+                lineage.cancel()
+            raise
 
         query_id = "q_" + uuid.uuid4().hex[:12]
         currencies = sorted({m.currency_default for m in metrics if m.currency_default})
@@ -769,8 +782,8 @@ class QueryPlanner:
             currency=currency,
         )
 
-        if self.catalogue.is_v2:
-            provenance["semantic"] = await self._semantic_provenance(metrics, cube_query)
+        if lineage is not None:
+            provenance["semantic"] = await lineage
 
         # Expose catalogue metric ids as row keys (in addition to Cube member
         # names) so aliases like total_operating_cost → net_cogs SQL still

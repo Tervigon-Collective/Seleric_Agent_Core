@@ -17,6 +17,7 @@ dependencies = [
     "tzdata>=2024.1",
     "psycopg2-binary>=2.9",
     "google-ads>=25.0",
+    "sqlglot>=25",
 ]
 
 [project.scripts]
