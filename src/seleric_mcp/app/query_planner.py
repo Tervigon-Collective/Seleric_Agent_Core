@@ -770,6 +770,12 @@ class QueryPlanner:
         # Normalize measure refs on the request so sort fields that still use
         # Cube members (or mixed catalogue/Cube ids) resolve cleanly.
         request = request.model_copy(update={"measures": [m.id for m in metrics]})
+        for f in request.filters:
+            fid = self.catalogue.resolve_dimension_id(f.dimension)
+            for m in metrics:
+                if fid in m.excluded_dimensions:
+                    raise PlanError(f"Metric '{m.id}' cannot be filtered by '{fid}': {m.excluded_dimensions[fid]}",
+                                    suggestions=self.catalogue.grain_twins(m.id))
         dimension_warnings: list[str] = []
         qualified_dims = self._validate_dimensions(metrics, request.dimensions, dimension_warnings)
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)

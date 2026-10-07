@@ -93,6 +93,13 @@ UNAVAILABLE = {
         "Use checkout_rate / add_to_cart_to_checkout_rate instead.")
     for m in ("avg_seconds_to_checkout", "avg_seconds_to_purchase", "checkout_steps")
 }
+# Refund-level money on the returns view: its refund_lines → product dims would repeat the whole refund on every
+# product in it (WildTrail Boots Sep: 108,224 refund-level vs 79,753 of its own lines). The line-grain
+# product_refunded_amount_excl_tax / product_returns_excl_tax answer by product (concept twins).
+_FANOUT = ("Refund-level amount: split by the refunded lines' product / restock it would repeat the whole refund "
+           "on every line. Use the line-grain product_* twin.")
+EXCLUDED_DIMS = {m: {d: _FANOUT for d in ("product_type", "product_title", "variant_title", "sku", "restock_type")}
+                 for m in ("refunded_amount_excl_tax", "returns_excl_tax")}
 NOT_CERTIFIED = {"link_clicks", "thruplays", "hook_rate", "hold_rate_15s", "cost_per_link_click"}  # approved
 # kept id, number changed (event → order date). The P&L ids came back on 2026-10-04 as the ORDER-date twins of
 # pnl_* (decision: every non-Finance domain reads the order date); their v1 event-date meaning is pnl_<id>.
@@ -115,6 +122,7 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "events_per_session": ["web_events"], "avg_touch_count": ["touches"],
     "repeat_rate": ["repeat_customers", "customers"], "ltv": ["new_customers"], "cac": ["ad_spend", "new_customers"],
     "ltv_cac_ratio": ["ltv", "cac"],
+    "new_customer_ltv": ["new_customers"],
     "channel_cac": ["ad_spend", "channel_new_customers"], "cost_per_order": ["ad_spend", "channel_orders"],
     "session_bounce_rate": ["sessions"], "pnl_contribution_margin_pct": ["pnl_contribution_margin", "pnl_net_sales"],
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
@@ -137,6 +145,7 @@ FAMILIES = {
     "platform": ["platform", "finance_channel", "ad_platform", "acquisition_platform"],
     "channel": ["channel", "acquisition_channel"],
     "campaign": ["campaign_name", "acquisition_campaign"],
+    "sku": ["sku", "first_order_sku"],  # customers: the SKU of the first order
 }
 V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_status",
                   "platform": "lt_platform", "channel": "lt_channel", "product_title": "product_title"}
@@ -160,7 +169,12 @@ DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm"
            "channel_new_customers": "New customers (by channel / campaign)",
            "channel_cac": "CAC (by channel / campaign)", "cost_per_order": "Cost per order (CPA)",
            "session_page_views": "Page views (sessions)", "session_bounce_rate": "Bounce rate (sessions)",
-           "product_orders": "Orders with the product"}
+           "product_orders": "Orders with the product",
+           "product_refunded_amount_excl_tax": "Product refunded amount (ex-GST)",
+           "product_returns_excl_tax": "Product returns value (ex-GST)",
+           "event_count": "Web events (events)", "event_page_views": "Page views (events)", "event_product_views": "Product views (events)",
+           "event_collection_views": "Collection views (events)", "event_add_to_carts": "Add-to-cart events (events)",
+           "event_site_searches": "Site searches (events)", "new_customer_ltv": "LTV (by channel / campaign)"}
 
 
 def human(mid: str) -> str:
@@ -358,6 +372,8 @@ def main() -> int:
         }
         if mid in UNAVAILABLE:
             doc["unavailable_reason"] = UNAVAILABLE[mid]
+        if mid in EXCLUDED_DIMS:
+            doc["excluded_dimensions"] = EXCLUDED_DIMS[mid]
         valid_for: dict[str, list[str]] = {}
         reasons = []
         if mid in META_ONLY:

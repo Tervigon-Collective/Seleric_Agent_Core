@@ -89,6 +89,9 @@ class MetricDef(BaseModel):
     currency_default: str | None = None
     grain: str
     supported_dimensions: list[str] = Field(default_factory=list)
+    # Semantic v2: dimensions of the metric's view it must NOT be sliced by (dimension -> reason), e.g. a
+    # refund-level amount by the refund lines' product (the join repeats the whole refund on every product).
+    excluded_dimensions: dict[str, str] = Field(default_factory=dict)
     supported_filters: list[str] = Field(default_factory=list)
     data_owner: str
     access_policy: AccessPolicy = Field(default_factory=AccessPolicy)
@@ -589,6 +592,7 @@ def _derive_supported_dimensions(
             d.id
             for d in dimensions.values()
             if view in d.views and d.id not in curated_dims and not is_waived(d.id)
+            and d.id not in m.excluded_dimensions
         )
         m.supported_dimensions.extend(added)
         # The filter gate only needs a view mapping, but keep the documented

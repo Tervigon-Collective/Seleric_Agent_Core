@@ -109,6 +109,7 @@ dimensions:
     web_event_detail: web_event_detail.ad_platform
     attribution: attribution.ad_platform
     returns: returns.ad_platform
+    payments: payments.ad_platform
     pnl: pnl.ad_platform
     order_pnl: order_pnl.ad_platform
   aliases: []
@@ -273,6 +274,7 @@ dimensions:
     web_sessions: web_sessions.campaign_id
     web_event_detail: web_event_detail.campaign_id
     returns: returns.campaign_id
+    payments: payments.campaign_id
     pnl: pnl.campaign_id
     order_pnl: order_pnl.campaign_id
   aliases: []
@@ -290,6 +292,7 @@ dimensions:
     web_sessions: web_sessions.campaign_name
     web_event_detail: web_event_detail.campaign_name
     returns: returns.campaign_name
+    payments: payments.campaign_name
     pnl: pnl.campaign_name
     order_pnl: order_pnl.campaign_name
   aliases:
@@ -313,6 +316,7 @@ dimensions:
     web_sessions: web_sessions.campaign_objective
     web_event_detail: web_event_detail.campaign_objective
     returns: returns.campaign_objective
+    payments: payments.campaign_objective
     pnl: pnl.campaign_objective
     order_pnl: order_pnl.campaign_objective
   aliases: []
@@ -330,6 +334,7 @@ dimensions:
     web_sessions: web_sessions.campaign_status
     web_event_detail: web_event_detail.campaign_status
     returns: returns.campaign_status
+    payments: payments.campaign_status
     pnl: pnl.campaign_status
     order_pnl: order_pnl.campaign_status
   aliases: []
@@ -347,6 +352,7 @@ dimensions:
     web_sessions: web_sessions.campaign_type
     web_event_detail: web_event_detail.campaign_type
     returns: returns.campaign_type
+    payments: payments.campaign_type
     pnl: pnl.campaign_type
     order_pnl: order_pnl.campaign_type
   aliases: []
@@ -375,6 +381,7 @@ dimensions:
     web_event_detail: web_event_detail.channel
     attribution: attribution.channel
     returns: returns.channel
+    payments: payments.channel
   aliases: []
   family: channel
   family_rank: 0
@@ -521,6 +528,7 @@ dimensions:
     web_event_detail: web_event_detail.finance_channel
     attribution: attribution.finance_channel
     returns: returns.finance_channel
+    payments: payments.finance_channel
     pnl: pnl.finance_channel
     order_pnl: order_pnl.finance_channel
   aliases: []
@@ -548,6 +556,15 @@ dimensions:
   views:
     customers: customers.first_order_at
   aliases: []
+- id: first_order_sku
+  display_name: First Order Sku
+  description: SKU of the customer's first order (the product that acquired them).
+  is_time: false
+  views:
+    customers: customers.first_order_sku
+  aliases: []
+  family: sku
+  family_rank: 1
 - id: fulfillment_status
   display_name: Fulfillment Status
   description: Shopify fulfillment status.
@@ -692,6 +709,7 @@ dimensions:
     commerce: commerce.is_new_customer
     product: product.is_new_customer
     returns: returns.is_new_customer
+    payments: payments.is_new_customer
     order_pnl: order_pnl.is_new_customer
   aliases:
   - new customer
@@ -711,6 +729,7 @@ dimensions:
     web_event_detail: web_event_detail.is_paid
     attribution: attribution.is_paid
     returns: returns.is_paid
+    payments: payments.is_paid
     pnl: pnl.is_paid
     order_pnl: order_pnl.is_paid
   aliases: []
@@ -797,6 +816,7 @@ dimensions:
     web_event_detail: web_event_detail.medium_group
     attribution: attribution.medium_group
     returns: returns.medium_group
+    payments: payments.medium_group
   aliases: []
   allowed_values:
   - paid
@@ -941,6 +961,7 @@ dimensions:
     web_event_detail: web_event_detail.platform
     attribution: attribution.platform
     returns: returns.platform
+    payments: payments.platform
   aliases: []
   family: platform
   family_rank: 0
@@ -1187,6 +1208,8 @@ dimensions:
   aliases:
   - SKU
   - product sku
+  family: sku
+  family_rank: 0
 - id: status
   display_name: Status
   description: Status after the change.
@@ -1205,6 +1228,7 @@ dimensions:
     web_event_detail: web_event_detail.sub_channel
     attribution: attribution.sub_channel
     returns: returns.sub_channel
+    payments: payments.sub_channel
     order_pnl: order_pnl.sub_channel
   aliases: []
 - id: touch_count

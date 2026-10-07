@@ -7,5 +7,14 @@ aliases:
 - lifetime value
 - customer lifetime value
 - clv
+axes:
+  scope:
+    values:
+    - all
+    - attributed
+    default: all
 resolves:
 - metric: ltv
+- when:
+    scope: attributed
+  metric: new_customer_ltv

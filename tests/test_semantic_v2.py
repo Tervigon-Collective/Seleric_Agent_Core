@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 136
+    assert len(v2.cat.metrics) == 145
     assert len(v2.cat.views) == 18
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -346,7 +346,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 133  # 136 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 142  # 145 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -451,14 +451,21 @@ def test_order_pnl_carries_sub_channel_and_order_attributes(v2):
 
 def test_grain_twins_cover_marts_cac_orders_and_refunds(v2):
     # brand × day marts -> session grain (traffic / campaign / device slices)
-    assert v2.grain_twins("page_views") == ["session_page_views"]
+    assert v2.grain_twins("page_views") == ["session_page_views", "event_page_views"]
+    assert v2.grain_twins("product_view_events") == ["session_product_views", "event_product_views"]
+    assert v2.grain_twins("ltv") == ["new_customer_ltv"]
     assert v2.grain_twins("bounce_rate") == ["session_bounce_rate"]
     # CAC -> the order-date channel P&L (channel / campaign slices); brand total identical
     assert v2.grain_twins("cac") == ["channel_cac"]
     # order-level -> product-level (an order holds several products)
     assert v2.grain_twins("orders") == ["product_orders", "channel_orders"]
     assert v2.grain_twins("new_customers") == ["channel_new_customers"]
-    assert v2.grain_twins("refunded_amount_excl_tax") == ["product_return_revenue"]
+    assert v2.grain_twins("refunded_amount_excl_tax") == ["product_refunded_amount_excl_tax"]
+    assert v2.grain_twins("returns_excl_tax") == ["product_returns_excl_tax"]
+    # a refund-level amount never splits by the refund lines' product (it would repeat the whole refund)
+    assert "product_title" not in v2.cat.metrics["refunded_amount_excl_tax"].supported_dimensions
+    assert "product_title" in v2.cat.metrics["refund_count"].supported_dimensions  # refunds containing it
+    assert "product_title" in v2.cat.metrics["product_refunded_amount_excl_tax"].supported_dimensions
     assert v2.grain_twins("return_revenue") == ["product_return_revenue"]
 
 
@@ -537,3 +544,13 @@ async def test_measure_filter_and_text_operators(planner, cube):
     with pytest.raises(PlanError):  # a metric filter is a comparison on a number
         await planner.run(QueryRequest(measures=["ad_spend"], time_range=SEP,
                                        filters=[FilterSpec(dimension="ad_spend", operator="contains", values=["x"])]))
+
+
+async def test_refund_level_amount_is_never_split_by_its_lines_product(planner, cube):
+    with pytest.raises(PlanError) as exc:
+        await planner.run(QueryRequest(measures=["refunded_amount_excl_tax"], time_range=SEP,
+                                       filters=[FilterSpec(dimension="product_title", values=["X"])]))
+    assert exc.value.suggestions == ["product_refunded_amount_excl_tax"]
+    with pytest.raises(PlanError):
+        await planner.run(QueryRequest(measures=["refunded_amount_excl_tax"], dimensions=["product_title"],
+                                       time_range=SEP))

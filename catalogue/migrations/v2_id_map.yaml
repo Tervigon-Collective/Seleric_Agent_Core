@@ -4,6 +4,33 @@ generated: '2026-10-04'
 description: 'Semantic v2 hard cut: every certified v1 metric id → its v2 metric. Old ids are rejected on the agent surface
   with an error naming `new` (+ filters). Members are Cube v2 view members.'
 v2_metrics:
+  product_refunded_amount_excl_tax:
+    member: returns.product_refunded_amount_excl_tax
+    date_axis: returns.refund_date
+  product_returns_excl_tax:
+    member: returns.product_returns_excl_tax
+    date_axis: returns.refund_date
+  event_count:
+    member: web_event_detail.event_count
+    date_axis: web_event_detail.event_date
+  event_page_views:
+    member: web_event_detail.event_page_views
+    date_axis: web_event_detail.event_date
+  event_product_views:
+    member: web_event_detail.event_product_views
+    date_axis: web_event_detail.event_date
+  event_collection_views:
+    member: web_event_detail.event_collection_views
+    date_axis: web_event_detail.event_date
+  event_add_to_carts:
+    member: web_event_detail.event_add_to_carts
+    date_axis: web_event_detail.event_date
+  event_site_searches:
+    member: web_event_detail.event_site_searches
+    date_axis: web_event_detail.event_date
+  new_customer_ltv:
+    member: commerce.new_customer_ltv
+    date_axis: commerce.order_date
   # 2026-10-08 conformed-dimension pass: channel/campaign-grain order counts, CAC and CPA; session-grain
   # twins of the web marts; product-grain order count.
   channel_orders:

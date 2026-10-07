@@ -27,3 +27,14 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces: []
+excluded_dimensions:
+  product_type: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'
+  product_title: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'
+  variant_title: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'
+  sku: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole refund on
+    every line. Use the line-grain product_* twin.'
+  restock_type: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'

@@ -31,11 +31,11 @@ resolves:
 - when:
     measure: amount
     scope: product
-  metric: product_return_revenue
+  metric: product_refunded_amount_excl_tax
 - when:
     measure: returns_value
     scope: product
-  metric: product_return_revenue
+  metric: product_returns_excl_tax
 - when:
     measure: count
   metric: refund_count

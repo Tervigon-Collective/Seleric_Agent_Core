@@ -300,9 +300,9 @@ concepts:
     resolves:
       - {when: {measure: amount}, metric: refunded_amount_excl_tax}
       # product grain: a refund-level amount split by product repeats the whole refund on every product in it
-      # (live: 300 % "return rates"); the line-level returned revenue (order date, ex-GST) is the product answer
-      - {when: {measure: amount, scope: product}, metric: product_return_revenue}
-      - {when: {measure: returns_value, scope: product}, metric: product_return_revenue}
+      # (live: 300 % "return rates"); the refunded LINES' own amounts (same refund date, ex-GST) are the answer
+      - {when: {measure: amount, scope: product}, metric: product_refunded_amount_excl_tax}
+      - {when: {measure: returns_value, scope: product}, metric: product_returns_excl_tax}
       - {when: {measure: count}, metric: refund_count}
       - {when: {measure: lines}, metric: refund_lines}
       - {when: {measure: returns_value}, metric: returns_excl_tax}
@@ -363,7 +363,7 @@ concepts:
     aliases: [product views, pdp views, collection views, add to carts, page views, site searches, engagement,
               web events, events per session, bounce rate]
     axes: {event: {values: [pdp, collection, atc, pageview, search, all, per_session, bounce], default: pdp},
-           scope: {values: [all, session], default: all}}
+           scope: {values: [all, session, event], default: all}}
     resolves:
       # session grain: the same counts on web_sessions, where traffic source / campaign / device / landing page
       # slice them (the daily mart is brand × day × event type only)
@@ -373,6 +373,13 @@ concepts:
       - {when: {event: pageview, scope: session}, metric: session_page_views}
       - {when: {event: search, scope: session}, metric: site_searches}
       - {when: {event: bounce, scope: session}, metric: session_bounce_rate}
+      # event grain: each event with its page / product / collection and its session's traffic and campaign
+      - {when: {event: pageview, scope: event}, metric: event_page_views}
+      - {when: {event: pdp, scope: event}, metric: event_product_views}
+      - {when: {event: collection, scope: event}, metric: event_collection_views}
+      - {when: {event: atc, scope: event}, metric: event_add_to_carts}
+      - {when: {event: search, scope: event}, metric: event_site_searches}
+      - {when: {event: all, scope: event}, metric: event_count}
       - {when: {event: pdp}, metric: product_view_events}
       - {when: {event: collection}, metric: collection_view_events}
       - {when: {event: atc}, metric: add_to_cart_events}
@@ -425,8 +432,11 @@ concepts:
     display_name: LTV
     one_liner: First-order net revenue per new customer (dashboard LTV basis).
     aliases: [ltv, lifetime value, customer lifetime value, clv]
+    axes: {scope: {values: [all, attributed], default: all}}
     resolves:
       - {metric: ltv}
+      # order grain on commerce: the same first-order net sales ÷ new customers, sliceable by traffic / campaign
+      - {when: {scope: attributed}, metric: new_customer_ltv}
 
   - id: cac
     display_name: CAC
