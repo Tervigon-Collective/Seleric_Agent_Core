@@ -113,17 +113,40 @@ def candidate_terms(text: str, skip: frozenset[str]) -> list[str]:
     broadly are dropped by the selectivity rule in ``ValueIndex.resolve``.
     Structural filters only — numbers, 1–2 char tokens, brand names (resolved
     separately)."""
-    words = [
-        w for w in normalize(text).split()
-        if len(w) >= 3 and not _NUMERIC_RE.match(w) and w not in skip
-    ]
     terms: list[str] = []
+    clauses = [
+        [w for w in normalize(clause).split() if len(w) >= 3 and not _NUMERIC_RE.match(w) and w not in skip]
+        for clause in _clauses(text)
+    ]
     for n in (3, 2, 1):
-        for i in range(0, len(words) - n + 1):
-            term = " ".join(words[i : i + n])
-            if term not in terms:
-                terms.append(term)
+        for words in clauses:
+            for i in range(0, len(words) - n + 1):
+                term = " ".join(words[i : i + n])
+                if term not in terms:
+                    terms.append(term)
     return terms
+
+
+# Characters that end a phrase: list commas and sentence ends. A phrase never spans
+# them — "across Meta, Google, organic, WhatsApp" named "google organic" (channel =
+# google_organic) and the scope gate demanded every figure be filtered to it (live
+# 2026-10-09 MS3-5d230f6836). A dot ends a phrase only before a space or the end,
+# so "go.product" or "2.5" stay whole.
+_CLAUSE_BREAKS = frozenset(",;!?()[]{}\n")
+
+
+def _clauses(text: str) -> list[str]:
+    out: list[str] = []
+    current: list[str] = []
+    for i, ch in enumerate(text):
+        ends_sentence = ch == "." and (i + 1 == len(text) or text[i + 1].isspace())
+        if ch in _CLAUSE_BREAKS or ends_sentence:
+            out.append("".join(current))
+            current = []
+        else:
+            current.append(ch)
+    out.append("".join(current))
+    return [c for c in out if c.strip()]
 
 
 def _is_opaque(value: str) -> bool:

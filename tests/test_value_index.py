@@ -368,3 +368,11 @@ def test_v2_catalogue_filter_values_are_scope_not_vocabulary(catalogue):
     assert {"meta", "google", "whatsapp", "organic"} <= _index(v2)._filter_value_words()
     assert "true" not in _index(v2)._filter_value_words()  # is_paid literal is not a name
     assert "meta" in _index(catalogue)._vocabulary()  # v1 unchanged
+
+
+def test_a_phrase_never_spans_a_list_comma():
+    # Live 2026-10-09 MS3-5d230f6836: "Meta, Google, organic" named "google organic".
+    terms = candidate_terms("across Meta, Google, organic. Suspender boots sales", skip=frozenset())
+    assert "google organic" not in terms and "meta google" not in terms
+    assert {"google", "organic", "suspender boots", "suspender boots sales"} <= set(terms)
+    assert "from product sync" in candidate_terms("traffic from go.product sync", skip=frozenset())  # no break inside go.product
