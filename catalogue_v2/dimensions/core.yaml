@@ -55,6 +55,8 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_format
     web_sessions: web_sessions.ad_format
     web_event_detail: web_event_detail.ad_format
+    attribution: attribution.ad_format
+    attribution_paths: attribution_paths.ad_format
     returns: returns.ad_format
     pnl: pnl.ad_format
     order_pnl: order_pnl.ad_format
@@ -72,6 +74,8 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_id
     web_sessions: web_sessions.ad_id
     web_event_detail: web_event_detail.ad_id
+    attribution: attribution.ad_id
+    attribution_paths: attribution_paths.ad_id
     returns: returns.ad_id
     pnl: pnl.ad_id
     order_pnl: order_pnl.ad_id
@@ -89,6 +93,8 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_name
     web_sessions: web_sessions.ad_name
     web_event_detail: web_event_detail.ad_name
+    attribution: attribution.ad_name
+    attribution_paths: attribution_paths.ad_name
     returns: returns.ad_name
     pnl: pnl.ad_name
     order_pnl: order_pnl.ad_name
@@ -106,8 +112,11 @@ dimensions:
     paid_media_breakdowns: paid_media_breakdowns.ad_platform
     paid_media_changes: paid_media_changes.ad_platform
     web_sessions: web_sessions.ad_platform
+    web_funnel: web_funnel.ad_platform
     web_event_detail: web_event_detail.ad_platform
     attribution: attribution.ad_platform
+    attribution_paths: attribution_paths.ad_platform
+    unit_economics: unit_economics.ad_platform
     returns: returns.ad_platform
     payments: payments.ad_platform
     pnl: pnl.ad_platform
@@ -131,6 +140,8 @@ dimensions:
     paid_media_changes: paid_media_changes.ad_status
     web_sessions: web_sessions.ad_status
     web_event_detail: web_event_detail.ad_status
+    attribution: attribution.ad_status
+    attribution_paths: attribution_paths.ad_status
     returns: returns.ad_status
     pnl: pnl.ad_status
     order_pnl: order_pnl.ad_status
@@ -148,6 +159,8 @@ dimensions:
     paid_media_changes: paid_media_changes.adset_id
     web_sessions: web_sessions.adset_id
     web_event_detail: web_event_detail.adset_id
+    attribution: attribution.adset_id
+    attribution_paths: attribution_paths.adset_id
     returns: returns.adset_id
     pnl: pnl.adset_id
     order_pnl: order_pnl.adset_id
@@ -165,6 +178,8 @@ dimensions:
     paid_media_changes: paid_media_changes.adset_name
     web_sessions: web_sessions.adset_name
     web_event_detail: web_event_detail.adset_name
+    attribution: attribution.adset_name
+    attribution_paths: attribution_paths.adset_name
     returns: returns.adset_name
     pnl: pnl.adset_name
     order_pnl: order_pnl.adset_name
@@ -182,6 +197,8 @@ dimensions:
     paid_media_changes: paid_media_changes.adset_status
     web_sessions: web_sessions.adset_status
     web_event_detail: web_event_detail.adset_status
+    attribution: attribution.adset_status
+    attribution_paths: attribution_paths.adset_status
     returns: returns.adset_status
     pnl: pnl.adset_status
     order_pnl: order_pnl.adset_status
@@ -208,6 +225,45 @@ dimensions:
   views:
     attribution_paths: attribution_paths.attribution_model
   aliases: []
+- id: basket_product_title
+  display_name: Basket Product Title
+  description: Product title.
+  is_time: false
+  views:
+    commerce: commerce.basket_product_title
+    payments: payments.basket_product_title
+  aliases: []
+  family: product
+  family_rank: 1
+- id: basket_product_type
+  display_name: Basket Product Type
+  description: Shopify product type ('(none)' when unset).
+  is_time: false
+  views:
+    commerce: commerce.basket_product_type
+    payments: payments.basket_product_type
+  aliases: []
+  family: product_type
+  family_rank: 1
+- id: basket_sku
+  display_name: Basket Sku
+  description: SKU.
+  is_time: false
+  views:
+    commerce: commerce.basket_sku
+    payments: payments.basket_sku
+  aliases: []
+  family: sku
+  family_rank: 1
+- id: basket_variant_title
+  display_name: Basket Variant Title
+  description: Variant title.
+  is_time: false
+  views:
+    commerce: commerce.basket_variant_title
+  aliases: []
+  family: variant
+  family_rank: 1
 - id: brand_id
   display_name: Brand Id
   description: Brand id (the agent scopes every query by it).
@@ -273,6 +329,9 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_id
     web_sessions: web_sessions.campaign_id
     web_event_detail: web_event_detail.campaign_id
+    attribution: attribution.campaign_id
+    attribution_paths: attribution_paths.campaign_id
+    unit_economics: unit_economics.campaign_id
     returns: returns.campaign_id
     payments: payments.campaign_id
     pnl: pnl.campaign_id
@@ -291,6 +350,9 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_name
     web_sessions: web_sessions.campaign_name
     web_event_detail: web_event_detail.campaign_name
+    attribution: attribution.campaign_name
+    attribution_paths: attribution_paths.campaign_name
+    unit_economics: unit_economics.campaign_name
     returns: returns.campaign_name
     payments: payments.campaign_name
     pnl: pnl.campaign_name
@@ -315,6 +377,9 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_objective
     web_sessions: web_sessions.campaign_objective
     web_event_detail: web_event_detail.campaign_objective
+    attribution: attribution.campaign_objective
+    attribution_paths: attribution_paths.campaign_objective
+    unit_economics: unit_economics.campaign_objective
     returns: returns.campaign_objective
     payments: payments.campaign_objective
     pnl: pnl.campaign_objective
@@ -333,6 +398,9 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_status
     web_sessions: web_sessions.campaign_status
     web_event_detail: web_event_detail.campaign_status
+    attribution: attribution.campaign_status
+    attribution_paths: attribution_paths.campaign_status
+    unit_economics: unit_economics.campaign_status
     returns: returns.campaign_status
     payments: payments.campaign_status
     pnl: pnl.campaign_status
@@ -351,6 +419,9 @@ dimensions:
     paid_media_changes: paid_media_changes.campaign_type
     web_sessions: web_sessions.campaign_type
     web_event_detail: web_event_detail.campaign_type
+    attribution: attribution.campaign_type
+    attribution_paths: attribution_paths.campaign_type
+    unit_economics: unit_economics.campaign_type
     returns: returns.campaign_type
     payments: payments.campaign_type
     pnl: pnl.campaign_type
@@ -378,8 +449,10 @@ dimensions:
     commerce: commerce.channel
     product: product.channel
     web_sessions: web_sessions.channel
+    web_funnel: web_funnel.channel
     web_event_detail: web_event_detail.channel
     attribution: attribution.channel
+    attribution_paths: attribution_paths.channel
     returns: returns.channel
     payments: payments.channel
   aliases: []
@@ -420,6 +493,8 @@ dimensions:
     paid_media_changes: paid_media_changes.creative_type
     web_sessions: web_sessions.creative_type
     web_event_detail: web_event_detail.creative_type
+    attribution: attribution.creative_type
+    attribution_paths: attribution_paths.creative_type
     returns: returns.creative_type
     pnl: pnl.creative_type
     order_pnl: order_pnl.creative_type
@@ -525,8 +600,11 @@ dimensions:
     paid_media_hourly: paid_media_hourly.finance_channel
     paid_media_breakdowns: paid_media_breakdowns.finance_channel
     web_sessions: web_sessions.finance_channel
+    web_funnel: web_funnel.finance_channel
     web_event_detail: web_event_detail.finance_channel
     attribution: attribution.finance_channel
+    attribution_paths: attribution_paths.finance_channel
+    unit_economics: unit_economics.finance_channel
     returns: returns.finance_channel
     payments: payments.finance_channel
     pnl: pnl.finance_channel
@@ -556,6 +634,24 @@ dimensions:
   views:
     customers: customers.first_order_at
   aliases: []
+- id: first_order_product_title
+  display_name: First Order Product Title
+  description: Product of the customer's first order.
+  is_time: false
+  views:
+    customers: customers.first_order_product_title
+  aliases: []
+  family: product
+  family_rank: 3
+- id: first_order_product_type
+  display_name: First Order Product Type
+  description: Product type of the customer's first order.
+  is_time: false
+  views:
+    customers: customers.first_order_product_type
+  aliases: []
+  family: product_type
+  family_rank: 2
 - id: first_order_sku
   display_name: First Order Sku
   description: SKU of the customer's first order (the product that acquired them).
@@ -564,7 +660,7 @@ dimensions:
     customers: customers.first_order_sku
   aliases: []
   family: sku
-  family_rank: 1
+  family_rank: 3
 - id: fulfillment_status
   display_name: Fulfillment Status
   description: Shopify fulfillment status.
@@ -708,6 +804,7 @@ dimensions:
   views:
     commerce: commerce.is_new_customer
     product: product.is_new_customer
+    attribution_paths: attribution_paths.is_new_customer
     returns: returns.is_new_customer
     payments: payments.is_new_customer
     order_pnl: order_pnl.is_new_customer
@@ -726,8 +823,11 @@ dimensions:
     paid_media_hourly: paid_media_hourly.is_paid
     paid_media_breakdowns: paid_media_breakdowns.is_paid
     web_sessions: web_sessions.is_paid
+    web_funnel: web_funnel.is_paid
     web_event_detail: web_event_detail.is_paid
     attribution: attribution.is_paid
+    attribution_paths: attribution_paths.is_paid
+    unit_economics: unit_economics.is_paid
     returns: returns.is_paid
     payments: payments.is_paid
     pnl: pnl.is_paid
@@ -813,8 +913,10 @@ dimensions:
     commerce: commerce.medium_group
     product: product.medium_group
     web_sessions: web_sessions.medium_group
+    web_funnel: web_funnel.medium_group
     web_event_detail: web_event_detail.medium_group
     attribution: attribution.medium_group
+    attribution_paths: attribution_paths.medium_group
     returns: returns.medium_group
     payments: payments.medium_group
   aliases: []
@@ -958,8 +1060,11 @@ dimensions:
     paid_media_hourly: paid_media_hourly.platform
     paid_media_breakdowns: paid_media_breakdowns.platform
     web_sessions: web_sessions.platform
+    web_funnel: web_funnel.platform
     web_event_detail: web_event_detail.platform
     attribution: attribution.platform
+    attribution_paths: attribution_paths.platform
+    unit_economics: unit_economics.platform
     returns: returns.platform
     payments: payments.platform
   aliases: []
@@ -1005,6 +1110,8 @@ dimensions:
   aliases:
   - product
   - product name
+  family: product
+  family_rank: 0
 - id: product_type
   display_name: Product Type
   description: Shopify product type ('(none)' when unset).
@@ -1013,6 +1120,8 @@ dimensions:
     product: product.product_type
     returns: returns.product_type
   aliases: []
+  family: product_type
+  family_rank: 0
 - id: publisher_platform
   display_name: Publisher Platform
   description: Meta audience breakdown (breakdown_type publisher_platform, placement, platform_device); Meta delivery
@@ -1227,6 +1336,7 @@ dimensions:
     web_sessions: web_sessions.sub_channel
     web_event_detail: web_event_detail.sub_channel
     attribution: attribution.sub_channel
+    attribution_paths: attribution_paths.sub_channel
     returns: returns.sub_channel
     payments: payments.sub_channel
     order_pnl: order_pnl.sub_channel
@@ -1296,6 +1406,8 @@ dimensions:
     returns: returns.variant_title
   aliases:
   - variant
+  family: variant
+  family_rank: 0
 - id: vendor
   display_name: Vendor
   description: Vendor.
@@ -1306,3 +1418,21 @@ dimensions:
   - brand vendor
   - supplier
   - vendor name
+- id: viewed_product_title
+  display_name: Viewed Product Title
+  description: Product (product events).
+  is_time: false
+  views:
+    web_sessions: web_sessions.viewed_product_title
+  aliases: []
+  family: product
+  family_rank: 2
+- id: viewed_sku
+  display_name: Viewed Sku
+  description: SKU (product events).
+  is_time: false
+  views:
+    web_sessions: web_sessions.viewed_sku
+  aliases: []
+  family: sku
+  family_rank: 2

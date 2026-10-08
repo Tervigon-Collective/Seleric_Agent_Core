@@ -30,3 +30,12 @@ replaces:
 - ad_channel_orders
 - attributed_orders
 - total_orders
+excluded_dimensions:
+  basket_product_title: basket_product_title counts the whole order / session / customer under each product in it;
+    by product_title this measure is its grain twin product_orders.
+  basket_sku: basket_sku counts the whole order / session / customer under each product in it; by sku this measure
+    is its grain twin product_orders.
+  basket_product_type: basket_product_type counts the whole order / session / customer under each product in it;
+    by product_type this measure is its grain twin product_orders.
+  basket_variant_title: basket_variant_title counts the whole order / session / customer under each product in it;
+    by variant_title this measure is its grain twin product_orders.

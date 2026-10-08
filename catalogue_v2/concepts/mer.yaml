@@ -12,6 +12,11 @@ axes:
     - order
     - finance
     default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
   channel:
     values:
     - all
@@ -48,3 +53,7 @@ resolves:
 - when:
     date: finance
   metric: pnl_mer
+- when:
+    date: order
+    scope: product
+  metric: product_mer

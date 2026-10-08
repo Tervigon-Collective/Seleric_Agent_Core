@@ -27,3 +27,12 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces: []
+excluded_dimensions:
+  basket_product_title: basket_product_title counts the whole order / session / customer under each product in it;
+    by product_title this measure is its grain twin product_discounts.
+  basket_sku: basket_sku counts the whole order / session / customer under each product in it; by sku this measure
+    is its grain twin product_discounts.
+  basket_product_type: basket_product_type counts the whole order / session / customer under each product in it;
+    by product_type this measure is its grain twin product_discounts.
+  basket_variant_title: basket_variant_title counts the whole order / session / customer under each product in it;
+    by variant_title this measure is its grain twin product_discounts.

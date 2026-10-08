@@ -62,7 +62,7 @@ views:
   freshness:
     source: Cube v2 view web_funnel (serve.* via cube_serve)
     expected_cadence: daily after dw/mart run; 26h SLA
-  description: 'Daily funnel mart: bounce rate, Snowplow purchases and revenue (brand × day).'
+  description: 'Daily funnel mart: bounce rate, Snowplow purchases and revenue by day and channel / platform.'
 - name: web_events
   title: Web Events
   date_dimension: report_date
@@ -86,14 +86,15 @@ views:
     source: Cube v2 view attribution (serve.* via cube_serve)
     expected_cadence: hourly after gold sync, IST
   description: 'Pre-purchase touchpoints by order date: touches and orders with touchpoints, sliced by the touch''s
-    traffic source.'
+    traffic source and its session''s campaign.'
 - name: attribution_paths
   title: Attribution Paths
   date_dimension: order_date
   freshness:
     source: Cube v2 view attribution_paths (serve.* via cube_serve)
     expected_cadence: hourly after gold sync, IST
-  description: 'Attribution paths per order and model: average touches per path, conversion paths.'
+  description: 'Attribution paths per order and model: average touches per path, conversion paths; sliced by the
+    order''s last-touch traffic and campaign.'
 - name: customers
   title: Customers
   date_dimension: last_order_at
@@ -107,7 +108,7 @@ views:
   freshness:
     source: Cube v2 view unit_economics (serve.* via cube_serve)
     expected_cadence: hourly after gold sync, IST
-  description: New-customer LTV, CAC and LTV:CAC (brand × day).
+  description: New-customer LTV, CAC and LTV:CAC by day, platform (first-order last touch / spend) and campaign.
 - name: returns
   title: Returns
   date_dimension: refund_date

@@ -18,6 +18,11 @@ axes:
     - meta
     - google
     default: all
+  scope:
+    values:
+    - all
+    - product
+    default: all
 axis_filters:
   platform:
     meta:
@@ -26,7 +31,13 @@ axis_filters:
       ad_platform: google
 resolves:
 - metric: ad_spend
+- when:
+    scope: product
+  metric: product_ad_spend
 disambiguation: 'One id for every spend number; the platform is a filter (ad_platform). Hourly and audience-breakdown
-  questions use the same metric (the planner routes to the hourly / breakdown binding).
+  questions use the same metric (the planner routes to the hourly / breakdown binding). By product (scope=product)
+  it is product_ad_spend: no platform reports spend per product, so each campaign-day''s spend is allocated over
+  the lines of the orders it drove (last touch) by line revenue; spend of campaign-days with no attributed order
+  is on no product, so products sum below total spend.
 
   '

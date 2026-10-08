@@ -29,3 +29,12 @@ access_policy:
 version: 1.0.0
 replaces:
 - gross_sales_all_channels
+excluded_dimensions:
+  basket_product_title: basket_product_title counts the whole order / session / customer under each product in it;
+    by product_title this measure is its grain twin product_gross_sale.
+  basket_sku: basket_sku counts the whole order / session / customer under each product in it; by sku this measure
+    is its grain twin product_gross_sale.
+  basket_product_type: basket_product_type counts the whole order / session / customer under each product in it;
+    by product_type this measure is its grain twin product_gross_sale.
+  basket_variant_title: basket_variant_title counts the whole order / session / customer under each product in it;
+    by variant_title this measure is its grain twin product_gross_sale.

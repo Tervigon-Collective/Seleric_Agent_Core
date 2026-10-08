@@ -29,3 +29,8 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces: []
+excluded_dimensions:
+  viewed_product_title: viewed_product_title counts the whole order / session / customer under each product in it;
+    by product_title this measure is its grain twin event_page_views.
+  viewed_sku: viewed_sku counts the whole order / session / customer under each product in it; by sku this measure
+    is its grain twin event_page_views.

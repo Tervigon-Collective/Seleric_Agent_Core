@@ -100,6 +100,12 @@ _FANOUT = ("Refund-level amount: split by the refunded lines' product / restock 
            "on every line. Use the line-grain product_* twin.")
 EXCLUDED_DIMS = {m: {d: _FANOUT for d in ("product_type", "product_title", "variant_title", "sku", "restock_type")}
                  for m in ("refunded_amount_excl_tax", "returns_excl_tax")}
+# The funnel mart's session rows use session channel labels (organic / other / google_free_listing: 39 % of brand 20 Sep
+# sessions) that carry no platform, so its bounce rate by platform would park them under an empty label; the
+# session-grain twin classifies every session. Its purchases sit on the order's last-touch channel (all mapped).
+_SESSION_LABELS = "Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate."
+EXCLUDED_DIMS["bounce_rate"] = {d: _SESSION_LABELS for d in ("platform", "finance_channel", "ad_platform", "is_paid",
+                                                             "medium_group", "channel")}
 NOT_CERTIFIED = {"link_clicks", "thruplays", "hook_rate", "hold_rate_15s", "cost_per_link_click"}  # approved
 # kept id, number changed (event → order date). The P&L ids came back on 2026-10-04 as the ORDER-date twins of
 # pnl_* (decision: every non-Finance domain reads the order date); their v1 event-date meaning is pnl_<id>.
@@ -123,6 +129,8 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "repeat_rate": ["repeat_customers", "customers"], "ltv": ["new_customers"], "cac": ["ad_spend", "new_customers"],
     "ltv_cac_ratio": ["ltv", "cac"],
     "new_customer_ltv": ["new_customers"],
+    "product_gross_roas": ["product_attributed_revenue", "product_ad_spend"], "product_net_roas": ["product_ad_spend"],
+    "product_mer": ["product_ad_spend"],
     "channel_cac": ["ad_spend", "channel_new_customers"], "cost_per_order": ["ad_spend", "channel_orders"],
     "session_bounce_rate": ["sessions"], "pnl_contribution_margin_pct": ["pnl_contribution_margin", "pnl_net_sales"],
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
@@ -145,8 +153,44 @@ FAMILIES = {
     "platform": ["platform", "finance_channel", "ad_platform", "acquisition_platform"],
     "channel": ["channel", "acquisition_channel"],
     "campaign": ["campaign_name", "acquisition_campaign"],
-    "sku": ["sku", "first_order_sku"],  # customers: the SKU of the first order
+    # product vocabulary on order / payment (basket_*: orders CONTAINING it), session (viewed_*: sessions that viewed
+    # or added it) and customer (first_order_*: the first order's product) views — see PROXY_OF
+    "product": ["product_title", "basket_product_title", "viewed_product_title", "first_order_product_title"],
+    "sku": ["sku", "basket_sku", "viewed_sku", "first_order_sku"],
+    "product_type": ["product_type", "basket_product_type", "first_order_product_type"],
+    "variant": ["variant_title", "basket_variant_title"],
 }
+# Proxy members: the product vocabulary with another meaning — the orders / sessions / customers that contain, viewed
+# or first bought the product (Cube counts each order / session once under every product in it). They answer a
+# product slice for a measure with no product grain (AOV, COD orders, conversion rate, repeat rate by product); a
+# measure whose catalogue grain twin carries the real member answers there instead (net sales by product = line
+# revenue, not the revenue of the orders containing it), so the proxy is excluded from it.
+PROXY_OF = {"basket_product_title": "product_title", "viewed_product_title": "product_title",
+            "first_order_product_title": "product_title", "basket_sku": "sku", "viewed_sku": "sku",
+            "first_order_sku": "sku", "basket_product_type": "product_type",
+            "first_order_product_type": "product_type", "basket_variant_title": "variant_title"}
+
+
+def _grain_twins(concepts: list[dict], mid: str) -> list[str]:
+    """The concepts' scope-axis twins of *mid* — the rule CatalogueService.grain_twins applies at run time."""
+    out: list[str] = []
+    for c in concepts:
+        scope = (c.get("axes") or {}).get("scope")
+        if not scope:
+            continue
+        rows = c.get("resolves") or []
+        for r in rows:
+            when = r.get("when") or {}
+            if r["metric"] != mid:
+                continue
+            own = when.get("scope", scope["default"])
+            base = {k: v for k, v in when.items() if k != "scope"}
+            for t in rows:
+                tw = t.get("when") or {}
+                if (tw.get("scope", scope["default"]) != own and t["metric"] != mid
+                        and all(tw.get(k, v) == v for k, v in base.items())):
+                    out.append(t["metric"])
+    return list(dict.fromkeys(out))
 V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_status",
                   "platform": "lt_platform", "channel": "lt_channel", "product_title": "product_title"}
 ALLOWED = {"finance_channel": ["meta", "google", "whatsapp", "organic", "unattributed"],
@@ -170,6 +214,8 @@ DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm"
            "channel_cac": "CAC (by channel / campaign)", "cost_per_order": "Cost per order (CPA)",
            "session_page_views": "Page views (sessions)", "session_bounce_rate": "Bounce rate (sessions)",
            "product_orders": "Orders with the product",
+           "product_ad_spend": "Product ad spend (allocated)", "product_attributed_revenue": "Product ad-attributed revenue",
+           "product_gross_roas": "Product gross ROAS", "product_net_roas": "Product net ROAS", "product_mer": "Product MER",
            "product_refunded_amount_excl_tax": "Product refunded amount (ex-GST)",
            "product_returns_excl_tax": "Product returns value (ex-GST)",
            "event_count": "Web events (events)", "event_page_views": "Page views (events)", "event_product_views": "Product views (events)",
@@ -327,6 +373,8 @@ def main() -> int:
     # ---- metrics
     measures = {m["name"]: m for vm in views_meta.values() for m in vm["measures"]}
     v2 = idmap["v2_metrics"]
+    concept_rows = ry(ROOT / "catalogue_v2_src" / "concepts.yaml")["concepts"]
+    view_dims = {v: {dim_id(v, d["name"]) for d in vm["dimensions"]} for v, vm in views_meta.items()}
     for mid, spec in sorted(v2.items()):
         view, member = spec["member"].split(".", 1)
         cm = measures[spec["member"]]
@@ -372,8 +420,15 @@ def main() -> int:
         }
         if mid in UNAVAILABLE:
             doc["unavailable_reason"] = UNAVAILABLE[mid]
-        if mid in EXCLUDED_DIMS:
-            doc["excluded_dimensions"] = EXCLUDED_DIMS[mid]
+        excluded = dict(EXCLUDED_DIMS.get(mid, {}))
+        twin_views = {t: v2[t]["member"].split(".", 1)[0] for t in _grain_twins(concept_rows, mid) if t in v2}
+        for proxy, real in PROXY_OF.items():
+            twin = next((t for t, tv in twin_views.items() if real in view_dims[tv]), None)
+            if proxy in view_dims[view] and twin is not None:
+                excluded[proxy] = (f"{proxy} counts the whole order / session / customer under each product in it; "
+                                   f"by {real} this measure is its grain twin {twin}.")
+        if excluded:
+            doc["excluded_dimensions"] = excluded
         valid_for: dict[str, list[str]] = {}
         reasons = []
         if mid in META_ONLY:

@@ -54,6 +54,21 @@ v2_metrics:
   product_orders:
     member: product.product_orders
     date_axis: product.order_date
+  product_ad_spend:
+    member: product.product_ad_spend
+    date_axis: product.order_date
+  product_attributed_revenue:
+    member: product.product_attributed_revenue
+    date_axis: product.order_date
+  product_gross_roas:
+    member: product.product_gross_roas
+    date_axis: product.order_date
+  product_net_roas:
+    member: product.product_net_roas
+    date_axis: product.order_date
+  product_mer:
+    member: product.product_mer
+    date_axis: product.order_date
   ad_spend:
     member: paid_media.ad_spend
     date_axis: paid_media.report_date

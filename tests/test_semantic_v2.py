@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 145
+    assert len(v2.cat.metrics) == 150
     assert len(v2.cat.views) == 18
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -346,7 +346,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 142  # 145 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 147  # 150 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -472,10 +472,13 @@ def test_grain_twins_cover_marts_cac_orders_and_refunds(v2):
 def test_twins_carry_the_slices_their_base_metric_lacks(v2):
     cat = v2.cat
     for base, twin, dims in (("page_views", "session_page_views", {"platform", "ad_platform", "campaign_name"}),
-                             ("cac", "channel_cac", {"finance_channel", "ad_platform", "campaign_name"}),
+                             ("add_to_carts", "event_add_to_carts", {"product_title", "sku"}),
                              ("orders", "product_orders", {"product_title", "sku"})):
         assert not dims <= set(cat.metrics[base].supported_dimensions)
         assert dims <= set(cat.metrics[twin].supported_dimensions), (twin, dims)
+    # unit economics carries the platform family and campaign itself (first-order last touch / spend campaign)
+    for mid in ("cac", "ltv", "ltv_cac_ratio"):
+        assert {"platform", "finance_channel", "ad_platform", "campaign_name"} <= set(cat.metrics[mid].supported_dimensions)
 
 
 def test_platform_family_is_conformed_across_domains(v2):
@@ -563,3 +566,33 @@ def test_spelled_out_ad_ratios_and_lpvs_resolve_to_their_own_metric(v2):
                       ("LPVs (landing page views)", "landing_page_views"), ("lpvs", "landing_page_views"),
                       ("page views", "page_views"), ("impressions", "impressions")):
         assert v2.resolve_concept(text).metric_id == mid, text
+
+
+def test_product_slices_reach_every_domain(v2):
+    cat = v2.cat
+    # twins from any scope: a session / attributed metric reaches the product grain too
+    assert v2.grain_twins("add_to_carts")[0] == "event_add_to_carts"
+    assert v2.grain_twins("channel_orders") == ["product_orders", "orders"]
+    # spend and ROAS by product: the allocation-model twins on the product view
+    assert v2.grain_twins("ad_spend") == ["product_ad_spend"]
+    assert v2.grain_twins("net_roas") == ["product_net_roas"]
+    assert v2.grain_twins("gross_roas") == ["product_gross_roas"]
+    assert v2.grain_twins("mer") == ["product_mer"]
+    for mid in ("product_ad_spend", "product_net_roas"):
+        assert {"product_title", "sku", "ad_platform", "campaign_name"} <= set(cat.metrics[mid].supported_dimensions)
+    # order / session / customer measures with no product grain slice by the proxy members of the product family
+    assert "basket_product_title" in cat.metrics["aov"].supported_dimensions
+    assert "basket_product_title" in cat.metrics["payment_amount"].supported_dimensions
+    assert "viewed_product_title" in cat.metrics["conversion_rate"].supported_dimensions
+    assert "first_order_product_title" in cat.metrics["repeat_rate"].supported_dimensions
+    families = {d.id: d.family for d in cat.dimensions.values()}
+    assert {families[d] for d in ("product_title", "basket_product_title", "viewed_product_title",
+                                  "first_order_product_title")} == {"product"}
+    # ... never where a grain twin carries the real member (net sales by product = line revenue)
+    for mid in ("net_sales", "orders", "add_to_carts"):
+        supported = set(cat.metrics[mid].supported_dimensions)
+        assert not {"basket_product_title", "viewed_product_title"} & supported, mid
+    # attribution paths / touches by the order's / session's campaign; funnel purchases by platform
+    assert {"finance_channel", "campaign_name"} <= set(cat.metrics["avg_touch_count"].supported_dimensions)
+    assert "campaign_name" in cat.metrics["touches"].supported_dimensions
+    assert {"platform", "ad_platform"} <= set(cat.metrics["funnel_purchases"].supported_dimensions)

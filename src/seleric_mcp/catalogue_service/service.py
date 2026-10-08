@@ -894,25 +894,28 @@ class CatalogueService:
 
     def grain_twins(self, metric_id: str) -> list[str]:
         """Metrics that answer the same concept selection at another grain, from the concepts' own ``scope``
-        axis: a row resolving to *metric_id* and a scope=<grain> row agreeing on every other axis it states
-        (net_sales {basis: net, date: order} -> product_net_revenue {basis: net, scope: product, date: order}).
-        An order-grain metric cannot carry a product breakdown; its twin can — the agent redirects there."""
-        out: list[str] = []
+        axis: a row resolving to *metric_id* and a row at another scope agreeing on every other axis it states
+        (net_sales {basis: net, date: order} -> product_net_revenue {basis: net, scope: product, date: order};
+        add_to_carts {event: atc, scope: session} -> event_add_to_carts {event: atc, scope: event}). A metric
+        that cannot carry a breakdown at its grain is answered by the twin that can — the agent redirects there.
+        Explicit-scope twins first (the grain named for the slice), the default-scope metric last."""
+        explicit: list[str] = []
+        default: list[str] = []
         for c in self.cat.concepts.values():
             scope = c.axes.get("scope")
             if scope is None:
                 continue
             for r in c.resolves:
-                if r.metric != metric_id or r.when.get("scope", scope.default) != scope.default:
+                if r.metric != metric_id:
                     continue
+                own = r.when.get("scope", scope.default)
                 base = {k: v for k, v in r.when.items() if k != "scope"}
                 for t in c.resolves:
-                    grain = t.when.get("scope")
-                    if (grain and grain != scope.default and t.metric != metric_id and t.metric not in out
-                            and t.metric in self.cat.metrics
+                    grain = t.when.get("scope", scope.default)
+                    if (grain != own and t.metric != metric_id and t.metric in self.cat.metrics
                             and all(t.when.get(k, v) == v for k, v in base.items())):
-                        out.append(t.metric)
-        return out
+                        (default if grain == scope.default else explicit).append(t.metric)
+        return list(dict.fromkeys([*explicit, *default]))
 
     def lookup_metric(self, metric_id: str) -> tuple[MetricDef, str | None] | None:
         """Queryable resolve, or exact id including draft/broken (for get_metric)."""

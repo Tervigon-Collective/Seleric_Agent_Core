@@ -21,6 +21,7 @@ hierarchies:
     - web_sessions
     - web_event_detail
     - attribution
+    - attribution_paths
     - returns
     - payments
   product:
@@ -48,6 +49,8 @@ hierarchies:
     - paid_media_changes
     - web_sessions
     - web_event_detail
+    - attribution
+    - attribution_paths
     - returns
     - pnl
     - order_pnl
@@ -67,6 +70,8 @@ hierarchies:
     - paid_media_changes
     - web_sessions
     - web_event_detail
+    - attribution
+    - attribution_paths
     - returns
     - pnl
     - order_pnl
