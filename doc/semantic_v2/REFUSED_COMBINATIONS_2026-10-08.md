@@ -23,8 +23,9 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
   product now resolve to the P&L basis (product_net_profit), not line gross profit.
 
 ### Gaps and next steps (not done this session)
-1. **Re-run the sweep** (`/tmp/sweep_agent.py` in the api container; MCP at http://mcp:8765/mcp) after Jenkins
-   deploys this catalogue. Expected: the 50 refusals close. Check each new twin's values against CH.
+1. ~~Re-run the sweep~~ DONE 2026-10-09 after Jenkins #82: **0 refused of 1,379** metric × slice combinations
+   (1,133 direct, 116 via a grain twin, 130 via a conformed sibling). Still to do: spot-check the new twins'
+   values against CH per metric (the view-level totals above are already checked).
 2. **Replay golden Q1–18** plus product P&L questions on the live API. Cross-check product net profit / CAC /
    CTR in ClickHouse.
 3. **Meta spend by P&L channel on product_pnl is 1,104.81 below order_pnl (Sep).** Allocated spend follows the
