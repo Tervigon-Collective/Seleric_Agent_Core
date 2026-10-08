@@ -1,5 +1,70 @@
 # Refused metric × slice combinations (2026-10-08)
 
+## Current state (second pass, 2026-10-08 afternoon IST)
+
+Live versions: Cube model mage-ai `main` f6d0c57 · catalogue / MCP Agent_Core `main` be554dc (Jenkins #78) ·
+agent image built from Seleric_Agent `conformed-dims` fea9914 (rollback tags `rollback-20261008f` / `-g`).
+`gaurav` 5f79555 holds the same agent changes merged with a teammate's executor rework (90fc6f5, not yet deployed —
+the next agent deploy should build from `gaurav`).
+
+Same sweep (149 metrics × 7 slices, brand 20, 2026-09-24..30) on the live stack:
+
+| Outcome | First pass | Now |
+|---|---:|---:|
+| Answered on the metric's own view | 752 | 814 |
+| Answered through a conformed sibling | 60 | 92 |
+| Answered through a grain twin | 67 | 66 |
+| **Refused** | **115** | **50** |
+
+What closed the gap (all checked against ClickHouse, brand totals unchanged):
+- **Product slices on every domain.** Proxy members of the product family: `basket_*` on commerce, payments,
+  attribution (orders / payments / touches of orders CONTAINING the product), `viewed_*` on web_sessions (sessions
+  that viewed / added it), `first_order_product_*` on customers. Excluded wherever a grain twin carries the real
+  product member (net sales by product stays line revenue). Declared once as `PROXY_FAMILIES` in the generator.
+- **Ad spend / ROAS / MER by product** — `product_ad_spend`, `product_gross_roas`, `product_net_roas`,
+  `product_mer`: campaign-day spend allocated over the lines of the orders each campaign drove (a model; Sep
+  777,843 of 1,193,322 allocated — campaign-days with no attributed order sit on no product).
+- **Unit economics by platform / campaign** (`ltv`, `cac`, `ltv_cac_ratio`), attribution paths by the order's traffic
+  / campaign, touches by their session's campaign, funnel purchases / revenue / bounce by platform.
+- **Twins from any scope** (session → event, attributed → product), proxies and platform sets derived from data —
+  no metric / keyword / value literals in agent code or Cube SQL.
+- Agent: comparisons judge the later window against the earlier one; a period to date cuts only its last day at
+  the elapsed hours; daily-only metrics compare whole days; the question's named values (e.g. "Meta") constrain
+  every prefetched query. Golden Q6 and the original "Meta campaigns … CPC, CPM, LPVs" question verified exact.
+
+### Remaining refusals (50) — data limits, not pipeline gaps
+
+| Group | Combinations | Why | What would close it |
+|---|---|---|---|
+| Ad delivery counts by product | clicks, impressions, ctr, cpc, cpm, landing_page_views, link_clicks, cost_per_landing_page_view, cost_per_link_click, thruplays, hook_rate, hold_rate_15s, video_completion_rate, status_changes | No ad source has a product dimension (Meta breakdowns: age / region / placement only) | Catalogue / DPA product-level ad insights ingested, or a campaign → product map maintained as data |
+| Order-date P&L costs by product | shipping_cost, packaging_cost, payment_gateway_fees, rto_cost, operating_cost, taxes_on_net_sales, be_roas, cost_per_order, channel_cac | Costs exist per order-date × channel only; line-level opex (net COGS − product cost, 161k) does not reconcile with the P&L (123k, Sep) | `semantic.fct_order_pnl_daily` rebuilt at line grain with an agreed allocation rule |
+| Finance (event-date) P&L by product | every `pnl_*` (22) | Catalogue policy: product sales exist on order date only | Same line-grain P&L, event-dated |
+| CAC / LTV:CAC by product | cac, ltv_cac_ratio | New customers have no product spend basis | Product CAC = allocated spend ÷ new customers whose first order contains it (define, then model) |
+| Funnel mart by product / campaign | funnel_purchases, funnel_revenue | `mart_funnel_daily` grain is day × channel | Add campaign / product to the mart, or use orders / product metrics (already answer it) |
+
+## Open tasks
+
+1. **Deploy `gaurav`** (5f79555) — it merges the teammate's executor rework with these fixes; the running image is
+   `conformed-dims` fea9914. Re-run golden Q6 / Q17 / Q19-22 after.
+2. **Answer audit false positive** — `total_mismatch` read "173 products" as a stated table total (golden Q21 failed
+   once after 4 revisions; passed on replay). A count of rows is not a column total.
+3. **Ratio "best and worst" rankings** — a breakdown sorted by a ratio lets tiny-volume rows win (product ROAS: a
+   5 INR-spend product at −190×). The entity-comparison path already selects by `volume_metric`; the breakdown path
+   does not, and "worst" took the 10th of a descending top 10.
+4. **Large breakdowns and model arithmetic** — golden Q17 fetched the right 103 rows, then summed them by hand and
+   the provenance gate rejected the invented sums (correctly). Group totals should come from a second grouped query
+   or `run_python`, not prose.
+5. **Proxy notes in summaries** — a sibling swap says "same values on this metric's view"; for `basket_*` /
+   `viewed_*` it should also carry the dimension's description (orders / sessions containing the product).
+6. Repo DDL `serve/customer/views/ltv_cac_daily.sql` (c73ed02) reads columns `serve.order_attribution` lacks — fix or
+   drop it; the Cube model now carries platform / campaign itself.
+7. Cube v2 runs in dev mode off the mage-ai working tree: a YAML error or a joined cube without a primary key takes
+   the whole model down instantly. Validate YAML before saving; consider a pre-save check.
+
+---
+
+## First pass (morning) — history
+
 The agent still refuses these combinations after the conformed-dimensions work went live:
 - Cube model: mage-ai `main` 13aa39b
 - Catalogue and MCP: Agent_Core `main` aea452c
