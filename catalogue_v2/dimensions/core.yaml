@@ -231,6 +231,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.basket_product_title
+    attribution: attribution.basket_product_title
+    attribution_paths: attribution_paths.basket_product_title
     payments: payments.basket_product_title
   aliases: []
   family: product
@@ -241,6 +243,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.basket_product_type
+    attribution: attribution.basket_product_type
+    attribution_paths: attribution_paths.basket_product_type
     payments: payments.basket_product_type
   aliases: []
   family: product_type
@@ -251,6 +255,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.basket_sku
+    attribution: attribution.basket_sku
+    attribution_paths: attribution_paths.basket_sku
     payments: payments.basket_sku
   aliases: []
   family: sku

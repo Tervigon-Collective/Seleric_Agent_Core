@@ -595,4 +595,5 @@ def test_product_slices_reach_every_domain(v2):
     # attribution paths / touches by the order's / session's campaign; funnel purchases by platform
     assert {"finance_channel", "campaign_name"} <= set(cat.metrics["avg_touch_count"].supported_dimensions)
     assert "campaign_name" in cat.metrics["touches"].supported_dimensions
+    assert "basket_product_title" in cat.metrics["touches"].supported_dimensions  # touches of orders containing it
     assert {"platform", "ad_platform"} <= set(cat.metrics["funnel_purchases"].supported_dimensions)
