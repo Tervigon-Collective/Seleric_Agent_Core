@@ -100,12 +100,6 @@ _FANOUT = ("Refund-level amount: split by the refunded lines' product / restock 
            "on every line. Use the line-grain product_* twin.")
 EXCLUDED_DIMS = {m: {d: _FANOUT for d in ("product_type", "product_title", "variant_title", "sku", "restock_type")}
                  for m in ("refunded_amount_excl_tax", "returns_excl_tax")}
-# The funnel mart's session rows use session channel labels (organic / other / google_free_listing: 39 % of brand 20 Sep
-# sessions) that carry no platform, so its bounce rate by platform would park them under an empty label; the
-# session-grain twin classifies every session. Its purchases sit on the order's last-touch channel (all mapped).
-_SESSION_LABELS = "Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate."
-EXCLUDED_DIMS["bounce_rate"] = {d: _SESSION_LABELS for d in ("platform", "finance_channel", "ad_platform", "is_paid",
-                                                             "medium_group", "channel")}
 NOT_CERTIFIED = {"link_clicks", "thruplays", "hook_rate", "hold_rate_15s", "cost_per_link_click"}  # approved
 # kept id, number changed (event → order date). The P&L ids came back on 2026-10-04 as the ORDER-date twins of
 # pnl_* (decision: every non-Finance domain reads the order date); their v1 event-date meaning is pnl_<id>.
@@ -160,15 +154,13 @@ FAMILIES = {
     "product_type": ["product_type", "basket_product_type", "first_order_product_type"],
     "variant": ["variant_title", "basket_variant_title"],
 }
-# Proxy members: the product vocabulary with another meaning — the orders / sessions / customers that contain, viewed
-# or first bought the product (Cube counts each order / session once under every product in it). They answer a
-# product slice for a measure with no product grain (AOV, COD orders, conversion rate, repeat rate by product); a
-# measure whose catalogue grain twin carries the real member answers there instead (net sales by product = line
-# revenue, not the revenue of the orders containing it), so the proxy is excluded from it.
-PROXY_OF = {"basket_product_title": "product_title", "viewed_product_title": "product_title",
-            "first_order_product_title": "product_title", "basket_sku": "sku", "viewed_sku": "sku",
-            "first_order_sku": "sku", "basket_product_type": "product_type",
-            "first_order_product_type": "product_type", "basket_variant_title": "variant_title"}
+# Proxy families: after the first member, the members carry the same vocabulary with another meaning — the orders /
+# sessions / customers that contain, viewed or first bought the product (Cube counts each order / session once under
+# every product in it). They answer a product slice for a measure with no product grain (AOV, conversion rate,
+# repeat rate by product); a measure whose catalogue grain twin carries the first member answers there instead (net
+# sales by product = line revenue, not the revenue of the orders containing it), so the proxies are excluded from it.
+PROXY_FAMILIES = ("product", "sku", "product_type", "variant")
+PROXY_OF = {proxy: FAMILIES[f][0] for f in PROXY_FAMILIES for proxy in FAMILIES[f][1:]}
 
 
 def _grain_twins(concepts: list[dict], mid: str) -> list[str]:

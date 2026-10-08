@@ -27,10 +27,3 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces: []
-excluded_dimensions:
-  platform: Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate.
-  finance_channel: Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate.
-  ad_platform: Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate.
-  is_paid: Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate.
-  medium_group: Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate.
-  channel: Funnel sessions carry session channel labels with no platform; use the session twin session_bounce_rate.

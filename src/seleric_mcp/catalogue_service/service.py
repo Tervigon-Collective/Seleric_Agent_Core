@@ -369,8 +369,7 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
               ("atc to checkout", "atc_to_checkout"), ("add to cart", "add_to_cart"),
               ("add-to-cart", "add_to_cart"), ("atc", "add_to_cart"), ("checkout", "checkout"),
               ("product view", "product_view"), ("pdp", "product_view")],
-    "basis": [("blended roas", "mer"), ("marketing efficiency", "mer"), ("returned", "returned"),
-              ("cost per order", "order"), ("cost per purchase", "order")],
+    "basis": [("blended roas", "mer"), ("marketing efficiency", "mer"), ("returned", "returned")],
     "status": [("returned or cancelled", "returned_or_cancelled"), ("returns and cancel", "returned_or_cancelled")],
     "measure": [("hook", "hook"), ("hold", "hold"), ("completion", "completion"), ("thruplay", "thruplays"),
                 ("number of refunds", "count"), ("refund count", "count"), ("refund lines", "lines"),
@@ -386,11 +385,7 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
     # question_axes, so "SKU wise gross sale" keeps scope=product when the model resolves "gross sales".
     # "product cost" is the COGS component, not the grain: matched first so the bare "product" does not fire.
     "scope": [("product cost", "all"), ("sku", "product"), ("variant", "product"), ("product", "product")],
-    # spelled-out forms (the planner's slot reader expands abbreviations): without them "cost per click" fell to
-    # the concept default (CTR) and the planner deduped CPC / CPM away (live 2026-10-08)
-    "metric_kind": [("link click", "link"), ("landing page", "landing_page"), ("cost per lpv", "landing_page"),
-                    ("cost per click", "cpc"), ("cost per mille", "cpm"), ("cost per thousand", "cpm"),
-                    ("click through", "ctr"), ("click-through", "ctr")],
+    "metric_kind": [("link click", "link"), ("landing page", "landing_page")],
     "event": [("events per session", "per_session"), ("per session", "per_session"), ("bounce", "bounce"),
               ("all events", "all"), ("web events", "all")],
 }
