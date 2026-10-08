@@ -24,8 +24,10 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
 
 ### Gaps and next steps (not done this session)
 1. ~~Re-run the sweep~~ DONE 2026-10-09 after Jenkins #82: **0 refused of 1,379** metric × slice combinations
-   (1,133 direct, 116 via a grain twin, 130 via a conformed sibling). Still to do: spot-check the new twins'
-   values against CH per metric (the view-level totals above are already checked).
+   (1,133 direct, 116 via a grain twin, 130 via a conformed sibling). Spot-checked through the agent's own
+   query_metrics against CH, brand 20 Sep, all exact: pnl_net_profit by product → product_pnl_net_profit 4,702.33
+   (WingBird); shipping_cost by product → 5,840.95; cpc by product → 23.15; funnel_purchases by campaign →
+   funnel_order_purchases 25 (TH-222-WINGBIRD-23SEP).
 2. **Replay golden Q1–18** plus product P&L questions on the live API. Cross-check product net profit / CAC /
    CTR in ClickHouse.
 3. **Meta spend by P&L channel on product_pnl is 1,104.81 below order_pnl (Sep).** Allocated spend follows the
