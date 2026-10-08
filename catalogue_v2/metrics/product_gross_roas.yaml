@@ -10,7 +10,6 @@ formula:
     ad spend (allocation model — see product_ad_spend).
   authoritative_source: cube
   depends_on:
-  - product_attributed_revenue
   - product_ad_spend
 cube_mapping:
   view: product
