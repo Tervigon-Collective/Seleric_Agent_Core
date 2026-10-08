@@ -7,5 +7,14 @@ aliases:
 - ltv cac
 - ltv to cac
 - ltv/cac
+axes:
+  scope:
+    values:
+    - all
+    - product
+    default: all
 resolves:
 - metric: ltv_cac_ratio
+- when:
+    scope: product
+  metric: product_ltv_cac_ratio

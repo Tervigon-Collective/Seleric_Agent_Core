@@ -19,6 +19,7 @@ axes:
     values:
     - all
     - attributed
+    - product
     default: all
 resolves:
 - when:
@@ -31,6 +32,14 @@ resolves:
 - when:
     basis: order
   metric: cost_per_order
+- when:
+    basis: new_customer
+    scope: product
+  metric: product_cac
+- when:
+    basis: order
+    scope: product
+  metric: product_cost_per_order
 disambiguation: 'CAC = ad spend ÷ new customers (cac, brand × day). By channel, platform or campaign it is channel_cac
   (same total). Cost per order / per purchase (CPA on orders, not new customers) is cost_per_order.
 

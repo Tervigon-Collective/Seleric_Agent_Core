@@ -17,6 +17,11 @@ axes:
     - meta
     - google
     default: all
+  scope:
+    values:
+    - all
+    - product
+    default: all
 axis_filters:
   platform:
     meta:
@@ -30,3 +35,11 @@ resolves:
 - when:
     kind: link
   metric: link_clicks
+- when:
+    kind: all
+    scope: product
+  metric: product_clicks
+- when:
+    kind: link
+    scope: product
+  metric: product_link_clicks

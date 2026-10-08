@@ -83,25 +83,31 @@ resolves:
     basis: net
     scope: product
     date: order
-  metric: product_gross_profit
+  metric: product_net_profit
 - when:
     basis: contribution
     scope: product
     date: order
-  metric: product_gross_profit
+  metric: product_contribution_margin
 - when:
     basis: gross
     scope: product
     date: order
   metric: product_gross_profit
-unsupported:
 - when:
+    basis: net
     scope: product
     date: finance
-  reason: Product profit exists on ORDER date only (product_gross_profit); Finance P&L has no product split.
+  metric: product_pnl_net_profit
+- when:
+    basis: contribution
+    scope: product
+    date: finance
+  metric: product_pnl_contribution_margin
 disambiguation: 'contribution = net sales − net COGS (before ad spend; v1 called it gross_profit). gross = gross
   sales − gross COGS − ad spend (the Attribution Overview Gross Profit tile). scope=product (by product / variant
-  / SKU) is line-level product_gross_profit = product net revenue − product net COGS, ex-GST; ad spend is not allocated
-  to products, so product profit is before ad spend whatever the basis.
+  / SKU): net = product_net_profit (the order P&L spread over the order''s lines, minus the ad spend allocated to
+  the product — products sum to the P&L before unallocated spend), contribution = product_contribution_margin; gross
+  stays line-level product_gross_profit.
 
   '

@@ -1,5 +1,44 @@
 # Refused metric × slice combinations (2026-10-08)
 
+## Data-modelling pass (2026-10-08 night): the 50 remaining refusals
+
+New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to ClickHouse; Cube v2 at mage-ai
+`main` b83618e; catalogue 200 metrics / 20 views:
+- **`serve.product_pnl` → Cube view `product_pnl`.** Every order P&L row (`serve.channel_pnl`) is spread over the
+  order's lines, plus allocated ad spend, plus one no-product row per campaign-day of unallocated spend. Totals
+  equal the P&L exactly: brand 20 Sep, net sales 1,701,572.24 (order date) and 537,132.82 (event date), net profit
+  −170,245.90, spend 1,193,322.06, 744 event-date returned orders, and campaign net profit identical. New metrics:
+  - order date: product_shipping / packaging / payment_gateway_fees / rto / operating cost, taxes, be_roas, cac,
+    cost_per_order, ltv_cac_ratio, net_profit, contribution_margin(_pct), net_margin_pct, new_customers;
+  - event date: product_pnl_* for every pnl_* that was refused by product.
+- **`serve.product_ad_line`.** Campaign-day delivery is allocated to lines by attributed revenue: product
+  impressions, clicks, link clicks, LPVs, ThruPlays, CTR, CPC, CPM, cost per LPV / link click, hook, hold and
+  completion rate. This is a model, labelled as such; campaign-days with no attributed order sit on no product.
+- **`serve.funnel_orders` → view `funnel_orders`.** funnel_order_purchases / funnel_order_revenue by traffic,
+  campaign and basket product. Revenue equals funnel_daily exactly; 922 vs 925 purchases.
+- **`serve.campaign_products`** gives `paid_media_changes` its sold_* members (status changes by the products
+  the change's campaign sold).
+- **Concepts gain product scopes** (cogs components, profit, margin, ROAS, MER, taxes, returns, orders, CAC,
+  LTV:CAC, clicks, impressions, cost_per, video, LPVs) and a funnel_purchases concept. Net profit / margin by
+  product now resolve to the P&L basis (product_net_profit), not line gross profit.
+
+### Gaps and next steps (not done this session)
+1. **Re-run the sweep** (`/tmp/sweep_agent.py` in the api container; MCP at http://mcp:8765/mcp) after Jenkins
+   deploys this catalogue. Expected: the 50 refusals close. Check each new twin's values against CH.
+2. **Replay golden Q1–18** plus product P&L questions on the live API. Cross-check product net profit / CAC /
+   CTR in ClickHouse.
+3. **Meta spend by P&L channel on product_pnl is 1,104.81 below order_pnl (Sep).** Allocated spend follows the
+   order's P&L channel; a few Meta-attributed orders sit in another channel.
+4. **Performance.** product_pnl recomputes line shares over all brands per query (~2 s). If it slows, materialise
+   it (a refreshable MV, as fct_order_pnl_daily).
+5. **Allocation models.** Product delivery / spend / CAC / ROAS are allocations, not platform data. Descriptions
+   say so; the answer should say "allocated" when it reports them.
+6. **Open from earlier.** Golden Q17 channel reconciliation; model-side arithmetic on large breakdowns; ads missing
+   from `serve.dim_ad` (likely the second Meta account).
+
+---
+
+
 ## Current state (second pass, 2026-10-08 afternoon IST)
 
 Live versions: Cube model mage-ai `main` f6d0c57 · catalogue / MCP Agent_Core `main` be554dc (Jenkins #78) ·

@@ -78,6 +78,42 @@ resolves:
     action: both
     measure: revenue
     date: finance
+    scope: product
+  metric: product_pnl_return_cancel_revenue
+- when:
+    action: return
+    measure: revenue
+    date: finance
+    scope: product
+  metric: product_pnl_return_revenue
+- when:
+    action: cancel
+    measure: revenue
+    date: finance
+    scope: product
+  metric: product_pnl_cancel_revenue
+- when:
+    action: both
+    measure: orders
+    date: finance
+    scope: product
+  metric: product_pnl_returned_or_cancelled_orders
+- when:
+    action: return
+    measure: orders
+    date: finance
+    scope: product
+  metric: product_pnl_returned_orders
+- when:
+    action: cancel
+    measure: orders
+    date: finance
+    scope: product
+  metric: product_pnl_cancelled_orders
+- when:
+    action: both
+    measure: revenue
+    date: finance
   metric: pnl_return_cancel_revenue
 - when:
     action: return

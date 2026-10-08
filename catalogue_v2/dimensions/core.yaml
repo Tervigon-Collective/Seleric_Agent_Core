@@ -49,6 +49,8 @@ dimensions:
   views:
     commerce: commerce.ad_format
     product: product.ad_format
+    product_pnl: product_pnl.ad_format
+    funnel_orders: funnel_orders.ad_format
     paid_media: paid_media.ad_format
     paid_media_hourly: paid_media_hourly.ad_format
     paid_media_breakdowns: paid_media_breakdowns.ad_format
@@ -68,6 +70,8 @@ dimensions:
   views:
     commerce: commerce.ad_id
     product: product.ad_id
+    product_pnl: product_pnl.ad_id
+    funnel_orders: funnel_orders.ad_id
     paid_media: paid_media.ad_id
     paid_media_hourly: paid_media_hourly.ad_id
     paid_media_breakdowns: paid_media_breakdowns.ad_id
@@ -87,6 +91,8 @@ dimensions:
   views:
     commerce: commerce.ad_name
     product: product.ad_name
+    product_pnl: product_pnl.ad_name
+    funnel_orders: funnel_orders.ad_name
     paid_media: paid_media.ad_name
     paid_media_hourly: paid_media_hourly.ad_name
     paid_media_breakdowns: paid_media_breakdowns.ad_name
@@ -107,6 +113,8 @@ dimensions:
   views:
     commerce: commerce.ad_platform
     product: product.ad_platform
+    product_pnl: product_pnl.ad_platform
+    funnel_orders: funnel_orders.ad_platform
     paid_media: paid_media.ad_platform
     paid_media_hourly: paid_media_hourly.ad_platform
     paid_media_breakdowns: paid_media_breakdowns.ad_platform
@@ -134,6 +142,8 @@ dimensions:
   views:
     commerce: commerce.ad_status
     product: product.ad_status
+    product_pnl: product_pnl.ad_status
+    funnel_orders: funnel_orders.ad_status
     paid_media: paid_media.ad_status
     paid_media_hourly: paid_media_hourly.ad_status
     paid_media_breakdowns: paid_media_breakdowns.ad_status
@@ -153,6 +163,8 @@ dimensions:
   views:
     commerce: commerce.adset_id
     product: product.adset_id
+    product_pnl: product_pnl.adset_id
+    funnel_orders: funnel_orders.adset_id
     paid_media: paid_media.adset_id
     paid_media_hourly: paid_media_hourly.adset_id
     paid_media_breakdowns: paid_media_breakdowns.adset_id
@@ -172,6 +184,8 @@ dimensions:
   views:
     commerce: commerce.adset_name
     product: product.adset_name
+    product_pnl: product_pnl.adset_name
+    funnel_orders: funnel_orders.adset_name
     paid_media: paid_media.adset_name
     paid_media_hourly: paid_media_hourly.adset_name
     paid_media_breakdowns: paid_media_breakdowns.adset_name
@@ -191,6 +205,8 @@ dimensions:
   views:
     commerce: commerce.adset_status
     product: product.adset_status
+    product_pnl: product_pnl.adset_status
+    funnel_orders: funnel_orders.adset_status
     paid_media: paid_media.adset_status
     paid_media_hourly: paid_media_hourly.adset_status
     paid_media_breakdowns: paid_media_breakdowns.adset_status
@@ -231,6 +247,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.basket_product_title
+    funnel_orders: funnel_orders.basket_product_title
     attribution: attribution.basket_product_title
     attribution_paths: attribution_paths.basket_product_title
     payments: payments.basket_product_title
@@ -243,6 +260,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.basket_product_type
+    funnel_orders: funnel_orders.basket_product_type
     attribution: attribution.basket_product_type
     attribution_paths: attribution_paths.basket_product_type
     payments: payments.basket_product_type
@@ -255,6 +273,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.basket_sku
+    funnel_orders: funnel_orders.basket_sku
     attribution: attribution.basket_sku
     attribution_paths: attribution_paths.basket_sku
     payments: payments.basket_sku
@@ -277,6 +296,8 @@ dimensions:
   views:
     commerce: commerce.brand_id
     product: product.brand_id
+    product_pnl: product_pnl.brand_id
+    funnel_orders: funnel_orders.brand_id
     paid_media: paid_media.brand_id
     paid_media_hourly: paid_media_hourly.brand_id
     paid_media_breakdowns: paid_media_breakdowns.brand_id
@@ -329,6 +350,8 @@ dimensions:
   views:
     commerce: commerce.campaign_id
     product: product.campaign_id
+    product_pnl: product_pnl.campaign_id
+    funnel_orders: funnel_orders.campaign_id
     paid_media: paid_media.campaign_id
     paid_media_hourly: paid_media_hourly.campaign_id
     paid_media_breakdowns: paid_media_breakdowns.campaign_id
@@ -350,6 +373,8 @@ dimensions:
   views:
     commerce: commerce.campaign_name
     product: product.campaign_name
+    product_pnl: product_pnl.campaign_name
+    funnel_orders: funnel_orders.campaign_name
     paid_media: paid_media.campaign_name
     paid_media_hourly: paid_media_hourly.campaign_name
     paid_media_breakdowns: paid_media_breakdowns.campaign_name
@@ -377,6 +402,8 @@ dimensions:
   views:
     commerce: commerce.campaign_objective
     product: product.campaign_objective
+    product_pnl: product_pnl.campaign_objective
+    funnel_orders: funnel_orders.campaign_objective
     paid_media: paid_media.campaign_objective
     paid_media_hourly: paid_media_hourly.campaign_objective
     paid_media_breakdowns: paid_media_breakdowns.campaign_objective
@@ -398,6 +425,8 @@ dimensions:
   views:
     commerce: commerce.campaign_status
     product: product.campaign_status
+    product_pnl: product_pnl.campaign_status
+    funnel_orders: funnel_orders.campaign_status
     paid_media: paid_media.campaign_status
     paid_media_hourly: paid_media_hourly.campaign_status
     paid_media_breakdowns: paid_media_breakdowns.campaign_status
@@ -419,6 +448,8 @@ dimensions:
   views:
     commerce: commerce.campaign_type
     product: product.campaign_type
+    product_pnl: product_pnl.campaign_type
+    funnel_orders: funnel_orders.campaign_type
     paid_media: paid_media.campaign_type
     paid_media_hourly: paid_media_hourly.campaign_type
     paid_media_breakdowns: paid_media_breakdowns.campaign_type
@@ -454,6 +485,7 @@ dimensions:
   views:
     commerce: commerce.channel
     product: product.channel
+    funnel_orders: funnel_orders.channel
     web_sessions: web_sessions.channel
     web_funnel: web_funnel.channel
     web_event_detail: web_event_detail.channel
@@ -493,6 +525,8 @@ dimensions:
   views:
     commerce: commerce.creative_type
     product: product.creative_type
+    product_pnl: product_pnl.creative_type
+    funnel_orders: funnel_orders.creative_type
     paid_media: paid_media.creative_type
     paid_media_hourly: paid_media_hourly.creative_type
     paid_media_breakdowns: paid_media_breakdowns.creative_type
@@ -602,6 +636,8 @@ dimensions:
   views:
     commerce: commerce.finance_channel
     product: product.finance_channel
+    product_pnl: product_pnl.finance_channel
+    funnel_orders: funnel_orders.finance_channel
     paid_media: paid_media.finance_channel
     paid_media_hourly: paid_media_hourly.finance_channel
     paid_media_breakdowns: paid_media_breakdowns.finance_channel
@@ -810,6 +846,7 @@ dimensions:
   views:
     commerce: commerce.is_new_customer
     product: product.is_new_customer
+    product_pnl: product_pnl.is_new_customer
     attribution_paths: attribution_paths.is_new_customer
     returns: returns.is_new_customer
     payments: payments.is_new_customer
@@ -825,6 +862,8 @@ dimensions:
   views:
     commerce: commerce.is_paid
     product: product.is_paid
+    product_pnl: product_pnl.is_paid
+    funnel_orders: funnel_orders.is_paid
     paid_media: paid_media.is_paid
     paid_media_hourly: paid_media_hourly.is_paid
     paid_media_breakdowns: paid_media_breakdowns.is_paid
@@ -918,6 +957,7 @@ dimensions:
   views:
     commerce: commerce.medium_group
     product: product.medium_group
+    funnel_orders: funnel_orders.medium_group
     web_sessions: web_sessions.medium_group
     web_funnel: web_funnel.medium_group
     web_event_detail: web_event_detail.medium_group
@@ -946,6 +986,8 @@ dimensions:
   views:
     commerce: commerce.order_date
     product: product.order_date
+    product_pnl: product_pnl.order_date
+    funnel_orders: funnel_orders.order_date
     attribution: attribution.order_date
     attribution_paths: attribution_paths.order_date
     returns: returns.order_date
@@ -1021,6 +1063,7 @@ dimensions:
   views:
     commerce: commerce.payment_bucket
     product: product.payment_bucket
+    product_pnl: product_pnl.payment_bucket
     returns: returns.payment_bucket
     order_pnl: order_pnl.payment_bucket
   aliases:
@@ -1062,6 +1105,7 @@ dimensions:
   views:
     commerce: commerce.platform
     product: product.platform
+    funnel_orders: funnel_orders.platform
     paid_media: paid_media.platform
     paid_media_hourly: paid_media_hourly.platform
     paid_media_breakdowns: paid_media_breakdowns.platform
@@ -1104,6 +1148,7 @@ dimensions:
   is_time: false
   views:
     product: product.product_id
+    product_pnl: product_pnl.product_id
   aliases: []
 - id: product_title
   display_name: Product Title
@@ -1111,6 +1156,7 @@ dimensions:
   is_time: false
   views:
     product: product.product_title
+    product_pnl: product_pnl.product_title
     web_event_detail: web_event_detail.product_title
     returns: returns.product_title
   aliases:
@@ -1124,6 +1170,7 @@ dimensions:
   is_time: false
   views:
     product: product.product_type
+    product_pnl: product_pnl.product_type
     returns: returns.product_type
   aliases: []
   family: product_type
@@ -1162,9 +1209,10 @@ dimensions:
   aliases: []
 - id: report_date
   display_name: Report Date
-  description: Delivery date (ad account time zone day).
+  description: Event date (IST) — the Finance P&L date (returns / cancels on the day they happen).
   is_time: true
   views:
+    product_pnl: product_pnl.report_date
     paid_media: paid_media.report_date
     paid_media_hourly: paid_media_hourly.report_date
     paid_media_breakdowns: paid_media_breakdowns.report_date
@@ -1283,9 +1331,10 @@ dimensions:
   - shipping zip
 - id: shipping_region
   display_name: Shipping Region
-  description: Shipping state / region of the order (NULL on ad spend rows).
+  description: Shipping region of the order.
   is_time: false
   views:
+    product_pnl: product_pnl.shipping_region
     order_pnl: order_pnl.shipping_region
   aliases:
   - region
@@ -1318,6 +1367,7 @@ dimensions:
   is_time: false
   views:
     product: product.sku
+    product_pnl: product_pnl.sku
     web_event_detail: web_event_detail.sku
     returns: returns.sku
   aliases:
@@ -1325,6 +1375,33 @@ dimensions:
   - product sku
   family: sku
   family_rank: 0
+- id: sold_product_title
+  display_name: Sold Product Title
+  description: Product title.
+  is_time: false
+  views:
+    paid_media_changes: paid_media_changes.sold_product_title
+  aliases: []
+  family: product
+  family_rank: 4
+- id: sold_product_type
+  display_name: Sold Product Type
+  description: Shopify product type ('(none)' when unset).
+  is_time: false
+  views:
+    paid_media_changes: paid_media_changes.sold_product_type
+  aliases: []
+  family: product_type
+  family_rank: 3
+- id: sold_sku
+  display_name: Sold Sku
+  description: SKU.
+  is_time: false
+  views:
+    paid_media_changes: paid_media_changes.sold_sku
+  aliases: []
+  family: sku
+  family_rank: 4
 - id: status
   display_name: Status
   description: Status after the change.
@@ -1339,6 +1416,8 @@ dimensions:
   views:
     commerce: commerce.sub_channel
     product: product.sub_channel
+    product_pnl: product_pnl.sub_channel
+    funnel_orders: funnel_orders.sub_channel
     web_sessions: web_sessions.sub_channel
     web_event_detail: web_event_detail.sub_channel
     attribution: attribution.sub_channel
@@ -1402,6 +1481,7 @@ dimensions:
   is_time: false
   views:
     product: product.variant_id
+    product_pnl: product_pnl.variant_id
   aliases: []
 - id: variant_title
   display_name: Variant Title
@@ -1409,6 +1489,7 @@ dimensions:
   is_time: false
   views:
     product: product.variant_title
+    product_pnl: product_pnl.variant_title
     returns: returns.variant_title
   aliases:
   - variant
@@ -1420,6 +1501,7 @@ dimensions:
   is_time: false
   views:
     product: product.vendor
+    product_pnl: product_pnl.vendor
   aliases:
   - brand vendor
   - supplier

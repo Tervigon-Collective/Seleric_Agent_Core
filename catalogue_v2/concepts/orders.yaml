@@ -108,6 +108,25 @@ resolves:
     date: finance
   metric: pnl_cancelled_orders
 - when:
+    status: new
+    scope: product
+  metric: product_new_customers
+- when:
+    status: cancelled
+    date: finance
+    scope: product
+  metric: product_pnl_cancelled_orders
+- when:
+    status: returned
+    date: finance
+    scope: product
+  metric: product_pnl_returned_orders
+- when:
+    status: returned_or_cancelled
+    date: finance
+    scope: product
+  metric: product_pnl_returned_or_cancelled_orders
+- when:
     status: returned
     date: finance
   metric: pnl_returned_orders

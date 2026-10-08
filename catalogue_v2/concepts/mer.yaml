@@ -57,3 +57,7 @@ resolves:
     date: order
     scope: product
   metric: product_mer
+- when:
+    date: finance
+    scope: product
+  metric: product_pnl_mer

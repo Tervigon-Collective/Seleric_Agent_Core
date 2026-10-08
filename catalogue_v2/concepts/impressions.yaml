@@ -12,6 +12,11 @@ axes:
     - meta
     - google
     default: all
+  scope:
+    values:
+    - all
+    - product
+    default: all
 axis_filters:
   platform:
     meta:
@@ -20,3 +25,6 @@ axis_filters:
       ad_platform: google
 resolves:
 - metric: impressions
+- when:
+    scope: product
+  metric: product_impressions

@@ -46,15 +46,13 @@ concepts:
       - {when: {basis: net, scope: product, date: order}, metric: product_net_revenue}
       - {when: {basis: gross, scope: product, date: order}, metric: product_gross_sale}
       - {when: {basis: gross, scope: product, date: finance}, metric: product_gross_sale}
+      # Finance (event-date) P&L net sales by product: serve.product_pnl spreads each P&L row over its order's lines
+      - {when: {basis: net, scope: product, date: finance}, metric: product_pnl_net_sales}
     unsupported:
       - when: {basis: total, scope: product}
         reason: >-
           Total sales (incl. GST) is order level only. By product use gross (product_gross_sale) or net
           (product_net_revenue) — both ex-GST.
-      - when: {basis: net, scope: product, date: finance}
-        reason: >-
-          Product sales exist on ORDER date only (product_net_revenue: each line's returns / cancels land on the
-          day it was ordered). Finance (event-date) net sales has no product split.
     disambiguation: >
       Default net sales = net_sales: the orders placed in the period (order date). date=finance (pnl_net_sales,
       "P&L net sales") books returns / cancels on the day they happen — the Finance dashboard Net Sales card.
@@ -89,6 +87,10 @@ concepts:
       - {when: {status: returned, date: order}, metric: returned_orders}
       - {when: {status: returned_or_cancelled, date: order}, metric: returned_or_cancelled_orders}
       - {when: {status: cancelled, date: finance}, metric: pnl_cancelled_orders}
+      - {when: {status: new, scope: product}, metric: product_new_customers}
+      - {when: {status: cancelled, date: finance, scope: product}, metric: product_pnl_cancelled_orders}
+      - {when: {status: returned, date: finance, scope: product}, metric: product_pnl_returned_orders}
+      - {when: {status: returned_or_cancelled, date: finance, scope: product}, metric: product_pnl_returned_or_cancelled_orders}
       - {when: {status: returned, date: finance}, metric: pnl_returned_orders}
       - {when: {status: returned_or_cancelled, date: finance}, metric: pnl_returned_or_cancelled_orders}
     disambiguation: >
@@ -109,17 +111,18 @@ concepts:
       - {when: {basis: net, date: finance}, metric: pnl_net_profit}
       - {when: {basis: contribution, date: finance}, metric: pnl_contribution_margin}
       - {when: {basis: gross, date: finance}, metric: gross_profit}
-      - {when: {basis: net, scope: product, date: order}, metric: product_gross_profit}
-      - {when: {basis: contribution, scope: product, date: order}, metric: product_gross_profit}
+      # product grain on the P&L basis (serve.product_pnl: the order P&L spread over its lines, ad spend allocated)
+      - {when: {basis: net, scope: product, date: order}, metric: product_net_profit}
+      - {when: {basis: contribution, scope: product, date: order}, metric: product_contribution_margin}
       - {when: {basis: gross, scope: product, date: order}, metric: product_gross_profit}
-    unsupported:
-      - when: {scope: product, date: finance}
-        reason: Product profit exists on ORDER date only (product_gross_profit); Finance P&L has no product split.
+      - {when: {basis: net, scope: product, date: finance}, metric: product_pnl_net_profit}
+      - {when: {basis: contribution, scope: product, date: finance}, metric: product_pnl_contribution_margin}
     disambiguation: >
       contribution = net sales − net COGS (before ad spend; v1 called it gross_profit). gross = gross sales −
       gross COGS − ad spend (the Attribution Overview Gross Profit tile). scope=product (by product / variant /
-      SKU) is line-level product_gross_profit = product net revenue − product net COGS, ex-GST; ad spend is not
-      allocated to products, so product profit is before ad spend whatever the basis.
+      SKU): net = product_net_profit (the order P&L spread over the order's lines, minus the ad spend allocated to
+      the product — products sum to the P&L before unallocated spend), contribution = product_contribution_margin;
+      gross stays line-level product_gross_profit.
 
   - id: margin
     display_name: Margin
@@ -135,9 +138,11 @@ concepts:
       - {when: {basis: net, date: finance}, metric: pnl_net_margin_pct}
       - {when: {basis: contribution, date: finance}, metric: pnl_contribution_margin_pct}
       - {when: {basis: gross, date: finance}, metric: pnl_contribution_margin_pct}
-      - {when: {basis: net, scope: product, date: order}, metric: product_gross_margin_pct}
-      - {when: {basis: contribution, scope: product, date: order}, metric: product_gross_margin_pct}
+      - {when: {basis: net, scope: product, date: order}, metric: product_net_margin_pct}
+      - {when: {basis: contribution, scope: product, date: order}, metric: product_contribution_margin_pct}
       - {when: {basis: gross, scope: product, date: order}, metric: product_gross_margin_pct}
+      - {when: {basis: net, scope: product, date: finance}, metric: product_pnl_net_margin_pct}
+      - {when: {basis: contribution, scope: product, date: finance}, metric: product_pnl_contribution_margin_pct}
     disambiguation: >
       "gross margin" on the company P&L is contribution margin % (net sales − net COGS) ÷ net sales; product gross
       margin is line-level (scope=product).
@@ -159,6 +164,11 @@ concepts:
       - {when: {basis: net, scope: product, date: order}, metric: product_net_roas}
       - {when: {basis: gross, scope: product, date: order}, metric: product_gross_roas}
       - {when: {basis: mer, scope: product, date: order}, metric: product_mer}
+      - {when: {basis: breakeven, scope: product, date: order}, metric: product_be_roas}
+      - {when: {basis: net, scope: product, date: finance}, metric: product_pnl_net_roas}
+      - {when: {basis: gross, scope: product, date: finance}, metric: product_gross_roas}
+      - {when: {basis: breakeven, scope: product, date: finance}, metric: product_pnl_be_roas}
+      - {when: {basis: mer, scope: product, date: finance}, metric: product_pnl_mer}
       - {when: {basis: net, date: finance}, metric: pnl_net_roas}
       - {when: {basis: gross, date: finance}, metric: gross_roas}
       - {when: {basis: breakeven, date: finance}, metric: pnl_be_roas}
@@ -167,7 +177,7 @@ concepts:
       net ROAS = (net sales − net COGS) ÷ ad spend; gross ROAS = gross sales ÷ ad spend; MER = net sales ÷ ad
       spend; break-even ROAS = net sales ÷ contribution margin. By product (scope=product) ROAS is the product's
       ad-attributed lines ÷ the ad spend allocated to them (product_net_roas / product_gross_roas / product_mer — a
-      model, see product_ad_spend); break-even ROAS has no product split. Channel ROAS (channel=meta) includes Meta organic
+      model, see product_ad_spend); break-even ROAS by product is product_be_roas (P&L basis). Channel ROAS (channel=meta) includes Meta organic
       sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified. Default is
       the order date (sales of the orders placed ÷ spend delivered in the period); date=finance is the P&L ROAS.
 
@@ -182,6 +192,7 @@ concepts:
       - {when: {date: order}, metric: mer}
       - {when: {date: finance}, metric: pnl_mer}
       - {when: {date: order, scope: product}, metric: product_mer}
+      - {when: {date: finance, scope: product}, metric: product_pnl_mer}
 
   - id: ad_spend
     display_name: Ad spend
@@ -203,36 +214,42 @@ concepts:
     display_name: Clicks
     one_liner: Ad clicks (all clicks unless "link clicks").
     aliases: [clicks, link clicks]
-    axes: {kind: {values: [all, link], default: all}, platform: *ad_platform}
+    axes: {kind: {values: [all, link], default: all}, platform: *ad_platform, scope: {values: [all, product], default: all}}
     axis_filters: *ad_filters
     resolves:
       - {when: {kind: all}, metric: clicks}
       - {when: {kind: link}, metric: link_clicks}
+      # product grain: delivery allocated to products (see product_ad_spend)
+      - {when: {kind: all, scope: product}, metric: product_clicks}
+      - {when: {kind: link, scope: product}, metric: product_link_clicks}
 
   - id: landing_page_views
     display_name: Landing page views
     one_liner: Landing page views reported by Meta (LPVs) — not site page views.
     aliases: [landing page views, landing page view, lpv, lpvs]
-    axes: {platform: *ad_platform}
+    axes: {platform: *ad_platform, scope: {values: [all, product], default: all}}
     axis_filters: *ad_filters
     resolves:
       - {metric: landing_page_views}
+      - {when: {scope: product}, metric: product_landing_page_views}
 
   - id: impressions
     display_name: Impressions
     one_liner: Ad impressions.
     aliases: [impressions, impr]
-    axes: {platform: *ad_platform}
+    axes: {platform: *ad_platform, scope: {values: [all, product], default: all}}
     axis_filters: *ad_filters
     resolves:
       - {metric: impressions}
+      - {when: {scope: product}, metric: product_impressions}
 
   - id: cost_per
     display_name: Ad efficiency (CTR / CPC / CPM)
     one_liner: CTR, CPC, CPM and cost per landing page view / link click.
     aliases: [ctr, cpc, cpm, click through rate, cost per click, cost per mille, cost per link click,
               cost per landing page view, click-through rate, cost per lpv, cost per thousand impressions]
-    axes: {metric_kind: {values: [ctr, cpc, cpm, link, landing_page], default: ctr}, platform: *ad_platform}
+    axes: {metric_kind: {values: [ctr, cpc, cpm, link, landing_page], default: ctr}, platform: *ad_platform,
+           scope: {values: [all, product], default: all}}
     axis_filters: *ad_filters
     resolves:
       - {when: {metric_kind: ctr}, metric: ctr}
@@ -240,17 +257,27 @@ concepts:
       - {when: {metric_kind: cpm}, metric: cpm}
       - {when: {metric_kind: link}, metric: cost_per_link_click}
       - {when: {metric_kind: landing_page}, metric: cost_per_landing_page_view}
+      - {when: {metric_kind: ctr, scope: product}, metric: product_ctr}
+      - {when: {metric_kind: cpc, scope: product}, metric: product_cpc}
+      - {when: {metric_kind: cpm, scope: product}, metric: product_cpm}
+      - {when: {metric_kind: link, scope: product}, metric: product_cost_per_link_click}
+      - {when: {metric_kind: landing_page, scope: product}, metric: product_cost_per_landing_page_view}
 
   - id: video
     display_name: Video engagement
     one_liner: Meta video hook rate, hold rate, completion rate and ThruPlays.
     aliases: [hook rate, hold rate, video completion rate, thruplays, video engagement]
-    axes: {measure: {values: [hook, hold, completion, thruplays], default: hook}}
+    axes: {measure: {values: [hook, hold, completion, thruplays], default: hook},
+           scope: {values: [all, product], default: all}}
     resolves:
       - {when: {measure: hook}, metric: hook_rate}
       - {when: {measure: hold}, metric: hold_rate_15s}
       - {when: {measure: completion}, metric: video_completion_rate}
       - {when: {measure: thruplays}, metric: thruplays}
+      - {when: {measure: hook, scope: product}, metric: product_hook_rate}
+      - {when: {measure: hold, scope: product}, metric: product_hold_rate_15s}
+      - {when: {measure: completion, scope: product}, metric: product_video_completion_rate}
+      - {when: {measure: thruplays, scope: product}, metric: product_thruplays}
 
   - id: cogs
     display_name: COGS
@@ -264,6 +291,18 @@ concepts:
       - {when: {component: total, scope: product, date: order}, metric: product_net_cogs}
       - {when: {component: product, scope: product, date: order}, metric: product_line_cost}
       - {when: {component: gross, scope: product, date: order}, metric: product_gross_cogs}
+      # operating components by product: the order's costs spread over its lines (serve.product_pnl), P&L basis
+      - {when: {component: shipping, scope: product, date: order}, metric: product_shipping_cost}
+      - {when: {component: packaging, scope: product, date: order}, metric: product_packaging_cost}
+      - {when: {component: gateway, scope: product, date: order}, metric: product_payment_gateway_fees}
+      - {when: {component: rto, scope: product, date: order}, metric: product_rto_cost}
+      - {when: {component: operating, scope: product, date: order}, metric: product_operating_cost}
+      - {when: {component: total, scope: product, date: finance}, metric: product_pnl_net_cogs}
+      - {when: {component: shipping, scope: product, date: finance}, metric: product_pnl_shipping_cost}
+      - {when: {component: packaging, scope: product, date: finance}, metric: product_pnl_packaging_cost}
+      - {when: {component: gateway, scope: product, date: finance}, metric: product_pnl_payment_gateway_fees}
+      - {when: {component: rto, scope: product, date: finance}, metric: product_pnl_rto_cost}
+      - {when: {component: operating, scope: product, date: finance}, metric: product_pnl_operating_cost}
       - {when: {component: total, date: order}, metric: net_cogs}
       - {when: {component: product, date: order}, metric: product_cost}
       - {when: {component: shipping, date: order}, metric: shipping_cost}
@@ -284,7 +323,8 @@ concepts:
       "total operating cost" in v1 meant net COGS (component=total); operating cost alone is shipping + packaging +
       gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment). scope=product (by
       product / variant / SKU, order date): total = product_net_cogs, product = product_line_cost, gross =
-      product_gross_cogs; the shipping / packaging / gateway / RTO components are not split by product.
+      product_gross_cogs; the shipping / packaging / gateway / RTO components by product are each order's costs spread over its
+      lines by revenue share (product_shipping_cost …, P&L basis; product_pnl_* on the event date).
 
   - id: returns_cancels
     display_name: Returns and cancellations
@@ -298,6 +338,12 @@ concepts:
       # product grain (line level, ex-GST, order date): the order-level ids cannot be split by product
       - {when: {action: return, measure: revenue, date: order, scope: product}, metric: product_return_revenue}
       - {when: {action: cancel, measure: revenue, date: order, scope: product}, metric: product_cancel_revenue}
+      - {when: {action: both, measure: revenue, date: finance, scope: product}, metric: product_pnl_return_cancel_revenue}
+      - {when: {action: return, measure: revenue, date: finance, scope: product}, metric: product_pnl_return_revenue}
+      - {when: {action: cancel, measure: revenue, date: finance, scope: product}, metric: product_pnl_cancel_revenue}
+      - {when: {action: both, measure: orders, date: finance, scope: product}, metric: product_pnl_returned_or_cancelled_orders}
+      - {when: {action: return, measure: orders, date: finance, scope: product}, metric: product_pnl_returned_orders}
+      - {when: {action: cancel, measure: orders, date: finance, scope: product}, metric: product_pnl_cancelled_orders}
       - {when: {action: both, measure: revenue, date: finance}, metric: pnl_return_cancel_revenue}
       - {when: {action: return, measure: revenue, date: finance}, metric: pnl_return_revenue}
       - {when: {action: cancel, measure: revenue, date: finance}, metric: pnl_cancel_revenue}
@@ -429,10 +475,12 @@ concepts:
     display_name: Taxes
     one_liner: GST on net sales (flat 18 %).
     aliases: [taxes, tax, gst]
-    axes: {date: {values: [order, finance], default: order}}
+    axes: {date: {values: [order, finance], default: order}, scope: {values: [all, product], default: all}}
     resolves:
       - {when: {date: order}, metric: taxes_on_net_sales}
       - {when: {date: finance}, metric: pnl_taxes_on_net_sales}
+      - {when: {date: order, scope: product}, metric: product_taxes_on_net_sales}
+      - {when: {date: finance, scope: product}, metric: product_pnl_taxes_on_net_sales}
 
   - id: customers
     display_name: Customers
@@ -466,13 +514,16 @@ concepts:
     one_liner: Customer acquisition cost = ad spend ÷ new customers.
     aliases: [cac, customer acquisition cost, cost per acquisition, cpa, cost per order, cost per purchase]
     axes: {basis: {values: [new_customer, order], default: new_customer},
-           scope: {values: [all, attributed], default: all}}
+           scope: {values: [all, attributed, product], default: all}}
     resolves:
       - {when: {basis: new_customer}, metric: cac}
       # attributed grain: spend and new customers on the order-date channel P&L, so CAC splits by channel /
       # sub-channel / campaign → ad set → ad (brand total = cac)
       - {when: {basis: new_customer, scope: attributed}, metric: channel_cac}
       - {when: {basis: order}, metric: cost_per_order}
+      # product grain (tried after the channel grain): allocated ad spend ÷ new customers / orders with the product
+      - {when: {basis: new_customer, scope: product}, metric: product_cac}
+      - {when: {basis: order, scope: product}, metric: product_cost_per_order}
     disambiguation: >
       CAC = ad spend ÷ new customers (cac, brand × day). By channel, platform or campaign it is channel_cac (same
       total). Cost per order / per purchase (CPA on orders, not new customers) is cost_per_order.
@@ -481,8 +532,23 @@ concepts:
     display_name: LTV:CAC
     one_liner: LTV ÷ CAC.
     aliases: [ltv:cac, ltv cac, ltv to cac, ltv/cac]
+    axes: {scope: {values: [all, product], default: all}}
     resolves:
       - {metric: ltv_cac_ratio}
+      - {when: {scope: product}, metric: product_ltv_cac_ratio}
+
+  - id: funnel_purchases
+    display_name: Funnel purchases
+    one_liner: Purchases and revenue in the web funnel mart (orders by their last-touch channel).
+    aliases: [funnel purchases, funnel revenue, funnel purchase revenue]
+    axes: {measure: {values: [purchases, revenue], default: purchases},
+           scope: {values: [all, attributed], default: all}}
+    resolves:
+      - {when: {measure: purchases}, metric: funnel_purchases}
+      - {when: {measure: revenue}, metric: funnel_revenue}
+      # order grain: the same purchases sliceable by campaign and by the products in the order
+      - {when: {measure: purchases, scope: attributed}, metric: funnel_order_purchases}
+      - {when: {measure: revenue, scope: attributed}, metric: funnel_order_revenue}
 
   - id: touchpoints
     display_name: Touchpoints

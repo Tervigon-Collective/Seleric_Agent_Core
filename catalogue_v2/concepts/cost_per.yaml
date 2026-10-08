@@ -29,6 +29,11 @@ axes:
     - meta
     - google
     default: all
+  scope:
+    values:
+    - all
+    - product
+    default: all
 axis_filters:
   platform:
     meta:
@@ -51,3 +56,23 @@ resolves:
 - when:
     metric_kind: landing_page
   metric: cost_per_landing_page_view
+- when:
+    metric_kind: ctr
+    scope: product
+  metric: product_ctr
+- when:
+    metric_kind: cpc
+    scope: product
+  metric: product_cpc
+- when:
+    metric_kind: cpm
+    scope: product
+  metric: product_cpm
+- when:
+    metric_kind: link
+    scope: product
+  metric: product_cost_per_link_click
+- when:
+    metric_kind: landing_page
+    scope: product
+  metric: product_cost_per_landing_page_view

@@ -141,3 +141,20 @@ views:
   description: 'P&L on ORDER date for performance and every non-Finance domain: COGS, contribution margin, net profit,
     ROAS / MER of the orders placed in the period (ad spend on delivery date). Slice by finance_channel and is_paid;
     drill campaign → ad set → ad. Finance (event date) is the pnl view.'
+- name: product_pnl
+  title: Product Pnl
+  date_dimension: order_date
+  freshness:
+    source: Cube v2 view product_pnl (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Product P&L: every order''s P&L (order date and event date) spread over its product lines — net
+    sales, COGS, operating costs, allocated ad spend, net profit, ROAS / MER, CAC and order counts by product, SKU
+    or product type, sliced by the order''s channel, traffic and campaign.'
+- name: funnel_orders
+  title: Funnel Orders
+  date_dimension: order_date
+  freshness:
+    source: Cube v2 view funnel_orders (serve.* via cube_serve)
+    expected_cadence: daily after dw/mart run; 26h SLA
+  description: 'Funnel purchases and revenue per order (order date): the funnel mart''s purchases sliced by the
+    order''s traffic, campaign and products (basket_*: orders containing the product).'

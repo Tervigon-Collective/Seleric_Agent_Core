@@ -16,6 +16,11 @@ axes:
     - completion
     - thruplays
     default: hook
+  scope:
+    values:
+    - all
+    - product
+    default: all
 resolves:
 - when:
     measure: hook
@@ -29,3 +34,19 @@ resolves:
 - when:
     measure: thruplays
   metric: thruplays
+- when:
+    measure: hook
+    scope: product
+  metric: product_hook_rate
+- when:
+    measure: hold
+    scope: product
+  metric: product_hold_rate_15s
+- when:
+    measure: completion
+    scope: product
+  metric: product_video_completion_rate
+- when:
+    measure: thruplays
+    scope: product
+  metric: product_thruplays

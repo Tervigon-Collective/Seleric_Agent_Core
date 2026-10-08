@@ -49,8 +49,8 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 149
-    assert len(v2.cat.views) == 18
+    assert len(v2.cat.metrics) == 200
+    assert len(v2.cat.views) == 20
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
 
@@ -346,7 +346,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 146  # 149 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 197  # 200 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -413,8 +413,9 @@ def test_concept_axis_keyed_by_its_dimension_is_placed_by_value(v2):
     ("revenue by variant", None, "product_net_revenue"),
     ("cogs per product", None, "product_net_cogs"),          # total COGS split by product, not product cost
     ("product cost", None, "product_cost"),                  # the order-date COGS component, not the grain
-    ("net profit", {"scope": "product"}, "product_gross_profit"),
-    ("margin", {"scope": "product"}, "product_gross_margin_pct"),
+    ("net profit", {"scope": "product"}, "product_net_profit"),    # P&L basis, allocated ad spend (2026-10-08)
+    ("margin", {"scope": "product"}, "product_net_margin_pct"),
+    ("gross profit", {"scope": "product"}, "product_gross_profit"),
     ("discounts per sku", None, "product_discounts"),
 ])
 def test_product_scope_resolves_to_the_product_grain_metric(v2, text, axes, metric):
@@ -424,17 +425,18 @@ def test_product_scope_resolves_to_the_product_grain_metric(v2, text, axes, metr
 
 
 def test_product_scope_without_a_product_metric_is_refused_not_answered_at_order_grain(v2):
-    for axes in ({"basis": "net", "scope": "product", "date": "finance"}, {"basis": "total", "scope": "product"}):
-        r = v2.resolve_concept("sales", axes)
-        assert r.kind == "unsupported_concept", (axes, r)
+    r = v2.resolve_concept("sales", {"basis": "total", "scope": "product"})  # incl. GST: order level only
+    assert r.kind == "unsupported_concept", r
+    # Finance (event-date) net sales by product: the P&L spread over its lines (serve.product_pnl, 2026-10-08)
+    assert v2.resolve_concept("sales", {"basis": "net", "scope": "product", "date": "finance"}).metric_id == "product_pnl_net_sales"
 
 
 def test_grain_twins_come_from_the_concepts_scope_axis(v2):
     assert v2.grain_twins("net_sales") == ["product_net_revenue"]
     assert v2.grain_twins("gross_sales") == ["product_gross_sale"]
     assert v2.grain_twins("net_cogs") == ["product_net_cogs"]
-    assert v2.grain_twins("net_profit") == ["product_gross_profit"]
-    assert v2.grain_twins("pnl_net_sales") == []      # Finance has no product split
+    assert v2.grain_twins("net_profit") == ["product_net_profit"]
+    assert v2.grain_twins("pnl_net_sales") == ["product_pnl_net_sales"]  # event-date P&L by product
     assert v2.grain_twins("total_sales") == []        # incl. GST: no product twin
     rows = {m["id"]: m for m in v2.bootstrap()["metrics"]}
     assert rows["net_sales"]["grain_twins"] == ["product_net_revenue"]
@@ -456,10 +458,10 @@ def test_grain_twins_cover_marts_cac_orders_and_refunds(v2):
     assert v2.grain_twins("ltv") == ["new_customer_ltv"]
     assert v2.grain_twins("bounce_rate") == ["session_bounce_rate"]
     # CAC -> the order-date channel P&L (channel / campaign slices); brand total identical
-    assert v2.grain_twins("cac") == ["channel_cac"]
+    assert v2.grain_twins("cac") == ["channel_cac", "product_cac"]  # channel grain first
     # order-level -> product-level (an order holds several products)
     assert v2.grain_twins("orders") == ["product_orders", "channel_orders"]
-    assert v2.grain_twins("new_customers") == ["channel_new_customers"]
+    assert v2.grain_twins("new_customers") == ["channel_new_customers", "product_new_customers"]
     assert v2.grain_twins("refunded_amount_excl_tax") == ["product_refunded_amount_excl_tax"]
     assert v2.grain_twins("returns_excl_tax") == ["product_returns_excl_tax"]
     # a refund-level amount never splits by the refund lines' product (it would repeat the whole refund)

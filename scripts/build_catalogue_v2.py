@@ -60,15 +60,19 @@ VIEW_INFO = {
     "pnl": ("finance", "brand_day_channel_ad", "canonical_pnl", None, "Finance"),
     # order-date P&L (decision 2026-10-04): every non-Finance domain reads the order date
     "order_pnl": ("finance", "brand_order_day_channel_ad", "channel_pnl", None, "Growth / Finance"),
+    # product P&L: the order P&L spread over its lines (serve.product_pnl), on the order and the event date
+    "product_pnl": ("product", "order_line_pnl_row", "product_performance", None, "Finance"),
+    # funnel purchases at order grain (serve.funnel_orders)
+    "funnel_orders": ("web_analytics", "order", "funnel_daily", None, "Growth / Web Analytics"),
 }
 MODULES = {  # v1 module id -> v2 views (no ontology in v2; extra_views is the scope)
-    "webanalytics": ["web_sessions", "web_funnel", "web_events", "web_event_detail"],
+    "webanalytics": ["web_sessions", "web_funnel", "web_events", "web_event_detail", "funnel_orders"],
     "commerce": ["commerce", "returns", "payments"],
-    "product": ["product"],
+    "product": ["product", "product_pnl"],
     "paidmedia": ["paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes", "order_pnl"],
     "attribution": ["attribution", "attribution_paths", "commerce"],
     "customer": ["customers", "unit_economics", "commerce", "order_pnl"],
-    "finance": ["pnl", "order_pnl"],
+    "finance": ["pnl", "order_pnl", "product_pnl"],
     "operations": ["returns", "payments"],
 }
 META_ONLY = {"landing_page_views", "cost_per_landing_page_view", "video_completion_rate", "thruplays",
@@ -125,6 +129,18 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "new_customer_ltv": ["new_customers"],
     "product_gross_roas": ["product_ad_spend"], "product_net_roas": ["product_ad_spend"],
     "product_mer": ["product_ad_spend"],
+    "product_ctr": ["product_clicks", "product_impressions"], "product_cpc": ["product_ad_spend", "product_clicks"],
+    "product_cpm": ["product_ad_spend", "product_impressions"],
+    "product_cost_per_landing_page_view": ["product_ad_spend", "product_landing_page_views"],
+    "product_cost_per_link_click": ["product_ad_spend", "product_link_clicks"],
+    "product_hook_rate": ["product_impressions"], "product_hold_rate_15s": ["product_thruplays"],
+    "product_video_completion_rate": ["product_impressions"],
+    "product_cac": ["product_new_customers"], "product_cost_per_order": ["product_orders"],
+    "product_ltv_cac_ratio": ["product_new_customers"], "product_be_roas": ["product_contribution_margin"],
+    "product_contribution_margin_pct": ["product_contribution_margin"], "product_net_margin_pct": ["product_net_profit"],
+    "product_pnl_contribution_margin_pct": ["product_pnl_contribution_margin"],
+    "product_pnl_net_margin_pct": ["product_pnl_net_profit"], "product_pnl_mer": ["product_pnl_net_sales"],
+    "product_pnl_net_roas": ["product_pnl_contribution_margin"], "product_pnl_be_roas": ["product_pnl_contribution_margin"],
     "channel_cac": ["ad_spend", "channel_new_customers"], "cost_per_order": ["ad_spend", "channel_orders"],
     "session_bounce_rate": ["sessions"], "pnl_contribution_margin_pct": ["pnl_contribution_margin", "pnl_net_sales"],
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
@@ -148,10 +164,12 @@ FAMILIES = {
     "channel": ["channel", "acquisition_channel"],
     "campaign": ["campaign_name", "acquisition_campaign"],
     # product vocabulary on order / payment (basket_*: orders CONTAINING it), session (viewed_*: sessions that viewed
-    # or added it) and customer (first_order_*: the first order's product) views — see PROXY_OF
-    "product": ["product_title", "basket_product_title", "viewed_product_title", "first_order_product_title"],
-    "sku": ["sku", "basket_sku", "viewed_sku", "first_order_sku"],
-    "product_type": ["product_type", "basket_product_type", "first_order_product_type"],
+    # or added it), customer (first_order_*: the first order's product) and ad-change (sold_*: products the change's
+    # campaign sold) views — see PROXY_OF
+    "product": ["product_title", "basket_product_title", "viewed_product_title", "first_order_product_title",
+                "sold_product_title"],
+    "sku": ["sku", "basket_sku", "viewed_sku", "first_order_sku", "sold_sku"],
+    "product_type": ["product_type", "basket_product_type", "first_order_product_type", "sold_product_type"],
     "variant": ["variant_title", "basket_variant_title"],
 }
 # Proxy families: after the first member, the members carry the same vocabulary with another meaning — the orders /
@@ -283,7 +301,8 @@ def main() -> int:
                         "attribution": "order_date", "attribution_paths": "order_date",
                         "customers": "last_order_at", "unit_economics": "report_date",
                         "returns": "refund_date", "payments": "transaction_date",
-                        "pnl": "report_date", "order_pnl": "order_date"}[name]
+                        "pnl": "report_date", "order_pnl": "order_date", "product_pnl": "order_date",
+                        "funnel_orders": "order_date"}[name]
         assert default_axis in time_dims, (name, default_axis, time_dims)
         if dt:
             assert dt in time_dims, (name, dt, time_dims)

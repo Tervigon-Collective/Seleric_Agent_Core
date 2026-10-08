@@ -8,6 +8,7 @@ modules:
     - web_funnel
     - web_events
     - web_event_detail
+    - funnel_orders
   commerce:
     display_name: Commerce Rollup
     description: Orders, sales, and refunds/returns across all channels.
@@ -20,6 +21,7 @@ modules:
     description: Per-product units, revenue, COGS, and margin.
     extra_views:
     - product
+    - product_pnl
   paidmedia:
     display_name: Paid Media Delivery
     description: Meta / Google ad delivery metrics (spend, CTR, CPC, CPM).
@@ -53,6 +55,7 @@ modules:
     extra_views:
     - pnl
     - order_pnl
+    - product_pnl
   operations:
     display_name: Returns & Refunds
     description: Shopify refund events and return lifecycle.

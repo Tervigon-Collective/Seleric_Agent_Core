@@ -18,6 +18,7 @@ hierarchies:
     views:
     - commerce
     - product
+    - funnel_orders
     - web_sessions
     - web_event_detail
     - attribution
@@ -43,6 +44,8 @@ hierarchies:
     views:
     - commerce
     - product
+    - product_pnl
+    - funnel_orders
     - paid_media
     - paid_media_hourly
     - paid_media_breakdowns
@@ -64,6 +67,8 @@ hierarchies:
     views:
     - commerce
     - product
+    - product_pnl
+    - funnel_orders
     - paid_media
     - paid_media_hourly
     - paid_media_breakdowns

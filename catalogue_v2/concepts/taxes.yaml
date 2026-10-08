@@ -12,6 +12,11 @@ axes:
     - order
     - finance
     default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
 resolves:
 - when:
     date: order
@@ -19,3 +24,11 @@ resolves:
 - when:
     date: finance
   metric: pnl_taxes_on_net_sales
+- when:
+    date: order
+    scope: product
+  metric: product_taxes_on_net_sales
+- when:
+    date: finance
+    scope: product
+  metric: product_pnl_taxes_on_net_sales

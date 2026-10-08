@@ -66,6 +66,159 @@ v2_metrics:
   product_mer:
     member: product.product_mer
     date_axis: product.order_date
+  product_impressions:
+    member: product.product_impressions
+    date_axis: product.order_date
+  product_clicks:
+    member: product.product_clicks
+    date_axis: product.order_date
+  product_link_clicks:
+    member: product.product_link_clicks
+    date_axis: product.order_date
+  product_landing_page_views:
+    member: product.product_landing_page_views
+    date_axis: product.order_date
+  product_thruplays:
+    member: product.product_thruplays
+    date_axis: product.order_date
+  product_ctr:
+    member: product.product_ctr
+    date_axis: product.order_date
+  product_cpc:
+    member: product.product_cpc
+    date_axis: product.order_date
+  product_cpm:
+    member: product.product_cpm
+    date_axis: product.order_date
+  product_cost_per_landing_page_view:
+    member: product.product_cost_per_landing_page_view
+    date_axis: product.order_date
+  product_cost_per_link_click:
+    member: product.product_cost_per_link_click
+    date_axis: product.order_date
+  product_hook_rate:
+    member: product.product_hook_rate
+    date_axis: product.order_date
+  product_hold_rate_15s:
+    member: product.product_hold_rate_15s
+    date_axis: product.order_date
+  product_video_completion_rate:
+    member: product.product_video_completion_rate
+    date_axis: product.order_date
+  product_shipping_cost:
+    member: product_pnl.pl_shipping_cost
+    date_axis: product_pnl.order_date
+  product_packaging_cost:
+    member: product_pnl.pl_packaging_cost
+    date_axis: product_pnl.order_date
+  product_payment_gateway_fees:
+    member: product_pnl.pl_payment_gateway_fees
+    date_axis: product_pnl.order_date
+  product_rto_cost:
+    member: product_pnl.pl_rto_cost
+    date_axis: product_pnl.order_date
+  product_operating_cost:
+    member: product_pnl.pl_operating_cost
+    date_axis: product_pnl.order_date
+  product_taxes_on_net_sales:
+    member: product_pnl.pl_taxes_on_net_sales
+    date_axis: product_pnl.order_date
+  product_be_roas:
+    member: product_pnl.pl_be_roas
+    date_axis: product_pnl.order_date
+  product_cac:
+    member: product_pnl.pl_cac
+    date_axis: product_pnl.order_date
+  product_cost_per_order:
+    member: product_pnl.pl_cost_per_order
+    date_axis: product_pnl.order_date
+  product_ltv_cac_ratio:
+    member: product_pnl.pl_ltv_cac_ratio
+    date_axis: product_pnl.order_date
+  product_net_profit:
+    member: product_pnl.pl_net_profit
+    date_axis: product_pnl.order_date
+  product_contribution_margin:
+    member: product_pnl.pl_contribution_margin
+    date_axis: product_pnl.order_date
+  product_contribution_margin_pct:
+    member: product_pnl.pl_contribution_margin_pct
+    date_axis: product_pnl.order_date
+  product_net_margin_pct:
+    member: product_pnl.pl_net_margin_pct
+    date_axis: product_pnl.order_date
+  product_new_customers:
+    member: product_pnl.pl_new_customers
+    date_axis: product_pnl.order_date
+  product_pnl_net_sales:
+    member: product_pnl.pl_net_sales
+    date_axis: product_pnl.report_date
+  product_pnl_net_cogs:
+    member: product_pnl.pl_net_cogs
+    date_axis: product_pnl.report_date
+  product_pnl_net_profit:
+    member: product_pnl.pl_net_profit
+    date_axis: product_pnl.report_date
+  product_pnl_contribution_margin:
+    member: product_pnl.pl_contribution_margin
+    date_axis: product_pnl.report_date
+  product_pnl_contribution_margin_pct:
+    member: product_pnl.pl_contribution_margin_pct
+    date_axis: product_pnl.report_date
+  product_pnl_net_margin_pct:
+    member: product_pnl.pl_net_margin_pct
+    date_axis: product_pnl.report_date
+  product_pnl_mer:
+    member: product_pnl.pl_mer
+    date_axis: product_pnl.report_date
+  product_pnl_net_roas:
+    member: product_pnl.pl_net_roas
+    date_axis: product_pnl.report_date
+  product_pnl_be_roas:
+    member: product_pnl.pl_be_roas
+    date_axis: product_pnl.report_date
+  product_pnl_return_revenue:
+    member: product_pnl.pl_return_revenue
+    date_axis: product_pnl.report_date
+  product_pnl_cancel_revenue:
+    member: product_pnl.pl_cancel_revenue
+    date_axis: product_pnl.report_date
+  product_pnl_return_cancel_revenue:
+    member: product_pnl.pl_return_cancel_revenue
+    date_axis: product_pnl.report_date
+  product_pnl_returned_orders:
+    member: product_pnl.pl_returned_orders
+    date_axis: product_pnl.report_date
+  product_pnl_cancelled_orders:
+    member: product_pnl.pl_cancelled_orders
+    date_axis: product_pnl.report_date
+  product_pnl_returned_or_cancelled_orders:
+    member: product_pnl.pl_returned_or_cancelled_orders
+    date_axis: product_pnl.report_date
+  product_pnl_shipping_cost:
+    member: product_pnl.pl_shipping_cost
+    date_axis: product_pnl.report_date
+  product_pnl_packaging_cost:
+    member: product_pnl.pl_packaging_cost
+    date_axis: product_pnl.report_date
+  product_pnl_payment_gateway_fees:
+    member: product_pnl.pl_payment_gateway_fees
+    date_axis: product_pnl.report_date
+  product_pnl_rto_cost:
+    member: product_pnl.pl_rto_cost
+    date_axis: product_pnl.report_date
+  product_pnl_operating_cost:
+    member: product_pnl.pl_operating_cost
+    date_axis: product_pnl.report_date
+  product_pnl_taxes_on_net_sales:
+    member: product_pnl.pl_taxes_on_net_sales
+    date_axis: product_pnl.report_date
+  funnel_order_purchases:
+    member: funnel_orders.funnel_order_purchases
+    date_axis: funnel_orders.order_date
+  funnel_order_revenue:
+    member: funnel_orders.funnel_order_revenue
+    date_axis: funnel_orders.order_date
   ad_spend:
     member: paid_media.ad_spend
     date_axis: paid_media.report_date
