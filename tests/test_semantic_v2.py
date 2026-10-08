@@ -597,3 +597,10 @@ def test_product_slices_reach_every_domain(v2):
     assert "campaign_name" in cat.metrics["touches"].supported_dimensions
     assert "basket_product_title" in cat.metrics["touches"].supported_dimensions  # touches of orders containing it
     assert {"platform", "ad_platform"} <= set(cat.metrics["funnel_purchases"].supported_dimensions)
+
+
+def test_a_terms_own_axis_words_win_over_the_questions(v2):
+    # live 2026-10-08: "… net ROAS … product gross sale" passed basis=gross (from "gross sale") with "net ROAS",
+    # which resolved to product_gross_roas and was labelled net ROAS
+    assert v2.resolve_concept("net roas", {"basis": "gross", "scope": "product"}).metric_id == "product_net_roas"
+    assert v2.resolve_concept("roas", {"basis": "gross"}).metric_id == "gross_roas"  # an open axis is still filled

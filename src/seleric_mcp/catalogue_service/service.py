@@ -713,19 +713,24 @@ class CatalogueService:
             if axis.default is not None:
                 filled[aname] = axis.default
         v2 = self.cat.semantic_version >= 2
+        # The term's own words set an axis first; axes passed in (often read from the WHOLE question) fill only
+        # the axes the term leaves open — "net ROAS" stays net in a question that also asks for "product gross
+        # sale" (live 2026-10-08: it resolved to product_gross_roas and was labelled net ROAS).
+        own: set[str] = set()
         for aname, axis in c.axes.items():
             hints = (_AXIS_KEYWORDS_V2.get(aname, []) if v2 else []) + _AXIS_KEYWORDS.get(aname, [])
             for kw, val in hints:
                 if val in axis.values and kw in t:
                     filled[aname] = val
                     explicitly_set.add(aname)
+                    own.add(aname)
                     break
         for k, v in (preset_axes or {}).items():
-            if k in c.axes:
+            if k in c.axes and k not in own:
                 filled[k] = v
                 explicitly_set.add(k)
         for k, v in (explicit_axes or {}).items():
-            if k in c.axes:
+            if k in c.axes and k not in own:
                 filled[k] = v
                 explicitly_set.add(k)
         defaults_applied = sorted(a for a in filled if a not in explicitly_set)
