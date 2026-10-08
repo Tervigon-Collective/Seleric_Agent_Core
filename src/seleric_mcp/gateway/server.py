@@ -7,6 +7,7 @@ inspects parameter annotations with ``issubclass(..., Context)`` and crashes
 when annotations are stringified (PEP 563).
 """
 
+import asyncio
 import json
 import os
 import re
@@ -738,7 +739,7 @@ def build_server(settings: Settings) -> FastMCP:
         return ctx.catalogue.resolve_term(text, kind=kind).model_dump()
 
     @mcp.tool()
-    async def catalogue_resolve_values(text: str, brand_id: str | None = None) -> dict:
+    async def catalogue_resolve_values(text: str, brand_id: str | None = None, axes_only: bool = False) -> dict:
         """Resolve the words of a question to values that exist in the data
         (a source, campaign, product or city name -> the dimension and exact
         values that hold it). Learned from Cube, not
@@ -747,14 +748,21 @@ def build_server(settings: Settings) -> FastMCP:
         matching values with volume and match type (exact|token|fuzzy|contains|
         abbreviation), the dimension's top values, and metrics on that view.
         Candidates only — the caller decides which apply. status='warming' while
-        the index for this brand is first being built."""
-        _log_call("catalogue_resolve_values", text=text, brand_id=brand_id)
+        the index for this brand is first being built. axes_only=True returns just
+        the axes the text's own words set (no value matching)."""
+        _log_call("catalogue_resolve_values", text=text, brand_id=brand_id, axes_only=axes_only)
+        axes = ctx.catalogue.question_axes(text)  # semantic v2: axes the question's own words set
+        if axes_only:
+            return {"status": "ok", "terms": [], "unmatched_terms": [], "axes": axes}
         brand = brand_id or ctx.values.brand_in_text(text) or ctx.values.default_brand_id
         snap = await ctx.values.get(brand, wait_s=4.0)
-        axes = ctx.catalogue.question_axes(text)  # semantic v2: axes the question's own words set
         if snap is None:
             return {"status": "warming", "brand_id": brand, "terms": [], "unmatched_terms": [], "axes": axes}
-        return {**ctx.values.resolve(text, snap), "axes": axes}
+        # Matching every n-gram against the whole index is CPU work (1-4 s): off the event loop, so concurrent
+        # missions' queries are not queued behind it (live 2026-10-08: three at once pushed it past the agent's
+        # 6 s budget and a mission lost its named product filter).
+        resolved = await asyncio.to_thread(ctx.values.resolve, text, snap)
+        return {**resolved, "axes": axes}
 
     @mcp.tool()
     def catalogue_resolve_concept(text: str, axes: dict | None = None) -> dict:
