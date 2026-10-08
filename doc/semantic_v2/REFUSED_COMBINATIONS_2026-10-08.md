@@ -36,8 +36,12 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
    (0.28 s per query instead of ~2 s).
 5. ~~Allocation labels~~ FIXED: Cube marks such measures `meta.allocated`, and the generator appends
    "(allocated)" to their display names (e.g. "Product CAC (allocated)"), which the agent writes in answers.
-6. **Open from earlier.** Golden Q17 channel reconciliation; model-side arithmetic on large breakdowns; ads missing
-   from `serve.dim_ad` (likely the second Meta account).
+6. ~~Golden Q17 / model arithmetic~~ FIXED 2026-10-09 (gaurav 7d440e0, deployed rollback-20261009a):
+   query_metrics states each breakdown dimension's subtotals and their share of the total, stored as a finding.
+   Golden Q17 now completes with per-channel rows and no unbacked-figure revisions. The catalogue alias "unattributed
+   revenue / sales" resolves to sales on channel=unattributed (Q17 had read it as gross − net).
+7. **Still open: data gap.** Ads missing from `serve.dim_ad` (likely the second Meta account is not ingested):
+   breakdowns by ad name report them as "no ad_name value".
 
 ---
 

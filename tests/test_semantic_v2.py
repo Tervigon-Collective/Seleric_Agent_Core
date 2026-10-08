@@ -606,3 +606,9 @@ def test_a_terms_own_axis_words_win_over_the_questions(v2):
     # which resolved to product_gross_roas and was labelled net ROAS
     assert v2.resolve_concept("net roas", {"basis": "gross", "scope": "product"}).metric_id == "product_net_roas"
     assert v2.resolve_concept("roas", {"basis": "gross"}).metric_id == "gross_roas"  # an open axis is still filled
+
+
+def test_unattributed_revenue_is_the_unattributed_channel(v2):
+    # golden Q17 2026-10-09: "quantify unattributed revenue" was computed as gross − net (the discount / return gap)
+    r = v2.resolve_concept("unattributed revenue")
+    assert r.metric_id == "net_sales" and r.filter == {"finance_channel": "unattributed"}

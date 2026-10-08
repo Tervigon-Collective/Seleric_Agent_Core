@@ -563,6 +563,10 @@ concepts:
 aliases:
   # spelled-out forms of the ad ratios (the planner's slot reader expands abbreviations): without them "cost per
   # click" fell to the concept default (CTR) and the planner deduped CPC / CPM away (live 2026-10-08)
+  # unattributed revenue is the P&L channel that holds it, not gross − net (golden Q17 2026-10-09 read it as the
+  # discount / return gap)
+  unattributed revenue: {concept: sales, axes: {channel: unattributed}}
+  unattributed sales: {concept: sales, axes: {channel: unattributed}}
   cost per click: {concept: cost_per, axes: {metric_kind: cpc}}
   cost per mille: {concept: cost_per, axes: {metric_kind: cpm}}
   cost per thousand impressions: {concept: cost_per, axes: {metric_kind: cpm}}
