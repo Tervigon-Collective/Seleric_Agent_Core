@@ -226,6 +226,18 @@ DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm"
            "product_orders": "Orders with the product",
            "product_ad_spend": "Product ad spend (allocated)",
            "product_gross_roas": "Product gross ROAS", "product_net_roas": "Product net ROAS", "product_mer": "Product MER",
+           "product_ctr": "Product CTR", "product_cpc": "Product CPC", "product_cpm": "Product CPM",
+           "product_cac": "Product CAC", "product_ltv_cac_ratio": "Product LTV:CAC ratio",
+           "product_be_roas": "Product break-even ROAS", "product_cost_per_order": "Product cost per order (CPA)",
+           "product_cost_per_landing_page_view": "Product cost per LPV", "product_landing_page_views": "Product LPVs",
+           "product_pnl_net_sales": "Product P&L net sales", "product_pnl_net_cogs": "Product P&L net COGS",
+           "product_pnl_net_profit": "Product P&L net profit", "product_pnl_mer": "Product P&L MER",
+           "product_pnl_net_roas": "Product P&L net ROAS", "product_pnl_be_roas": "Product P&L break-even ROAS",
+           "product_pnl_net_margin_pct": "Product P&L net margin %",
+           "product_pnl_contribution_margin_pct": "Product P&L contribution margin %",
+           "product_contribution_margin_pct": "Product contribution margin %", "product_net_margin_pct": "Product net margin %",
+           "product_rto_cost": "Product RTO cost", "product_pnl_rto_cost": "Product P&L RTO cost",
+           "funnel_order_purchases": "Funnel purchases (orders)", "funnel_order_revenue": "Funnel revenue (orders)",
            "product_refunded_amount_excl_tax": "Product refunded amount (ex-GST)",
            "product_returns_excl_tax": "Product returns value (ex-GST)",
            "event_count": "Web events (events)", "event_page_views": "Page views (events)", "event_product_views": "Product views (events)",
@@ -402,6 +414,11 @@ def main() -> int:
         roles = sorted({r for m in olds for r in ((v1_metrics.get(m["old"]) or {}).get("access_policy") or {}).get("roles_allowed", [])})
         owners = collections.Counter((v1_metrics.get(m["old"]) or {}).get("data_owner") for m in olds if m["old"] in v1_metrics)
         desc = " ".join((cm.get("description") or "").split())
+        # Cube marks measures that rest on ad delivery allocated to products: the label says so, so an answer that
+        # reads the label never presents a model as platform-reported
+        label = human(mid)
+        if (cm.get("meta") or {}).get("allocated") and "allocated" not in label.lower():
+            label += " (allocated)"
         axis_note = f"Date axis: {axis} ({'event date' if mid.startswith('pnl_') else 'IST'}); grain: {grain}."
         if mid in REDEFINED:
             home = next((n for n, ms in by_new.items() if n != mid and any(m["old"] == mid for m in ms)), None)
@@ -411,7 +428,7 @@ def main() -> int:
             axis_note += f" Also the home of the v1 meaning of: {', '.join(formerly)}."
         doc = {
             "id": mid,
-            "display_name": human(mid),
+            "display_name": label,
             "category": category,
             "status": "broken" if mid in UNAVAILABLE else ("approved" if mid in NOT_CERTIFIED else "certified"),
             "description": f"{desc} {axis_note}".strip(),

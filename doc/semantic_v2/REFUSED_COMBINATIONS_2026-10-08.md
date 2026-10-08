@@ -30,12 +30,12 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
    funnel_order_purchases 25 (TH-222-WINGBIRD-23SEP).
 2. **Replay golden Q1–18** plus product P&L questions on the live API. Cross-check product net profit / CAC /
    CTR in ClickHouse.
-3. **Meta spend by P&L channel on product_pnl is 1,104.81 below order_pnl (Sep).** Allocated spend follows the
-   order's P&L channel; a few Meta-attributed orders sit in another channel.
-4. **Performance.** product_pnl recomputes line shares over all brands per query (~2 s). If it slows, materialise
-   it (a refreshable MV, as fct_order_pnl_daily).
-5. **Allocation models.** Product delivery / spend / CAC / ROAS are allocations, not platform data. Descriptions
-   say so; the answer should say "allocated" when it reports them.
+3. ~~Meta spend gap~~ FIXED (mage-ai 49061cc): allocated spend is its own row on the spend's platform /
+   campaign, so spend and net profit equal order_pnl_daily by channel exactly (Sep Meta spend 855,043.07).
+4. ~~Performance~~ FIXED: semantic.fct_product_pnl, refreshed every 5 minutes, backs serve.product_pnl
+   (0.28 s per query instead of ~2 s).
+5. ~~Allocation labels~~ FIXED: Cube marks such measures `meta.allocated`, and the generator appends
+   "(allocated)" to their display names (e.g. "Product CAC (allocated)"), which the agent writes in answers.
 6. **Open from earlier.** Golden Q17 channel reconciliation; model-side arithmetic on large breakdowns; ads missing
    from `serve.dim_ad` (likely the second Meta account).
 
