@@ -8,7 +8,14 @@ description: 'Product net profit = net sales − net COGS − allocated ad spend
 formula:
   human_readable: Product net profit = net sales − net COGS − allocated ad spend.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - product_contribution_margin
+  - product_order_ad_spend
+  composition:
+  - metric: product_contribution_margin
+    sign: 1
+  - metric: product_order_ad_spend
+    sign: -1
 cube_mapping:
   view: product_pnl
   measure: product_pnl.pl_net_profit

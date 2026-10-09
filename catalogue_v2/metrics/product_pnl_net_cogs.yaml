@@ -7,7 +7,14 @@ description: 'Product share of net COGS (product + operating cost). Date axis: r
 formula:
   human_readable: Product share of net COGS (product + operating cost).
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - product_pnl_product_cost
+  - product_pnl_operating_cost
+  composition:
+  - metric: product_pnl_product_cost
+    sign: 1
+  - metric: product_pnl_operating_cost
+    sign: 1
 cube_mapping:
   view: product_pnl
   measure: product_pnl.pl_net_cogs

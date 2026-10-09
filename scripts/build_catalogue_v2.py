@@ -252,6 +252,10 @@ def human(mid: str) -> str:
         return "P&L " + mid[4:].replace("_", " ")
     if mid.startswith("order_pnl_"):
         return mid[len("order_pnl_"):].replace("_", " ").capitalize() + " (P&L basis)"
+    if mid.startswith("product_order_"):
+        return "Product " + mid[len("product_order_"):].replace("_", " ") + " (P&L basis)"
+    if mid.startswith("product_pnl_"):
+        return "Product P&L " + mid[len("product_pnl_"):].replace("_", " ")
     return mid.replace("_", " ").capitalize()
 
 
@@ -400,7 +404,9 @@ def main() -> int:
     v2 = idmap["v2_metrics"]
     concept_rows = ry(ROOT / "catalogue_v2_src" / "concepts.yaml")["concepts"]
     view_dims = {v: {dim_id(v, d["name"]) for d in vm["dimensions"]} for v, vm in views_meta.items()}
-    id_of_member = {spec["member"]: mid for mid, spec in v2.items()}
+    # One member can carry an id per date axis (product_pnl: order_date ids product_*, report_date ids
+    # product_pnl_*), so a composition term is looked up on its parent's own axis.
+    id_of_member = {(spec["member"], spec["date_axis"]): mid for mid, spec in v2.items()}
     for mid, spec in sorted(v2.items()):
         view, member = spec["member"].split(".", 1)
         cm = measures[spec["member"]]
@@ -433,8 +439,10 @@ def main() -> int:
         # (meta.composition); the catalogue carries it by metric id so a breakdown reconciles to the total.
         composition = []
         for term in (cm.get("meta") or {}).get("composition") or []:
-            part = id_of_member.get(f"{view}.{term['member']}")
-            assert part is not None, f"{mid}: composition member {view}.{term['member']} has no catalogue id"
+            part = id_of_member.get((f"{view}.{term['member']}", spec["date_axis"]))
+            assert part is not None, (
+                f"{mid}: composition member {view}.{term['member']} has no catalogue id on {spec['date_axis']}"
+            )
             composition.append({"metric": part, "sign": int(term["sign"])})
         depends_on = [d for d in RATIO_PARTS.get(mid, []) if d in v2 and d != mid] or [t["metric"] for t in composition]
         doc = {

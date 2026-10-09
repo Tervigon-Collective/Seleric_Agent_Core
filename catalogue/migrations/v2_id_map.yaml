@@ -4,6 +4,42 @@ generated: '2026-10-04'
 description: 'Semantic v2 hard cut: every certified v1 metric id → its v2 metric. Old ids are rejected on the agent surface
   with an error naming `new` (+ filters). Members are Cube v2 view members.'
 v2_metrics:
+  product_order_gross_sales:
+    member: product_pnl.pl_gross_sales
+    date_axis: product_pnl.order_date
+  product_order_discounts:
+    member: product_pnl.pl_discounts
+    date_axis: product_pnl.order_date
+  product_order_return_revenue:
+    member: product_pnl.pl_return_revenue
+    date_axis: product_pnl.order_date
+  product_order_cancel_revenue:
+    member: product_pnl.pl_cancel_revenue
+    date_axis: product_pnl.order_date
+  product_order_net_sales:
+    member: product_pnl.pl_net_sales
+    date_axis: product_pnl.order_date
+  product_order_product_cost:
+    member: product_pnl.pl_product_cost
+    date_axis: product_pnl.order_date
+  product_order_net_cogs:
+    member: product_pnl.pl_net_cogs
+    date_axis: product_pnl.order_date
+  product_order_ad_spend:
+    member: product_pnl.pl_ad_spend
+    date_axis: product_pnl.order_date
+  product_pnl_gross_sales:
+    member: product_pnl.pl_gross_sales
+    date_axis: product_pnl.report_date
+  product_pnl_discounts:
+    member: product_pnl.pl_discounts
+    date_axis: product_pnl.report_date
+  product_pnl_product_cost:
+    member: product_pnl.pl_product_cost
+    date_axis: product_pnl.report_date
+  product_pnl_ad_spend:
+    member: product_pnl.pl_ad_spend
+    date_axis: product_pnl.report_date
   order_pnl_gross_sales:
     member: order_pnl.order_pnl_gross_sales
     date_axis: order_pnl.order_date
