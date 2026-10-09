@@ -105,6 +105,7 @@ dimensions:
     pnl: pnl.ad_name
     order_pnl: order_pnl.ad_name
   aliases: []
+  stable_key: ad_id
 - id: ad_platform
   display_name: Ad Platform
   description: 'Ad platform the traffic rolls up to: meta | google (NULL for other channels) — as on paid_media
@@ -198,6 +199,7 @@ dimensions:
     pnl: pnl.adset_name
     order_pnl: order_pnl.adset_name
   aliases: []
+  stable_key: adset_id
 - id: adset_status
   display_name: Adset Status
   description: Current ad set status.
@@ -393,6 +395,7 @@ dimensions:
   - campaign-wise
   - campaign wise
   - campaign name
+  stable_key: campaign_id
   family: campaign
   family_rank: 0
 - id: campaign_objective
@@ -1162,6 +1165,7 @@ dimensions:
   aliases:
   - product
   - product name
+  stable_key: product_id
   family: product
   family_rank: 0
 - id: product_type
@@ -1494,6 +1498,7 @@ dimensions:
     returns: returns.variant_title
   aliases:
   - variant
+  stable_key: variant_id
   family: variant
   family_rank: 0
 - id: vendor

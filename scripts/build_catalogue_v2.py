@@ -353,6 +353,30 @@ def main() -> int:
                                           "description": " ".join((d.get("description") or "").split()),
                                           "is_time": d["type"] == "time", "views": {}, "aliases": []})
             entry["views"][vname] = member
+    # The id that identifies a label's entity (Cube meta.stable_key on the shared member): in each view, the member
+    # whose source (aliasMember) is the label's own cube's key member. The agent treats a breakdown by the label and
+    # by its key as one breakdown.
+    for vname, vm in views_meta.items():
+        by_source: dict[str, list[str]] = {}
+        for d in vm["dimensions"]:
+            by_source.setdefault(d.get("aliasMember") or "", []).append(d["name"].split(".", 1)[1])
+        for d in vm["dimensions"]:
+            key = (d.get("meta") or {}).get("stable_key")
+            source = d.get("aliasMember") or ""
+            if not key or "." not in source:
+                continue
+            short = d["name"].split(".", 1)[1]
+            members = by_source.get(f"{source.split('.', 1)[0]}.{key}") or []
+            if len(members) != 1:
+                continue
+            did = DIM_RENAME.get((vname, short), short)
+            dims[did].setdefault("stable_key_by_view", {})[vname] = DIM_RENAME.get((vname, members[0]), members[0])
+    for did, entry in dims.items():
+        by_view = entry.pop("stable_key_by_view", None)
+        if by_view:
+            # one key per label id: the most common across its views (they agree for every declared pair)
+            keys = sorted(by_view.values(), key=lambda k: (-list(by_view.values()).count(k), k))
+            entry["stable_key"] = keys[0]
     for did, entry in dims.items():
         old = v1_dims.get(V1_DIM_ALIASES.get(did, did)) or v1_dims.get(did)
         if old:
