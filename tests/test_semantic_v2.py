@@ -612,3 +612,10 @@ def test_unattributed_revenue_is_the_unattributed_channel(v2):
     # golden Q17 2026-10-09: "quantify unattributed revenue" was computed as gross − net (the discount / return gap)
     r = v2.resolve_concept("unattributed revenue")
     assert r.metric_id == "net_sales" and r.filter == {"finance_channel": "unattributed"}
+
+
+def test_several_values_of_one_axis_are_compared_not_a_scope(v2):
+    # golden Q17 2026-10-09: "sales by Meta campaign, Google sub-channel, organic, WhatsApp" read channel=meta
+    assert "channel" not in v2.question_axes("Show sales by Meta campaign, Google sub-channel, organic and WhatsApp")
+    assert v2.question_axes("meta sales last week")["channel"] == "meta"
+    assert v2.question_axes("product cost last month")["scope"] == "all"  # the longer phrase wins over "product"

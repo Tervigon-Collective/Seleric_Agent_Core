@@ -677,10 +677,16 @@ class CatalogueService:
         t = f" {(text or '').strip().lower()} "
         found: dict[str, str] = {}
         for aname, hints in _AXIS_KEYWORDS_V2.items():
-            for kw, val in hints:
-                if re.search(rf"(?<![\w&]){re.escape(kw)}(?![\w&])", t):
-                    found[aname] = val
-                    break
+            # Several values of one axis in a question are compared side by side, not a scope: "sales by Meta
+            # campaign, Google sub-channel, organic, WhatsApp …" read channel=meta and filtered every sales query to
+            # Meta (golden Q17, 2026-10-09). The axis is set only when the question names exactly one value of it.
+            # a keyword inside a longer matched one is that one ("product cost" is not "product")
+            spans = [(m.start(), m.end(), val) for kw, val in hints
+                     for m in re.finditer(rf"(?<![\w&]){re.escape(kw)}(?![\w&])", t)]
+            values = {val for a, b, val in spans
+                      if not any(c <= a and b <= d and d - c > b - a for c, d, _ in spans)}
+            if len(values) == 1:
+                found[aname] = values.pop()
         return found
 
     @staticmethod
