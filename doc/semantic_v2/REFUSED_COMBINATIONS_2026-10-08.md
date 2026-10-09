@@ -30,7 +30,10 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
 (3 with one revision). Across the 18 traces the only dimension retry was Q16: the understanding picked
 `entity_name` (the ad change-log's entity) as the ranking dimension for "which campaigns, products and channels
 contributed", and the retry steered it to supported dimensions. That is a planner mis-pick, not a metric × slice
-gap. Possible follow-up: validate the plan's entity dimension against its rank metric before prefetching.
+gap. FIXED (gaurav 5c38cba, bf167d9; deployed rollback-20261009e): the plan falls back to an asked breakdown the
+rank metric carries, and a rank_order slot ranks the worst entities ascending ("contributed to the loss" had ranked
+the most profitable). Q16 replay: 0 dimension retries, PASS, worst campaigns exact vs CH (Brand Search −3,464.63,
+TH-383-SUSPENDER-26SEP-ADV+ −3,122.10 on 2026-10-02). Nothing in this document remains open.
 
 ### Gaps and next steps (not done this session)
 1. ~~Re-run the sweep~~ DONE 2026-10-09 after Jenkins #82: **0 refused of 1,379** metric × slice combinations
