@@ -627,3 +627,11 @@ def test_every_composition_is_a_same_view_signed_sum_of_additive_metrics(v2):
             assert part.cube_mapping.view == m.cube_mapping.view
             assert part.aggregation == m.aggregation == "additive"
             assert t.sign in (1, -1)
+
+
+def test_a_hyphenated_axis_word_is_read_with_axes_passed(v2):
+    """'break-even ROAS' resolved to be_roas bare but to net_roas whenever the agent passed axes: the axis
+    keywords were matched against the hyphenated text. A hyphen and a space spell the same word."""
+    for axes, want in (({}, "be_roas"), ({"date": "order"}, "be_roas"), ({"scope": "product"}, "product_be_roas"),
+                       ({"date": "finance"}, "pnl_be_roas")):
+        assert v2.resolve_concept("break-even roas", axes=axes).metric_id == want

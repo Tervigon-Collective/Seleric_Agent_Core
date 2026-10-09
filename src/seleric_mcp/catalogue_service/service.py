@@ -674,7 +674,8 @@ class CatalogueService:
         its Finance date axis. Empty for a v1 catalogue."""
         if self.cat.semantic_version < 2:
             return {}
-        t = f" {(text or '').strip().lower()} "
+        # A hyphen and a space spell the same word ("break-even" / "break even", "add-to-cart" / "add to cart").
+        t = f" {(text or '').strip().lower().replace('-', ' ')} "
         found: dict[str, str] = {}
         for aname, hints in _AXIS_KEYWORDS_V2.items():
             # Several values of one axis in a question are compared side by side, not a scope: "sales by Meta
@@ -682,7 +683,7 @@ class CatalogueService:
             # Meta (golden Q17, 2026-10-09). The axis is set only when the question names exactly one value of it.
             # a keyword inside a longer matched one is that one ("product cost" is not "product")
             spans = [(m.start(), m.end(), val) for kw, val in hints
-                     for m in re.finditer(rf"(?<![\w&]){re.escape(kw)}(?![\w&])", t)]
+                     for m in re.finditer(rf"(?<![\w&]){re.escape(kw.replace('-', ' '))}(?![\w&])", t)]
             values = {val for a, b, val in spans
                       if not any(c <= a and b <= d and d - c > b - a for c, d, _ in spans)}
             if len(values) == 1:
@@ -712,7 +713,9 @@ class CatalogueService:
     def _fill_axes(
         self, c, text: str, preset_axes: dict, explicit_axes: dict | None
     ) -> tuple[dict[str, str], list[str]]:
-        t = (text or "").strip().lower()
+        # A hyphen and a space spell the same word: "break-even ROAS" read no basis whenever axes were passed and
+        # resolved to net ROAS (live probe 2026-10-09), while the bare phrase resolved to break-even ROAS.
+        t = (text or "").strip().lower().replace("-", " ")
         filled: dict[str, str] = {}
         explicitly_set: set[str] = set()
         for aname, axis in c.axes.items():
@@ -726,7 +729,7 @@ class CatalogueService:
         for aname, axis in c.axes.items():
             hints = (_AXIS_KEYWORDS_V2.get(aname, []) if v2 else []) + _AXIS_KEYWORDS.get(aname, [])
             for kw, val in hints:
-                if val in axis.values and kw in t:
+                if val in axis.values and kw.replace("-", " ") in t:
                     filled[aname] = val
                     explicitly_set.add(aname)
                     own.add(aname)
