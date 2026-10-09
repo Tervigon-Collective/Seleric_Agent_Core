@@ -43,8 +43,9 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
    several channels no longer scopes to the first (question_axes), and the value-resolution cache expires (10 min).
    An "unattributed revenue" alias was tried and REVERTED: its bound filter scoped every revenue query of the
    mission to the unattributed channel (the total became the unattributed slice).
-7. **Still open: data gap.** Ads missing from `serve.dim_ad` (likely the second Meta account is not ingested):
-   breakdowns by ad name report them as "no ad_name value".
+7. ~~Ads missing from serve.dim_ad~~ RESOLVED 2026-10-09 — not a data gap: every attributed ad id is in
+   `serve.dim_ad`; the 7 Suspender Boots orders came from one Google ad the platform reports without a name. Cube
+   labels unnamed ads "<platform> ad <ad_id>" (mage-ai 00e3bb9), so ad-name breakdowns keep those orders.
 
 ---
 
