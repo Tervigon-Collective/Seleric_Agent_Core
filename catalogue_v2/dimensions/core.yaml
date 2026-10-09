@@ -86,7 +86,7 @@ dimensions:
   aliases: []
 - id: ad_name
   display_name: Ad Name
-  description: Ad name.
+  description: Ad name (unnamed ads as "<platform> ad <ad_id>").
   is_time: false
   views:
     commerce: commerce.ad_name
