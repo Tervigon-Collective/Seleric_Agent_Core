@@ -94,6 +94,9 @@ class MetricDef(BaseModel):
     aggregation: Literal["additive", "ratio"]
     ratio_components: RatioComponents | None = None
     companion_measures: list[str] = Field(default_factory=list)
+    # The dimension that splits this line into its natural parts (Cube meta.split_by): a breakdown shows the
+    # parts under the line (deductions by refund class: returns, cancellations, adjustments).
+    split_by: str | None = None
     unit: str
     currency_default: str | None = None
     grain: str
@@ -784,6 +787,8 @@ def _check_integrity(cat: Catalogue) -> None:
                     f"metric {m.id}: formula.composition term '{term.metric}' is on view "
                     f"{part.cube_mapping.view}, not {m.cube_mapping.view}"
                 )
+        if m.split_by and m.split_by not in cat.dimensions:
+            problems.append(f"metric {m.id}: split_by unknown dimension '{m.split_by}'")
         for companion in m.companion_measures:
             if companion not in cat.metrics:
                 problems.append(f"metric {m.id}: companion_measures unknown metric '{companion}'")

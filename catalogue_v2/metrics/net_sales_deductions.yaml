@@ -30,3 +30,4 @@ access_policy:
   - metrics:read
 version: 1.0.0
 replaces: []
+split_by: refund_class

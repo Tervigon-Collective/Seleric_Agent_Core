@@ -470,6 +470,8 @@ def main() -> int:
         }
         if mid in UNAVAILABLE:
             doc["unavailable_reason"] = UNAVAILABLE[mid]
+        if split := (cm.get("meta") or {}).get("split_by"):
+            doc["split_by"] = dim_id(view, f"{view}.{split}")
         excluded = dict(EXCLUDED_DIMS.get(mid, {}))
         twin_views = {t: v2[t]["member"].split(".", 1)[0] for t in _grain_twins(concept_rows, mid) if t in v2}
         for proxy, real in PROXY_OF.items():
