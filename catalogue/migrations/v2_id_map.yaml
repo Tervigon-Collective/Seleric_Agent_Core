@@ -4,6 +4,21 @@ generated: '2026-10-04'
 description: 'Semantic v2 hard cut: every certified v1 metric id → its v2 metric. Old ids are rejected on the agent surface
   with an error naming `new` (+ filters). Members are Cube v2 view members.'
 v2_metrics:
+  return_rate:
+    member: order_pnl.return_rate
+    date_axis: order_pnl.order_date
+  channel_returned_orders:
+    member: order_pnl.channel_returned_orders
+    date_axis: order_pnl.order_date
+  product_return_rate:
+    member: product_pnl.pl_return_rate
+    date_axis: product_pnl.order_date
+  product_order_orders:
+    member: product_pnl.pl_orders
+    date_axis: product_pnl.order_date
+  product_order_returned_orders:
+    member: product_pnl.pl_returned_orders
+    date_axis: product_pnl.order_date
   product_order_gross_sales:
     member: product_pnl.pl_gross_sales
     date_axis: product_pnl.order_date

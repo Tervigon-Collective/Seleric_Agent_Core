@@ -142,6 +142,8 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "product_pnl_net_margin_pct": ["product_pnl_net_profit"], "product_pnl_mer": ["product_pnl_net_sales"],
     "product_pnl_net_roas": ["product_pnl_contribution_margin"], "product_pnl_be_roas": ["product_pnl_contribution_margin"],
     "channel_cac": ["ad_spend", "channel_new_customers"], "cost_per_order": ["ad_spend", "channel_orders"],
+    "return_rate": ["channel_returned_orders", "channel_orders"],
+    "product_return_rate": ["product_order_returned_orders", "product_order_orders"],
     "session_bounce_rate": ["sessions"], "pnl_contribution_margin_pct": ["pnl_contribution_margin", "pnl_net_sales"],
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
     "pnl_gross_roas": ["gross_sales", "ad_spend"], "pnl_net_roas": ["pnl_contribution_margin", "ad_spend"],

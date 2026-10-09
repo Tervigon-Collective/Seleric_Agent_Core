@@ -391,6 +391,15 @@ concepts:
       - {when: {basis: total}, metric: aov}
       - {when: {basis: net}, metric: net_aov}
 
+  - id: return_rate
+    display_name: Return rate
+    one_liner: Orders later returned / orders placed (order-date cohort).
+    aliases: [return rate, returns rate, rate of return, rate of returns, return percentage, return %]
+    axes: {scope: {values: [all, product], default: all}}
+    resolves:
+      - {metric: return_rate}
+      - {when: {scope: product}, metric: product_return_rate}
+
   - id: discounts
     display_name: Discounts
     one_liner: Discounts ex-GST (booked at placement — same on order and event date).
