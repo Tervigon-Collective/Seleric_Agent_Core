@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 229  # + the P&L line items that complete each composition (order, Finance and both product trees)
+    assert len(v2.cat.metrics) == 231  # + the P&L line items that complete each composition (order, Finance and both product trees)
     assert len(v2.cat.views) == 20
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -346,7 +346,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 226  # 229 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 228  # 231 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]

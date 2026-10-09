@@ -8,7 +8,14 @@ description: 'Total sales incl. tax (what customers paid at placement), by order
 formula:
   human_readable: Total sales incl. tax (what customers paid at placement), by order date.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - paid_sales
+  - discounts_incl_tax
+  composition:
+  - metric: paid_sales
+    sign: 1
+  - metric: discounts_incl_tax
+    sign: 1
 cube_mapping:
   view: commerce
   measure: commerce.total_sales
