@@ -40,6 +40,18 @@ aliases:
     concept: cac
     axes:
       basis: order
+  unit return rate:
+    concept: return_rate
+    axes:
+      measure: units
+  units return rate:
+    concept: return_rate
+    axes:
+      measure: units
+  return rate by units:
+    concept: return_rate
+    axes:
+      measure: units
   funnel step 1:
     concept: conversion_rate
     axes:

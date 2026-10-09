@@ -9,7 +9,17 @@ formula:
   human_readable: Net sales ex-GST on ORDER date (cancelled / RTO → 0). The Finance P&L number on event date is
     pnl_net_sales.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - gross_sales
+  - discounts
+  - net_sales_deductions
+  composition:
+  - metric: gross_sales
+    sign: 1
+  - metric: discounts
+    sign: -1
+  - metric: net_sales_deductions
+    sign: -1
 cube_mapping:
   view: commerce
   measure: commerce.net_sales

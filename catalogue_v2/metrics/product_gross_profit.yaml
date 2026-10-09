@@ -7,7 +7,14 @@ description: 'Line gross profit ex-GST (net line revenue − net COGS). Date axi
 formula:
   human_readable: Line gross profit ex-GST (net line revenue − net COGS).
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - product_net_revenue
+  - product_net_cogs
+  composition:
+  - metric: product_net_revenue
+    sign: 1
+  - metric: product_net_cogs
+    sign: -1
 cube_mapping:
   view: product
   measure: product.product_gross_profit

@@ -8,7 +8,20 @@ description: 'Net line revenue ex-GST (after line cancellations / returns), by o
 formula:
   human_readable: Net line revenue ex-GST (after line cancellations / returns), by order date.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - product_gross_sale
+  - product_discounts
+  - product_return_revenue
+  - product_cancel_revenue
+  composition:
+  - metric: product_gross_sale
+    sign: 1
+  - metric: product_discounts
+    sign: -1
+  - metric: product_return_revenue
+    sign: -1
+  - metric: product_cancel_revenue
+    sign: -1
 cube_mapping:
   view: product
   measure: product.product_net_revenue

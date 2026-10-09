@@ -395,10 +395,13 @@ concepts:
     display_name: Return rate
     one_liner: Orders later returned / orders placed (order-date cohort).
     aliases: [return rate, returns rate, rate of return, rate of returns, return percentage, return %]
-    axes: {scope: {values: [all, product], default: all}}
+    axes: {scope: {values: [all, product], default: all}, measure: {values: [orders, units], default: orders}}
     resolves:
       - {metric: return_rate}
       - {when: {scope: product}, metric: product_return_rate}
+      # units returned / units ordered (line level, so it is also the per-product unit rate)
+      - {when: {measure: units}, metric: unit_return_rate}
+      - {when: {measure: units, scope: product}, metric: unit_return_rate}
 
   - id: discounts
     display_name: Discounts
@@ -583,6 +586,9 @@ aliases:
   cost per purchase: {concept: cac, axes: {basis: order}}
   # CPA in ad reporting is cost per purchase / conversion (orders); CAC is the per-new-customer figure
   cpa: {concept: cac, axes: {basis: order}}
+  unit return rate: {concept: return_rate, axes: {measure: units}}
+  units return rate: {concept: return_rate, axes: {measure: units}}
+  return rate by units: {concept: return_rate, axes: {measure: units}}
   funnel step 1: {concept: conversion_rate, axes: {stage: product_view}}
   funnel product view step: {concept: conversion_rate, axes: {stage: product_view}}
   funnel step 2: {concept: conversion_rate, axes: {stage: add_to_cart}}

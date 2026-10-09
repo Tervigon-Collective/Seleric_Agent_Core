@@ -15,8 +15,20 @@ axes:
     - all
     - product
     default: all
+  measure:
+    values:
+    - orders
+    - units
+    default: orders
 resolves:
 - metric: return_rate
 - when:
     scope: product
   metric: product_return_rate
+- when:
+    measure: units
+  metric: unit_return_rate
+- when:
+    measure: units
+    scope: product
+  metric: unit_return_rate

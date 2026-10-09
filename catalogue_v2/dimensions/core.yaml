@@ -1185,9 +1185,10 @@ dimensions:
   aliases: []
 - id: refund_class
   display_name: Refund Class
-  description: P&L refund class (return / cancel / RTO …).
+  description: P&L refund class of the order (ACTIVE, RETURN, CANCELLATION, ADJUSTMENT).
   is_time: false
   views:
+    commerce: commerce.refund_class
     returns: returns.refund_class
   aliases: []
 - id: refund_date
