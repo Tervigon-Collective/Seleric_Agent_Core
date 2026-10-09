@@ -35,6 +35,11 @@ rank metric carries, and a rank_order slot ranks the worst entities ascending ("
 the most profitable). Q16 replay: 0 dimension retries, PASS, worst campaigns exact vs CH (Brand Search −3,464.63,
 TH-383-SUSPENDER-26SEP-ADV+ −3,122.10 on 2026-10-02). Nothing in this document remains open.
 
+**Post-deploy verification 2026-10-09 (after the last agent deploy, gaurav bf167d9 / rollback-20261009e, Core #93):**
+full sweep 1,379 / 1,379 answered, 0 refused, 0 errors; golden Q1–18 on the live API 18 / 18 COMPLETED, validation
+PASS, 0 "does not support the dimension" retries in any trace (Q8, Q12 one revision, Q18 two — answer wording, not
+dimensions).
+
 ### Gaps and next steps (not done this session)
 1. ~~Re-run the sweep~~ DONE 2026-10-09 after Jenkins #82: **0 refused of 1,379** metric × slice combinations
    (1,133 direct, 116 via a grain twin, 130 via a conformed sibling). Spot-checked through the agent's own
