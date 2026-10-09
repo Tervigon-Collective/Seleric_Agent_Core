@@ -22,6 +22,10 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
   LTV:CAC, clicks, impressions, cost_per, video, LPVs) and a funnel_purchases concept. Net profit / margin by
   product now resolve to the P&L basis (product_net_profit), not line gross profit.
 
+**Final sweep 2026-10-09 ~06:10 IST** (after every change above, all repos at their final commits, MCP stable):
+1,379 of 1,379 answered — 1,133 direct, 116 via a grain twin, 130 via a conformed sibling; 0 refused, 0 errors.
+(A run during an MCP restart showed 39 connection errors — any Agent_Core push, even doc-only, restarts the MCP.)
+
 ### Gaps and next steps (not done this session)
 1. ~~Re-run the sweep~~ DONE 2026-10-09 after Jenkins #82: **0 refused of 1,379** metric × slice combinations
    (1,133 direct, 116 via a grain twin, 130 via a conformed sibling). Spot-checked through the agent's own
