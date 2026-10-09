@@ -9,7 +9,14 @@ description: 'Net COGS = product + operating cost, net of returns (order date). 
 formula:
   human_readable: Net COGS = product + operating cost, net of returns (order date).
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - product_cost
+  - operating_cost
+  composition:
+  - metric: product_cost
+    sign: 1
+  - metric: operating_cost
+    sign: 1
 cube_mapping:
   view: order_pnl
   measure: order_pnl.net_cogs

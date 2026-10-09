@@ -8,7 +8,14 @@ description: 'Contribution margin = net sales − net COGS (before ad spend). Da
 formula:
   human_readable: Contribution margin = net sales − net COGS (before ad spend).
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - pnl_net_sales
+  - pnl_net_cogs
+  composition:
+  - metric: pnl_net_sales
+    sign: 1
+  - metric: pnl_net_cogs
+    sign: -1
 cube_mapping:
   view: pnl
   measure: pnl.pnl_contribution_margin

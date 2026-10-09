@@ -8,7 +8,20 @@ description: 'Operating cost = shipping + packaging + gateway fees + RTO. Date a
 formula:
   human_readable: Operating cost = shipping + packaging + gateway fees + RTO.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - pnl_shipping_cost
+  - pnl_packaging_cost
+  - pnl_payment_gateway_fees
+  - pnl_rto_cost
+  composition:
+  - metric: pnl_shipping_cost
+    sign: 1
+  - metric: pnl_packaging_cost
+    sign: 1
+  - metric: pnl_payment_gateway_fees
+    sign: 1
+  - metric: pnl_rto_cost
+    sign: 1
 cube_mapping:
   view: pnl
   measure: pnl.pnl_operating_cost

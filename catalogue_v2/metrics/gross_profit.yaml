@@ -9,7 +9,17 @@ description: 'Gross profit = gross sales − gross COGS − ad spend (order date
 formula:
   human_readable: Gross profit = gross sales − gross COGS − ad spend (order date).
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - order_pnl_gross_sales
+  - gross_cogs
+  - order_pnl_ad_spend
+  composition:
+  - metric: order_pnl_gross_sales
+    sign: 1
+  - metric: gross_cogs
+    sign: -1
+  - metric: order_pnl_ad_spend
+    sign: -1
 cube_mapping:
   view: order_pnl
   measure: order_pnl.gross_profit

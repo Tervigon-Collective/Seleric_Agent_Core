@@ -4,6 +4,36 @@ generated: '2026-10-04'
 description: 'Semantic v2 hard cut: every certified v1 metric id → its v2 metric. Old ids are rejected on the agent surface
   with an error naming `new` (+ filters). Members are Cube v2 view members.'
 v2_metrics:
+  order_pnl_gross_sales:
+    member: order_pnl.order_pnl_gross_sales
+    date_axis: order_pnl.order_date
+  order_pnl_discounts:
+    member: order_pnl.order_pnl_discounts
+    date_axis: order_pnl.order_date
+  order_pnl_return_revenue:
+    member: order_pnl.order_pnl_return_revenue
+    date_axis: order_pnl.order_date
+  order_pnl_cancel_revenue:
+    member: order_pnl.order_pnl_cancel_revenue
+    date_axis: order_pnl.order_date
+  order_pnl_net_sales:
+    member: order_pnl.order_pnl_net_sales
+    date_axis: order_pnl.order_date
+  order_pnl_ad_spend:
+    member: order_pnl.order_pnl_ad_spend
+    date_axis: order_pnl.order_date
+  pnl_gross_sales:
+    member: pnl.pnl_gross_sales
+    date_axis: pnl.report_date
+  pnl_discounts:
+    member: pnl.pnl_discounts
+    date_axis: pnl.report_date
+  pnl_product_cost:
+    member: pnl.pnl_product_cost
+    date_axis: pnl.report_date
+  pnl_ad_spend:
+    member: pnl.pnl_ad_spend
+    date_axis: pnl.report_date
   product_refunded_amount_excl_tax:
     member: returns.product_refunded_amount_excl_tax
     date_axis: returns.refund_date
@@ -1927,9 +1957,9 @@ maps:
     — one id, the order-date one'
   verify: false
 - old: pnl_product_cost
-  new: product_cost
-  member: order_pnl.product_cost
-  date_axis: order_pnl.order_date
+  new: pnl_product_cost
+  member: pnl.pnl_product_cost
+  date_axis: pnl.report_date
   note: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers are identical
     — one id, the order-date one'
   verify: false

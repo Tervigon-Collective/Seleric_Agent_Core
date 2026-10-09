@@ -7,7 +7,14 @@ description: 'Return + cancellation revenue ex-GST, event date. Date axis: repor
 formula:
   human_readable: Return + cancellation revenue ex-GST, event date.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - pnl_return_revenue
+  - pnl_cancel_revenue
+  composition:
+  - metric: pnl_return_revenue
+    sign: 1
+  - metric: pnl_cancel_revenue
+    sign: 1
 cube_mapping:
   view: pnl
   measure: pnl.pnl_return_cancel_revenue

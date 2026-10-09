@@ -49,7 +49,7 @@ def planner(v2, cube, result_store) -> QueryPlanner:
 
 def test_catalogue_v2_loads_as_semantic_v2(v2):
     assert v2.is_v2
-    assert len(v2.cat.metrics) == 200
+    assert len(v2.cat.metrics) == 210  # + the P&L line items that complete each composition (2026-10-09)
     assert len(v2.cat.views) == 20
     assert {"traffic", "product", "geo", "ad", "campaign"} <= set(v2.cat.hierarchies)
 
@@ -80,7 +80,7 @@ def test_checkout_timing_metrics_are_unavailable_with_reason(v2):
 def test_every_retired_v1_id_is_rejected_naming_its_replacement(v2, planner):
     maps = yaml.safe_load(ID_MAP.read_text())["maps"]
     retired = [m for m in maps if m["old"] != m["new"] and m["old"] not in v2.cat.metrics]
-    assert len(retired) == len(v2.cat.retired) == 111  # channel_orders / product_orders are v2 ids again
+    assert len(retired) == len(v2.cat.retired) == 110  # channel_orders / product_orders / pnl_product_cost are v2 ids again
     for m in retired:
         term = v2.resolve_term(m["old"])
         assert isinstance(term, RetiredTerm), m["old"]
@@ -346,7 +346,7 @@ def test_binding_dimensions_are_on_the_metric_surface(v2):
 def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     b = v2.bootstrap()
     assert b["semantic_version"] == 2 and set(b["hierarchies"]) == set(v2.cat.hierarchies)
-    assert len(b["metrics"]) == 197  # 200 minus the 3 unavailable checkout-timing metrics
+    assert len(b["metrics"]) == 207  # 210 minus the 3 unavailable checkout-timing metrics
     m = {x["id"]: x for x in b["metrics"]}
     assert m["hook_rate"]["valid_for"] == {"ad_platform": ["meta"]}
     assert m["ad_spend"]["extra_granularities"] == ["hour"] and "age" in m["ad_spend"]["supported_dimensions"]
@@ -614,3 +614,16 @@ def test_several_values_of_one_axis_are_compared_not_a_scope(v2):
     assert "channel" not in v2.question_axes("Show sales by Meta campaign, Google sub-channel, organic and WhatsApp")
     assert v2.question_axes("meta sales last week")["channel"] == "meta"
     assert v2.question_axes("product cost last month")["scope"] == "all"  # the longer phrase wins over "product"
+
+
+def test_every_composition_is_a_same_view_signed_sum_of_additive_metrics(v2):
+    """formula.composition (Cube meta.composition) is what breakdowns and bridges reconcile against; the loader
+    rejects a term on another view or a non-additive term, so every declared tree here is usable as is."""
+    composed = {m.id: m for m in v2.cat.metrics.values() if m.formula.composition}
+    assert composed, "no metric declares a composition"
+    for m in composed.values():
+        for t in m.formula.composition:
+            part = v2.cat.metrics[t.metric]
+            assert part.cube_mapping.view == m.cube_mapping.view
+            assert part.aggregation == m.aggregation == "additive"
+            assert t.sign in (1, -1)

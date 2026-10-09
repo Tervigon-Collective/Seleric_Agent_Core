@@ -8,7 +8,20 @@ description: 'Net sales ex-GST = gross − discounts − returns − cancels (ev
 formula:
   human_readable: Net sales ex-GST = gross − discounts − returns − cancels (event date). = dashboard Net Sales.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - pnl_gross_sales
+  - pnl_discounts
+  - pnl_return_revenue
+  - pnl_cancel_revenue
+  composition:
+  - metric: pnl_gross_sales
+    sign: 1
+  - metric: pnl_discounts
+    sign: -1
+  - metric: pnl_return_revenue
+    sign: -1
+  - metric: pnl_cancel_revenue
+    sign: -1
 cube_mapping:
   view: pnl
   measure: pnl.pnl_net_sales

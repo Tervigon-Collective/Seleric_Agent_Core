@@ -15,12 +15,21 @@ import yaml
 from pydantic import BaseModel, Field
 
 
+class CompositionTerm(BaseModel):
+    metric: str
+    sign: Literal[1, -1]
+
+
 class Formula(BaseModel):
     human_readable: str
     authoritative_source: Literal["cube"] = "cube"
     # Catalogue metric ids this derived metric is composed from (agent/ontology
     # disambiguation). Prefer real catalogue ids over free-text tokens.
     depends_on: list[str] = Field(default_factory=list)
+    # An additive metric that is exactly the signed sum of other metrics on the same view (Cube measure
+    # meta.composition): net profit = contribution margin − ad spend, and so on down the P&L. What a
+    # breakdown, waterfall or bridge of the metric is built from — every line reconciles to the total.
+    composition: list[CompositionTerm] = Field(default_factory=list)
 
 
 class CubeMapping(BaseModel):
@@ -764,6 +773,17 @@ def _check_integrity(cat: Catalogue) -> None:
         for dep in m.formula.depends_on:
             if dep not in cat.metrics:
                 problems.append(f"metric {m.id}: formula.depends_on unknown metric '{dep}'")
+        for term in m.formula.composition:
+            part = cat.metrics.get(term.metric)
+            if part is None:
+                problems.append(f"metric {m.id}: formula.composition unknown metric '{term.metric}'")
+            elif m.aggregation != "additive" or part.aggregation != "additive":
+                problems.append(f"metric {m.id}: formula.composition needs additive metrics ('{term.metric}')")
+            elif part.cube_mapping.view != m.cube_mapping.view:
+                problems.append(
+                    f"metric {m.id}: formula.composition term '{term.metric}' is on view "
+                    f"{part.cube_mapping.view}, not {m.cube_mapping.view}"
+                )
         for companion in m.companion_measures:
             if companion not in cat.metrics:
                 problems.append(f"metric {m.id}: companion_measures unknown metric '{companion}'")

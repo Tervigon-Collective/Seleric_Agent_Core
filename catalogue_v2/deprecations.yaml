@@ -460,10 +460,6 @@ deprecations:
   new: gross_roas
   reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
     are identical — one id, the order-date one'
-- old: pnl_product_cost
-  new: product_cost
-  reason: 'semantic v2 (2026-10-04): booked at placement on both axes, so the event-date and order-date numbers
-    are identical — one id, the order-date one'
 - old: gross_units_ordered
   new: units_ordered
   reason: v1 draft, certified in v2 as the product-grain units_ordered (2026-10-06).

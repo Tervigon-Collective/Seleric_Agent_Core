@@ -250,6 +250,8 @@ def human(mid: str) -> str:
         return DISPLAY[mid]
     if mid.startswith("pnl_"):
         return "P&L " + mid[4:].replace("_", " ")
+    if mid.startswith("order_pnl_"):
+        return "Order-date P&L " + mid[len("order_pnl_"):].replace("_", " ")
     return mid.replace("_", " ").capitalize()
 
 
@@ -398,6 +400,7 @@ def main() -> int:
     v2 = idmap["v2_metrics"]
     concept_rows = ry(ROOT / "catalogue_v2_src" / "concepts.yaml")["concepts"]
     view_dims = {v: {dim_id(v, d["name"]) for d in vm["dimensions"]} for v, vm in views_meta.items()}
+    id_of_member = {spec["member"]: mid for mid, spec in v2.items()}
     for mid, spec in sorted(v2.items()):
         view, member = spec["member"].split(".", 1)
         cm = measures[spec["member"]]
@@ -426,6 +429,14 @@ def main() -> int:
                           f"event-date P&L number, now {home}.")
         if formerly:
             axis_note += f" Also the home of the v1 meaning of: {', '.join(formerly)}."
+        # Cube declares an additive measure that is exactly a signed sum of measures on its own view
+        # (meta.composition); the catalogue carries it by metric id so a breakdown reconciles to the total.
+        composition = []
+        for term in (cm.get("meta") or {}).get("composition") or []:
+            part = id_of_member.get(f"{view}.{term['member']}")
+            assert part is not None, f"{mid}: composition member {view}.{term['member']} has no catalogue id"
+            composition.append({"metric": part, "sign": int(term["sign"])})
+        depends_on = [d for d in RATIO_PARTS.get(mid, []) if d in v2 and d != mid] or [t["metric"] for t in composition]
         doc = {
             "id": mid,
             "display_name": label,
@@ -433,7 +444,7 @@ def main() -> int:
             "status": "broken" if mid in UNAVAILABLE else ("approved" if mid in NOT_CERTIFIED else "certified"),
             "description": f"{desc} {axis_note}".strip(),
             "formula": {"human_readable": desc or human(mid), "authoritative_source": "cube",
-                        "depends_on": [d for d in RATIO_PARTS.get(mid, []) if d in v2 and d != mid]},
+                        "depends_on": depends_on, **({"composition": composition} if composition else {})},
             "cube_mapping": {"view": view, "measure": spec["member"],
                              **({"time_dimension": spec["date_axis"]} if axis != default_axis_of[view] else {})},
             "aggregation": "ratio" if ratio else "additive",

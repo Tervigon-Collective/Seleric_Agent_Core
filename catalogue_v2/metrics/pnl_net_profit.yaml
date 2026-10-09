@@ -8,7 +8,14 @@ description: 'Net profit = net sales − net COGS − ad spend. = dashboard Net 
 formula:
   human_readable: Net profit = net sales − net COGS − ad spend. = dashboard Net Profit.
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - pnl_contribution_margin
+  - pnl_ad_spend
+  composition:
+  - metric: pnl_contribution_margin
+    sign: 1
+  - metric: pnl_ad_spend
+    sign: -1
 cube_mapping:
   view: pnl
   measure: pnl.pnl_net_profit

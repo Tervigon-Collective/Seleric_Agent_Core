@@ -9,7 +9,14 @@ description: 'Net profit = net sales − net COGS − ad spend (order date; ad s
 formula:
   human_readable: Net profit = net sales − net COGS − ad spend (order date; ad spend on delivery date).
   authoritative_source: cube
-  depends_on: []
+  depends_on:
+  - contribution_margin
+  - order_pnl_ad_spend
+  composition:
+  - metric: contribution_margin
+    sign: 1
+  - metric: order_pnl_ad_spend
+    sign: -1
 cube_mapping:
   view: order_pnl
   measure: order_pnl.net_profit
