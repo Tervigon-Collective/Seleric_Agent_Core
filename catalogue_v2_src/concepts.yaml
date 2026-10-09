@@ -512,7 +512,7 @@ concepts:
   - id: cac
     display_name: CAC
     one_liner: Customer acquisition cost = ad spend ÷ new customers.
-    aliases: [cac, customer acquisition cost, cost per acquisition, cpa, cost per order, cost per purchase]
+    aliases: [cac, customer acquisition cost, cost per acquisition, cost per order, cost per purchase]
     axes: {basis: {values: [new_customer, order], default: new_customer},
            scope: {values: [all, attributed, product], default: all}}
     resolves:
@@ -572,6 +572,8 @@ aliases:
   cost per landing page view: {concept: cost_per, axes: {metric_kind: landing_page}}
   cost per order: {concept: cac, axes: {basis: order}}
   cost per purchase: {concept: cac, axes: {basis: order}}
+  # CPA in ad reporting is cost per purchase / conversion (orders); CAC is the per-new-customer figure
+  cpa: {concept: cac, axes: {basis: order}}
   funnel step 1: {concept: conversion_rate, axes: {stage: product_view}}
   funnel product view step: {concept: conversion_rate, axes: {stage: product_view}}
   funnel step 2: {concept: conversion_rate, axes: {stage: add_to_cart}}

@@ -36,6 +36,10 @@ aliases:
     concept: cac
     axes:
       basis: order
+  cpa:
+    concept: cac
+    axes:
+      basis: order
   funnel step 1:
     concept: conversion_rate
     axes:

@@ -251,7 +251,7 @@ def human(mid: str) -> str:
     if mid.startswith("pnl_"):
         return "P&L " + mid[4:].replace("_", " ")
     if mid.startswith("order_pnl_"):
-        return "Order-date P&L " + mid[len("order_pnl_"):].replace("_", " ")
+        return mid[len("order_pnl_"):].replace("_", " ").capitalize() + " (P&L basis)"
     return mid.replace("_", " ").capitalize()
 
 
