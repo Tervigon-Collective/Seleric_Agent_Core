@@ -26,6 +26,12 @@ New serve views in mage-ai `serve/semantic/views/09_product_pnl.sql`, applied to
 1,379 of 1,379 answered — 1,133 direct, 116 via a grain twin, 130 via a conformed sibling; 0 refused, 0 errors.
 (A run during an MCP restart showed 39 connection errors — any Agent_Core push, even doc-only, restarts the MCP.)
 
+**Golden set Q1–18 on the live API (2026-10-09, after the final deploys):** 18 / 18 COMPLETED, validation PASS
+(3 with one revision). Across the 18 traces the only dimension retry was Q16: the understanding picked
+`entity_name` (the ad change-log's entity) as the ranking dimension for "which campaigns, products and channels
+contributed", and the retry steered it to supported dimensions. That is a planner mis-pick, not a metric × slice
+gap. Possible follow-up: validate the plan's entity dimension against its rank metric before prefetching.
+
 ### Gaps and next steps (not done this session)
 1. ~~Re-run the sweep~~ DONE 2026-10-09 after Jenkins #82: **0 refused of 1,379** metric × slice combinations
    (1,133 direct, 116 via a grain twin, 130 via a conformed sibling). Spot-checked through the agent's own
