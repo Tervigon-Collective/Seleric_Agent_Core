@@ -25,7 +25,7 @@ action execution (propose → confirm → commit). The live surface is **semanti
 
 ```bash
 uv sync
-cp .env.example .env          # fill CUBE_API_URL + CUBEJS_API_SECRET (or SELERIC_API_KEY)
+cp .env.example .env          # fill CUBEJS_API_SECRET (or SELERIC_API_KEY); Cube URL defaults to v2 :4002 in config.yaml
 
 uv run pytest -m "not live"   # unit tests
 uv run pytest                 # + live tests when Cube is reachable
