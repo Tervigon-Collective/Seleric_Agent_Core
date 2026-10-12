@@ -675,6 +675,12 @@ v2_metrics:
   status_changes:
     member: paid_media_changes.status_changes
     date_axis: paid_media_changes.changed_at
+  budget_changes:
+    member: paid_media_changes.budget_changes
+    date_axis: paid_media_changes.changed_at
+  bid_strategy_changes:
+    member: paid_media_changes.bid_strategy_changes
+    date_axis: paid_media_changes.changed_at
   taxes_on_net_sales:
     member: order_pnl.taxes_on_net_sales
     date_axis: order_pnl.order_date
