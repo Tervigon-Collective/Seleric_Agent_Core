@@ -81,6 +81,8 @@ services:
     volumes:
       - ./catalogue:/app/catalogue:ro
       - ./catalogue_v2:/app/catalogue_v2:ro
+      # QueryPlanner.load_dataset_contracts() reads catalogue_v2_src/datasets.yaml
+      - ./catalogue_v2_src:/app/catalogue_v2_src:ro
       - ./config.yaml:/app/config.yaml:ro
       - mcp-data:/data
     ports:
