@@ -1,0 +1,2654 @@
+{
+  "suite_id": "seleric_business_query_requests_v1",
+  "catalogue_version": "aa37782211d1",
+  "created_date": "2026-10-12T10:52:22.964643Z",
+  "timezone": "Asia/Kolkata",
+  "brand_id": 20,
+  "validation": {
+    "metric_ids": "checked against live catalogue search",
+    "dimensions_and_filter_dimensions": "checked against each metric supported_dimensions",
+    "executed": true,
+    "numeric_oracles": true,
+    "certified_bindings": true
+  },
+  "execution_notes": [
+    "Each query_request is the API payload; case metadata must not be sent as request fields.",
+    "Date windows are fixed and interpreted in the serving model's IST date axis. Freeze a source snapshot/as-of time for reproducible numerical tests.",
+    "granularity none means aggregate over the entire window; [] dimensions means one total row.",
+    "All requests use one semantic view. Catalogue compatibility does not establish runtime certification.",
+    "Ads and non-converting web traffic cannot be forced into an order-date cohort without a certified mapping and visible unmatched populations.",
+    "Check truncation for requests with limit 1000; paginate or narrow scope where needed before asserting totals or exhaustive rankings.",
+    "Use authoritative ratio algebra for derived rates. Do not average daily ratios, mix event/session counts or infer causal explanations from these requests.",
+    "P&L definitions include delivery-date spend; reported net profit is not necessarily fully allocated cohort profit.",
+    "Commerce net_sales and order_pnl_net_sales have different return treatment; do not substitute or expect equality.",
+    "Named campaign/ad winners require resolved scoped IDs, sufficient sample size and complete spend/attribution allocation coverage.",
+    "Source-derived numerical expectations, tolerances, deployed revisions and actual query/evidence records must be added before SEM-18 certification."
+  ],
+  "results": [
+    {
+      "id": "AD01",
+      "domain": "ad_delivery",
+      "question": "What were Meta spend, impressions, link clicks and landing-page views from 1\u201311 October?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 314.34499999999997,
+      "rows": [
+        {
+          "ad_spend": "497666.6399999999",
+          "impressions": "1604777",
+          "link_clicks": "21015",
+          "landing_page_views": "18505"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD02",
+      "domain": "ad_delivery",
+      "question": "How did Meta delivery change each day?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 192.662,
+      "rows": [
+        {
+          "report_date.day": "2026-10-01T00:00:00.000",
+          "report_date": "2026-10-01T00:00:00.000",
+          "ad_spend": "36104.61",
+          "impressions": "110871",
+          "link_clicks": "1577",
+          "landing_page_views": "1370"
+        },
+        {
+          "report_date.day": "2026-10-02T00:00:00.000",
+          "report_date": "2026-10-02T00:00:00.000",
+          "ad_spend": "24878.71",
+          "impressions": "68588",
+          "link_clicks": "1068",
+          "landing_page_views": "908"
+        },
+        {
+          "report_date.day": "2026-10-03T00:00:00.000",
+          "report_date": "2026-10-03T00:00:00.000",
+          "ad_spend": "44393.45",
+          "impressions": "110565",
+          "link_clicks": "1748",
+          "landing_page_views": "1631"
+        },
+        {
+          "report_date.day": "2026-10-04T00:00:00.000",
+          "report_date": "2026-10-04T00:00:00.000",
+          "ad_spend": "41909.270000000004",
+          "impressions": "297188",
+          "link_clicks": "1970",
+          "landing_page_views": "1805"
+        },
+        {
+          "report_date.day": "2026-10-05T00:00:00.000",
+          "report_date": "2026-10-05T00:00:00.000",
+          "ad_spend": "62397.95",
+          "impressions": "259116",
+          "link_clicks": "2150",
+          "landing_page_views": "1974"
+        },
+        {
+          "report_date.day": "2026-10-06T00:00:00.000",
+          "report_date": "2026-10-06T00:00:00.000",
+          "ad_spend": "59856.39",
+          "impressions": "212002",
+          "link_clicks": "2557",
+          "landing_page_views": "2356"
+        },
+        {
+          "report_date.day": "2026-10-07T00:00:00.000",
+          "report_date": "2026-10-07T00:00:00.000",
+          "ad_spend": "60538.03",
+          "impressions": "146032",
+          "link_clicks": "2447",
+          "landing_page_views": "2243"
+        },
+        {
+          "report_date.day": "2026-10-08T00:00:00.000",
+          "report_date": "2026-10-08T00:00:00.000",
+          "ad_spend": "58860.2",
+          "impressions": "123190",
+          "link_clicks": "2397",
+          "landing_page_views": "2168"
+        },
+        {
+          "report_date.day": "2026-10-09T00:00:00.000",
+          "report_date": "2026-10-09T00:00:00.000",
+          "ad_spend": "47301.45999999999",
+          "impressions": "131377",
+          "link_clicks": "2901",
+          "landing_page_views": "2180"
+        },
+        {
+          "report_date.day": "2026-10-10T00:00:00.000",
+          "report_date": "2026-10-10T00:00:00.000",
+          "ad_spend": "33067.53",
+          "impressions": "81780",
+          "link_clicks": "1168",
+          "landing_page_views": "1011"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD03",
+      "domain": "ad_delivery",
+      "question": "Which 10 Meta campaigns spent the most, and what delivery did they generate?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 312.544,
+      "rows": [
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "ad_spend": "55793.41",
+          "impressions": "178071",
+          "link_clicks": "2906",
+          "landing_page_views": "2546"
+        },
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "ad_spend": "49163.20999999999",
+          "impressions": "250693",
+          "link_clicks": "3807",
+          "landing_page_views": "3355"
+        },
+        {
+          "campaign_id": "120250597947340783",
+          "campaign_name": "TH-222-WINGBIRD-23SEP",
+          "ad_spend": "49099.409999999996",
+          "impressions": "98630",
+          "link_clicks": "1952",
+          "landing_page_views": "1735"
+        },
+        {
+          "campaign_id": "120250690866980783",
+          "campaign_name": "TH-336-PAWTECH-26SEP",
+          "ad_spend": "46780.03",
+          "impressions": "124652",
+          "link_clicks": "1602",
+          "landing_page_views": "1479"
+        },
+        {
+          "campaign_id": "120250681379400783",
+          "campaign_name": "TH-149-SCRATCHLOUNGE-25SEP",
+          "ad_spend": "42872.079999999994",
+          "impressions": "53835",
+          "link_clicks": "1342",
+          "landing_page_views": "1245"
+        },
+        {
+          "campaign_id": "120250695726350783",
+          "campaign_name": "CAT TOY CS-26SEP",
+          "ad_spend": "26968.91",
+          "impressions": "51942",
+          "link_clicks": "979",
+          "landing_page_views": "870"
+        },
+        {
+          "campaign_id": "120250684363180783",
+          "campaign_name": "TH-445-PROSUSPENDERBOOTS-25SEP",
+          "ad_spend": "21743.119999999995",
+          "impressions": "91256",
+          "link_clicks": "1085",
+          "landing_page_views": "1024"
+        },
+        {
+          "campaign_id": "120250823301270783",
+          "campaign_name": "TH-149-SCRATCHLOUNGE-6OCT",
+          "ad_spend": "20481.17",
+          "impressions": "49800",
+          "link_clicks": "1043",
+          "landing_page_views": "947"
+        },
+        {
+          "campaign_id": "120250667421200783",
+          "campaign_name": "DOG TOY CS-24SEP",
+          "ad_spend": "18283.43",
+          "impressions": "34619",
+          "link_clicks": "576",
+          "landing_page_views": "535"
+        },
+        {
+          "campaign_id": "120250648999490783",
+          "campaign_name": "TH-012-SNUGBOO-23SEP",
+          "ad_spend": "16573",
+          "impressions": "29189",
+          "link_clicks": "570",
+          "landing_page_views": "507"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD04",
+      "domain": "ad_delivery",
+      "question": "Which 10 Meta ads generated the most landing-page views?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 283.6,
+      "rows": [
+        {
+          "ad_id": "120250726752430783",
+          "ad_name": "TH-383-SUSPENDER-UGC",
+          "ad_spend": "49163.20999999999",
+          "impressions": "250693",
+          "link_clicks": "3807",
+          "landing_page_views": "3355"
+        },
+        {
+          "ad_id": "120250695088280783",
+          "ad_name": "TH-383-SUSPENDER-4XL-MAROON_BN520_TM099",
+          "ad_spend": "55793.41",
+          "impressions": "178071",
+          "link_clicks": "2906",
+          "landing_page_views": "2546"
+        },
+        {
+          "ad_id": "120250690867010783",
+          "ad_name": "TH-336-PAWTECH_BN537_CF301",
+          "ad_spend": "46780.03",
+          "impressions": "124652",
+          "link_clicks": "1602",
+          "landing_page_views": "1479"
+        },
+        {
+          "ad_id": "120250598012060783",
+          "ad_name": "TH-222-WINGBIRD",
+          "ad_spend": "39362.88",
+          "impressions": "74054",
+          "link_clicks": "1568",
+          "landing_page_views": "1390"
+        },
+        {
+          "ad_id": "120250681379410783",
+          "ad_name": "TH-149-SCRATCHLOUNGE",
+          "ad_spend": "42872.079999999994",
+          "impressions": "53835",
+          "link_clicks": "1342",
+          "landing_page_views": "1245"
+        },
+        {
+          "ad_id": "120250754903360783",
+          "ad_name": "TH-445-PROSUSPENDERBOOTS_ET129_CF137-1st-oct",
+          "ad_spend": "21340.439999999995",
+          "impressions": "90613",
+          "link_clicks": "1077",
+          "landing_page_views": "1016"
+        },
+        {
+          "ad_id": "120250823301280783",
+          "ad_name": "TH-149-SCRATCHLOUNGE_SI221_ET110",
+          "ad_spend": "20481.17",
+          "impressions": "49800",
+          "link_clicks": "1043",
+          "landing_page_views": "947"
+        },
+        {
+          "ad_id": "120250667421220783",
+          "ad_name": "DOG TOYS-CS",
+          "ad_spend": "18283.43",
+          "impressions": "34619",
+          "link_clicks": "576",
+          "landing_page_views": "535"
+        },
+        {
+          "ad_id": "120250822013210783",
+          "ad_name": "DOG T-SHIRT-CS",
+          "ad_spend": "10429.5",
+          "impressions": "38910",
+          "link_clicks": "623",
+          "landing_page_views": "519"
+        },
+        {
+          "ad_id": "120250814322350783",
+          "ad_name": "TH-012-SNUGBOO_BN537_SP388-6OCT",
+          "ad_spend": "16573",
+          "impressions": "29189",
+          "link_clicks": "570",
+          "landing_page_views": "507"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD05",
+      "domain": "ad_delivery",
+      "question": "How did Meta delivery vary across ad sets?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 297.83799999999997,
+      "rows": [
+        {
+          "campaign_id": "120250695088250783",
+          "adset_id": "120250695088240783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "55793.41",
+          "impressions": "178071",
+          "link_clicks": "2906",
+          "landing_page_views": "2546"
+        },
+        {
+          "campaign_id": "120250726752410783",
+          "adset_id": "120250726752450783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "49163.20999999999",
+          "impressions": "250693",
+          "link_clicks": "3807",
+          "landing_page_views": "3355"
+        },
+        {
+          "campaign_id": "120250597947340783",
+          "adset_id": "120250598012070783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "49099.409999999996",
+          "impressions": "98630",
+          "link_clicks": "1952",
+          "landing_page_views": "1735"
+        },
+        {
+          "campaign_id": "120250690866980783",
+          "adset_id": "120250690867020783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "46780.03",
+          "impressions": "124652",
+          "link_clicks": "1602",
+          "landing_page_views": "1479"
+        },
+        {
+          "campaign_id": "120250681379400783",
+          "adset_id": "120250681379390783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "42872.079999999994",
+          "impressions": "53835",
+          "link_clicks": "1342",
+          "landing_page_views": "1245"
+        },
+        {
+          "campaign_id": "120250695726350783",
+          "adset_id": "120250695726370783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "26968.91",
+          "impressions": "51942",
+          "link_clicks": "979",
+          "landing_page_views": "870"
+        },
+        {
+          "campaign_id": "120250684363180783",
+          "adset_id": "120250684363170783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "21743.119999999995",
+          "impressions": "91256",
+          "link_clicks": "1085",
+          "landing_page_views": "1024"
+        },
+        {
+          "campaign_id": "120250823301270783",
+          "adset_id": "120250823301290783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "20481.17",
+          "impressions": "49800",
+          "link_clicks": "1043",
+          "landing_page_views": "947"
+        },
+        {
+          "campaign_id": "120250667421200783",
+          "adset_id": "120250667421210783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "18283.43",
+          "impressions": "34619",
+          "link_clicks": "576",
+          "landing_page_views": "535"
+        },
+        {
+          "campaign_id": "120250648999490783",
+          "adset_id": "120250649150440783",
+          "adset_name": "Broad Advantage+",
+          "ad_spend": "16573",
+          "impressions": "29189",
+          "link_clicks": "570",
+          "landing_page_views": "507"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD06",
+      "domain": "ad_delivery",
+      "question": "How did delivery vary by creative type?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 207.003,
+      "rows": [
+        {
+          "creative_type": "VIDEO",
+          "ad_spend": "355319.57",
+          "impressions": "1312463",
+          "link_clicks": "15489",
+          "landing_page_views": "13923"
+        },
+        {
+          "creative_type": "SHARE",
+          "ad_spend": "142286.80000000002",
+          "impressions": "292211",
+          "link_clicks": "5526",
+          "landing_page_views": "4582"
+        },
+        {
+          "creative_type": "",
+          "ad_spend": "60.27",
+          "impressions": "103",
+          "link_clicks": "0",
+          "landing_page_views": "0"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD07",
+      "domain": "ad_delivery",
+      "question": "How did delivery vary by campaign objective?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 501.44599999999997,
+      "rows": [
+        {
+          "campaign_objective": "OUTCOME_SALES",
+          "ad_spend": "496706.7200000001",
+          "impressions": "1244695",
+          "link_clicks": "20465",
+          "landing_page_views": "18386"
+        },
+        {
+          "campaign_objective": "OUTCOME_AWARENESS",
+          "ad_spend": "720.14",
+          "impressions": "353886",
+          "link_clicks": "0",
+          "landing_page_views": "0"
+        },
+        {
+          "campaign_objective": "OUTCOME_TRAFFIC",
+          "ad_spend": "239.78",
+          "impressions": "6196",
+          "link_clicks": "550",
+          "landing_page_views": "119"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD08",
+      "domain": "ad_delivery",
+      "question": "How did daily spend and click volume change for the two Suspender campaigns?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 435.729,
+      "rows": [
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "report_date.day": "2026-10-08T00:00:00.000",
+          "report_date": "2026-10-08T00:00:00.000",
+          "ad_spend": "5304.14",
+          "impressions": "19033",
+          "link_clicks": "289",
+          "landing_page_views": "240"
+        },
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "report_date.day": "2026-10-08T00:00:00.000",
+          "report_date": "2026-10-08T00:00:00.000",
+          "ad_spend": "5939.43",
+          "impressions": "16831",
+          "link_clicks": "322",
+          "landing_page_views": "281"
+        },
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "report_date.day": "2026-10-09T00:00:00.000",
+          "report_date": "2026-10-09T00:00:00.000",
+          "ad_spend": "7375.82",
+          "impressions": "20319",
+          "link_clicks": "354",
+          "landing_page_views": "318"
+        },
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "report_date.day": "2026-10-09T00:00:00.000",
+          "report_date": "2026-10-09T00:00:00.000",
+          "ad_spend": "10357.33",
+          "impressions": "49037",
+          "link_clicks": "969",
+          "landing_page_views": "789"
+        },
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "report_date.day": "2026-10-10T00:00:00.000",
+          "report_date": "2026-10-10T00:00:00.000",
+          "ad_spend": "1510.35",
+          "impressions": "6094",
+          "link_clicks": "63",
+          "landing_page_views": "79"
+        },
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "report_date.day": "2026-10-10T00:00:00.000",
+          "report_date": "2026-10-10T00:00:00.000",
+          "ad_spend": "2062.44",
+          "impressions": "5537",
+          "link_clicks": "73",
+          "landing_page_views": "62"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD09",
+      "domain": "ad_delivery",
+      "question": "How did weekly spend, impressions and link clicks vary by paid platform in September?",
+      "status": "PARTIAL",
+      "error": null,
+      "elapsed_ms": 282.046,
+      "rows": [],
+      "warnings": [
+        "'landing_page_views' is valid only for ad_platform = meta; scoped to it (other metrics in this request are not). Meta-only measure (Google reports no such field).",
+        "Metrics spanned multiple Cube views or time axes (e.g. placement order_date vs event event_date); ran one query per group. Narrate each part with its own provenance \u2014 do not join or sum rows across parts (grains/axes may differ)."
+      ],
+      "ratio_valid": false,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "AD10",
+      "domain": "ad_delivery",
+      "question": "What were September spend, impressions and clicks by platform and account?",
+      "status": "PARTIAL",
+      "error": null,
+      "elapsed_ms": 245.725,
+      "rows": [],
+      "warnings": [
+        "'landing_page_views' is valid only for ad_platform = meta; scoped to it (other metrics in this request are not). Meta-only measure (Google reports no such field).",
+        "Metrics spanned multiple Cube views or time axes (e.g. placement order_date vs event event_date); ran one query per group. Narrate each part with its own provenance \u2014 do not join or sum rows across parts (grains/axes may differ)."
+      ],
+      "ratio_valid": false,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "paid_media",
+      "time_basis": "report_date"
+    },
+    {
+      "id": "PN01",
+      "domain": "pnl",
+      "question": "What were overall reported net sales, costs, contribution, ad spend and net profit?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 174.846,
+      "rows": [
+        {
+          "order_pnl_net_sales": "914211.9294020139",
+          "net_cogs": "362799.71489999996",
+          "contribution_margin": "551412.214502014",
+          "order_pnl_ad_spend": "619778.516531",
+          "net_profit": "-68366.30202898593"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN02",
+      "domain": "pnl",
+      "question": "How did reported P&L change each day?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 148.945,
+      "rows": [
+        {
+          "order_date.day": "2026-10-01T00:00:00.000",
+          "order_date": "2026-10-01T00:00:00.000",
+          "order_pnl_net_sales": "74594.66987492675",
+          "net_cogs": "29764.3694",
+          "contribution_margin": "44830.30047492671",
+          "order_pnl_ad_spend": "45967.58831",
+          "net_profit": "-1137.2878350732733"
+        },
+        {
+          "order_date.day": "2026-10-02T00:00:00.000",
+          "order_date": "2026-10-02T00:00:00.000",
+          "order_pnl_net_sales": "31340.79021",
+          "net_cogs": "13023.047700000001",
+          "contribution_margin": "18317.74251",
+          "order_pnl_ad_spend": "35504.786819999994",
+          "net_profit": "-17187.044309999997"
+        },
+        {
+          "order_date.day": "2026-10-03T00:00:00.000",
+          "order_date": "2026-10-03T00:00:00.000",
+          "order_pnl_net_sales": "103231.30181000003",
+          "net_cogs": "46364.59059999999",
+          "contribution_margin": "56866.71121000001",
+          "order_pnl_ad_spend": "54602.833263000015",
+          "net_profit": "2263.8779469999977"
+        },
+        {
+          "order_date.day": "2026-10-04T00:00:00.000",
+          "order_date": "2026-10-04T00:00:00.000",
+          "order_pnl_net_sales": "70795.32259552267",
+          "net_cogs": "29462.4003",
+          "contribution_margin": "41332.92229552269",
+          "order_pnl_ad_spend": "52968.01943500001",
+          "net_profit": "-11635.097139477319"
+        },
+        {
+          "order_date.day": "2026-10-05T00:00:00.000",
+          "order_date": "2026-10-05T00:00:00.000",
+          "order_pnl_net_sales": "134593.05000000002",
+          "net_cogs": "52034.02010000001",
+          "contribution_margin": "82559.02990000001",
+          "order_pnl_ad_spend": "73811.90662899998",
+          "net_profit": "8747.123271000022"
+        },
+        {
+          "order_date.day": "2026-10-06T00:00:00.000",
+          "order_date": "2026-10-06T00:00:00.000",
+          "order_pnl_net_sales": "110662.84506666668",
+          "net_cogs": "43574.37629999999",
+          "contribution_margin": "67088.46876666667",
+          "order_pnl_ad_spend": "70633.76350199997",
+          "net_profit": "-3545.294735333324"
+        },
+        {
+          "order_date.day": "2026-10-07T00:00:00.000",
+          "order_date": "2026-10-07T00:00:00.000",
+          "order_pnl_net_sales": "98635.379844898",
+          "net_cogs": "38872.3202",
+          "contribution_margin": "59763.05964489796",
+          "order_pnl_ad_spend": "71171.65746299998",
+          "net_profit": "-11408.597818102036"
+        },
+        {
+          "order_date.day": "2026-10-08T00:00:00.000",
+          "order_date": "2026-10-08T00:00:00.000",
+          "order_pnl_net_sales": "116424.29000000004",
+          "net_cogs": "44704.24219999999",
+          "contribution_margin": "71720.04780000001",
+          "order_pnl_ad_spend": "69851.37416800001",
+          "net_profit": "1868.673631999988"
+        },
+        {
+          "order_date.day": "2026-10-09T00:00:00.000",
+          "order_date": "2026-10-09T00:00:00.000",
+          "order_pnl_net_sales": "68030.61000000002",
+          "net_cogs": "23357.3838",
+          "contribution_margin": "44673.22620000002",
+          "order_pnl_ad_spend": "60101.688976",
+          "net_profit": "-15428.462776"
+        },
+        {
+          "order_date.day": "2026-10-10T00:00:00.000",
+          "order_date": "2026-10-10T00:00:00.000",
+          "order_pnl_net_sales": "70958.50000000001",
+          "net_cogs": "28049.0386",
+          "contribution_margin": "42909.4614",
+          "order_pnl_ad_spend": "45085.33984000001",
+          "net_profit": "-2175.8784400000086"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN03",
+      "domain": "pnl",
+      "question": "Which finance channels contributed the most reported net profit?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 145.925,
+      "rows": [
+        {
+          "finance_channel": "unattributed",
+          "order_pnl_net_sales": "157860.84555555557",
+          "net_cogs": "63024.781699999985",
+          "contribution_margin": "94836.06385555556",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "94836.06385555556"
+        },
+        {
+          "finance_channel": "whatsapp",
+          "order_pnl_net_sales": "12647.250000000002",
+          "net_cogs": "4967.7033",
+          "contribution_margin": "7679.546700000001",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "7679.546700000001"
+        },
+        {
+          "finance_channel": "organic",
+          "order_pnl_net_sales": "4447.55",
+          "net_cogs": "1888.8428",
+          "contribution_margin": "2558.7072000000007",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "2558.7072000000007"
+        },
+        {
+          "finance_channel": "google",
+          "order_pnl_net_sales": "201270.65487398067",
+          "net_cogs": "87013.32470000001",
+          "contribution_margin": "114257.33017398081",
+          "order_pnl_ad_spend": "122111.87653100002",
+          "net_profit": "-7854.546357019266"
+        },
+        {
+          "finance_channel": "meta",
+          "order_pnl_net_sales": "537985.6289724773",
+          "net_cogs": "205905.06239999988",
+          "contribution_margin": "332080.566572478",
+          "order_pnl_ad_spend": "497666.64000000054",
+          "net_profit": "-165586.07342752223"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN04",
+      "domain": "pnl",
+      "question": "Which Meta campaign buckets had the highest reported net profit?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 282.503,
+      "rows": [
+        {
+          "campaign_id": null,
+          "campaign_name": null,
+          "order_pnl_net_sales": "55728.75041046981",
+          "net_cogs": "20361.6085",
+          "contribution_margin": "35367.14191046981",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "35367.14191046981",
+          "channel_orders": "34"
+        },
+        {
+          "campaign_id": "120250884319280783",
+          "campaign_name": "TH-287-MISTCALMBRUSH-10OCT-UGC",
+          "order_pnl_net_sales": "3811.27",
+          "net_cogs": "1118.26",
+          "contribution_margin": "2693.01",
+          "order_pnl_ad_spend": "1099.2900000000002",
+          "net_profit": "1593.7200000000003",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250437240110783",
+          "campaign_name": "TH-222-WINGBIRD-08SEP",
+          "order_pnl_net_sales": "2667.97",
+          "net_cogs": "1084.7639000000001",
+          "contribution_margin": "1583.2060999999997",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1583.2060999999997",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120247805774670783",
+          "campaign_name": "TH-383-SUSPENDER-17JUNE",
+          "order_pnl_net_sales": "1906.0200000000002",
+          "net_cogs": "615.8744999999999",
+          "contribution_margin": "1290.1455000000003",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1290.1455000000003",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120249388862310783",
+          "campaign_name": "TH-383-SUSPENDER-17JULY-ADV+",
+          "order_pnl_net_sales": "2117.8",
+          "net_cogs": "928.4883",
+          "contribution_margin": "1189.3117000000002",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1189.3117000000002",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120249948202410783",
+          "campaign_name": "TH-054-TOTE-12AUG",
+          "order_pnl_net_sales": "1600.17",
+          "net_cogs": "435",
+          "contribution_margin": "1165.17",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1165.17",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250331650630783",
+          "campaign_name": "TH-348-FUSIONHARNESS-1SEP",
+          "order_pnl_net_sales": "2166.8",
+          "net_cogs": "1093",
+          "contribution_margin": "1073.8000000000002",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1073.8000000000002",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250652935110783",
+          "campaign_name": "TH-068_WILD-23SEP-CS",
+          "order_pnl_net_sales": "1694.07",
+          "net_cogs": "744.24",
+          "contribution_margin": "949.8299999999999",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "949.8299999999999",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250695459110783",
+          "campaign_name": "TH-452-FLEXIDINEFEEDER-26SEP-CS",
+          "order_pnl_net_sales": "1100.85",
+          "net_cogs": "426.0083",
+          "contribution_margin": "674.8417",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "674.8417",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250167148470783",
+          "campaign_name": "TH-284-CRABDASH TOY-23AUG",
+          "order_pnl_net_sales": "945.61",
+          "net_cogs": "405.3666",
+          "contribution_margin": "540.2434000000001",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "540.2434000000001",
+          "channel_orders": "1"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN05",
+      "domain": "pnl",
+      "question": "Which Meta campaign buckets had the largest reported losses?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 297.091,
+      "rows": [
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "order_pnl_net_sales": "38043.249962416114",
+          "net_cogs": "12075.271000000002",
+          "contribution_margin": "25967.97896241611",
+          "order_pnl_ad_spend": "55793.409999999996",
+          "net_profit": "-29825.431037583883",
+          "channel_orders": "22"
+        },
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "order_pnl_net_sales": "35475.14202000001",
+          "net_cogs": "10684.0106",
+          "contribution_margin": "24791.13142",
+          "order_pnl_ad_spend": "49163.20999999999",
+          "net_profit": "-24372.078579999998",
+          "channel_orders": "20"
+        },
+        {
+          "campaign_id": "120250695726350783",
+          "campaign_name": "CAT TOY CS-26SEP",
+          "order_pnl_net_sales": "23519.469502040818",
+          "net_cogs": "8439.2867",
+          "contribution_margin": "15080.18280204082",
+          "order_pnl_ad_spend": "26968.909999999996",
+          "net_profit": "-11888.727197959182",
+          "channel_orders": "16"
+        },
+        {
+          "campaign_id": "120250597947340783",
+          "campaign_name": "TH-222-WINGBIRD-23SEP",
+          "order_pnl_net_sales": "62184.54999999997",
+          "net_cogs": "23260.948000000004",
+          "contribution_margin": "38923.602",
+          "order_pnl_ad_spend": "49099.409999999996",
+          "net_profit": "-10175.808",
+          "channel_orders": "51"
+        },
+        {
+          "campaign_id": "120250788048700783",
+          "campaign_name": "TH-348-FUSIONHARNESS-03OCT",
+          "order_pnl_net_sales": "10985",
+          "net_cogs": "5992.7215",
+          "contribution_margin": "4992.2785",
+          "order_pnl_ad_spend": "14667.409999999996",
+          "net_profit": "-9675.131499999996",
+          "channel_orders": "5"
+        },
+        {
+          "campaign_id": "120250690866980783",
+          "campaign_name": "TH-336-PAWTECH-26SEP",
+          "order_pnl_net_sales": "60150.49000000002",
+          "net_cogs": "22644.424000000003",
+          "contribution_margin": "37506.066000000006",
+          "order_pnl_ad_spend": "46780.03000000001",
+          "net_profit": "-9273.963999999993",
+          "channel_orders": "29"
+        },
+        {
+          "campaign_id": "120250667421200783",
+          "campaign_name": "DOG TOY CS-24SEP",
+          "order_pnl_net_sales": "16065.57",
+          "net_cogs": "6409.852900000001",
+          "contribution_margin": "9655.7171",
+          "order_pnl_ad_spend": "18283.430000000004",
+          "net_profit": "-8627.7129",
+          "channel_orders": "9"
+        },
+        {
+          "campaign_id": "120250821109680783",
+          "campaign_name": "TH-445-PROSUSPENDERBOOTS-6OCT",
+          "order_pnl_net_sales": "2166.8",
+          "net_cogs": "1730.8283000000001",
+          "contribution_margin": "435.97170000000006",
+          "order_pnl_ad_spend": "8638.4",
+          "net_profit": "-8202.4283",
+          "channel_orders": "2"
+        },
+        {
+          "campaign_id": "120250684363180783",
+          "campaign_name": "TH-445-PROSUSPENDERBOOTS-25SEP",
+          "order_pnl_net_sales": "24047.82",
+          "net_cogs": "10363.479399999998",
+          "contribution_margin": "13684.340600000003",
+          "order_pnl_ad_spend": "21743.120000000003",
+          "net_profit": "-8058.7793999999985",
+          "channel_orders": "11"
+        },
+        {
+          "campaign_id": "120250737739100783",
+          "campaign_name": "DOG-SHOES-CTL-30SEP",
+          "order_pnl_net_sales": "2107.56",
+          "net_cogs": "671.86",
+          "contribution_margin": "1435.6999999999998",
+          "order_pnl_ad_spend": "8952.41",
+          "net_profit": "-7516.71",
+          "channel_orders": "1"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN06",
+      "domain": "pnl",
+      "question": "Which Meta ad buckets had the highest reported net profit?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 249.501,
+      "rows": [
+        {
+          "campaign_id": null,
+          "ad_id": null,
+          "ad_name": null,
+          "order_pnl_net_sales": "55728.75041046981",
+          "net_cogs": "20361.6085",
+          "contribution_margin": "35367.14191046981",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "35367.14191046981",
+          "channel_orders": "34"
+        },
+        {
+          "campaign_id": "120250884319280783",
+          "ad_id": "120250884319290783",
+          "ad_name": "TH-287-MISTCALMBRUSH-UGC",
+          "order_pnl_net_sales": "3811.27",
+          "net_cogs": "1118.26",
+          "contribution_margin": "2693.01",
+          "order_pnl_ad_spend": "1099.2900000000002",
+          "net_profit": "1593.7200000000003",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250437240110783",
+          "ad_id": "120250437240120783",
+          "ad_name": "TH-222-WINGBIRD",
+          "order_pnl_net_sales": "2667.97",
+          "net_cogs": "1084.7639000000001",
+          "contribution_margin": "1583.2060999999997",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1583.2060999999997",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120247805774670783",
+          "ad_id": "120247805774680783",
+          "ad_name": "TH-383-SUSPENDER-4XL- MAROON_ET141_IM256",
+          "order_pnl_net_sales": "1906.0200000000002",
+          "net_cogs": "615.8744999999999",
+          "contribution_margin": "1290.1455000000003",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1290.1455000000003",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120249388862310783",
+          "ad_id": "120249388862290783",
+          "ad_name": "TH-383-SUSPENDER_VP032_IM258",
+          "order_pnl_net_sales": "2117.8",
+          "net_cogs": "928.4883",
+          "contribution_margin": "1189.3117000000002",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1189.3117000000002",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120249948202410783",
+          "ad_id": "120249948202400783",
+          "ad_name": "TH-054-TOTE-CS-1",
+          "order_pnl_net_sales": "1600.17",
+          "net_cogs": "435",
+          "contribution_margin": "1165.17",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1165.17",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250331650630783",
+          "ad_id": "120250389172070783",
+          "ad_name": "TH-348-FUSIONHARNESS_ET164_VP034-4SEP",
+          "order_pnl_net_sales": "2166.8",
+          "net_cogs": "1093",
+          "contribution_margin": "1073.8000000000002",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "1073.8000000000002",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250652935110783",
+          "ad_id": "120250652935120783",
+          "ad_name": "TH-068_WILD-CS",
+          "order_pnl_net_sales": "1694.07",
+          "net_cogs": "744.24",
+          "contribution_margin": "949.8299999999999",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "949.8299999999999",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250695459110783",
+          "ad_id": "120250695548450783",
+          "ad_name": "TH-452-FLEXIDINEFEEDER-CS",
+          "order_pnl_net_sales": "1100.85",
+          "net_cogs": "426.0083",
+          "contribution_margin": "674.8417",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "674.8417",
+          "channel_orders": "1"
+        },
+        {
+          "campaign_id": "120250167148470783",
+          "ad_id": "120250167148460783",
+          "ad_name": "TH-284-CRABDASH TOY",
+          "order_pnl_net_sales": "945.61",
+          "net_cogs": "405.3666",
+          "contribution_margin": "540.2434000000001",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "540.2434000000001",
+          "channel_orders": "1"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN07",
+      "domain": "pnl",
+      "question": "How large were product, shipping, packaging, payment gateway and RTO costs?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 177.96699999999998,
+      "rows": [
+        {
+          "product_cost": "307433.78",
+          "shipping_cost": "36973.8",
+          "packaging_cost": "8340",
+          "payment_gateway_fees": "5185.6449",
+          "rto_cost": "4866.49",
+          "net_cogs": "362799.71489999996"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN08",
+      "domain": "pnl",
+      "question": "What gross sales, discounts, returns and cancellations form the P&L sales bridge?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 144.509,
+      "rows": [
+        {
+          "order_pnl_gross_sales": "1041442.5113934489",
+          "order_pnl_discounts": "32547.434213656994",
+          "order_pnl_return_revenue": "82782.20777777777",
+          "order_pnl_cancel_revenue": "11900.940000000002",
+          "order_pnl_net_sales": "914211.9294020139"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN09",
+      "domain": "pnl",
+      "question": "How did reported P&L differ by payment bucket?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 155.857,
+      "rows": [
+        {
+          "payment_bucket": "manual",
+          "order_pnl_net_sales": "879718.4294020149",
+          "net_cogs": "346514.6303000002",
+          "contribution_margin": "533203.7991020139",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "533203.7991020139"
+        },
+        {
+          "payment_bucket": "online",
+          "order_pnl_net_sales": "21244.84",
+          "net_cogs": "8642.5046",
+          "contribution_margin": "12602.335399999998",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "12602.335399999998"
+        },
+        {
+          "payment_bucket": "cod",
+          "order_pnl_net_sales": "13248.660000000002",
+          "net_cogs": "7642.58",
+          "contribution_margin": "5606.08",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "5606.08"
+        },
+        {
+          "payment_bucket": null,
+          "order_pnl_net_sales": "0",
+          "net_cogs": "0",
+          "contribution_margin": "0",
+          "order_pnl_ad_spend": "619778.5165310011",
+          "net_profit": "-619778.5165310011"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "PN10",
+      "domain": "pnl",
+      "question": "How much P&L was represented by each row type and finance channel?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 163.67100000000002,
+      "rows": [
+        {
+          "order_pnl_row_type": "orders",
+          "finance_channel": "meta",
+          "order_pnl_net_sales": "537985.6289724773",
+          "net_cogs": "205905.06239999988",
+          "contribution_margin": "332080.566572478",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "332080.566572478"
+        },
+        {
+          "order_pnl_row_type": "orders",
+          "finance_channel": "google",
+          "order_pnl_net_sales": "201270.65487398067",
+          "net_cogs": "87013.32470000001",
+          "contribution_margin": "114257.33017398081",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "114257.33017398081"
+        },
+        {
+          "order_pnl_row_type": "orders",
+          "finance_channel": "unattributed",
+          "order_pnl_net_sales": "157860.84555555557",
+          "net_cogs": "63024.781699999985",
+          "contribution_margin": "94836.06385555556",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "94836.06385555556"
+        },
+        {
+          "order_pnl_row_type": "orders",
+          "finance_channel": "whatsapp",
+          "order_pnl_net_sales": "12647.250000000002",
+          "net_cogs": "4967.7033",
+          "contribution_margin": "7679.546700000001",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "7679.546700000001"
+        },
+        {
+          "order_pnl_row_type": "orders",
+          "finance_channel": "organic",
+          "order_pnl_net_sales": "4447.55",
+          "net_cogs": "1888.8428",
+          "contribution_margin": "2558.7072000000007",
+          "order_pnl_ad_spend": "0",
+          "net_profit": "2558.7072000000007"
+        },
+        {
+          "order_pnl_row_type": "ad_spend",
+          "finance_channel": "google",
+          "order_pnl_net_sales": "0",
+          "net_cogs": "0",
+          "contribution_margin": "0",
+          "order_pnl_ad_spend": "122111.87653100002",
+          "net_profit": "-122111.87653100002"
+        },
+        {
+          "order_pnl_row_type": "ad_spend",
+          "finance_channel": "meta",
+          "order_pnl_net_sales": "0",
+          "net_cogs": "0",
+          "contribution_margin": "0",
+          "order_pnl_ad_spend": "497666.64000000054",
+          "net_profit": "-497666.64000000054"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "order_pnl",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "WB01",
+      "domain": "web_analytics",
+      "question": "What were all-channel session volume and session conversion indicators?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 216.631,
+      "rows": [
+        {
+          "sessions": "47100",
+          "product_view_rate": "0.6718259023354565",
+          "add_to_cart_rate": "0.030233545647558386",
+          "checkout_rate": "0.013333333333333334",
+          "conversion_rate": "0.009363057324840765"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB02",
+      "domain": "web_analytics",
+      "question": "How did session volume and conversion indicators change each day?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 329.322,
+      "rows": [
+        {
+          "session_date.day": "2026-10-01T00:00:00.000",
+          "session_date": "2026-10-01T00:00:00.000",
+          "sessions": "4419",
+          "product_view_rate": "0.6250282869427473",
+          "add_to_cart_rate": "0.02964471599909482",
+          "checkout_rate": "0.014482914686580674",
+          "conversion_rate": "0.008599230595157275"
+        },
+        {
+          "session_date.day": "2026-10-02T00:00:00.000",
+          "session_date": "2026-10-02T00:00:00.000",
+          "sessions": "2933",
+          "product_view_rate": "0.6829185134674395",
+          "add_to_cart_rate": "0.021479713603818614",
+          "checkout_rate": "0.010228435049437436",
+          "conversion_rate": "0.0064780088646437094"
+        },
+        {
+          "session_date.day": "2026-10-03T00:00:00.000",
+          "session_date": "2026-10-03T00:00:00.000",
+          "sessions": "3932",
+          "product_view_rate": "0.6754832146490336",
+          "add_to_cart_rate": "0.033316378433367246",
+          "checkout_rate": "0.0211088504577823",
+          "conversion_rate": "0.013733468972533061"
+        },
+        {
+          "session_date.day": "2026-10-04T00:00:00.000",
+          "session_date": "2026-10-04T00:00:00.000",
+          "sessions": "3981",
+          "product_view_rate": "0.6892740517457925",
+          "add_to_cart_rate": "0.03491585028887214",
+          "checkout_rate": "0.013062044712383824",
+          "conversion_rate": "0.01105249937201708"
+        },
+        {
+          "session_date.day": "2026-10-05T00:00:00.000",
+          "session_date": "2026-10-05T00:00:00.000",
+          "sessions": "4047",
+          "product_view_rate": "0.6881640721522115",
+          "add_to_cart_rate": "0.03607610575735112",
+          "checkout_rate": "0.017296763034346428",
+          "conversion_rate": "0.012601927353595256"
+        },
+        {
+          "session_date.day": "2026-10-06T00:00:00.000",
+          "session_date": "2026-10-06T00:00:00.000",
+          "sessions": "5110",
+          "product_view_rate": "0.6690802348336595",
+          "add_to_cart_rate": "0.027592954990215263",
+          "checkout_rate": "0.015655577299412915",
+          "conversion_rate": "0.010958904109589041"
+        },
+        {
+          "session_date.day": "2026-10-07T00:00:00.000",
+          "session_date": "2026-10-07T00:00:00.000",
+          "sessions": "5188",
+          "product_view_rate": "0.7322667694680031",
+          "add_to_cart_rate": "0.034117193523515804",
+          "checkout_rate": "0.014263685427910563",
+          "conversion_rate": "0.009830377794911334"
+        },
+        {
+          "session_date.day": "2026-10-08T00:00:00.000",
+          "session_date": "2026-10-08T00:00:00.000",
+          "sessions": "5042",
+          "product_view_rate": "0.6681872272907576",
+          "add_to_cart_rate": "0.03609678698928996",
+          "checkout_rate": "0.013486711622372074",
+          "conversion_rate": "0.011106703689012296"
+        },
+        {
+          "session_date.day": "2026-10-09T00:00:00.000",
+          "session_date": "2026-10-09T00:00:00.000",
+          "sessions": "5093",
+          "product_view_rate": "0.6817200078539172",
+          "add_to_cart_rate": "0.022580011780875712",
+          "checkout_rate": "0.007264873355586099",
+          "conversion_rate": "0.00490869821323385"
+        },
+        {
+          "session_date.day": "2026-10-10T00:00:00.000",
+          "session_date": "2026-10-10T00:00:00.000",
+          "sessions": "3929",
+          "product_view_rate": "0.6406210231611097",
+          "add_to_cart_rate": "0.02621532196487656",
+          "checkout_rate": "0.0111987783150929",
+          "conversion_rate": "0.006617459913463986"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB03",
+      "domain": "web_analytics",
+      "question": "Which traffic channels had the highest session volume and how did they convert?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 448.24199999999996,
+      "rows": [
+        {
+          "channel": "ig_feed",
+          "sessions": "16935",
+          "product_view_rate": "0.8075583111898436",
+          "add_to_cart_rate": "0.04115736640094479",
+          "checkout_rate": "0.015589016829052258",
+          "conversion_rate": "0.0141718334809566"
+        },
+        {
+          "channel": "unattributed",
+          "sessions": "12664",
+          "product_view_rate": "0.5695672773215413",
+          "add_to_cart_rate": "0.007580543272267846",
+          "checkout_rate": "0.009238787113076437",
+          "conversion_rate": "0.0021320277953253315"
+        },
+        {
+          "channel": "fb_feed",
+          "sessions": "6813",
+          "product_view_rate": "0.7798326728313518",
+          "add_to_cart_rate": "0.035667107001321",
+          "checkout_rate": "0.011448701012769706",
+          "conversion_rate": "0.009834140613532952"
+        },
+        {
+          "channel": "google_search",
+          "sessions": "5412",
+          "product_view_rate": "0.22191426459719144",
+          "add_to_cart_rate": "0.02328159645232816",
+          "checkout_rate": "0.01237989652623799",
+          "conversion_rate": "0.0066518847006651885"
+        },
+        {
+          "channel": "google_pmax",
+          "sessions": "2896",
+          "product_view_rate": "0.8774171270718232",
+          "add_to_cart_rate": "0.06526243093922653",
+          "checkout_rate": "0.024171270718232045",
+          "conversion_rate": "0.020027624309392266"
+        },
+        {
+          "channel": "google_shopping",
+          "sessions": "1162",
+          "product_view_rate": "0.7082616179001722",
+          "add_to_cart_rate": "0.028399311531841654",
+          "checkout_rate": "0.016351118760757316",
+          "conversion_rate": "0.004302925989672977"
+        },
+        {
+          "channel": "google_organic",
+          "sessions": "825",
+          "product_view_rate": "0.7442424242424243",
+          "add_to_cart_rate": "0.0024242424242424242",
+          "checkout_rate": "0.0024242424242424242",
+          "conversion_rate": "0"
+        },
+        {
+          "channel": "whatsapp",
+          "sessions": "198",
+          "product_view_rate": "0.5707070707070707",
+          "add_to_cart_rate": "0.12626262626262627",
+          "checkout_rate": "0.025252525252525252",
+          "conversion_rate": "0.020202020202020204"
+        },
+        {
+          "channel": "meta_organic",
+          "sessions": "61",
+          "product_view_rate": "0.5737704918032787",
+          "add_to_cart_rate": "0.03278688524590164",
+          "checkout_rate": "0.01639344262295082",
+          "conversion_rate": "0.01639344262295082"
+        },
+        {
+          "channel": "ai_chatgpt",
+          "sessions": "38",
+          "product_view_rate": "0.868421052631579",
+          "add_to_cart_rate": "0.07894736842105263",
+          "checkout_rate": "0.02631578947368421",
+          "conversion_rate": "0.02631578947368421"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB04",
+      "domain": "web_analytics",
+      "question": "How did Meta sessions and conversion indicators vary by campaign?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 764.334,
+      "rows": [
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "sessions": "4179",
+          "product_view_rate": "0.8183776022972002",
+          "add_to_cart_rate": "0.017468293850203397",
+          "checkout_rate": "0.005264417324718832",
+          "conversion_rate": "0.005025125628140704"
+        },
+        {
+          "campaign_id": null,
+          "campaign_name": null,
+          "sessions": "2680",
+          "product_view_rate": "0.8735074626865672",
+          "add_to_cart_rate": "0.03805970149253731",
+          "checkout_rate": "0.012686567164179104",
+          "conversion_rate": "0.012686567164179104"
+        },
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "sessions": "2396",
+          "product_view_rate": "0.8301335559265443",
+          "add_to_cart_rate": "0.03547579298831385",
+          "checkout_rate": "0.009181969949916527",
+          "conversion_rate": "0.007512520868113523"
+        },
+        {
+          "campaign_id": "120250597947340783",
+          "campaign_name": "TH-222-WINGBIRD-23SEP",
+          "sessions": "1930",
+          "product_view_rate": "0.8658031088082901",
+          "add_to_cart_rate": "0.07253886010362694",
+          "checkout_rate": "0.027461139896373058",
+          "conversion_rate": "0.026424870466321245"
+        },
+        {
+          "campaign_id": "120250690866980783",
+          "campaign_name": "TH-336-PAWTECH-26SEP",
+          "sessions": "1607",
+          "product_view_rate": "0.8537647790914747",
+          "add_to_cart_rate": "0.04044803982576229",
+          "checkout_rate": "0.019912881144990666",
+          "conversion_rate": "0.01804604853764779"
+        },
+        {
+          "campaign_id": "120250681379400783",
+          "campaign_name": "TH-149-SCRATCHLOUNGE-25SEP",
+          "sessions": "1426",
+          "product_view_rate": "0.8380084151472651",
+          "add_to_cart_rate": "0.05750350631136045",
+          "checkout_rate": "0.019635343618513323",
+          "conversion_rate": "0.018934081346423562"
+        },
+        {
+          "campaign_id": "120250684363180783",
+          "campaign_name": "TH-445-PROSUSPENDERBOOTS-25SEP",
+          "sessions": "1225",
+          "product_view_rate": "0.8138775510204082",
+          "add_to_cart_rate": "0.027755102040816326",
+          "checkout_rate": "0.010612244897959184",
+          "conversion_rate": "0.00816326530612245"
+        },
+        {
+          "campaign_id": "120250823301270783",
+          "campaign_name": "TH-149-SCRATCHLOUNGE-6OCT",
+          "sessions": "1077",
+          "product_view_rate": "0.819870009285051",
+          "add_to_cart_rate": "0.0510677808727948",
+          "checkout_rate": "0.013927576601671309",
+          "conversion_rate": "0.012999071494893221"
+        },
+        {
+          "campaign_id": "120250695726350783",
+          "campaign_name": "CAT TOY CS-26SEP",
+          "sessions": "1000",
+          "product_view_rate": "0.326",
+          "add_to_cart_rate": "0.04",
+          "checkout_rate": "0.019",
+          "conversion_rate": "0.015"
+        },
+        {
+          "campaign_id": "120250822013190783",
+          "campaign_name": "DOG DAD T-SHIRT-CS-06OCT",
+          "sessions": "748",
+          "product_view_rate": "0.8355614973262032",
+          "add_to_cart_rate": "0.03074866310160428",
+          "checkout_rate": "0.014705882352941176",
+          "conversion_rate": "0.012032085561497326"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB05",
+      "domain": "web_analytics",
+      "question": "How did website session volume, bounce and conversion vary by device?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 202.48,
+      "rows": [
+        {
+          "device_type": null,
+          "sessions": "47100",
+          "session_bounce_rate": "0.32817409766454353",
+          "conversion_rate": "0.009363057324840765"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB06",
+      "domain": "web_analytics",
+      "question": "Which landing pages attracted the most sessions, and how did those sessions convert?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 385.581,
+      "rows": [
+        {
+          "landing_page_path": "/",
+          "sessions": "9765",
+          "product_view_rate": "0.26216077828981055",
+          "add_to_cart_rate": "0.016897081413210446",
+          "checkout_rate": "0.011469534050179211",
+          "conversion_rate": "0.004505888376856119"
+        },
+        {
+          "landing_page_path": "/products/pawveralls-suspender-boots",
+          "sessions": "7888",
+          "product_view_rate": "0.8326572008113591",
+          "add_to_cart_rate": "0.02865111561866126",
+          "checkout_rate": "0.009254563894523327",
+          "conversion_rate": "0.0069726166328600405"
+        },
+        {
+          "landing_page_path": "/products/meow-scratch-lounge-cat-scratcher-relax-bed",
+          "sessions": "2804",
+          "product_view_rate": "0.8213266761768901",
+          "add_to_cart_rate": "0.05706134094151213",
+          "checkout_rate": "0.019971469329529243",
+          "conversion_rate": "0.019971469329529243"
+        },
+        {
+          "landing_page_path": "/products/shop-wingbird-smart-pet-toys-by-tilting-heads",
+          "sessions": "2224",
+          "product_view_rate": "0.8435251798561151",
+          "add_to_cart_rate": "0.06879496402877698",
+          "checkout_rate": "0.02697841726618705",
+          "conversion_rate": "0.025179856115107913"
+        },
+        {
+          "landing_page_path": "/products/pawveralls-pro-suspender-boots-for-dogs-waterproof-paw-protection-tilting-heads",
+          "sessions": "1873",
+          "product_view_rate": "0.8344901227976508",
+          "add_to_cart_rate": "0.034703683929524824",
+          "checkout_rate": "0.014415376401494928",
+          "conversion_rate": "0.011745862253069941"
+        },
+        {
+          "landing_page_path": "/products/shop-electric-paw-cleaner-with-paw-cleanser-by-tilting-heads",
+          "sessions": "1848",
+          "product_view_rate": "0.8668831168831169",
+          "add_to_cart_rate": "0.040584415584415584",
+          "checkout_rate": "0.01893939393939394",
+          "conversion_rate": "0.016774891774891776"
+        },
+        {
+          "landing_page_path": "/products/pocketpup-tote-bag",
+          "sessions": "1108",
+          "product_view_rate": "0.8673285198555957",
+          "add_to_cart_rate": "0.0388086642599278",
+          "checkout_rate": "0.01444043321299639",
+          "conversion_rate": "0.010830324909747292"
+        },
+        {
+          "landing_page_path": "/collections/play-instinct-cats",
+          "sessions": "896",
+          "product_view_rate": "0.23660714285714285",
+          "add_to_cart_rate": "0.03125",
+          "checkout_rate": "0.008928571428571428",
+          "conversion_rate": "0.008928571428571428"
+        },
+        {
+          "landing_page_path": "/collections/play-instinct-dogs",
+          "sessions": "862",
+          "product_view_rate": "0.20417633410672853",
+          "add_to_cart_rate": "0.04640371229698376",
+          "checkout_rate": "0.016241299303944315",
+          "conversion_rate": "0.016241299303944315"
+        },
+        {
+          "landing_page_path": "/products/dog-dad-club-t-shirt-everyday-statement-wear-for-dog-lovers",
+          "sessions": "802",
+          "product_view_rate": "0.8491271820448878",
+          "add_to_cart_rate": "0.028678304239401497",
+          "checkout_rate": "0.00997506234413965",
+          "conversion_rate": "0.00997506234413965"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB07",
+      "domain": "web_analytics",
+      "question": "What were the supported ATC-to-checkout and checkout-to-purchase session ratios?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 227.814,
+      "rows": [
+        {
+          "sessions": "47100",
+          "add_to_cart_to_checkout_rate": "0.4410112359550562",
+          "checkout_to_purchase_rate": "0.7022292993630573"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB08",
+      "domain": "web_analytics",
+      "question": "How did bounce and purchase conversion vary by browser and operating system?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 194.635,
+      "rows": [
+        {
+          "browser_family": null,
+          "os_family": null,
+          "sessions": "47100",
+          "session_bounce_rate": "0.32817409766454353",
+          "conversion_rate": "0.009363057324840765"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_sessions",
+      "time_basis": "session_date"
+    },
+    {
+      "id": "WB09",
+      "domain": "web_analytics",
+      "question": "Which product pages generated the most product-view and add-to-cart events?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 800.304,
+      "rows": [
+        {
+          "page_path": "/products/pawveralls-suspender-boots",
+          "sku": "TH-383-SUSPENDER-XS-MAROON",
+          "product_title": "Pawveralls Suspender Boots",
+          "event_product_views": "9944",
+          "event_add_to_carts": "117"
+        },
+        {
+          "page_path": "/products/pawveralls-pro-suspender-boots-for-dogs-waterproof-paw-protection-tilting-heads",
+          "sku": "TH-445-PROSUSPENDERBOOTS-XS",
+          "product_title": "Pawveralls Pro Suspender Boots",
+          "event_product_views": "3413",
+          "event_add_to_carts": "32"
+        },
+        {
+          "page_path": "/products/meow-scratch-lounge-cat-scratcher-relax-bed",
+          "sku": "TH-149-SCRATCHLOUNGE",
+          "product_title": "Meow Scratch Lounge",
+          "event_product_views": "3168",
+          "event_add_to_carts": "295"
+        },
+        {
+          "page_path": "/products/shop-wingbird-smart-pet-toys-by-tilting-heads",
+          "sku": "TH-222-WINGBIRD",
+          "product_title": "WingBird Smart Flapping Toy",
+          "event_product_views": "2714",
+          "event_add_to_carts": "379"
+        },
+        {
+          "page_path": "/products/shop-electric-paw-cleaner-with-paw-cleanser-by-tilting-heads",
+          "sku": "TH-336-PAWTECH-BLUE",
+          "product_title": "PawTech Cleaner with Paw Cleanser 500ml",
+          "event_product_views": "2141",
+          "event_add_to_carts": "175"
+        },
+        {
+          "page_path": "/products/pocketpup-tote-bag",
+          "sku": "TH-054-TOTE-YELLOW",
+          "product_title": "PocketPup Tote Bag (For Small Dogs & Cats) - Up to 6.5kg",
+          "event_product_views": "1356",
+          "event_add_to_carts": "49"
+        },
+        {
+          "page_path": "/products/snugsole-pet-boots",
+          "sku": "TH-012-SNUGBOO-XS",
+          "product_title": "SnugSole Boots",
+          "event_product_views": "1256",
+          "event_add_to_carts": "33"
+        },
+        {
+          "page_path": "/products/dog-dad-club-t-shirt-everyday-statement-wear-for-dog-lovers",
+          "sku": "TH-359-DADCLUBTSHIRT-XS",
+          "product_title": "Dog Dad Club T-Shirt",
+          "event_product_views": "994",
+          "event_add_to_carts": "1"
+        },
+        {
+          "page_path": "/products/wildtrail-boots-winter-ready-waterproof-non-slip-built-for-all-terrains",
+          "sku": "TH-068-WILD-S",
+          "product_title": "WildTrail Boots",
+          "event_product_views": "952",
+          "event_add_to_carts": "16"
+        },
+        {
+          "page_path": "/products/fusiongrip-harness-2-in-1-dog-harness-with-retractable-leash",
+          "sku": "TH-348-FUSIONHARNESS-XS",
+          "product_title": "FusionGrip Harness",
+          "event_product_views": "875",
+          "event_add_to_carts": "20"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_event_detail",
+      "time_basis": "event_date"
+    },
+    {
+      "id": "WB10",
+      "domain": "web_analytics",
+      "question": "How did daily page-view and site-search event volumes vary by traffic channel?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 1567.7259999999999,
+      "rows": [
+        {
+          "channel": "audience_network",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "27",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "sms",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "10",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "organic_search",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "17",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "whatsapp",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "89",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "0",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "google_shopping",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "374",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "ig_feed",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "5359",
+          "event_site_searches": "5"
+        },
+        {
+          "channel": "ai_chatgpt",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "20",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "google_organic",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "212",
+          "event_site_searches": "0"
+        },
+        {
+          "channel": "google_search",
+          "event_date.day": "2026-10-01T00:00:00.000",
+          "event_date": "2026-10-01T00:00:00.000",
+          "event_page_views": "2038",
+          "event_site_searches": "17"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "web_event_detail",
+      "time_basis": "event_date"
+    },
+    {
+      "id": "CM01",
+      "domain": "commerce",
+      "question": "How many orders were placed and what were gross sales, discounts, paid sales and commerce net sales?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 271.58700000000005,
+      "rows": [
+        {
+          "orders": "511",
+          "gross_sales": "1041442.511393449",
+          "discounts": "32547.434213657",
+          "paid_sales": "1186883.9",
+          "net_sales": "966246.9052285464"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM02",
+      "domain": "commerce",
+      "question": "How did daily orders and sales change?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 301.50300000000004,
+      "rows": [
+        {
+          "order_date.day": "2026-10-01T00:00:00.000",
+          "order_date": "2026-10-01T00:00:00.000",
+          "orders": "47",
+          "gross_sales": "93311.34906380858",
+          "discounts": "2792.759188881836",
+          "paid_sales": "106429.00000000001",
+          "net_sales": "83388.93110000005"
+        },
+        {
+          "order_date.day": "2026-10-02T00:00:00.000",
+          "order_date": "2026-10-02T00:00:00.000",
+          "orders": "19",
+          "gross_sales": "42543.114881018046",
+          "discounts": "1841.9746710180423",
+          "paid_sales": "47894.09999999999",
+          "net_sales": "36493.26743333334"
+        },
+        {
+          "order_date.day": "2026-10-03T00:00:00.000",
+          "order_date": "2026-10-03T00:00:00.000",
+          "orders": "58",
+          "gross_sales": "123450.73370597634",
+          "discounts": "4649.671895976284",
+          "paid_sales": "139865.1",
+          "net_sales": "114117.55156666673"
+        },
+        {
+          "order_date.day": "2026-10-04T00:00:00.000",
+          "order_date": "2026-10-04T00:00:00.000",
+          "orders": "48",
+          "gross_sales": "94298.67595965444",
+          "discounts": "3427.728919687278",
+          "paid_sales": "106810.20000000001",
+          "net_sales": "84735.91440000004"
+        },
+        {
+          "order_date.day": "2026-10-05T00:00:00.000",
+          "order_date": "2026-10-05T00:00:00.000",
+          "orders": "64",
+          "gross_sales": "146075.81893520834",
+          "discounts": "4791.238935208368",
+          "paid_sales": "166350.80000000002",
+          "net_sales": "136979.0949942603"
+        },
+        {
+          "order_date.day": "2026-10-06T00:00:00.000",
+          "order_date": "2026-10-06T00:00:00.000",
+          "orders": "63",
+          "gross_sales": "127132.60591406705",
+          "discounts": "4187.547514067016",
+          "paid_sales": "144683.70000000004",
+          "net_sales": "117855.01031111111"
+        },
+        {
+          "order_date.day": "2026-10-07T00:00:00.000",
+          "order_date": "2026-10-07T00:00:00.000",
+          "orders": "61",
+          "gross_sales": "112950.91054628634",
+          "discounts": "2923.9207013883024",
+          "paid_sales": "129342.70000000003",
+          "net_sales": "103807.92850682311"
+        },
+        {
+          "order_date.day": "2026-10-08T00:00:00.000",
+          "order_date": "2026-10-08T00:00:00.000",
+          "orders": "63",
+          "gross_sales": "121847.99585464507",
+          "discounts": "3305.90585464502",
+          "paid_sales": "139390",
+          "net_sales": "114930.05812198452"
+        },
+        {
+          "order_date.day": "2026-10-09T00:00:00.000",
+          "order_date": "2026-10-09T00:00:00.000",
+          "orders": "33",
+          "gross_sales": "70851.76501539921",
+          "discounts": "1550.8150153991944",
+          "paid_sales": "81570",
+          "net_sales": "69088.35720682304"
+        },
+        {
+          "order_date.day": "2026-10-10T00:00:00.000",
+          "order_date": "2026-10-10T00:00:00.000",
+          "orders": "36",
+          "gross_sales": "72813.986359115",
+          "discounts": "1855.486359115002",
+          "paid_sales": "83473.40000000001",
+          "net_sales": "70473.88896803734"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM03",
+      "domain": "commerce",
+      "question": "Which traffic channels generated the most commerce net sales?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 336.094,
+      "rows": [
+        {
+          "channel": "ig_feed",
+          "orders": "242",
+          "paid_sales": "537295.4999999995",
+          "net_sales": "435335.2872050696"
+        },
+        {
+          "channel": "exchange_replacement",
+          "orders": "58",
+          "paid_sales": "139385",
+          "net_sales": "116005.22000000007"
+        },
+        {
+          "channel": "fb_feed",
+          "orders": "65",
+          "paid_sales": "138800.30000000002",
+          "net_sales": "115384.60520806733"
+        },
+        {
+          "channel": "google_pmax",
+          "orders": "57",
+          "paid_sales": "132545.20000000004",
+          "net_sales": "104610.50181909153"
+        },
+        {
+          "channel": "google_search",
+          "orders": "42",
+          "paid_sales": "109684.1",
+          "net_sales": "86672.13378949474"
+        },
+        {
+          "channel": "unattributed",
+          "orders": "20",
+          "paid_sales": "66037.9",
+          "net_sales": "56085.310000000005"
+        },
+        {
+          "channel": "google_shopping",
+          "orders": "13",
+          "paid_sales": "29980.299999999996",
+          "net_sales": "23995.767206823024"
+        },
+        {
+          "channel": "whatsapp",
+          "orders": "7",
+          "paid_sales": "17387.3",
+          "net_sales": "14765.050000000001"
+        },
+        {
+          "channel": "meta_organic",
+          "orders": "4",
+          "paid_sales": "8271.1",
+          "net_sales": "7039.46"
+        },
+        {
+          "channel": "ai_chatgpt",
+          "orders": "1",
+          "paid_sales": "2999",
+          "net_sales": "2541.53"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM04",
+      "domain": "commerce",
+      "question": "How did placed orders and sales differ by payment bucket?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 265.40599999999995,
+      "rows": [
+        {
+          "payment_bucket": "manual",
+          "orders": "496",
+          "cod_orders": "0",
+          "prepaid_orders": "0",
+          "paid_sales": "1140184.5999999992",
+          "net_sales": "929127.8941174358"
+        },
+        {
+          "payment_bucket": "cod",
+          "orders": "8",
+          "cod_orders": "8",
+          "prepaid_orders": "0",
+          "paid_sales": "19131.4",
+          "net_sales": "15874.171111111113"
+        },
+        {
+          "payment_bucket": "online",
+          "orders": "7",
+          "cod_orders": "0",
+          "prepaid_orders": "7",
+          "paid_sales": "27567.899999999998",
+          "net_sales": "21244.84"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM05",
+      "domain": "commerce",
+      "question": "How did order count and commerce net sales differ for new and existing customers?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 296.814,
+      "rows": [
+        {
+          "is_new_customer": "1",
+          "orders": "347",
+          "new_customers": "347",
+          "net_sales": "639230.5654524417"
+        },
+        {
+          "is_new_customer": "0",
+          "orders": "164",
+          "new_customers": "0",
+          "net_sales": "327016.33977610414"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM06",
+      "domain": "commerce",
+      "question": "Which shipping states generated the most commerce net sales?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 337.934,
+      "rows": [
+        {
+          "shipping_state": "MAHARASHTRA",
+          "orders": "127",
+          "net_sales": "234994.3242804339"
+        },
+        {
+          "shipping_state": "KARNATAKA",
+          "orders": "91",
+          "net_sales": "192469.33082046898"
+        },
+        {
+          "shipping_state": "DELHI",
+          "orders": "47",
+          "net_sales": "84226.90321111107"
+        },
+        {
+          "shipping_state": "WEST BENGAL",
+          "orders": "33",
+          "net_sales": "65551.07387264613"
+        },
+        {
+          "shipping_state": "HARYANA",
+          "orders": "38",
+          "net_sales": "62390.69306666666"
+        },
+        {
+          "shipping_state": "UTTAR PRADESH",
+          "orders": "35",
+          "net_sales": "58108.76210682302"
+        },
+        {
+          "shipping_state": "TELANGANA",
+          "orders": "22",
+          "net_sales": "43189.387887724595"
+        },
+        {
+          "shipping_state": "TAMIL NADU",
+          "orders": "19",
+          "net_sales": "41408.41156666666"
+        },
+        {
+          "shipping_state": "GUJARAT",
+          "orders": "18",
+          "net_sales": "40701.130000000005"
+        },
+        {
+          "shipping_state": "ANDHRA PRADESH",
+          "orders": "11",
+          "net_sales": "24362.999999999996"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM07",
+      "domain": "commerce",
+      "question": "For September orders, how many were returned or cancelled and what revenue deductions were recorded?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 436.14399999999995,
+      "rows": [
+        {
+          "orders": "1097",
+          "returned_orders": "190",
+          "cancelled_orders": "42",
+          "returned_or_cancelled_orders": "232",
+          "return_revenue": "369990.88215630874",
+          "cancel_revenue": "73844.84"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM08",
+      "domain": "commerce",
+      "question": "Which Meta campaigns generated the most orders and commerce net sales?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 898.947,
+      "rows": [
+        {
+          "campaign_id": "120250597947340783",
+          "campaign_name": "TH-222-WINGBIRD-23SEP",
+          "orders": "51",
+          "net_sales": "64386.23999999994",
+          "returned_orders": "2",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": "120250690866980783",
+          "campaign_name": "TH-336-PAWTECH-26SEP",
+          "orders": "29",
+          "net_sales": "61843.10441364608",
+          "returned_orders": "1",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": "120250681379400783",
+          "campaign_name": "TH-149-SCRATCHLOUNGE-25SEP",
+          "orders": "26",
+          "net_sales": "61214.28",
+          "returned_orders": "0",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": null,
+          "campaign_name": null,
+          "orders": "34",
+          "net_sales": "55977.305291725315",
+          "returned_orders": "2",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": "120250695088250783",
+          "campaign_name": "TH-383-SUSPENDER-26SEP-ADV+",
+          "orders": "22",
+          "net_sales": "47085.370299999995",
+          "returned_orders": "6",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": "120250726752410783",
+          "campaign_name": "TH-383-SUSPENDER-29SEP",
+          "orders": "20",
+          "net_sales": "35190.36891634193",
+          "returned_orders": "3",
+          "cancelled_orders": "1"
+        },
+        {
+          "campaign_id": "120250823301270783",
+          "campaign_name": "TH-149-SCRATCHLOUNGE-6OCT",
+          "orders": "14",
+          "net_sales": "29150.747206823027",
+          "returned_orders": "0",
+          "cancelled_orders": "1"
+        },
+        {
+          "campaign_id": "120250684363180783",
+          "campaign_name": "TH-445-PROSUSPENDERBOOTS-25SEP",
+          "orders": "11",
+          "net_sales": "27859.86",
+          "returned_orders": "2",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": "120250648999490783",
+          "campaign_name": "TH-012-SNUGBOO-23SEP",
+          "orders": "14",
+          "net_sales": "26438.28111111111",
+          "returned_orders": "0",
+          "cancelled_orders": "0"
+        },
+        {
+          "campaign_id": "120250695726350783",
+          "campaign_name": "CAT TOY CS-26SEP",
+          "orders": "16",
+          "net_sales": "23512.2672",
+          "returned_orders": "1",
+          "cancelled_orders": "0"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "commerce",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM09",
+      "domain": "commerce",
+      "question": "Which 10 products generated the most net line revenue and how many units and distinct orders did they have?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 240.549,
+      "rows": [
+        {
+          "product_id": "8240181837913",
+          "product_title": "Pawveralls Suspender Boots",
+          "product_net_revenue": "127152.53000000007",
+          "units_sold": "66",
+          "product_orders": "75"
+        },
+        {
+          "product_id": "8028959539289",
+          "product_title": "Meow Scratch Lounge",
+          "product_net_revenue": "118384.95000000006",
+          "units_sold": "58",
+          "product_orders": "54"
+        },
+        {
+          "product_id": "8349232169049",
+          "product_title": "Pawveralls Pro Suspender Boots",
+          "product_net_revenue": "76029.00000000004",
+          "units_sold": "41",
+          "product_orders": "43"
+        },
+        {
+          "product_id": "8152830607449",
+          "product_title": "PawTech Cleaner with Paw Cleanser 500ml",
+          "product_net_revenue": "75541.58000000002",
+          "units_sold": "38",
+          "product_orders": "37"
+        },
+        {
+          "product_id": "8069022580825",
+          "product_title": "WingBird Smart Flapping Toy",
+          "product_net_revenue": "73206.43999999997",
+          "units_sold": "69",
+          "product_orders": "71"
+        },
+        {
+          "product_id": "7906956968025",
+          "product_title": "SnugSole Boots",
+          "product_net_revenue": "38075.020000000004",
+          "units_sold": "23",
+          "product_orders": "23"
+        },
+        {
+          "product_id": "8164696162393",
+          "product_title": "FusionGrip Harness",
+          "product_net_revenue": "31555.219999999994",
+          "units_sold": "15",
+          "product_orders": "17"
+        },
+        {
+          "product_id": "7960269717593",
+          "product_title": "PocketPup Tote Bag (For Small Dogs & Cats) - Up to 6.5kg",
+          "product_net_revenue": "20589.600000000002",
+          "units_sold": "15",
+          "product_orders": "17"
+        },
+        {
+          "product_id": "8123760607321",
+          "product_title": "CrabDash Toy",
+          "product_net_revenue": "11350.25",
+          "units_sold": "7",
+          "product_orders": "7"
+        },
+        {
+          "product_id": "7972300456025",
+          "product_title": "WildTrail Boots",
+          "product_net_revenue": "10858.74",
+          "units_sold": "7",
+          "product_orders": "9"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "product",
+      "time_basis": "order_date"
+    },
+    {
+      "id": "CM10",
+      "domain": "commerce",
+      "question": "Which SKUs had the most returned units among September orders?",
+      "status": "PASS",
+      "error": null,
+      "elapsed_ms": 193.547,
+      "rows": [
+        {
+          "product_id": "8069022580825",
+          "variant_id": "42808195907673",
+          "sku": "TH-222-WINGBIRD",
+          "units_ordered": "128",
+          "returned_units": "18",
+          "product_return_revenue": "23007.749999999996"
+        },
+        {
+          "product_id": "8123760607321",
+          "variant_id": "42988962283609",
+          "sku": "TH-284-CRABDASH TOY",
+          "units_ordered": "57",
+          "returned_units": "9",
+          "product_return_revenue": "13044.32"
+        },
+        {
+          "product_id": "8349232169049",
+          "variant_id": "44574063951961",
+          "sku": "TH-445-PROSUSPENDERBOOTS-M",
+          "units_ordered": "13",
+          "returned_units": "7",
+          "product_return_revenue": "13894.150000000001"
+        },
+        {
+          "product_id": "8152830607449",
+          "variant_id": "43110614368345",
+          "sku": "TH-336-PAWTECH-GRAY",
+          "units_ordered": "28",
+          "returned_units": "7",
+          "product_return_revenue": "13765.68"
+        },
+        {
+          "product_id": "8240181837913",
+          "variant_id": "43391339233369",
+          "sku": "TH-383-SUSPENDER-3XL-MAROON",
+          "units_ordered": "11",
+          "returned_units": "6",
+          "product_return_revenue": "12495.02"
+        },
+        {
+          "product_id": "7972300456025",
+          "variant_id": "42435800039513",
+          "sku": "TH-068-WILD-M",
+          "units_ordered": "9",
+          "returned_units": "5",
+          "product_return_revenue": "4912.8"
+        },
+        {
+          "product_id": "8349232169049",
+          "variant_id": "44574063886425",
+          "sku": "TH-445-PROSUSPENDERBOOTS-XS",
+          "units_ordered": "16",
+          "returned_units": "5",
+          "product_return_revenue": "6395.85"
+        },
+        {
+          "product_id": "8240181837913",
+          "variant_id": "43391339102297",
+          "sku": "TH-383-SUSPENDER-M-MAROON",
+          "units_ordered": "9",
+          "returned_units": "5",
+          "product_return_revenue": "6353.400000000001"
+        },
+        {
+          "product_id": "8240181837913",
+          "variant_id": "43391339167833",
+          "sku": "TH-383-SUSPENDER-XL-MAROON",
+          "units_ordered": "10",
+          "returned_units": "5",
+          "product_return_revenue": "8471.2"
+        },
+        {
+          "product_id": "8152830607449",
+          "variant_id": "43110614401113",
+          "sku": "TH-336-PAWTECH-BLUE",
+          "units_ordered": "33",
+          "returned_units": "4",
+          "product_return_revenue": "4167.23"
+        }
+      ],
+      "warnings": [],
+      "ratio_valid": true,
+      "grain_valid": true,
+      "composition_valid": true,
+      "expected_view": "product",
+      "time_basis": "order_date"
+    }
+  ]
+}
