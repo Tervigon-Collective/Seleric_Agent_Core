@@ -483,6 +483,7 @@ def main() -> int:
             "cube_mapping": {"view": view, "measure": spec["member"],
                              **({"time_dimension": spec["date_axis"]} if axis != default_axis_of[view] else {})},
             "aggregation": "ratio" if ratio else "additive",
+            **({"ratio_components": {"numerator": RATIO_PARTS[mid][0], "denominator": RATIO_PARTS[mid][1]}} if ratio and len(RATIO_PARTS.get(mid,[]))==2 else {}),
             "unit": unit,
             **({"currency_default": "INR"} if fmt == "currency" else {}),
             "grain": grain,

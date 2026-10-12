@@ -303,7 +303,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
     write_cfg = _as_bool(_cfg_get(gateway, "write_enabled", False), False)
     write_env = os.getenv("WRITE_ENABLED")
     if write_env is not None and write_env.strip() != "":
-        write_enabled = write_env.strip() == "true"
+        write_enabled = write_env.strip().lower() in ("true", "1", "yes", "on")
     else:
         write_enabled = write_cfg
 

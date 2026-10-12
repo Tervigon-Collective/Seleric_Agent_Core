@@ -15,6 +15,9 @@ cube_mapping:
   view: pnl
   measure: pnl.pnl_net_roas
 aggregation: ratio
+ratio_components:
+  numerator: pnl_contribution_margin
+  denominator: ad_spend
 unit: ratio
 grain: brand_day_channel_ad
 data_owner: Finance

@@ -1,0 +1,10 @@
+{
+  "catalogue_version": "f53e649736b9",
+  "content_hash": "b3c608aabe99958770d3f5679beb4c8c2b2df5fdb3f4435794380841f23eb87d",
+  "counts": {
+    "conflicts": 31,
+    "cube_members": 755,
+    "metrics": 231,
+    "physical_views": 55
+  }
+}

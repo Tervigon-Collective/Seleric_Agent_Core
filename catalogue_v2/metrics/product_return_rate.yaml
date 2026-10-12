@@ -15,6 +15,9 @@ cube_mapping:
   view: product_pnl
   measure: product_pnl.pl_return_rate
 aggregation: ratio
+ratio_components:
+  numerator: product_order_returned_orders
+  denominator: product_order_orders
 unit: ratio
 grain: order_line_pnl_row
 data_owner: Finance

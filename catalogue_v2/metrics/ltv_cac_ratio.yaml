@@ -14,6 +14,9 @@ cube_mapping:
   view: unit_economics
   measure: unit_economics.ltv_cac_ratio
 aggregation: ratio
+ratio_components:
+  numerator: ltv
+  denominator: cac
 unit: ratio
 grain: brand_day
 data_owner: Growth / Finance

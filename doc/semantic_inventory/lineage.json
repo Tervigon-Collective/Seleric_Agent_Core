@@ -1,0 +1,1061 @@
+[
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_google_ads_status_history",
+      "gold.fct_meta_ads_status_history"
+    ],
+    "gold_sources": [
+      "gold.fct_google_ads_status_history",
+      "gold.fct_meta_ads_status_history"
+    ],
+    "upstream": [
+      "serve.google_ads_status_history",
+      "serve.meta_ads_status_history"
+    ],
+    "view": "serve.ad_changes",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_ad_channel_pnl_daily",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_ad_channel_pnl_daily",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_ad_channel_pnl_daily",
+      "serve.channel_pnl"
+    ],
+    "view": "serve.ad_channel_pnl_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily"
+    ],
+    "upstream": [
+      "serve.google_ads_daily",
+      "serve.meta_ads_daily"
+    ],
+    "view": "serve.ad_delivery_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_campaigns_hourly",
+      "gold.fct_meta_ads_hourly"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_campaigns_hourly",
+      "gold.fct_meta_ads_hourly"
+    ],
+    "upstream": [
+      "serve.google_ads_hourly",
+      "serve.meta_ads_hourly"
+    ],
+    "view": "serve.ad_delivery_hourly",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_attribution_paths"
+    ],
+    "gold_sources": [
+      "gold.fct_attribution_paths"
+    ],
+    "upstream": [
+      "gold.fct_attribution_paths"
+    ],
+    "view": "serve.attribution_paths",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.commerce_orders",
+      "serve.product_performance"
+    ],
+    "view": "serve.campaign_products",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_order_items",
+      "serve.commerce_performance_daily",
+      "serve.google_ads_daily",
+      "serve.meta_ads_daily"
+    ],
+    "view": "serve.canonical_pnl",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.cfg_traffic_platforms"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.cfg_traffic_platforms"
+    ],
+    "view": "serve.cfg_traffic_platforms",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.cfg_traffic_source_rules"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.cfg_traffic_source_rules"
+    ],
+    "view": "serve.cfg_traffic_source_rules",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.order_attribution"
+    ],
+    "view": "serve.channel_attribution_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source",
+      "serve.commerce_orders",
+      "serve.google_ads_daily",
+      "serve.meta_ads_daily"
+    ],
+    "view": "serve.channel_pnl",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_items"
+    ],
+    "gold_sources": [
+      "gold.fct_order_items"
+    ],
+    "upstream": [
+      "gold.fct_order_items"
+    ],
+    "view": "serve.commerce_order_events",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_order_attribution",
+      "gold.fct_orders",
+      "serve.product_performance"
+    ],
+    "view": "serve.commerce_orders",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.commerce_order_events",
+      "serve.commerce_orders"
+    ],
+    "view": "serve.commerce_performance_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_customers"
+    ],
+    "gold_sources": [
+      "gold.dim_customers"
+    ],
+    "upstream": [
+      "gold.dim_customers"
+    ],
+    "view": "serve.customer_data",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_customers",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.dim_customers",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.dim_customers",
+      "gold.fct_orders"
+    ],
+    "view": "serve.customer_ltv",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad"
+    ],
+    "gold_sources": [
+      "gold.dim_ad"
+    ],
+    "upstream": [
+      "gold.dim_ad"
+    ],
+    "view": "serve.dim_ad",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_adset"
+    ],
+    "gold_sources": [
+      "gold.dim_adset"
+    ],
+    "upstream": [
+      "gold.dim_adset"
+    ],
+    "view": "serve.dim_adset",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_orders",
+      "gold.fct_session_funnel",
+      "semantic.dim_brand"
+    ],
+    "gold_sources": [
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_orders",
+      "gold.fct_session_funnel"
+    ],
+    "upstream": [
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_orders",
+      "gold.fct_session_funnel",
+      "semantic.dim_brand"
+    ],
+    "view": "serve.dim_brand",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily"
+    ],
+    "upstream": [
+      "gold.dim_campaign",
+      "serve.google_ads_daily",
+      "serve.meta_ads_daily"
+    ],
+    "view": "serve.dim_campaign",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.dim_product_variant"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.dim_product_variant"
+    ],
+    "view": "serve.dim_product_variant",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.dim_traffic_source"
+    ],
+    "view": "serve.dim_traffic_source",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_finance_waterfall_daily"
+    ],
+    "gold_sources": [
+      "gold.fct_finance_waterfall_daily"
+    ],
+    "upstream": [
+      "gold.fct_finance_waterfall_daily"
+    ],
+    "view": "serve.finance_waterfall_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.mart_funnel_daily"
+    ],
+    "gold_sources": [
+      "gold.mart_funnel_daily"
+    ],
+    "upstream": [
+      "gold.mart_funnel_daily"
+    ],
+    "view": "serve.funnel_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_order_attribution",
+      "serve.order_attribution"
+    ],
+    "view": "serve.funnel_orders",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_campaign",
+      "gold.fct_google_ads_daily"
+    ],
+    "gold_sources": [
+      "gold.dim_campaign",
+      "gold.fct_google_ads_daily"
+    ],
+    "upstream": [
+      "gold.dim_campaign",
+      "gold.fct_google_ads_daily"
+    ],
+    "view": "serve.google_ads_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_campaign",
+      "gold.fct_google_campaigns_hourly"
+    ],
+    "gold_sources": [
+      "gold.dim_campaign",
+      "gold.fct_google_campaigns_hourly"
+    ],
+    "upstream": [
+      "gold.dim_campaign",
+      "gold.fct_google_campaigns_hourly"
+    ],
+    "view": "serve.google_ads_hourly",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_google_ads_status_history"
+    ],
+    "gold_sources": [
+      "gold.fct_google_ads_status_history"
+    ],
+    "upstream": [
+      "gold.fct_google_ads_status_history"
+    ],
+    "view": "serve.google_ads_status_history",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.google_ads_daily",
+      "serve.meta_ads_daily",
+      "serve.order_attribution"
+    ],
+    "view": "serve.ltv_cac_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "gold.mart_meta_ad_daily_attribution",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "gold.mart_meta_ad_daily_attribution"
+    ],
+    "upstream": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.mart_meta_ad_daily_attribution",
+      "serve.order_attribution"
+    ],
+    "view": "serve.meta_ad_attribution_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.mart_meta_ad_breakdown_daily"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.mart_meta_ad_breakdown_daily"
+    ],
+    "upstream": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.mart_meta_ad_breakdown_daily"
+    ],
+    "view": "serve.meta_ads_breakdown_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_meta_ads_daily"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_meta_ads_daily"
+    ],
+    "upstream": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_meta_ads_daily"
+    ],
+    "view": "serve.meta_ads_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_meta_ads_hourly"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_meta_ads_hourly"
+    ],
+    "upstream": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_meta_ads_hourly"
+    ],
+    "view": "serve.meta_ads_hourly",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_meta_ads_status_history"
+    ],
+    "gold_sources": [
+      "gold.fct_meta_ads_status_history"
+    ],
+    "upstream": [
+      "gold.fct_meta_ads_status_history"
+    ],
+    "view": "serve.meta_ads_status_history",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_order_attribution",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source",
+      "serve.commerce_orders"
+    ],
+    "view": "serve.order_attribution",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.fct_order_pnl_daily"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.fct_order_pnl_daily"
+    ],
+    "view": "serve.order_pnl_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.commerce_orders"
+    ],
+    "view": "serve.orders_all_channels",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_payments"
+    ],
+    "gold_sources": [
+      "gold.fct_payments"
+    ],
+    "upstream": [
+      "gold.fct_payments"
+    ],
+    "view": "serve.payments",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders",
+      "semantic.cfg_traffic_platforms",
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.commerce_orders",
+      "serve.order_attribution"
+    ],
+    "view": "serve.platform_attribution_commerce",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.fct_pnl_daily"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.fct_pnl_daily"
+    ],
+    "view": "serve.pnl_daily",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_ad_neurohack_map",
+      "gold.dim_adset",
+      "gold.dim_campaign",
+      "gold.dim_creative",
+      "gold.fct_google_ads_daily",
+      "gold.fct_meta_ads_daily",
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.ad_delivery_daily",
+      "serve.commerce_orders",
+      "serve.product_performance"
+    ],
+    "view": "serve.product_ad_line",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.dim_product_variant"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.dim_product_variant"
+    ],
+    "view": "serve.product_hierarchy_conflicts",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "view": "serve.product_performance",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.fct_product_pnl"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.fct_product_pnl"
+    ],
+    "view": "serve.product_pnl",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_customers",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.dim_customers",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "gold.dim_customers",
+      "gold.fct_orders"
+    ],
+    "view": "serve.purchase_sequence",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_orders",
+      "gold.fct_refunds"
+    ],
+    "gold_sources": [
+      "gold.fct_orders",
+      "gold.fct_refunds"
+    ],
+    "upstream": [
+      "gold.fct_orders",
+      "gold.fct_refunds"
+    ],
+    "view": "serve.refund_events",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_refund_line_items"
+    ],
+    "gold_sources": [
+      "gold.fct_refund_line_items"
+    ],
+    "upstream": [
+      "gold.fct_refund_line_items"
+    ],
+    "view": "serve.return_lifecycle",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_items"
+    ],
+    "gold_sources": [
+      "gold.fct_order_items"
+    ],
+    "upstream": [
+      "serve.commerce_order_events"
+    ],
+    "view": "serve.returns_cancels_all_channels",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "gold_sources": [
+      "gold.fct_order_attribution",
+      "gold.fct_order_items",
+      "gold.fct_orders"
+    ],
+    "upstream": [
+      "serve.commerce_orders"
+    ],
+    "view": "serve.sales_all_channels",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.dim_ad",
+      "gold.dim_campaign",
+      "gold.fct_session_funnel"
+    ],
+    "gold_sources": [
+      "gold.dim_ad",
+      "gold.dim_campaign",
+      "gold.fct_session_funnel"
+    ],
+    "upstream": [
+      "gold.dim_ad",
+      "gold.dim_campaign",
+      "gold.fct_session_funnel"
+    ],
+    "view": "serve.session_funnel",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_touchpoints"
+    ],
+    "gold_sources": [
+      "gold.fct_touchpoints"
+    ],
+    "upstream": [
+      "gold.fct_touchpoints"
+    ],
+    "view": "serve.touchpoints",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.dim_traffic_source"
+    ],
+    "view": "serve.traffic_hierarchy_conflicts",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "semantic.dim_traffic_source"
+    ],
+    "gold_sources": [],
+    "upstream": [
+      "semantic.dim_traffic_source"
+    ],
+    "view": "serve.traffic_unmapped",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.fct_web_events"
+    ],
+    "gold_sources": [
+      "gold.fct_web_events"
+    ],
+    "upstream": [
+      "gold.fct_web_events"
+    ],
+    "view": "serve.web_events",
+    "writes": null
+  },
+  {
+    "engine": "View",
+    "external_sources": [
+      "gold.mart_web_events_daily"
+    ],
+    "gold_sources": [
+      "gold.mart_web_events_daily"
+    ],
+    "upstream": [
+      "gold.mart_web_events_daily"
+    ],
+    "view": "serve.web_events_daily",
+    "writes": null
+  }
+]

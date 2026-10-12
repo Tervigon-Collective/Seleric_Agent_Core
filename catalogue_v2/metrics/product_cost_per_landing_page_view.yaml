@@ -15,6 +15,9 @@ cube_mapping:
   view: product
   measure: product.product_cost_per_landing_page_view
 aggregation: ratio
+ratio_components:
+  numerator: product_ad_spend
+  denominator: product_landing_page_views
 unit: INR
 currency_default: INR
 grain: order_line

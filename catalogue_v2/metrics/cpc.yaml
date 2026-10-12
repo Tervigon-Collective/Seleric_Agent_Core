@@ -14,6 +14,9 @@ cube_mapping:
   view: paid_media
   measure: paid_media.cpc
 aggregation: ratio
+ratio_components:
+  numerator: ad_spend
+  denominator: clicks
 unit: INR
 currency_default: INR
 grain: ad_day

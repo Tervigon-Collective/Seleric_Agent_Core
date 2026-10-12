@@ -1,0 +1,6825 @@
+[
+  {
+    "member": "attribution.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.basket_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.basket_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.basket_sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.brand_id",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.order_date",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.orders_with_touchpoints",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution.touch_sequence",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.touch_ts",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.touch_type",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.touches",
+    "physical": [
+      "serve.touchpoints"
+    ],
+    "view_engine": {
+      "serve.touchpoints": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.attribution_model",
+    "physical": [
+      "serve.attribution_paths"
+    ],
+    "view_engine": {
+      "serve.attribution_paths": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.avg_touch_count",
+    "physical": [
+      "serve.attribution_paths"
+    ],
+    "view_engine": {
+      "serve.attribution_paths": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.basket_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.basket_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.basket_sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.brand_id",
+    "physical": [
+      "serve.attribution_paths"
+    ],
+    "view_engine": {
+      "serve.attribution_paths": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.conversion_path",
+    "physical": [
+      "serve.attribution_paths"
+    ],
+    "view_engine": {
+      "serve.attribution_paths": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.is_new_customer",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "attribution_paths.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.order_date",
+    "physical": [
+      "serve.attribution_paths"
+    ],
+    "view_engine": {
+      "serve.attribution_paths": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.touch_count",
+    "physical": [
+      "serve.attribution_paths"
+    ],
+    "view_engine": {
+      "serve.attribution_paths": "supporting_dimension"
+    }
+  },
+  {
+    "member": "attribution_paths.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.aov",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.attribution_confidence",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.basket_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.basket_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.basket_sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.basket_variant_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.brand_id",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.brand_name",
+    "physical": [
+      "serve.dim_brand"
+    ],
+    "view_engine": {
+      "serve.dim_brand": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.cancel_revenue",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.cancelled_orders",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.cod_orders",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.days_since_prev_order",
+    "physical": [
+      "serve.purchase_sequence"
+    ],
+    "view_engine": {
+      "serve.purchase_sequence": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.discounts",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.discounts_incl_tax",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.event_date",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.event_type",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.financial_status",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.fulfillment_status",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.geo",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.gross_sales",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.is_cancelled",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.is_cod",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.is_first_order",
+    "physical": [
+      "serve.purchase_sequence"
+    ],
+    "view_engine": {
+      "serve.purchase_sequence": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.is_new_customer",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.is_placement_order",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.is_prepaid",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.is_refunded",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.net_aov",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.net_sales",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.net_sales_deductions",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.new_customer_ltv",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.new_customers",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.order_created_at",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.order_date",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.order_id",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.order_name",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.order_seq",
+    "physical": [
+      "serve.purchase_sequence"
+    ],
+    "view_engine": {
+      "serve.purchase_sequence": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.order_status",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.order_value_incl_tax",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.orders",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.paid_sales",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.payment_bucket",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.payment_gateway",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.payment_method",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.payment_orders",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.prepaid_orders",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.refund_amount",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.refund_class",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.return_cancel_revenue",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.return_revenue",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.return_status",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.returned_or_cancelled_orders",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.returned_orders",
+    "physical": [
+      "serve.commerce_order_events"
+    ],
+    "view_engine": {
+      "serve.commerce_order_events": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.sales_channel",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.shipping_city",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.shipping_country",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.shipping_pincode",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.shipping_state",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "commerce.total_sales",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "commerce.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.accepts_marketing",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.acquisition_campaign",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.acquisition_channel",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.acquisition_platform",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.brand_id",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.customers",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.default_city",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.default_country_code",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.default_province",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.first_order_at",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.first_order_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.first_order_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.first_order_sku",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.is_repeat_customer",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.last_order_at",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.lifetime_order_count",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.repeat_customers",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "customers.repeat_rate",
+    "physical": [
+      "serve.customer_ltv"
+    ],
+    "view_engine": {
+      "serve.customer_ltv": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.basket_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.basket_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.basket_sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.brand_id",
+    "physical": [
+      "serve.funnel_orders"
+    ],
+    "view_engine": {
+      "serve.funnel_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "funnel_orders.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.funnel_order_purchases",
+    "physical": [
+      "serve.funnel_orders"
+    ],
+    "view_engine": {
+      "serve.funnel_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "funnel_orders.funnel_order_revenue",
+    "physical": [
+      "serve.funnel_orders"
+    ],
+    "view_engine": {
+      "serve.funnel_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "funnel_orders.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.order_date",
+    "physical": [
+      "serve.funnel_orders"
+    ],
+    "view_engine": {
+      "serve.funnel_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "funnel_orders.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "funnel_orders.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.ad_platform",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.be_roas",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.brand_id",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.channel_cac",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.channel_new_customers",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.channel_orders",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.channel_returned_orders",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.contribution_margin",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.contribution_margin_pct",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.cost_per_order",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "order_pnl.finance_channel",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.gross_cogs",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.gross_profit",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.gross_roas",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.is_new_customer",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.is_paid",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.mer",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.net_cogs",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.net_margin_pct",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.net_profit",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.net_roas",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.operating_cost",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_date",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_pnl_ad_spend",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_pnl_cancel_revenue",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_pnl_discounts",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_pnl_gross_sales",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_pnl_net_sales",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.order_pnl_return_revenue",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.packaging_cost",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.payment_bucket",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.payment_gateway_fees",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.product_cost",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.return_rate",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.row_type",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.rto_cost",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.sales_channel",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.shipping_cost",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.shipping_region",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.sub_channel",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "order_pnl.taxes_on_net_sales",
+    "physical": [
+      "serve.order_pnl_daily"
+    ],
+    "view_engine": {
+      "serve.order_pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.account_id",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.ad_platform",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.ad_spend",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.brand_id",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.clicks",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.cost_per_landing_page_view",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.cost_per_link_click",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.cpc",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.cpm",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media.ctr",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.finance_channel",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.hold_rate_15s",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.hook_rate",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.impressions",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.is_paid",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.landing_page_views",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.link_clicks",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.platform",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.report_date",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.thruplays",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media.video_completion_rate",
+    "physical": [
+      "serve.ad_delivery_daily"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ad_platform",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ad_spend",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.age",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.brand_id",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.breakdown_type",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.clicks",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.country",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.cpc",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.cpm",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.ctr",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.device_platform",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.finance_channel",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.gender",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.impression_device",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.impressions",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.is_paid",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.landing_page_views",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.link_clicks",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.platform",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.platform_position",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.publisher_platform",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.region",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_breakdowns.report_date",
+    "physical": [
+      "serve.meta_ads_breakdown_daily"
+    ],
+    "view_engine": {
+      "serve.meta_ads_breakdown_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.ad_platform",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.bid_strategy_changes",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.brand_id",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.budget_changes",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.changed_at",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.changed_fields",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.entity_id",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.entity_name",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.entity_type",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.prev_status",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.sold_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.sold_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.sold_sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_changes.status",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_changes.status_changes",
+    "physical": [
+      "serve.ad_changes"
+    ],
+    "view_engine": {
+      "serve.ad_changes": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ad_platform",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ad_spend",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.brand_id",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.clicks",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.cpc",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.cpm",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "paid_media_hourly.ctr",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.finance_channel",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.hour_of_day",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.impressions",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.is_paid",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.landing_page_views",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.link_clicks",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.platform",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.report_date",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "paid_media_hourly.report_hour",
+    "physical": [
+      "serve.ad_delivery_hourly"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_hourly": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.basket_product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.basket_product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.basket_sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.brand_id",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.is_cod",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.is_new_customer",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.is_refund",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.is_successful",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.payment_amount",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.payment_gateway",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.payment_method",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "payments.transaction_date",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.transaction_kind",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.transaction_status",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "payments.transactions",
+    "physical": [
+      "serve.payments"
+    ],
+    "view_engine": {
+      "serve.payments": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.ad_platform",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.brand_id",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "pnl.finance_channel",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.is_paid",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_ad_spend",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_be_roas",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_cancel_revenue",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_cancelled_orders",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_contribution_margin",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_contribution_margin_pct",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_discounts",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_gross_sales",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_mer",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_net_cogs",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_net_margin_pct",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_net_profit",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_net_roas",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_net_sales",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_operating_cost",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_packaging_cost",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_payment_gateway_fees",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_product_cost",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_return_cancel_revenue",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_return_revenue",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_returned_or_cancelled_orders",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_returned_orders",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_rto_cost",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_shipping_cost",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.pnl_taxes_on_net_sales",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.report_date",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.row_type",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "pnl.sales_channel",
+    "physical": [
+      "serve.pnl_daily"
+    ],
+    "view_engine": {
+      "serve.pnl_daily": "primary_fact"
+    }
+  },
+  {
+    "member": "product.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.brand_id",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.in_catalogue",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.is_cod",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.is_cost_set",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.is_new_customer",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.line_item_id",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.order_date",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.orders",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.payment_bucket",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.payment_gateway",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.payment_method",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.price",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.product",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.product_ad_spend",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_attributed_revenue",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_cancel_revenue",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_clicks",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_cost_per_landing_page_view",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_cost_per_link_click",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_cpc",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_cpm",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_ctr",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_discounts",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_gross_cogs",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_gross_margin_pct",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_gross_profit",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_gross_roas",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_gross_sale",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_hold_rate_15s",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_hook_rate",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_id",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.product_impressions",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_landing_page_views",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_line_cost",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_link_clicks",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_mer",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_net_cogs",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_net_revenue",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_net_roas",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_orders",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_return_revenue",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.product_thruplays",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.product_video_completion_rate",
+    "physical": [
+      "serve.product_ad_line"
+    ],
+    "view_engine": {
+      "serve.product_ad_line": "allocation_fact"
+    }
+  },
+  {
+    "member": "product.returned_units",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.sales_channel",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.shipping_city",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.shipping_state",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "product.sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.unit_return_rate",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.units_ordered",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.units_per_order",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.units_sold",
+    "physical": [
+      "serve.product_performance"
+    ],
+    "view_engine": {
+      "serve.product_performance": "primary_fact"
+    }
+  },
+  {
+    "member": "product.variant_id",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.variant_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product.vendor",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.ad_platform",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.brand_id",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.finance_channel",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.is_new_customer",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.is_paid",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.order_date",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.payment_bucket",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_ad_spend",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_be_roas",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_cac",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_cancel_revenue",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_cancelled_orders",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_contribution_margin",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_contribution_margin_pct",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_cost_per_order",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_discounts",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_gross_sales",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_ltv_cac_ratio",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_mer",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_net_cogs",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_net_margin_pct",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_net_profit",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_net_roas",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_net_sales",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_new_customers",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_operating_cost",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_orders",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_packaging_cost",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_payment_gateway_fees",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_product_cost",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_return_cancel_revenue",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_return_rate",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_return_revenue",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_returned_or_cancelled_orders",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_returned_orders",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_rto_cost",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_shipping_cost",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.pl_taxes_on_net_sales",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.product_id",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.report_date",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.shipping_region",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.sub_channel",
+    "physical": [
+      "serve.product_pnl"
+    ],
+    "view_engine": {
+      "serve.product_pnl": "preaggregation"
+    }
+  },
+  {
+    "member": "product_pnl.variant_id",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.variant_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "product_pnl.vendor",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.brand_id",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.has_money_refund",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.is_cod",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.is_new_customer",
+    "physical": [
+      "serve.commerce_orders"
+    ],
+    "view_engine": {
+      "serve.commerce_orders": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.order_date",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.payment_bucket",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.product",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.product_refunded_amount_excl_tax",
+    "physical": [
+      "serve.return_lifecycle"
+    ],
+    "view_engine": {
+      "serve.return_lifecycle": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.product_returns_excl_tax",
+    "physical": [
+      "serve.return_lifecycle"
+    ],
+    "view_engine": {
+      "serve.return_lifecycle": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.product_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.product_type",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.refund_class",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.refund_count",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.refund_date",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.refund_lines",
+    "physical": [
+      "serve.return_lifecycle"
+    ],
+    "view_engine": {
+      "serve.return_lifecycle": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.refunded_amount_excl_tax",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.restock_type",
+    "physical": [
+      "serve.return_lifecycle"
+    ],
+    "view_engine": {
+      "serve.return_lifecycle": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.return_recovered_cogs",
+    "physical": [
+      "serve.return_lifecycle"
+    ],
+    "view_engine": {
+      "serve.return_lifecycle": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.return_status",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.returns_excl_tax",
+    "physical": [
+      "serve.refund_events"
+    ],
+    "view_engine": {
+      "serve.refund_events": "primary_fact"
+    }
+  },
+  {
+    "member": "returns.sku",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "returns.variant_title",
+    "physical": [
+      "serve.dim_product_variant"
+    ],
+    "view_engine": {
+      "serve.dim_product_variant": "supporting_dimension"
+    }
+  },
+  {
+    "member": "unit_economics.ad_platform",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.brand_id",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.cac",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "unit_economics.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "unit_economics.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "unit_economics.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "unit_economics.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "unit_economics.finance_channel",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.is_paid",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.ltv",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.ltv_cac_ratio",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.platform",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "unit_economics.report_date",
+    "physical": [
+      "serve.ad_delivery_daily",
+      "serve.order_attribution"
+    ],
+    "view_engine": {
+      "serve.ad_delivery_daily": "primary_fact",
+      "serve.order_attribution": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.brand_id",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.collection",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.device_type",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_add_to_carts",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_collection_views",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_count",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_date",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_page_views",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_product_views",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_site_searches",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_timestamp",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.event_type",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.events_per_session",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.geo_city",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.geo_country",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.landing_page_path",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.page_path",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.product_title",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.sku",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_event_detail.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_event_detail.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_events.add_to_cart_events",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.brand_id",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.collection_view_events",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.event_type",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.page_views",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.product_view_events",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.report_date",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.site_search_events",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_events.web_events",
+    "physical": [
+      "serve.web_events_daily"
+    ],
+    "view_engine": {
+      "serve.web_events_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_funnel.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source",
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension",
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_funnel.bounce_rate",
+    "physical": [
+      "serve.funnel_daily"
+    ],
+    "view_engine": {
+      "serve.funnel_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_funnel.brand_id",
+    "physical": [
+      "serve.funnel_daily"
+    ],
+    "view_engine": {
+      "serve.funnel_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_funnel.channel",
+    "physical": [
+      "serve.funnel_daily"
+    ],
+    "view_engine": {
+      "serve.funnel_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_funnel.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source",
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension",
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_funnel.funnel_purchases",
+    "physical": [
+      "serve.funnel_daily"
+    ],
+    "view_engine": {
+      "serve.funnel_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_funnel.funnel_revenue",
+    "physical": [
+      "serve.funnel_daily"
+    ],
+    "view_engine": {
+      "serve.funnel_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_funnel.is_paid",
+    "physical": [
+      "serve.dim_traffic_source",
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension",
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_funnel.medium_group",
+    "physical": [
+      "serve.dim_traffic_source",
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension",
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_funnel.platform",
+    "physical": [
+      "serve.dim_traffic_source",
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension",
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_funnel.report_date",
+    "physical": [
+      "serve.funnel_daily"
+    ],
+    "view_engine": {
+      "serve.funnel_daily": "preaggregation"
+    }
+  },
+  {
+    "member": "web_sessions.ad_format",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.ad_id",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.ad_name",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.ad_platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.ad_status",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.add_to_cart_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.add_to_cart_to_checkout_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.add_to_carts",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.adset_id",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.adset_name",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.adset_status",
+    "physical": [
+      "serve.dim_adset"
+    ],
+    "view_engine": {
+      "serve.dim_adset": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.avg_page_depth",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.avg_seconds_to_add_to_cart",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.avg_seconds_to_checkout",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.avg_seconds_to_purchase",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.brand_id",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.browser_family",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.campaign_id",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.campaign_name",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.campaign_objective",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.campaign_status",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.campaign_type",
+    "physical": [
+      "serve.dim_campaign"
+    ],
+    "view_engine": {
+      "serve.dim_campaign": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.checkout_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.checkout_steps",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.checkout_to_purchase_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.conversion_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.creative_type",
+    "physical": [
+      "serve.dim_ad"
+    ],
+    "view_engine": {
+      "serve.dim_ad": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.device_type",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.finance_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.funnel_stage",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.geo_city",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.geo_country",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.geo_region",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.is_bounce",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.is_converted",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.is_paid",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.landing_page_path",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.medium_group",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.os_family",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.platform",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.product_view_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.remove_from_carts",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.sales_channel",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_bounce_rate",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_collection_views",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_date",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_hour",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_page_views",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_product_views",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.session_start",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.sessions",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.site_searches",
+    "physical": [
+      "serve.session_funnel"
+    ],
+    "view_engine": {
+      "serve.session_funnel": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.sub_channel",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.traffic",
+    "physical": [
+      "serve.dim_traffic_source"
+    ],
+    "view_engine": {
+      "serve.dim_traffic_source": "supporting_dimension"
+    }
+  },
+  {
+    "member": "web_sessions.viewed_product_title",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  },
+  {
+    "member": "web_sessions.viewed_sku",
+    "physical": [
+      "serve.web_events"
+    ],
+    "view_engine": {
+      "serve.web_events": "primary_fact"
+    }
+  }
+]

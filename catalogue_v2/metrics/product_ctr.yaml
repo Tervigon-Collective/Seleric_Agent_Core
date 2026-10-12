@@ -14,6 +14,9 @@ cube_mapping:
   view: product
   measure: product.product_ctr
 aggregation: ratio
+ratio_components:
+  numerator: product_clicks
+  denominator: product_impressions
 unit: ratio
 grain: order_line
 data_owner: Commerce Ops

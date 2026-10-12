@@ -15,6 +15,9 @@ cube_mapping:
   view: pnl
   measure: pnl.pnl_mer
 aggregation: ratio
+ratio_components:
+  numerator: pnl_net_sales
+  denominator: ad_spend
 unit: ratio
 grain: brand_day_channel_ad
 data_owner: Growth / Analytics

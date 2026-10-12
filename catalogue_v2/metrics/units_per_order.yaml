@@ -14,6 +14,9 @@ cube_mapping:
   view: product
   measure: product.units_per_order
 aggregation: ratio
+ratio_components:
+  numerator: units_sold
+  denominator: orders
 unit: ratio
 grain: order_line
 data_owner: Commerce Ops

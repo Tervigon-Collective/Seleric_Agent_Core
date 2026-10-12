@@ -14,6 +14,9 @@ cube_mapping:
   view: unit_economics
   measure: unit_economics.cac
 aggregation: ratio
+ratio_components:
+  numerator: ad_spend
+  denominator: new_customers
 unit: INR
 currency_default: INR
 grain: brand_day

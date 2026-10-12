@@ -15,6 +15,9 @@ cube_mapping:
   view: product
   measure: product.unit_return_rate
 aggregation: ratio
+ratio_components:
+  numerator: returned_units
+  denominator: units_ordered
 unit: ratio
 grain: order_line
 data_owner: Commerce Ops

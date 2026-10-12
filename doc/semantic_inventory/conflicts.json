@@ -1,0 +1,239 @@
+[
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_ad_spend; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_ad_spend\", \"product_pnl.report_date\": \"product_pnl_ad_spend\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_ad_spend",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_be_roas; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_be_roas\", \"product_pnl.report_date\": \"product_pnl_be_roas\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_be_roas",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_cancel_revenue; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_cancel_revenue\", \"product_pnl.report_date\": \"product_pnl_cancel_revenue\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_cancel_revenue",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_contribution_margin; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_contribution_margin\", \"product_pnl.report_date\": \"product_pnl_contribution_margin\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_contribution_margin",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_contribution_margin_pct; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_contribution_margin_pct\", \"product_pnl.report_date\": \"product_pnl_contribution_margin_pct\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_contribution_margin_pct",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_discounts; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_discounts\", \"product_pnl.report_date\": \"product_pnl_discounts\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_discounts",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_gross_sales; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_gross_sales\", \"product_pnl.report_date\": \"product_pnl_gross_sales\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_gross_sales",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_net_cogs; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_net_cogs\", \"product_pnl.report_date\": \"product_pnl_net_cogs\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_net_cogs",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_net_margin_pct; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_net_margin_pct\", \"product_pnl.report_date\": \"product_pnl_net_margin_pct\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_net_margin_pct",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_net_profit; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_net_profit\", \"product_pnl.report_date\": \"product_pnl_net_profit\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_net_profit",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_net_sales; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_net_sales\", \"product_pnl.report_date\": \"product_pnl_net_sales\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_net_sales",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_operating_cost; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_operating_cost\", \"product_pnl.report_date\": \"product_pnl_operating_cost\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_operating_cost",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_packaging_cost; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_packaging_cost\", \"product_pnl.report_date\": \"product_pnl_packaging_cost\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_packaging_cost",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_payment_gateway_fees; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_payment_gateway_fees\", \"product_pnl.report_date\": \"product_pnl_payment_gateway_fees\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_payment_gateway_fees",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_product_cost; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_product_cost\", \"product_pnl.report_date\": \"product_pnl_product_cost\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_product_cost",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_return_revenue; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_return_revenue\", \"product_pnl.report_date\": \"product_pnl_return_revenue\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_return_revenue",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_returned_orders; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_order_returned_orders\", \"product_pnl.report_date\": \"product_pnl_returned_orders\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_returned_orders",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_rto_cost; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_rto_cost\", \"product_pnl.report_date\": \"product_pnl_rto_cost\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_rto_cost",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_shipping_cost; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_shipping_cost\", \"product_pnl.report_date\": \"product_pnl_shipping_cost\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_shipping_cost",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "date_basis differs across metrics sharing measure product_pnl.pl_taxes_on_net_sales; confirm each axis is a declared order-date/event-date twin (SEM-05)",
+    "evidence": "{\"product_pnl\": \"product_taxes_on_net_sales\", \"product_pnl.report_date\": \"product_pnl_taxes_on_net_sales\"}",
+    "kind": "conflicting_date_basis",
+    "severity": "info",
+    "subject": "product_pnl.pl_taxes_on_net_sales",
+    "topic": "date_basis_axes"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['session_add_to_carts']",
+    "evidence": "catalogue_metric=add_to_cart_rate",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.atc_rate"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['total_ad_spend']",
+    "evidence": "catalogue_metric=cac",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.cac"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['total_ad_spend']",
+    "evidence": "catalogue_metric=pnl_contribution_margin",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.contribution_margin"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['total_ad_spend']",
+    "evidence": "catalogue_metric=gross_roas",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.gross_roas"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['avg_price', 'purchase']",
+    "evidence": "catalogue_metric=gross_sales",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.gross_sales"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['total_ad_spend']",
+    "evidence": "catalogue_metric=pnl_mer",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.mer"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['net_sales_all_channels', 'total_ad_spend', 'total_operating_cost_all_channels']",
+    "evidence": "catalogue_metric=pnl_net_profit",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.net_profit"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['commerce_net_revenue_daily', 'google_spend', 'meta_spend']",
+    "evidence": "catalogue_metric=pnl_net_profit",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.net_profit_shopify"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['total_ad_spend']",
+    "evidence": "catalogue_metric=net_roas",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.net_roas"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['purchase', 'returns']",
+    "evidence": "catalogue_metric=net_sales",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.net_sales"
+  },
+  {
+    "detail": "depends_on references vocabulary absent from the catalogue: ['refunded_orders']",
+    "evidence": "catalogue_metric=returned_or_cancelled_orders",
+    "kind": "agent_dependency_unknown",
+    "severity": "warning",
+    "subject": "metric.returns_cancels"
+  }
+]

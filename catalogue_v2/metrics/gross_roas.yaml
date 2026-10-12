@@ -16,6 +16,9 @@ cube_mapping:
   view: order_pnl
   measure: order_pnl.gross_roas
 aggregation: ratio
+ratio_components:
+  numerator: gross_sales
+  denominator: ad_spend
 unit: ratio
 grain: brand_order_day_channel_ad
 data_owner: Finance

@@ -1,0 +1,634 @@
+[
+  {
+    "categories": [
+      "paid_media"
+    ],
+    "cube_views": [
+      "paid_media_changes"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.ad_changes"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.ad_channel_pnl_daily"
+  },
+  {
+    "categories": [
+      "paid_media"
+    ],
+    "cube_views": [
+      "paid_media",
+      "unit_economics"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.ad_delivery_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [
+      "paid_media_hourly"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.ad_delivery_hourly"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution_paths"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [
+      "bridge"
+    ],
+    "view": "serve.attribution_paths"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "bridge",
+    "secondary_roles": [],
+    "view": "serve.campaign_products"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.canonical_pnl"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "internal_config",
+    "secondary_roles": [],
+    "view": "serve.cfg_traffic_platforms"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "internal_config",
+    "secondary_roles": [],
+    "view": "serve.cfg_traffic_source_rules"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.channel_attribution_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [
+      "primary_fact"
+    ],
+    "view": "serve.channel_pnl"
+  },
+  {
+    "categories": [
+      "commerce"
+    ],
+    "cube_views": [
+      "commerce"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.commerce_order_events"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution_paths",
+      "commerce",
+      "payments",
+      "product",
+      "returns"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.commerce_orders"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.commerce_performance_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.customer_data"
+  },
+  {
+    "categories": [
+      "customer"
+    ],
+    "cube_views": [
+      "customers"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.customer_ltv"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution",
+      "attribution_paths",
+      "commerce",
+      "funnel_orders",
+      "order_pnl",
+      "paid_media",
+      "paid_media_breakdowns",
+      "paid_media_changes",
+      "paid_media_hourly",
+      "pnl",
+      "product",
+      "product_pnl",
+      "returns",
+      "web_event_detail",
+      "web_sessions"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.dim_ad"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution",
+      "attribution_paths",
+      "commerce",
+      "funnel_orders",
+      "order_pnl",
+      "paid_media",
+      "paid_media_breakdowns",
+      "paid_media_changes",
+      "paid_media_hourly",
+      "pnl",
+      "product",
+      "product_pnl",
+      "returns",
+      "web_event_detail",
+      "web_sessions"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.dim_adset"
+  },
+  {
+    "categories": [
+      "commerce"
+    ],
+    "cube_views": [
+      "commerce"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.dim_brand"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution",
+      "attribution_paths",
+      "commerce",
+      "funnel_orders",
+      "order_pnl",
+      "paid_media",
+      "paid_media_breakdowns",
+      "paid_media_changes",
+      "paid_media_hourly",
+      "payments",
+      "pnl",
+      "product",
+      "product_pnl",
+      "returns",
+      "unit_economics",
+      "web_event_detail",
+      "web_sessions"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.dim_campaign"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution",
+      "attribution_paths",
+      "commerce",
+      "customers",
+      "funnel_orders",
+      "paid_media_changes",
+      "payments",
+      "product",
+      "product_pnl",
+      "returns"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.dim_product_variant"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution",
+      "attribution_paths",
+      "commerce",
+      "funnel_orders",
+      "payments",
+      "product",
+      "returns",
+      "web_event_detail",
+      "web_funnel",
+      "web_sessions"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.dim_traffic_source"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.finance_waterfall_daily"
+  },
+  {
+    "categories": [
+      "web_analytics"
+    ],
+    "cube_views": [
+      "web_funnel"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.funnel_daily"
+  },
+  {
+    "categories": [
+      "web_analytics"
+    ],
+    "cube_views": [
+      "funnel_orders"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.funnel_orders"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "source_adapter",
+    "secondary_roles": [],
+    "view": "serve.google_ads_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "source_adapter",
+    "secondary_roles": [],
+    "view": "serve.google_ads_hourly"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "source_adapter",
+    "secondary_roles": [],
+    "view": "serve.google_ads_status_history"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.ltv_cac_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.meta_ad_attribution_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [
+      "paid_media_breakdowns"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.meta_ads_breakdown_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "source_adapter",
+    "secondary_roles": [],
+    "view": "serve.meta_ads_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "source_adapter",
+    "secondary_roles": [],
+    "view": "serve.meta_ads_hourly"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "source_adapter",
+    "secondary_roles": [],
+    "view": "serve.meta_ads_status_history"
+  },
+  {
+    "categories": [
+      "customer"
+    ],
+    "cube_views": [
+      "unit_economics"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.order_attribution"
+  },
+  {
+    "categories": [
+      "finance"
+    ],
+    "cube_views": [
+      "order_pnl"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.order_pnl_daily"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "compatibility_legacy",
+    "secondary_roles": [],
+    "view": "serve.orders_all_channels"
+  },
+  {
+    "categories": [
+      "operations"
+    ],
+    "cube_views": [
+      "payments"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.payments"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.platform_attribution_commerce"
+  },
+  {
+    "categories": [
+      "finance"
+    ],
+    "cube_views": [
+      "pnl"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [
+      "preaggregation"
+    ],
+    "view": "serve.pnl_daily"
+  },
+  {
+    "categories": [
+      "product"
+    ],
+    "cube_views": [
+      "product"
+    ],
+    "is_public_semantic_owner": false,
+    "role": "allocation_fact",
+    "secondary_roles": [],
+    "view": "serve.product_ad_line"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "reconciliation_monitor",
+    "secondary_roles": [],
+    "view": "serve.product_hierarchy_conflicts"
+  },
+  {
+    "categories": [
+      "product"
+    ],
+    "cube_views": [
+      "product"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.product_performance"
+  },
+  {
+    "categories": [
+      "product"
+    ],
+    "cube_views": [
+      "product_pnl"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.product_pnl"
+  },
+  {
+    "categories": [
+      "commerce"
+    ],
+    "cube_views": [
+      "commerce"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.purchase_sequence"
+  },
+  {
+    "categories": [
+      "operations"
+    ],
+    "cube_views": [
+      "returns"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.refund_events"
+  },
+  {
+    "categories": [
+      "operations"
+    ],
+    "cube_views": [
+      "returns"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "supporting_dimension",
+    "secondary_roles": [],
+    "view": "serve.return_lifecycle"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "compatibility_legacy",
+    "secondary_roles": [],
+    "view": "serve.returns_cancels_all_channels"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "compatibility_legacy",
+    "secondary_roles": [],
+    "view": "serve.sales_all_channels"
+  },
+  {
+    "categories": [
+      "web_analytics"
+    ],
+    "cube_views": [
+      "web_event_detail",
+      "web_funnel",
+      "web_sessions"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.session_funnel"
+  },
+  {
+    "categories": [
+      "attribution"
+    ],
+    "cube_views": [
+      "attribution"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.touchpoints"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "reconciliation_monitor",
+    "secondary_roles": [],
+    "view": "serve.traffic_hierarchy_conflicts"
+  },
+  {
+    "categories": [],
+    "cube_views": [],
+    "is_public_semantic_owner": false,
+    "role": "reconciliation_monitor",
+    "secondary_roles": [],
+    "view": "serve.traffic_unmapped"
+  },
+  {
+    "categories": [
+      "web_analytics"
+    ],
+    "cube_views": [
+      "web_event_detail",
+      "web_sessions"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "primary_fact",
+    "secondary_roles": [],
+    "view": "serve.web_events"
+  },
+  {
+    "categories": [
+      "web_analytics"
+    ],
+    "cube_views": [
+      "web_events"
+    ],
+    "is_public_semantic_owner": true,
+    "role": "preaggregation",
+    "secondary_roles": [],
+    "view": "serve.web_events_daily"
+  }
+]

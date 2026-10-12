@@ -15,6 +15,9 @@ cube_mapping:
   view: order_pnl
   measure: order_pnl.return_rate
 aggregation: ratio
+ratio_components:
+  numerator: channel_returned_orders
+  denominator: channel_orders
 unit: ratio
 grain: brand_order_day_channel_ad
 data_owner: Growth / Finance

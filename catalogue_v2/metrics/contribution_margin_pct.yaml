@@ -16,6 +16,9 @@ cube_mapping:
   view: order_pnl
   measure: order_pnl.contribution_margin_pct
 aggregation: ratio
+ratio_components:
+  numerator: contribution_margin
+  denominator: net_cogs
 unit: ratio
 grain: brand_order_day_channel_ad
 data_owner: Growth / Finance

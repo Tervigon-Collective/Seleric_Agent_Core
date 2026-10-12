@@ -15,6 +15,9 @@ cube_mapping:
   view: product
   measure: product.product_cpm
 aggregation: ratio
+ratio_components:
+  numerator: product_ad_spend
+  denominator: product_impressions
 unit: INR
 currency_default: INR
 grain: order_line
