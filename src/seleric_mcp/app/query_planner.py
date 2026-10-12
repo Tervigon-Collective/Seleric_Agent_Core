@@ -679,9 +679,8 @@ class QueryPlanner:
             drop.add(m.cube_mapping.measure)
             if m.cube_mapping.measure_pct:
                 drop.add(m.cube_mapping.measure_pct)
-            if m.ratio_components:
-                drop.add(m.ratio_components.numerator)
-                drop.add(m.ratio_components.denominator)
+            for member in self._resolve_ratio_component_members(m):
+                drop.add(member)
         rename: dict[str, str] = {}
         for d in self.catalogue.cat.dimensions.values():
             member = d.views.get(view)
@@ -697,6 +696,25 @@ class QueryPlanner:
                 clean[key] = v
             out.append(clean)
         return out
+
+    # ---------- ratio components (SEM-14) ----------
+
+    def _resolve_ratio_component_members(self, m: MetricDef) -> list[str]:
+        """Resolve a ratio metric's numerator/denominator to fully-qualified Cube
+        measures on the metric's *active* view (its home view or the binding the
+        planner selected for this request). The catalogue stores ratio components
+        as catalogue metric ids (semantic v2); legacy v1 definitions store already
+        qualified members, which we pass through. A component with no measure on
+        the active view is a plan error, never a silently invalid Cube member."""
+        if not (m.aggregation == "ratio" and m.ratio_components):
+            return []
+        # A genuinely broken catalogue (component id resolves to nothing) is a plan
+        # error; a component that exists but is not served from this view is a
+        # cross-view ratio, whose value Cube computes authoritatively — no components.
+        for comp_id in (m.ratio_components.numerator, m.ratio_components.denominator):
+            if comp_id not in self.catalogue.cat.metrics and "." not in comp_id:
+                raise PlanError(f"ratio component '{comp_id}' not found in catalogue")
+        return list(m.ratio_component_members.get(m.cube_mapping.view, []))
 
     # ---------- cube query build ----------
 
@@ -717,10 +735,9 @@ class QueryPlanner:
             measures.append(m.cube_mapping.measure)
             if m.cube_mapping.measure_pct:
                 measures.append(m.cube_mapping.measure_pct)
-            if m.aggregation == "ratio" and m.ratio_components:
-                for comp in (m.ratio_components.numerator, m.ratio_components.denominator):
-                    if comp not in measures:
-                        measures.append(comp)
+            for member in self._resolve_ratio_component_members(m):
+                if member not in measures:
+                    measures.append(member)
 
         view_def = self.catalogue.cat.views[view]
         query: dict = {

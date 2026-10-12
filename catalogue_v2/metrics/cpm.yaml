@@ -17,6 +17,7 @@ aggregation: ratio
 ratio_components:
   numerator: ad_spend
   denominator: impressions
+  multiplier: 1000
 unit: INR
 currency_default: INR
 grain: ad_day

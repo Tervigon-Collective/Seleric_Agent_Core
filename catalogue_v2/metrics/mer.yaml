@@ -10,13 +10,15 @@ formula:
   human_readable: Marketing efficiency ratio = net sales of the orders placed ÷ ad spend delivered (order date).
   authoritative_source: cube
   depends_on:
-  - contribution_margin
-  - net_cogs
+  - order_pnl_net_sales
   - ad_spend
 cube_mapping:
   view: order_pnl
   measure: order_pnl.mer
 aggregation: ratio
+ratio_components:
+  numerator: order_pnl_net_sales
+  denominator: ad_spend
 unit: ratio
 grain: brand_order_day_channel_ad
 data_owner: Growth / Finance

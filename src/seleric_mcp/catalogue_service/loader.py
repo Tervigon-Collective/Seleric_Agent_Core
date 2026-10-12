@@ -46,6 +46,10 @@ class CubeMapping(BaseModel):
 class RatioComponents(BaseModel):
     numerator: str
     denominator: str
+    # SEM-14: scale applied to (numerator / denominator) so the ratio's human
+    # unit matches the physical quotient (e.g. CPM = spend/impressions × 1000).
+    # Cube remains the authoritative calculator; this is decomposition metadata.
+    multiplier: float = 1.0
 
 
 class AccessPolicy(BaseModel):
@@ -93,6 +97,11 @@ class MetricDef(BaseModel):
     cube_mapping: CubeMapping
     aggregation: Literal["additive", "ratio"]
     ratio_components: RatioComponents | None = None
+    # Semantic v2: for a ratio, the effective Cube measure members for its
+    # numerator/denominator on each view it can be served from (home view and any
+    # binding view), keyed by view name. Computed at load time from the component
+    # metric ids so execution never emits an unqualified catalogue id to Cube.
+    ratio_component_members: dict[str, list[str]] = Field(default_factory=dict)
     companion_measures: list[str] = Field(default_factory=list)
     # The dimension that splits this line into its natural parts (Cube meta.split_by): a breakdown shows the
     # parts under the line (deductions by refund class: returns, cancellations, adjustments).
@@ -413,6 +422,39 @@ def _read_yaml(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def _resolve_ratio_component_members(metrics: dict[str, MetricDef]) -> None:
+    """For every ratio metric, precompute the effective Cube measure members of
+    its numerator/denominator on each view it can be served from (home view plus
+    binding views). Semantic v2 stores ratio components as catalogue metric ids,
+    so executing a ratio must resolve each component to its qualified measure on
+    the *active* view — never append a bare metric id to a Cube query. Legacy v1
+    definitions already store qualified members, which resolve to themselves."""
+    for m in metrics.values():
+        if not (m.aggregation == "ratio" and m.ratio_components):
+            continue
+        views = [m.cube_mapping.view, *(b.view for b in m.bindings)]
+        mapping: dict[str, list[str]] = {}
+        for view in views:
+            if view in mapping:
+                continue
+            members: list[str] = []
+            for comp_id in (m.ratio_components.numerator, m.ratio_components.denominator):
+                comp = metrics.get(comp_id)
+                if comp is None:
+                    members.append(comp_id)  # legacy: already a qualified member
+                    continue
+                if comp.cube_mapping.view == view:
+                    members.append(comp.cube_mapping.measure)
+                    continue
+                b = next((b for b in comp.bindings if b.view == view), None)
+                if b is None:
+                    break
+                members.append(b.measure)
+            if len(members) == 2:
+                mapping[view] = members
+        m.ratio_component_members = mapping
+
+
 def load_catalogue(catalogue_dir: Path) -> Catalogue:
     hasher = hashlib.sha256()
     yaml_files = sorted(catalogue_dir.rglob("*.yaml"))
@@ -426,6 +468,8 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
     for p in sorted((catalogue_dir / "metrics").glob("*.yaml")):
         m = MetricDef.model_validate(_read_yaml(p))
         metrics[m.id] = m
+
+    _resolve_ratio_component_members(metrics)
 
     dimensions: dict[str, DimensionDef] = {}
     for p in sorted((catalogue_dir / "dimensions").glob("*.yaml")):

@@ -11,12 +11,14 @@ formula:
   authoritative_source: cube
   depends_on:
   - net_profit
-  - contribution_margin
-  - net_cogs
+  - order_pnl_net_sales
 cube_mapping:
   view: order_pnl
   measure: order_pnl.net_margin_pct
 aggregation: ratio
+ratio_components:
+  numerator: net_profit
+  denominator: order_pnl_net_sales
 unit: ratio
 grain: brand_order_day_channel_ad
 data_owner: Growth / Finance

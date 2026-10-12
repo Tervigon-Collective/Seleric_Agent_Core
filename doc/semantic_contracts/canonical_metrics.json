@@ -1,5 +1,5 @@
 {
-  "version": "f53e649736b9",
+  "version": "aa37782211d1",
   "semantic_version": 2,
   "metrics": {
     "ad_spend": {
@@ -454,7 +454,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "total_sales",
-        "denominator": "orders"
+        "denominator": "orders",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "commerce": [
+          "commerce.total_sales",
+          "commerce.orders"
+        ]
       }
     },
     "avg_page_depth": {
@@ -813,14 +820,14 @@
         "human_readable": "Break-even ROAS = net sales \u00f7 (net sales \u2212 net COGS) (order date).",
         "authoritative_source": "cube",
         "depends_on": [
-          "contribution_margin",
-          "net_cogs"
+          "order_pnl_net_sales",
+          "contribution_margin"
         ],
         "composition": []
       },
       "depends_on": [
-        "contribution_margin",
-        "net_cogs"
+        "order_pnl_net_sales",
+        "contribution_margin"
       ],
       "composition": [],
       "supported_dimensions": [
@@ -854,8 +861,15 @@
       "replaces": [],
       "unavailable_reason": null,
       "ratio_components": {
-        "numerator": "contribution_margin",
-        "denominator": "net_cogs"
+        "numerator": "order_pnl_net_sales",
+        "denominator": "contribution_margin",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "order_pnl": [
+          "order_pnl.order_pnl_net_sales",
+          "order_pnl.contribution_margin"
+        ]
       }
     },
     "bounce_rate": {
@@ -942,7 +956,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "new_customers"
+        "denominator": "new_customers",
+        "multiplier": 1.0
       }
     },
     "cancel_revenue": {
@@ -1170,7 +1185,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "channel_new_customers"
+        "denominator": "channel_new_customers",
+        "multiplier": 1.0
       }
     },
     "channel_new_customers": {
@@ -1861,13 +1877,13 @@
         "authoritative_source": "cube",
         "depends_on": [
           "contribution_margin",
-          "net_cogs"
+          "order_pnl_net_sales"
         ],
         "composition": []
       },
       "depends_on": [
         "contribution_margin",
-        "net_cogs"
+        "order_pnl_net_sales"
       ],
       "composition": [],
       "supported_dimensions": [
@@ -1902,7 +1918,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "contribution_margin",
-        "denominator": "net_cogs"
+        "denominator": "order_pnl_net_sales",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "order_pnl": [
+          "order_pnl.contribution_margin",
+          "order_pnl.order_pnl_net_sales"
+        ]
       }
     },
     "conversion_rate": {
@@ -2032,7 +2055,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "landing_page_views"
+        "denominator": "landing_page_views",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "paid_media": [
+          "paid_media.ad_spend",
+          "paid_media.landing_page_views"
+        ]
       }
     },
     "cost_per_link_click": {
@@ -2091,7 +2121,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "link_clicks"
+        "denominator": "link_clicks",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "paid_media": [
+          "paid_media.ad_spend",
+          "paid_media.link_clicks"
+        ]
       }
     },
     "cost_per_order": {
@@ -2152,7 +2189,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "channel_orders"
+        "denominator": "channel_orders",
+        "multiplier": 1.0
       }
     },
     "cpc": {
@@ -2283,7 +2321,22 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "clicks"
+        "denominator": "clicks",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "paid_media": [
+          "paid_media.ad_spend",
+          "paid_media.clicks"
+        ],
+        "paid_media_breakdowns": [
+          "paid_media_breakdowns.ad_spend",
+          "paid_media_breakdowns.clicks"
+        ],
+        "paid_media_hourly": [
+          "paid_media_hourly.ad_spend",
+          "paid_media_hourly.clicks"
+        ]
       }
     },
     "cpm": {
@@ -2414,7 +2467,22 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ad_spend",
-        "denominator": "impressions"
+        "denominator": "impressions",
+        "multiplier": 1000.0
+      },
+      "ratio_component_members": {
+        "paid_media": [
+          "paid_media.ad_spend",
+          "paid_media.impressions"
+        ],
+        "paid_media_breakdowns": [
+          "paid_media_breakdowns.ad_spend",
+          "paid_media_breakdowns.impressions"
+        ],
+        "paid_media_hourly": [
+          "paid_media_hourly.ad_spend",
+          "paid_media_hourly.impressions"
+        ]
       }
     },
     "ctr": {
@@ -2545,7 +2613,22 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "clicks",
-        "denominator": "impressions"
+        "denominator": "impressions",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "paid_media": [
+          "paid_media.clicks",
+          "paid_media.impressions"
+        ],
+        "paid_media_breakdowns": [
+          "paid_media_breakdowns.clicks",
+          "paid_media_breakdowns.impressions"
+        ],
+        "paid_media_hourly": [
+          "paid_media_hourly.clicks",
+          "paid_media_hourly.impressions"
+        ]
       }
     },
     "customers": {
@@ -3549,7 +3632,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "gross_sales",
-        "denominator": "ad_spend"
+        "denominator": "ad_spend",
+        "multiplier": 1.0
       }
     },
     "gross_sales": {
@@ -4188,7 +4272,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "ltv",
-        "denominator": "cac"
+        "denominator": "cac",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "unit_economics": [
+          "unit_economics.ltv",
+          "unit_economics.cac"
+        ]
       }
     },
     "mer": {
@@ -4207,15 +4298,13 @@
         "human_readable": "Marketing efficiency ratio = net sales of the orders placed \u00f7 ad spend delivered (order date).",
         "authoritative_source": "cube",
         "depends_on": [
-          "contribution_margin",
-          "net_cogs",
+          "order_pnl_net_sales",
           "ad_spend"
         ],
         "composition": []
       },
       "depends_on": [
-        "contribution_margin",
-        "net_cogs",
+        "order_pnl_net_sales",
         "ad_spend"
       ],
       "composition": [],
@@ -4248,7 +4337,12 @@
       "excluded_dimensions": {},
       "bindings": [],
       "replaces": [],
-      "unavailable_reason": null
+      "unavailable_reason": null,
+      "ratio_components": {
+        "numerator": "order_pnl_net_sales",
+        "denominator": "ad_spend",
+        "multiplier": 1.0
+      }
     },
     "net_aov": {
       "id": "net_aov",
@@ -4341,7 +4435,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "net_sales",
-        "denominator": "orders"
+        "denominator": "orders",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "commerce": [
+          "commerce.net_sales",
+          "commerce.orders"
+        ]
       }
     },
     "net_cogs": {
@@ -4436,15 +4537,13 @@
         "authoritative_source": "cube",
         "depends_on": [
           "net_profit",
-          "contribution_margin",
-          "net_cogs"
+          "order_pnl_net_sales"
         ],
         "composition": []
       },
       "depends_on": [
         "net_profit",
-        "contribution_margin",
-        "net_cogs"
+        "order_pnl_net_sales"
       ],
       "composition": [],
       "supported_dimensions": [
@@ -4476,7 +4575,18 @@
       "excluded_dimensions": {},
       "bindings": [],
       "replaces": [],
-      "unavailable_reason": null
+      "unavailable_reason": null,
+      "ratio_components": {
+        "numerator": "net_profit",
+        "denominator": "order_pnl_net_sales",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "order_pnl": [
+          "order_pnl.net_profit",
+          "order_pnl.order_pnl_net_sales"
+        ]
+      }
     },
     "net_profit": {
       "id": "net_profit",
@@ -4611,7 +4721,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "contribution_margin",
-        "denominator": "ad_spend"
+        "denominator": "ad_spend",
+        "multiplier": 1.0
       }
     },
     "net_sales": {
@@ -6122,7 +6233,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "pnl_net_sales",
-        "denominator": "pnl_contribution_margin"
+        "denominator": "pnl_contribution_margin",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "pnl": [
+          "pnl.pnl_net_sales",
+          "pnl.pnl_contribution_margin"
+        ]
       }
     },
     "pnl_cancel_revenue": {
@@ -6346,7 +6464,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "pnl_contribution_margin",
-        "denominator": "pnl_net_sales"
+        "denominator": "pnl_net_sales",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "pnl": [
+          "pnl.pnl_contribution_margin",
+          "pnl.pnl_net_sales"
+        ]
       }
     },
     "pnl_discounts": {
@@ -6499,7 +6624,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "pnl_net_sales",
-        "denominator": "ad_spend"
+        "denominator": "ad_spend",
+        "multiplier": 1.0
       }
     },
     "pnl_net_cogs": {
@@ -6632,7 +6758,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "pnl_net_profit",
-        "denominator": "pnl_net_sales"
+        "denominator": "pnl_net_sales",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "pnl": [
+          "pnl.pnl_net_profit",
+          "pnl.pnl_net_sales"
+        ]
       }
     },
     "pnl_net_profit": {
@@ -6769,7 +6902,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "pnl_contribution_margin",
-        "denominator": "ad_spend"
+        "denominator": "ad_spend",
+        "multiplier": 1.0
       }
     },
     "pnl_net_sales": {
@@ -8136,7 +8270,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_ad_spend",
-        "denominator": "product_landing_page_views"
+        "denominator": "product_landing_page_views",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.product_ad_spend",
+          "product.product_landing_page_views"
+        ]
       }
     },
     "product_cost_per_link_click": {
@@ -8214,7 +8355,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_ad_spend",
-        "denominator": "product_link_clicks"
+        "denominator": "product_link_clicks",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.product_ad_spend",
+          "product.product_link_clicks"
+        ]
       }
     },
     "product_cost_per_order": {
@@ -8353,7 +8501,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_ad_spend",
-        "denominator": "product_clicks"
+        "denominator": "product_clicks",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.product_ad_spend",
+          "product.product_clicks"
+        ]
       }
     },
     "product_cpm": {
@@ -8431,7 +8586,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_ad_spend",
-        "denominator": "product_impressions"
+        "denominator": "product_impressions",
+        "multiplier": 1000.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.product_ad_spend",
+          "product.product_impressions"
+        ]
       }
     },
     "product_ctr": {
@@ -8509,7 +8671,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_clicks",
-        "denominator": "product_impressions"
+        "denominator": "product_impressions",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.product_clicks",
+          "product.product_impressions"
+        ]
       }
     },
     "product_discounts": {
@@ -8723,7 +8892,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_gross_profit",
-        "denominator": "product_net_revenue"
+        "denominator": "product_net_revenue",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.product_gross_profit",
+          "product.product_net_revenue"
+        ]
       }
     },
     "product_gross_profit": {
@@ -12635,7 +12811,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "product_order_returned_orders",
-        "denominator": "product_order_orders"
+        "denominator": "product_order_orders",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product_pnl": [
+          "product_pnl.pl_returned_orders",
+          "product_pnl.pl_orders"
+        ]
       }
     },
     "product_return_revenue": {
@@ -13605,7 +13788,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "repeat_customers",
-        "denominator": "customers"
+        "denominator": "customers",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "customers": [
+          "customers.repeat_customers",
+          "customers.customers"
+        ]
       }
     },
     "return_cancel_revenue": {
@@ -13748,7 +13938,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "channel_returned_orders",
-        "denominator": "channel_orders"
+        "denominator": "channel_orders",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "order_pnl": [
+          "order_pnl.channel_returned_orders",
+          "order_pnl.channel_orders"
+        ]
       }
     },
     "return_recovered_cogs": {
@@ -15118,7 +15315,14 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "returned_units",
-        "denominator": "units_ordered"
+        "denominator": "units_ordered",
+        "multiplier": 1.0
+      },
+      "ratio_component_members": {
+        "product": [
+          "product.returned_units",
+          "product.units_ordered"
+        ]
       }
     },
     "units_ordered": {
@@ -15266,7 +15470,8 @@
       "unavailable_reason": null,
       "ratio_components": {
         "numerator": "units_sold",
-        "denominator": "orders"
+        "denominator": "orders",
+        "multiplier": 1.0
       }
     },
     "units_sold": {

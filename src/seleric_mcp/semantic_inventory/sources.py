@@ -267,6 +267,7 @@ def load_metric_records(catalogue_dir: Path) -> tuple[str, list[MetricRecord]]:
                 depends_on=sorted(m.formula.depends_on),
                 ratio_numerator=rc.numerator if rc else None,
                 ratio_denominator=rc.denominator if rc else None,
+                ratio_multiplier=rc.multiplier if rc else None,
                 bindings=[b.model_dump() for b in m.bindings],
                 supported_dimensions=sorted(m.supported_dimensions),
                 supported_filters=sorted(m.supported_filters),

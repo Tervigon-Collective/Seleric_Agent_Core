@@ -1,8 +1,18 @@
+import pytest
+
 from seleric_mcp.app import insight_engine as ie
+from seleric_mcp.catalogue_service.loader import load_catalogue
+from seleric_mcp.catalogue_service.service import CatalogueService
+from seleric_mcp.config import PROJECT_ROOT
 
 
 def _metric(catalogue, mid):
     return catalogue.get_metric(mid)
+
+
+@pytest.fixture(scope="module")
+def v2():
+    return CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v2"))
 
 
 def test_additive_totals_and_delta(catalogue):
@@ -98,3 +108,36 @@ def test_no_compare_note(catalogue):
     report = ie.explain([{"commerce_orders.dashboard_net_sales_excl_tax": "5"}], None, [m], {})
     assert report["top_movers"] == []
     assert "note" in report
+
+
+# ---------------------------------------------------------------- SEM-14 v2 ratio components
+
+def test_v2_ratio_recomputes_from_resolved_members(v2):
+    """Catalogued components are metric ids, but stored rows carry the qualified
+    Cube members; the recompute must resolve them."""
+    m = v2.get_metric("ctr")
+    rows = [{"paid_media.clicks": "5", "paid_media.impressions": "100"},
+            {"paid_media.clicks": "5", "paid_media.impressions": "100"}]
+    total = ie.metric_total(rows, m)
+    assert total["value"] == 0.05
+    assert total["recomputed"] is True
+    assert total["method"] == "sum(paid_media.clicks)/sum(paid_media.impressions)"
+
+
+def test_v2_cpm_recompute_applies_the_multiplier(v2):
+    """CPM = spend ÷ impressions × 1000; the period recompute must scale too."""
+    m = v2.get_metric("cpm")
+    rows = [{"paid_media.ad_spend": "500", "paid_media.impressions": "100000"}]
+    total = ie.metric_total(rows, m)
+    assert total["value"] == 5.0
+    assert total["method"] == "sum(paid_media.ad_spend)/sum(paid_media.impressions)*1000"
+
+
+def test_ratio_zero_denominator_falls_back_to_cube_measure(v2):
+    """A zero denominator must not divide by zero: fall back to the authoritative
+    Cube measure rather than emitting inf/nan."""
+    m = v2.get_metric("ctr")
+    rows = [{"paid_media.ctr": "0", "paid_media.clicks": "0", "paid_media.impressions": "0"}]
+    total = ie.metric_total(rows, m)
+    assert total["recomputed"] is False
+    assert total["value"] == 0.0

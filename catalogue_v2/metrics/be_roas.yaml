@@ -10,15 +10,15 @@ formula:
   human_readable: Break-even ROAS = net sales ÷ (net sales − net COGS) (order date).
   authoritative_source: cube
   depends_on:
+  - order_pnl_net_sales
   - contribution_margin
-  - net_cogs
 cube_mapping:
   view: order_pnl
   measure: order_pnl.be_roas
 aggregation: ratio
 ratio_components:
-  numerator: contribution_margin
-  denominator: net_cogs
+  numerator: order_pnl_net_sales
+  denominator: contribution_margin
 unit: ratio
 grain: brand_order_day_channel_ad
 data_owner: Growth / Finance

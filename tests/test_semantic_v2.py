@@ -635,3 +635,127 @@ def test_a_hyphenated_axis_word_is_read_with_axes_passed(v2):
     for axes, want in (({}, "be_roas"), ({"date": "order"}, "be_roas"), ({"scope": "product"}, "product_be_roas"),
                        ({"date": "finance"}, "pnl_be_roas")):
         assert v2.resolve_concept("break-even roas", axes=axes).metric_id == want
+
+
+# ---------------------------------------------------------------- SEM-14 ratio component execution
+
+def test_ratio_components_resolve_to_qualified_cube_members(v2):
+    """The catalogue stores ratio components as metric ids; execution must send
+    Cube qualified measures, never a bare catalogue id."""
+    m = v2.cat.metrics["ctr"]
+    assert m.ratio_components.numerator == "clicks" and m.ratio_components.denominator == "impressions"
+    assert m.ratio_component_members["paid_media"] == ["paid_media.clicks", "paid_media.impressions"]
+
+
+async def test_ctr_query_uses_qualified_component_members(planner, cube):
+    cube.by_prefix["paid_media"] = [{"paid_media.ctr": "0.05", "paid_media.clicks": "5",
+                                     "paid_media.impressions": "100"}]
+    out = await planner.run(QueryRequest(measures=["ctr"], time_range=SEP))
+    assert "error" not in out
+    assert cube.queries[-1]["measures"] == ["paid_media.ctr", "paid_media.clicks", "paid_media.impressions"]
+    assert "clicks" not in cube.queries[-1]["measures"] and "impressions" not in cube.queries[-1]["measures"]
+
+
+async def test_ratio_components_follow_the_hourly_binding(planner, cube):
+    cube.by_prefix["paid_media_hourly"] = [{"paid_media_hourly.cpc": "2.0",
+                                            "paid_media_hourly.ad_spend": "20",
+                                            "paid_media_hourly.clicks": "10"}]
+    await planner.run(QueryRequest(measures=["cpc"], time_range=SEP, granularity="hour"))
+    q = cube.queries[-1]
+    assert q["measures"] == ["paid_media_hourly.cpc", "paid_media_hourly.ad_spend",
+                             "paid_media_hourly.clicks"]
+    assert q["timeDimensions"][0]["dimension"] == "paid_media_hourly.report_hour"
+
+
+async def test_ratio_components_follow_the_breakdown_binding(planner, cube):
+    cube.by_prefix["paid_media_breakdowns"] = [{"paid_media_breakdowns.ctr": "0.04",
+                                                "paid_media_breakdowns.clicks": "4",
+                                                "paid_media_breakdowns.impressions": "100"}]
+    await planner.run(QueryRequest(measures=["ctr"], dimensions=["age"], time_range=SEP))
+    q = cube.queries[-1]
+    assert q["measures"] == ["paid_media_breakdowns.ctr", "paid_media_breakdowns.clicks",
+                             "paid_media_breakdowns.impressions"]
+    # the breakdown_type slice is pinned so the components are not multi-counted
+    assert {"member": "paid_media_breakdowns.breakdown_type", "operator": "equals",
+            "values": ["age_and_gender"]} in q["filters"]
+
+
+async def test_aov_components_use_its_own_view(planner, cube):
+    cube.by_prefix["commerce"] = [{"commerce.aov": "500", "commerce.total_sales": "5000",
+                                   "commerce.orders": "10"}]
+    await planner.run(QueryRequest(measures=["aov"], time_range=SEP))
+    assert cube.queries[-1]["measures"] == ["commerce.aov", "commerce.total_sales", "commerce.orders"]
+
+
+@pytest.mark.parametrize("mid,num,den", [
+    ("be_roas", "order_pnl_net_sales", "contribution_margin"),
+    ("contribution_margin_pct", "contribution_margin", "order_pnl_net_sales"),
+    ("net_margin_pct", "net_profit", "order_pnl_net_sales"),
+    ("pnl_be_roas", "pnl_net_sales", "pnl_contribution_margin"),
+    ("pnl_contribution_margin_pct", "pnl_contribution_margin", "pnl_net_sales"),
+])
+def test_pnl_ratios_divide_by_net_sales_not_net_cogs(v2, mid, num, den):
+    """Regression: an earlier contract divided order-date margin ratios by net COGS,
+    which does not reconcile with the authoritative Cube measure (verified live by
+    scripts/verify_ratio_components.py). They must divide by net sales."""
+    rc = v2.cat.metrics[mid].ratio_components
+    assert (rc.numerator, rc.denominator) == (num, den)
+
+
+def test_cpm_carries_its_scaling_multiplier(v2):
+    """CPM = spend ÷ impressions × 1000: the multiplier is part of the ratio contract."""
+    cpm = v2.cat.metrics["cpm"]
+    assert cpm.ratio_components.numerator == "ad_spend"
+    assert cpm.ratio_components.denominator == "impressions"
+    assert cpm.ratio_components.multiplier == 1000
+    assert v2.cat.metrics["ctr"].ratio_components.multiplier == 1  # unscaled ratios stay 1
+
+
+async def test_cross_view_ratio_sends_only_its_authoritative_measure(planner, cube):
+    """A ratio whose components live on other views (CAC = paid_media spend ÷
+    customer count) cannot be decomposed on its own view; Cube computes the value,
+    so no component members are appended (and no invalid member is emitted)."""
+    cube.by_prefix["unit_economics"] = [{"unit_economics.cac": "250"}]
+    out = await planner.run(QueryRequest(measures=["cac"], time_range=SEP))
+    assert "error" not in out
+    assert cube.queries[-1]["measures"] == ["unit_economics.cac"]
+
+
+async def test_unknown_ratio_component_is_refused(v2, cube, result_store):
+    """A component id that resolves to no catalogue metric is a broken contract —
+    refused before it reaches Cube."""
+    m = v2.get_metric("ctr").model_copy(deep=True)
+    m.ratio_components = m.ratio_components.model_copy(update={"numerator": "no_such_metric"})
+    m.ratio_component_members = {}
+    planner = QueryPlanner(_catalogue_with(v2, m), cube, result_store)
+    with pytest.raises(PlanError) as exc:
+        await planner.run(QueryRequest(measures=["ctr"], time_range=SEP))
+    assert "ratio component 'no_such_metric' not found" in str(exc.value)
+
+
+def _catalogue_with(catalogue: CatalogueService, metric) -> CatalogueService:
+    overlay = catalogue.cat.model_copy(deep=True)
+    overlay.metrics[metric.id] = metric
+    return CatalogueService(overlay, serve_db=catalogue.serve_db)
+
+
+def test_canonical_contract_matches_the_catalogue(v2):
+    """The exported Agent contract must stay in sync with the catalogue: signed
+    composition, ratio algebra (components + multiplier) and resolved members."""
+    import json
+
+    doc = json.loads((PROJECT_ROOT / "doc" / "semantic_contracts" / "canonical_metrics.json")
+                     .read_text(encoding="utf-8"))
+    assert doc["version"] == v2.version
+    assert set(doc["metrics"]) == set(v2.cat.metrics)
+    for mid, m in v2.cat.metrics.items():
+        c = doc["metrics"][mid]
+        assert c["measure"] == m.cube_mapping.measure
+        assert c["composition"] == [t.model_dump() for t in m.formula.composition]
+        if m.ratio_components:
+            assert c["ratio_components"]["numerator"] == m.ratio_components.numerator
+            assert c["ratio_components"]["denominator"] == m.ratio_components.denominator
+            assert c["ratio_components"]["multiplier"] == m.ratio_components.multiplier
+            assert c.get("ratio_component_members", {}) == m.ratio_component_members
+        else:
+            assert "ratio_components" not in c

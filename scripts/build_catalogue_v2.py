@@ -112,6 +112,14 @@ ORDER_DATE_PNL = ["net_profit", "net_cogs", "product_cost", "shipping_cost", "pa
                   "gross_profit", "taxes_on_net_sales", "mer", "gross_roas", "net_roas", "be_roas", "gross_cogs"]
 REDEFINED = {"return_revenue": "2.0.0", "cancel_revenue": "2.0.0",
              **{m: "2.0.0" for m in ORDER_DATE_PNL if m != "gross_cogs"}}
+# Ratios whose declared human unit scales the raw numerator/denominator quotient
+# (e.g. CPM = spend ÷ impressions × 1000). This is decomposition metadata only:
+# Cube remains the authoritative engine that computes the published measure.
+RATIO_MULTIPLIERS = {
+    "cpm": 1000,
+    "product_cpm": 1000,
+    "product_pnl_cpm": 1000,
+}
 RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from aggregates)
     "aov": ["total_sales", "orders"], "net_aov": ["net_sales", "orders"],
     "ctr": ["clicks", "impressions"], "cpc": ["ad_spend", "clicks"], "cpm": ["ad_spend", "impressions"],
@@ -149,11 +157,13 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "pnl_net_margin_pct": ["pnl_net_profit", "pnl_net_sales"], "pnl_mer": ["pnl_net_sales", "ad_spend"],
     "pnl_gross_roas": ["gross_sales", "ad_spend"], "pnl_net_roas": ["pnl_contribution_margin", "ad_spend"],
     "pnl_be_roas": ["pnl_net_sales", "pnl_contribution_margin"],
-    # order-date P&L: its net sales (P&L basis) = contribution_margin + net_cogs on the same view
-    "contribution_margin_pct": ["contribution_margin", "net_cogs"],
-    "net_margin_pct": ["net_profit", "contribution_margin", "net_cogs"],
-    "mer": ["contribution_margin", "net_cogs", "ad_spend"], "gross_roas": ["gross_sales", "ad_spend"],
-    "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["contribution_margin", "net_cogs"],
+    # order-date P&L: its net sales (P&L basis) is the order_pnl_net_sales measure
+    # (= contribution_margin + net_cogs on the same view). Ratios here divide by that
+    # net-sales measure, not by net COGS.
+    "contribution_margin_pct": ["contribution_margin", "order_pnl_net_sales"],
+    "net_margin_pct": ["net_profit", "order_pnl_net_sales"],
+    "mer": ["order_pnl_net_sales", "ad_spend"], "gross_roas": ["gross_sales", "ad_spend"],
+    "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["order_pnl_net_sales", "contribution_margin"],
 }
 DIM_RENAME = {("commerce", "event_type"): "order_event_type",  # same member name, different meaning
               ("order_pnl", "row_type"): "order_pnl_row_type"}  # orders | ad_spend, not pnl's detail | reconciliation
@@ -483,7 +493,9 @@ def main() -> int:
             "cube_mapping": {"view": view, "measure": spec["member"],
                              **({"time_dimension": spec["date_axis"]} if axis != default_axis_of[view] else {})},
             "aggregation": "ratio" if ratio else "additive",
-            **({"ratio_components": {"numerator": RATIO_PARTS[mid][0], "denominator": RATIO_PARTS[mid][1]}} if ratio and len(RATIO_PARTS.get(mid,[]))==2 else {}),
+            **({"ratio_components": {"numerator": RATIO_PARTS[mid][0], "denominator": RATIO_PARTS[mid][1],
+                                     **({"multiplier": RATIO_MULTIPLIERS[mid]} if mid in RATIO_MULTIPLIERS else {})}}
+               if ratio and len(RATIO_PARTS.get(mid,[]))==2 else {}),
             "unit": unit,
             **({"currency_default": "INR"} if fmt == "currency" else {}),
             "grain": grain,

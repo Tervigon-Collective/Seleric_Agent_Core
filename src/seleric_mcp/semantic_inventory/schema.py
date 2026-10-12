@@ -71,6 +71,7 @@ class MetricRecord:
     depends_on: list[str] = field(default_factory=list)
     ratio_numerator: str | None = None
     ratio_denominator: str | None = None
+    ratio_multiplier: float | None = None
     bindings: list[dict] = field(default_factory=list)
     supported_dimensions: list[str] = field(default_factory=list)
     supported_filters: list[str] = field(default_factory=list)

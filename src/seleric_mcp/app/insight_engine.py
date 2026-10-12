@@ -31,6 +31,18 @@ def _sum_measure(rows: list[dict], measure: str) -> float | None:
     return round(sum(vals), 4) if vals else None
 
 
+def _ratio_component_keys(metric: MetricDef, rows: list[dict]) -> list[str]:
+    """The row keys holding this ratio's numerator/denominator. Semantic v2 stores
+    components as catalogue metric ids resolved to Cube members per view; pick the
+    view whose members are actually present in the result rows. Legacy v1 stores
+    already-qualified members, which are used as is."""
+    sample = rows[0] if rows else {}
+    for members in (metric.ratio_component_members or {}).values():
+        if all(k in sample for k in members):
+            return members
+    return [metric.ratio_components.numerator, metric.ratio_components.denominator]
+
+
 def metric_total(rows: list[dict], metric: MetricDef) -> dict:
     """Period total for one metric. Additive: sum rows. Ratio: recompute from
     catalogued components when available; otherwise a flagged approximation
@@ -39,14 +51,20 @@ def metric_total(rows: list[dict], metric: MetricDef) -> dict:
     if metric.aggregation == "additive":
         return {"value": _sum_measure(rows, measure), "recomputed": True, "method": "sum"}
     if metric.ratio_components:
-        num = _sum_measure(rows, metric.ratio_components.numerator)
-        den = _sum_measure(rows, metric.ratio_components.denominator)
+        num_key, den_key = _ratio_component_keys(metric, rows)
+        num = _sum_measure(rows, num_key)
+        den = _sum_measure(rows, den_key)
         if num is not None and den not in (None, 0):
-            return {
-                "value": round(num / den, 4),
-                "recomputed": True,
-                "method": f"sum({metric.ratio_components.numerator})/sum({metric.ratio_components.denominator})",
-            }
+            mult = metric.ratio_components.multiplier or 1
+            value = num / den * mult
+            method = f"sum({num_key})/sum({den_key})" + (f"*{mult:g}" if mult != 1 else "")
+            return {"value": round(value, 4), "recomputed": True, "method": method}
+    vals = [f for row in rows if (f := _to_float(row.get(measure))) is not None]
+    return {
+        "value": round(statistics.fmean(vals), 4) if vals else None,
+        "recomputed": False,
+        "method": "mean_of_rows_approximation",
+    }
     vals = [f for row in rows if (f := _to_float(row.get(measure))) is not None]
     return {
         "value": round(statistics.fmean(vals), 4) if vals else None,
