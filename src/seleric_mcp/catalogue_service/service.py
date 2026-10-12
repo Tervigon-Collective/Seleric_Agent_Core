@@ -869,10 +869,11 @@ class CatalogueService:
 
     def _v2_metric_extras(self, m: MetricDef) -> dict:
         """valid_for (e.g. Meta-only), extra granularities (hour), binding notes and the date basis of a
-        metric that exists on both axes (pnl_X = finance / event date, X = order date) — only when set."""
+        metric that exists on both axes (pnl_X = finance / event date, X = order date) — only when set.
+        Also exposes signed ratio algebra (ratio_components, multiplier, resolved component members per view)
+        so the Agent can execute ratio algebra without re-resolving."""
         extra: dict = {}
         if m.unit:
-            # the agent labels values with it (a currency unit equal to the query's currency → "118840.44 INR")
             extra["unit"] = m.unit
         if m.id.startswith("pnl_") and m.id[4:] in self.cat.metrics:
             extra["date_basis"], extra["date_twin"] = "finance", m.id[4:]
@@ -882,13 +883,21 @@ class CatalogueService:
         if twins:
             extra["grain_twins"] = twins
         if m.aggregation == "ratio":
-            # The additive component a leaderboard of this ratio is selected by ("top campaigns by CTR" over a
-            # long tail would otherwise be won by a 1-impression campaign): its formula's last additive input
-            # (ctr -> impressions, aov -> orders, product_gross_margin_pct -> product_net_revenue).
             vol = next((d for d in reversed(m.formula.depends_on)
                         if (dm := self.cat.metrics.get(d)) is not None and dm.aggregation == "additive"), None)
             if vol:
                 extra["volume_metric"] = vol
+            # SEM-17: expose signed ratio components + multiplier + resolved members
+            if m.ratio_components:
+                extra["ratio_components"] = {
+                    "numerator": m.ratio_components.numerator,
+                    "denominator": m.ratio_components.denominator,
+                    "multiplier": m.ratio_components.multiplier,
+                }
+            if m.ratio_component_members:
+                extra["ratio_component_members"] = {
+                    k: list(v) for k, v in sorted(m.ratio_component_members.items())
+                }
         if m.valid_for:
             extra["valid_for"] = {k: list(v) for k, v in m.valid_for.items()}
             if m.valid_for_reason:
