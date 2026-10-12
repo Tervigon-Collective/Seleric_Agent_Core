@@ -11,8 +11,11 @@ legacy is the defect.
 ## 0. Conventions (apply to every primitive)
 
 - **Windows.** A comparison has a *current* window `C` and a *baseline* window `B`.
-  `delta = value(C) - value(B)`. `pct_change = delta / value(B)` and is `null`
-  when `value(B) == 0` or `null`.
+  `delta = value(C) - value(B)`. `pct_change = delta / |value(B)|`, so the sign
+  of `pct_change` always matches the direction of `delta` (profit -10 -> -20 is
+  `-100%`, not `+100%`). It is `null` when `value(B) == 0` or `null`, and the
+  output flags `baseline_negative` when `value(B) < 0` because a percentage of
+  a negative base is hard to read (Q8).
 - **Equal-length rule.** Totals of *additive* metrics over windows of different
   length are not comparable. The primitive refuses (`refusal: unequal_windows`)
   unless the caller passes `normalize="per_day"`, in which case values are
@@ -86,8 +89,13 @@ Identity (exact): `sum_s (rate_effect_s + mix_effect_s + interaction_s) == R(C) 
 
 Preconditions: both components additive and present for every segment;
 `D_s > 0` in the windows where `r_s` is used. A segment with `D_s(P) == 0` has
-`r_s(P)` undefined: its contribution is attributed to `mix_effect` using
-`r_s = R(P)` of the *other* window and flagged `imputed_rate`. (Open question Q2.)
+`r_s(P)` undefined. It is imputed with the segment's **own** rate from the other
+window (`r_s(P) := r_s(P')`), so `Δr = 0` and `rate_effect = interaction = 0`:
+the whole effect is then pure `mix_effect`, flagged `imputed_rate`. The identity
+holds for any imputed value; only the split between mix and interaction changes,
+and imputing the segment's own rate is the choice that keeps it pure mix. A
+segment with `D_s = 0` in **both** windows contributes nothing and is dropped.
+(Open question Q2.)
 The primitive first verifies `R(P) == sum w*r` on the data; if it fails, it
 refuses (`refusal: weighted_identity_failed`).
 
@@ -166,8 +174,9 @@ and is `null` for every other primitive.
 
 - **Q1 (sign convention).** `delta = current - baseline` everywhere. Legacy
   `period_deltas` used A-B in question order. Confirm current - baseline.
-- **Q2 (zero-denominator segments in mix_shift).** Impute the other window's
-  overall rate and flag, or refuse the whole decomposition?
+- **Q2 (zero-denominator segments in mix_shift).** Impute the segment's own
+  rate from the other window and flag (as drafted), or refuse the whole
+  decomposition?
 - **Q3 (unequal windows).** Refuse by default and allow `per_day`
   normalization only on request, or auto-normalize with disclosure?
 - **Q4 (funnel non-nested stages).** Refuse, or compute with the `non_nested` flag?
@@ -178,3 +187,6 @@ and is `null` for every other primitive.
 - **Q7 (polarity).** Which metrics are "bad when up" (`direction_bad`)? Needs a
   business-owner review of the 233 catalogue metrics; the Agent's
   `metric_registry.yaml` has 74 entries to start from.
+- **Q8 (negative baselines).** `pct_change = delta / |baseline|` with a
+  `baseline_negative` flag (as drafted), or `null` whenever the baseline is
+  `<= 0`? Matters most for profit and margin "why did it decline" questions.
