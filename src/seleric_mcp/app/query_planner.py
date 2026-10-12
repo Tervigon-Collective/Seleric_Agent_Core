@@ -17,6 +17,7 @@ from zoneinfo import ZoneInfo
 
 from ..catalogue_service.loader import CubeMapping, DimensionDef, MetricDef
 from ..catalogue_service.service import CatalogueService
+from ..dataset_contracts import load_dataset_contracts, get_contract_for_view, get_binding_grain
 from ..semantic_layer.cube_client import CubeClient
 from .models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from .provenance import build_provenance
@@ -138,6 +139,8 @@ class QueryPlanner:
         # this brand on views that expose a brand_id dimension (single-tenant
         # deployments must not silently aggregate other/test brands).
         self.default_brand_id = default_brand_id
+        # Dataset contracts for grain/policy enforcement (SEM-16)
+        self.dataset_contracts = load_dataset_contracts()
 
     def _effective_time_dimension(self, m: MetricDef) -> str | None:
         """Fully-qualified time dimension date-range filters apply to for this
@@ -291,6 +294,32 @@ class QueryPlanner:
                     )
             for b in m.bindings:
                 if request.granularity in b.granularities or (asked & set(b.dimensions)):
+                    # SEM-16: Enforce dataset contract grain and policies
+                    contracts = get_contract_for_view(b.view, self.dataset_contracts)
+                    for c in contracts:
+                        if c.certification_status == "certified":
+                            # Validate grain: requested dimensions should be compatible
+                            for d in request.dimensions:
+                                if d not in c.declared_keys and d != "brand_id":
+                                    warnings.append(
+                                        f"Dimension '{d}' not in certified grain of {c.name} ({b.view}; "
+                                        f"grain: {c.declared_keys}). Results may not align with {c.name}'s declared grain."
+                                    )
+                            # Validate date policy alignment
+                            if request.granularity not in SUBDAILY_GRANULARITIES:
+                                expected = c.date_policy_default
+                                actual = b.time_dimension or (b.view + "." + expected.split(".")[-1])
+                                if expected and expected not in actual:
+                                    warnings.append(
+                                        f"{c.name} date policy expects '{c.date_policy_meaning}' ({expected}); "
+                                        f"binding uses time dimension '{actual}'."
+                                    )
+                        elif c.certification_status == "partial":
+                            warnings.append(
+                                f"Binding '{b.name}' (view {b.view}) is covered by {c.name} with status "
+                                f"'{c.certification_status}': grain uniqueness not verified. "
+                                f"Use with caution — results may contain duplicate rows."
+                            )
                     bound = m.model_copy(deep=True)
                     bound.cube_mapping = CubeMapping(
                         view=b.view, measure=b.measure, time_dimension=b.time_dimension
