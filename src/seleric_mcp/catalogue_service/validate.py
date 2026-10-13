@@ -23,6 +23,16 @@ def _cube_members(meta: dict) -> set[str]:
     return members
 
 
+def _ratio_members(service: CatalogueService, m) -> list[str]:
+    """Cube members a ratio needs. Semantic v2 stores components as catalogue metric
+    ids; the loader resolves them to qualified measures per view (``ratio_component_members``).
+    A bare metric id is not a Cube member, so checking it flagged every ratio as broken.
+    Components that are not catalogue metrics (legacy qualified members) stay as stored."""
+    resolved = [member for members in (m.ratio_component_members or {}).values() for member in members]
+    raw = [c for c in (m.ratio_components.numerator, m.ratio_components.denominator) if c not in service.cat.metrics]
+    return resolved + raw
+
+
 async def validate_against_cube(service: CatalogueService, cube: CubeClient) -> dict:
     """Returns {checked, broken: [metric ids], unreachable: bool}."""
     try:
@@ -38,7 +48,7 @@ async def validate_against_cube(service: CatalogueService, cube: CubeClient) -> 
         if m.cube_mapping.measure_pct:
             needed.append(m.cube_mapping.measure_pct)
         if m.ratio_components:
-            needed += [m.ratio_components.numerator, m.ratio_components.denominator]
+            needed += _ratio_members(service, m)
         for dim_id in m.supported_dimensions:
             dim = service.cat.dimensions.get(dim_id)
             if dim and m.cube_mapping.view in dim.views:
