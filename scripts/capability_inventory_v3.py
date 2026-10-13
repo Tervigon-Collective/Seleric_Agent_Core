@@ -214,6 +214,18 @@ BEHAVIOURS = [
     ("retired_id_error", "keep", [], "retired v1 ids rejected with an error naming the replacement"),
 ]
 
+# Capabilities already broken on the live v2 surface (Phase 0 findings, 2026-10-14). Cube v2 hot-reloads model_v2 from
+# mage-ai main, which is ahead of the live serve DDL (unapplied commits f645091, 8a2b333). v3 must deliver these.
+LIVE_DEFECTS = {
+    "taxes_on_net_sales": "Cube error: order_pnl_daily.taxes not in live semantic.fct_order_pnl_daily (f645091 unapplied)",
+    "pnl_taxes_on_net_sales": "Cube error: pnl_daily.taxes not in live semantic.fct_pnl_daily (f645091 unapplied)",
+    "product_taxes_on_net_sales": "Cube error: product_economics.taxes not in live serve.product_pnl (f645091 unapplied)",
+    "product_pnl_taxes_on_net_sales": "Cube error: product_economics.taxes not in live serve.product_pnl (f645091)",
+}
+for _m in ("first_order_variant_id", "first_order_sku", "first_order_product_title", "first_order_product_type"):
+    LIVE_DEFECTS[f"customers.{_m}"] = ("Cube error: serve.customer_ltv.first_order_variant_id not live (8a2b333 unapplied); "
+                                       "the first_order_product join fails for every query using it")
+
 # New capabilities the spec adds (so the map is the full v3 contract, not only the v2 one).
 NEW = [
     ("dimension.order_type", ["D-01", "D-08", "D-08a"]), ("dimension.root_order_id", ["D-01"]),
@@ -308,7 +320,7 @@ def build(cat, meta: dict, mcp: dict) -> dict:
                              supported_filters=sorted(m.supported_filters),
                              valid_for={k: sorted(v) for k, v in m.valid_for.items()},
                              excluded_dimensions=dict(m.excluded_dimensions),
-                             replaces=sorted(m.replaces))
+                             replaces=sorted(m.replaces), live_defect=LIVE_DEFECTS.get(mid))
         for mem in [m.cube_mapping.measure] + [b.measure for b in m.bindings] + list(m.companion_measures):
             member_targets.setdefault(mem, (target, ids))
     out["metrics"] = metrics
@@ -362,7 +374,7 @@ def build(cat, meta: dict, mcp: dict) -> dict:
                 m_meta = {k: v for k, v in (mem.get("meta") or {}).items()
                           if k in ("stable_key", "composition", "allocated")}
                 grans = [g["name"] for g in mem.get("granularities") or [] if isinstance(g, dict)]
-                members[name] = entry(t, ids, kind={"measures": "measure", "dimensions": "dimension", "hierarchies": "hierarchy"}[kind], type=mem.get("type"), meta=m_meta,
+                members[name] = entry(t, ids, live_defect=LIVE_DEFECTS.get(name), kind={"measures": "measure", "dimensions": "dimension", "hierarchies": "hierarchy"}[kind], type=mem.get("type"), meta=m_meta,
                                       granularities=grans or None, alias=mem.get("aliasMember"))
         cubes[c["name"]] = {"type": c.get("type"), "public": public, "members": members}
     out["cube_v2"] = cubes

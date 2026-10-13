@@ -1,0 +1,222 @@
+{
+ "ad_changes": {
+  "hash": "941497477466348379",
+  "rows": 10126
+ },
+ "ad_channel_pnl_daily": {
+  "hash": "2394792599179895571",
+  "rows": 36170
+ },
+ "ad_delivery_daily": {
+  "hash": "\\N",
+  "rows": 28785
+ },
+ "ad_delivery_hourly": {
+  "hash": "\\N",
+  "rows": 313945
+ },
+ "attribution_paths": {
+  "hash": "7271355155169660266",
+  "rows": 25164
+ },
+ "campaign_products": {
+  "hash": "11023519605211422312",
+  "rows": 5255
+ },
+ "canonical_pnl": {
+  "hash": "2085315659717877178",
+  "rows": 1166
+ },
+ "cfg_traffic_platforms": {
+  "hash": "1746643653040628637",
+  "rows": 11
+ },
+ "cfg_traffic_source_rules": {
+  "hash": "\\N",
+  "rows": 29
+ },
+ "channel_attribution_daily": {
+  "hash": "16593969775181675570",
+  "rows": 1967
+ },
+ "channel_pnl": {
+  "hash": "16986076528967436177",
+  "rows": 93555
+ },
+ "commerce_order_events": {
+  "hash": "17152641240468976845",
+  "rows": 4740
+ },
+ "commerce_orders": {
+  "hash": "10860700193674182780",
+  "rows": 24148
+ },
+ "commerce_performance_daily": {
+  "hash": "4805445045326041617",
+  "rows": 678
+ },
+ "customer_data": {
+  "hash": "4132150332218169532",
+  "rows": 42152
+ },
+ "customer_ltv": {
+  "hash": "4360447877063233741",
+  "rows": 19810
+ },
+ "dim_ad": {
+  "hash": "10720631993992690498",
+  "rows": 3499
+ },
+ "dim_adset": {
+  "hash": "4410863920320338208",
+  "rows": 2082
+ },
+ "dim_brand": {
+  "hash": "1862292192642772908",
+  "rows": 7
+ },
+ "dim_campaign": {
+  "hash": "\\N",
+  "rows": 1312
+ },
+ "dim_product_variant": {
+  "hash": "\\N",
+  "rows": 1476
+ },
+ "dim_traffic_source": {
+  "hash": "15870353231356748651",
+  "rows": 3112
+ },
+ "finance_waterfall_daily": {
+  "hash": "6272806769885385310",
+  "rows": 1172
+ },
+ "funnel_daily": {
+  "hash": "9231650691527607701",
+  "rows": 3208
+ },
+ "funnel_orders": {
+  "hash": "8123289433058823245",
+  "rows": 23593
+ },
+ "google_ads_daily": {
+  "hash": "\\N",
+  "rows": 4035
+ },
+ "google_ads_hourly": {
+  "hash": "\\N",
+  "rows": 250493
+ },
+ "google_ads_status_history": {
+  "hash": "\\N",
+  "rows": 323
+ },
+ "ltv_cac_daily": {
+  "hash": "14059192334058654079",
+  "rows": 20929
+ },
+ "meta_ad_attribution_daily": {
+  "hash": "15420358908516420839",
+  "rows": 3875
+ },
+ "meta_ads_breakdown_daily": {
+  "hash": "\\N",
+  "rows": 332296
+ },
+ "meta_ads_daily": {
+  "hash": "\\N",
+  "rows": 24750
+ },
+ "meta_ads_hourly": {
+  "hash": "9552006711052390844",
+  "rows": 63452
+ },
+ "meta_ads_status_history": {
+  "hash": "\\N",
+  "rows": 9803
+ },
+ "order_attribution": {
+  "hash": "3544917476203003068",
+  "rows": 24102
+ },
+ "order_pnl_daily": {
+  "hash": "13435367324738699521",
+  "rows": 56646
+ },
+ "orders_all_channels": {
+  "hash": "11484243636345767195",
+  "rows": 24102
+ },
+ "payments": {
+  "hash": "14544247764230923160",
+  "rows": 33790
+ },
+ "platform_attribution_commerce": {
+  "hash": "1790150151712042348",
+  "rows": 24102
+ },
+ "pnl_daily": {
+  "hash": "4105440907940929796",
+  "rows": 36170
+ },
+ "product_ad_line": {
+  "hash": "8817626428639463957",
+  "rows": 14477
+ },
+ "product_hierarchy_conflicts": {
+  "hash": "0",
+  "rows": 0
+ },
+ "product_performance": {
+  "hash": "2346930140191838851",
+  "rows": 30385
+ },
+ "product_pnl": {
+  "hash": "10837414098100258148",
+  "rows": 123046
+ },
+ "purchase_sequence": {
+  "hash": "11820731317606481380",
+  "rows": 24063
+ },
+ "refund_events": {
+  "hash": "4522210580590024831",
+  "rows": 3681
+ },
+ "return_lifecycle": {
+  "hash": "18023087811319595178",
+  "rows": 4172
+ },
+ "returns_cancels_all_channels": {
+  "hash": "9813878937480775142",
+  "rows": 4740
+ },
+ "sales_all_channels": {
+  "hash": "2959913089909628015",
+  "rows": 24102
+ },
+ "session_funnel": {
+  "hash": "\\N",
+  "rows": 480461
+ },
+ "touchpoints": {
+  "hash": "16555344650493916970",
+  "rows": 10132
+ },
+ "traffic_hierarchy_conflicts": {
+  "hash": "0",
+  "rows": 0
+ },
+ "traffic_unmapped": {
+  "hash": "16941647215156141291",
+  "rows": 2
+ },
+ "web_events": {
+  "hash": "\\N",
+  "rows": 2813641
+ },
+ "web_events_daily": {
+  "hash": "13859690322983133573",
+  "rows": 10117
+ }
+}
