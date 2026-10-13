@@ -2,6 +2,7 @@
 
 Plan: `doc/semantic_v3/PLAN.md` (copy of `plan/SEMANTIC_V3_REBUILD_PLAN.md`). Spec: `doc/Seleric_Enterprise_Data_Model_v2_Two_Planes.md` v2.2 (§0B decisions, §0C target semantics, §0D constraints).
 Read this file and spec §0B at the start of every session; append an entry at the end.
+**Checklist (done / not done / findings / decisions / open questions): `CHECKLIST.md`** — keep it current.
 
 ## Status
 | Phase | State | Gate |
@@ -118,3 +119,9 @@ Not done / carried forward:
 - New-customer vs gold: 22 sale orders differ (identity merge / ordering, D-15 / D-16a).
 
 Next: Phase 2 — the component ledger (D-11a historical rate card is needed first).
+
+### 2026-10-14 — Phase 1 follow-up (owner rulings D-22f / D-22g)
+- D-22f: a line refunded with no return is `cancelled`. An order whose every line is refunded with no return is `cancelled` (45 sale + 7 other orders).
+- D-22g: a returned quantity with no refund on an active order is `returned` (2 lines).
+- SQL is updated in mage-ai `semantic-v3` and both rulings are in spec §0B. **Not yet applied** to production (waiting for the owner's OK).
+- Added `CHECKLIST.md`.
