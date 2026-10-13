@@ -9,7 +9,8 @@ Read this file and spec §0B at the start of every session; append an entry at t
 |---|---|---|
 | 0 Baseline + capability inventory | **done 2026-10-14** | **PASS** — CAPABILITY_MAP covers 100 % of catalogue_v2 ids + Cube v2 members (0 gaps) |
 | 1 Order classification | **done 2026-10-14 (applied)** | **PASS** — v3_contracts 15/15 live; owner reviewed outcomes (D-22a–e) |
-| 2–9 | not started | — |
+| 2 Component ledger | **done 2026-10-14 (applied)** | **PASS** — contracts 26/26 live; reconciliation 0 unexplained ₹ |
+| 3–9 | not started | — |
 
 ## Where the work lives
 - Agent Core: branch `semantic-v3`, worktree `/home/tervigon/work/agent_core_v3`. **Not** checked out in `/opt/seleric/Seleric_Agent_Core`: compose runs from there and bind-mounts `catalogue*/` into the live MCP, and Jenkins deploys `main` there. Commit locally; never push to `main`.
@@ -19,7 +20,7 @@ Read this file and spec §0B at the start of every session; append an entry at t
 - mage-ai: branch `semantic-v3`, worktree `/home/tervigon/work/mage_v3` (`.env` is a symlink to the main checkout's, untracked). Earlier: no branch (no edits in Phase 0). `/opt/seleric/mage-ai/infra/cube` is bind-mounted into the live `cube-v2` (dev mode, hot reload), so mage-ai work must also go in a worktree (`semantic-v3`), not a branch switch in `/opt/seleric/mage-ai`.
 
 ## Open questions (ask the owner when the phase reaches them)
-1. **D-11a** (Phase 2): historical rate card for COD handling, checkout fee, weight discrepancy before 2026-09.
+1. ~~**D-11a**~~ DECIDED 2026-10-14: no extra data; legacy COD / checkout / weight stay unrecorded.
 2. **Allocated-family period rule** (Phase 4): same day / same period / reproduce today's `product_ad_line` `delivery_share`.
 3. **Monthly-close history** (Phase 4): months before the first snapshot shown as "reconstructed from current state", or not offered?
 4. ~~**Unknown-outcome review**~~ done 2026-10-14 → D-22a–e; 68 sale orders (₹96k) remain Unknown.
@@ -125,3 +126,17 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 - D-22g: a returned quantity with no refund on an active order is `returned` (2 lines).
 - SQL is updated in mage-ai `semantic-v3` (f0fe20b) and both rulings are in spec §0B. **Applied to production with the owner's OK; contracts 15/15 live.**
 - Added `CHECKLIST.md`.
+
+### 2026-10-14 — Phase 2 (component ledger) — applied
+- Owner decisions: D-11a (no extra data), D-10a (shipping reversed on cancel / RTO), D-01a (value-difference price adjustment), D-22h (Unknown booked as cancelled), D-01b (exchange-credit gateways).
+- Built (mage-ai `semantic-v3` 052de69):
+  - `semantic.ledger_order_component` + `serve.ledger_order_component`, `serve.fct_payment`;
+  - `serve/evaluations/v3_reconcile_gold.py`;
+  - ledger and payment contracts in `v3_contracts.py`;
+  - `apply_v3.py --live-deps`.
+- Applied with the owner's OK. Live results:
+  - contracts 26/26;
+  - reconciliation: LINE / ORDER / PRODUCT pass, and the v2 bridge has 0 unexplained ₹ (all history: v2 3,53,55,650 → v3 3,49,43,898, Δ −4,11,752, every ₹ assigned to a decision id).
+- Results are in `mage-ai/serve/evaluations/results/v3_*_20261014.json`. The full bridge table and findings F2-1…F2-8 are in `CHECKLIST.md`.
+- Fingerprint after the apply: only live-data changes (gold CDC batch 23:29 + v2 refresh 23:35) and the new views.
+- Next: Phase 3 (ads at native grain, website LPV, attribution bridge with the model parameter).
