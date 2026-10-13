@@ -23,8 +23,13 @@ def test_dashboard_analyst_prompt_composes_guard_persona_and_scope():
     # Interpolates the current scope.
     assert "Funnel Analytics" in out
     assert "Tilting Heads" in out
-    assert "item_count" in out
+    # v2 data rules: scope is a filter, order date is the default basis.
+    assert "ad_platform" in out
+    assert "ORDER date" in out
     assert "greater_than" in out
+    # Retired v1 ids must not be taught to clients.
+    assert "_all_channels" not in out.replace('"_all_channels"', "")
+    assert "item_count" not in out
 
 
 def test_dashboard_analyst_prompt_blank_scope_falls_back():
