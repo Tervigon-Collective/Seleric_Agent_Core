@@ -253,14 +253,6 @@ async def test_meta_only_metric_rejects_google(planner):
     assert "only valid for ad_platform = meta" in str(exc.value)
 
 
-async def test_amazon_sales_channel_is_rejected(planner):
-    req = QueryRequest(measures=["orders"], time_range=SEP,
-                       filters=[FilterSpec(dimension="sales_channel", operator="equals", values=["amazon"])])
-    with pytest.raises(PlanError) as exc:
-        await planner.run(req)
-    assert "not supported" in str(exc.value) and "Amazon" in str(exc.value)
-
-
 async def test_term_filters_flow_into_the_query(planner, cube):
     req = QueryRequest(measures=["meta net sales"], time_range=SEP)
     out = await planner.run(req)
@@ -353,7 +345,7 @@ def test_bootstrap_carries_what_the_agent_needs(v2, catalogue):
     assert any("Meta only" in n for n in m["ad_spend"]["binding_notes"])
     d = {x["id"]: x for x in b["dimensions"]}
     assert d["channel"]["hierarchy"] == {"id": "traffic", "level": 2, "levels": ["platform", "channel", "sub_channel"]}
-    assert "amazon" in d["sales_channel"]["unsupported_values"]
+    assert "sales_channel" not in d  # Amazon removed from the semantic layer (2026-10-13)
     assert "Meta delivery only" in d["age"]["description"]
     # v1 bootstrap unchanged
     assert "semantic_version" not in catalogue.bootstrap()

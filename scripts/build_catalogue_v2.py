@@ -217,14 +217,13 @@ def _grain_twins(concepts: list[dict], mid: str) -> list[str]:
 V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_status",
                   "platform": "lt_platform", "channel": "lt_channel", "product_title": "product_title"}
 ALLOWED = {"finance_channel": ["meta", "google", "whatsapp", "organic", "unattributed"],
-           "ad_platform": ["meta", "google"], "sales_channel": ["shopify", "amazon"],
+           "ad_platform": ["meta", "google"],
            "row_type": ["detail", "reconciliation"], "order_pnl_row_type": ["orders", "ad_spend"],
            "medium_group": ["paid", "owned", "earned", "none", "unclassified"]}
 # v1 glossary ids that are live v2 ids again but whose v1 TERMS read best on another metric: "orders by channel" /
 # "meta orders" need the full traffic hierarchy (commerce.orders carries platform → channel → sub_channel; the
 # order-date channel P&L has no channel). channel_orders stays reachable by id and via the cac concept's grain.
 GLOSSARY_REDIRECT = {"channel_orders": "orders"}
-SALES_CHANNEL_REASON = "Amazon is a reserved sales channel; it is not yet supported on the agent surface."
 DISPLAY = {"aov": "AOV", "net_aov": "Net AOV", "ctr": "CTR", "cpc": "CPC", "cpm": "CPM", "ltv": "LTV", "cac": "CAC",
            "ltv_cac_ratio": "LTV:CAC ratio", "pnl_mer": "P&L MER", "pnl_gross_roas": "P&L gross ROAS",
            "pnl_net_roas": "P&L net ROAS", "pnl_be_roas": "P&L break-even ROAS",
@@ -399,8 +398,6 @@ def main() -> int:
         if family:
             entry["family"] = family
             entry["family_rank"] = FAMILIES[family].index(did)
-        if did == "sales_channel":
-            entry["unsupported_values"] = {"amazon": SALES_CHANNEL_REASON}
         if not entry["description"]:
             entry["description"] = entry["display_name"]
         if set(entry["views"]) == {"paid_media_breakdowns"} and did != "brand_id":

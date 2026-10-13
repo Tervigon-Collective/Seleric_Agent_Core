@@ -249,8 +249,7 @@ class QueryPlanner:
     # ---------- semantic v2: unsupported values, valid_for, bindings ----------
 
     def _check_unsupported_values(self, filters: list[FilterSpec]) -> None:
-        """A dimension value the agent surface does not support yet (e.g. sales_channel =
-        amazon) is rejected with its reason — never answered as an empty / wrong slice."""
+        """A dimension value the agent surface does not support yet is rejected with its reason — never answered as an empty / wrong slice."""
         for f in filters:
             dim = self.catalogue.cat.dimensions.get(f.dimension)
             if dim is None or not dim.unsupported_values:

@@ -1259,22 +1259,6 @@ dimensions:
   allowed_values:
   - detail
   - reconciliation
-- id: sales_channel
-  display_name: Sales Channel
-  description: 'Sales channel: shopify (amazon is a reserved slot, not yet supported).'
-  is_time: false
-  views:
-    commerce: commerce.sales_channel
-    product: product.sales_channel
-    web_sessions: web_sessions.sales_channel
-    pnl: pnl.sales_channel
-    order_pnl: order_pnl.sales_channel
-  aliases: []
-  allowed_values:
-  - shopify
-  - amazon
-  unsupported_values:
-    amazon: Amazon is a reserved sales channel; it is not yet supported on the agent surface.
 - id: session_date
   display_name: Session Date
   description: Session date (IST).

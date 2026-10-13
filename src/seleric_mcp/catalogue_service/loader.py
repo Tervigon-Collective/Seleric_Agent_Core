@@ -152,8 +152,7 @@ class DimensionDef(BaseModel):
     # equals/notEquals filters be case/typo-corrected instead of silently
     # matching zero rows. None means "no known enum" — filter values pass
     # through unvalidated, exactly as before this field existed.
-    # Semantic v2: values the agent surface does not support yet -> reason (e.g. sales_channel
-    # amazon). A filter on one is rejected with the reason, never answered as an empty slice.
+    # Semantic v2: values the agent surface does not support yet -> reason. A filter on one is rejected with the reason, never answered as an empty slice.
     unsupported_values: dict[str, str] = Field(default_factory=dict)
     # Semantic v2 conformed family (platform / channel / campaign): members carrying the same value
     # vocabulary on different views, so a slice on one can be answered by a sibling on a view that lacks it.

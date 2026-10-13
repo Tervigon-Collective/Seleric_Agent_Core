@@ -1537,7 +1537,6 @@ class CatalogueService:
                 "One metric id per number; scope, platform and channel are filters, not ids.",
                 "finance_channel: meta (incl. Meta organic), google (incl. Google organic), whatsapp, organic, unattributed.",
                 "is_paid = true keeps paid Meta / Google clicks only.",
-                "sales_channel = amazon is not supported yet.",
             ],
             "catalogue_version": self.version,
         }
