@@ -72,6 +72,6 @@ Findings (live today, not caused by this work):
   the live Agent surface, while serve DDL is applied by hand. Rule for this rebuild: no branch switch in
   `/opt/seleric/mage-ai`; v3 work goes in a worktree.
 - **F0-3:** brand 28 (spend only) gets computed `net_profit` / `pnl_net_profit` (= −spend) instead of a refusal. That is a Phase 1 contract item.
-- Both are recorded as `live_defect` on the CAPABILITY_MAP entries; v3 must deliver these capabilities.
+- F0-1 and F0-2 are recorded as `live_defect` on the CAPABILITY_MAP entries; v3 must deliver these capabilities.
 
 Gate: **PASS** (0 coverage gaps). Next: Phase 1 (order classification). First, open a mage-ai `semantic-v3` worktree.
