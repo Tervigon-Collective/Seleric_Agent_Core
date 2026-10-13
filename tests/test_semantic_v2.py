@@ -491,7 +491,7 @@ def test_platform_family_is_conformed_across_domains(v2):
 
 def test_row_type_is_split_by_value_domain(v2):
     cat = v2.cat
-    assert cat.dimensions["row_type"].allowed_values == ["detail", "reconciliation"]
+    assert cat.dimensions["row_type"].allowed_values == ["orders", "ad_spend"]
     assert set(cat.dimensions["row_type"].views) == {"pnl"}
     assert cat.dimensions["order_pnl_row_type"].allowed_values == ["orders", "ad_spend"]
 

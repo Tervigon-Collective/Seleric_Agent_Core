@@ -3,11 +3,11 @@ id: taxes_on_net_sales
 display_name: Taxes on net sales
 category: finance
 status: certified
-description: 'GST on net sales at the flat 18 % rate (order date). Date axis: order_date (IST); grain: brand_order_day_channel_ad.
+description: 'GST on net sales, each line at its own rate (shipping at the order''s line rate), order date. Date axis: order_date (IST); grain: brand_order_day_channel_ad.
   Redefined in semantic v2 (version 2.0.0): until v2 the id taxes_on_net_sales meant the event-date P&L number,
   now pnl_taxes_on_net_sales.'
 formula:
-  human_readable: GST on net sales at the flat 18 % rate (order date).
+  human_readable: GST on net sales, each line at its own rate (shipping at the order's line rate), order date.
   authoritative_source: cube
   depends_on: []
 cube_mapping:

@@ -698,18 +698,18 @@ terms:
   canonical_id: net_sales
   canonical_dimension_id: channel
   definition: 'Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: pnl_net_sales
-    grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use net_sales
+    grouped by channel. For sales of orders placed in the window by source use net_sales
     grouped by lt_platform.'
 - term: channel revenue
   canonical_id: net_sales
   canonical_dimension_id: channel
   definition: 'Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: pnl_net_sales
-    grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use net_sales
+    grouped by channel. For sales of orders placed in the window by source use net_sales
     grouped by lt_platform.'
 - term: channel net revenue
   canonical_id: net_sales
   definition: 'Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: pnl_net_sales
-    grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use net_sales
+    grouped by channel. For sales of orders placed in the window by source use net_sales
     grouped by lt_platform.'
 - term: channel attribution sales
   canonical_id: net_sales
@@ -725,13 +725,13 @@ terms:
   canonical_id: net_sales
   canonical_dimension_id: channel
   definition: 'Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: pnl_net_sales
-    grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use net_sales
+    grouped by channel. For sales of orders placed in the window by source use net_sales
     grouped by lt_platform.'
 - term: revenue by channel
   canonical_id: net_sales
   canonical_dimension_id: channel
   definition: 'Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: pnl_net_sales
-    grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use net_sales
+    grouped by channel. For sales of orders placed in the window by source use net_sales
     grouped by lt_platform.'
 - term: by channel
   canonical_dimension_id: channel

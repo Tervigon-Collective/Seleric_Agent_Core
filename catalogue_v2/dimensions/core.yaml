@@ -1251,14 +1251,14 @@ dimensions:
   - return status
 - id: row_type
   display_name: Row Type
-  description: detail (campaign-level) | reconciliation (not placeable at campaign grain).
+  description: orders (the order lines' P&L) | ad_spend (delivery rows).
   is_time: false
   views:
     pnl: pnl.row_type
   aliases: []
   allowed_values:
-  - detail
-  - reconciliation
+  - orders
+  - ad_spend
 - id: session_date
   display_name: Session Date
   description: Session date (IST).

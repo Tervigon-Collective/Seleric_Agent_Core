@@ -166,7 +166,7 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["order_pnl_net_sales", "contribution_margin"],
 }
 DIM_RENAME = {("commerce", "event_type"): "order_event_type",  # same member name, different meaning
-              ("order_pnl", "row_type"): "order_pnl_row_type"}  # orders | ad_spend, not pnl's detail | reconciliation
+              ("order_pnl", "row_type"): "order_pnl_row_type"}  # kept apart for stable ids (both orders | ad_spend)
 # Conformed dimension families: members that carry the SAME value vocabulary on different views (checked live
 # 2026-10-08: ad_platform / finance_channel / platform agree on meta + google, acquisition_platform uses the traffic
 # platform labels, acquisition_campaign holds campaign names). A filter / breakdown on one member is answered on a
@@ -218,7 +218,7 @@ V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_st
                   "platform": "lt_platform", "channel": "lt_channel", "product_title": "product_title"}
 ALLOWED = {"finance_channel": ["meta", "google", "whatsapp", "organic", "unattributed"],
            "ad_platform": ["meta", "google"],
-           "row_type": ["detail", "reconciliation"], "order_pnl_row_type": ["orders", "ad_spend"],
+           "row_type": ["orders", "ad_spend"], "order_pnl_row_type": ["orders", "ad_spend"],
            "medium_group": ["paid", "owned", "earned", "none", "unclassified"]}
 # v1 glossary ids that are live v2 ids again but whose v1 TERMS read best on another metric: "orders by channel" /
 # "meta orders" need the full traffic hierarchy (commerce.orders carries platform → channel → sub_channel; the
@@ -585,7 +585,8 @@ def main() -> int:
     for t in ry(V1 / "glossary" / "terms.yaml")["terms"]:
         t = dict(t)
         if t.get("definition"):
-            t["definition"] = " ".join(modernize(t["definition"]).split())
+            # pnl_daily has no reconciliation rows since the line spine (2026-10-13)
+            t["definition"] = " ".join(modernize(t["definition"]).replace(" (include reconciliation rows)", "").split())
         cid, did = t.get("canonical_id"), t.get("canonical_dimension_id")
         if cid in GLOSSARY_REDIRECT:
             cid = t["canonical_id"] = GLOSSARY_REDIRECT[cid]
