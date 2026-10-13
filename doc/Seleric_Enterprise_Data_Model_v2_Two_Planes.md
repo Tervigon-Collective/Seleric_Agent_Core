@@ -117,6 +117,7 @@ Status values: **PENDING** (not answered), **DECIDED** (owner answer recorded wi
 | D-08a | Test orders | exclude / include | F-05 | **DECIDED 2026-10-14: excluded everywhere.** |
 | D-15 | New-customer definition | first placed / first delivered | — | **DECIDED 2026-10-14: first placed order** (regardless of outcome). |
 | D-16 | Guest identity | match guests by phone/email / keep separate | — | **DECIDED 2026-10-14: guest checkouts matched to customers by phone/email** for repeat/LTV. Feasible: `gold.dim_customers` has `phone`, `phone_hash`, `email_hash`. *Proposed (not yet decided): use hashed keys in serve, no raw PII to the Agent.* |
+| D-26 | Live v2 defects F0-1 (4 tax metrics error) / F0-2 (customers × first-order product errors) | fix in v2 now / leave until v3 | Phase 0 sweep 2026-10-14: 7 of 739 Cube v2 members fail; caused by unapplied mage-ai f645091 / 8a2b333 | **DECIDED 2026-10-14 (owner):** leave broken in v2; v3 delivers them (CAPABILITY_MAP `live_defect`). No v2 production write. |
 
 ---
 

@@ -7,7 +7,8 @@ Read this file and spec §0B at the start of every session; append an entry at t
 | Phase | State | Gate |
 |---|---|---|
 | 0 Baseline + capability inventory | **done 2026-10-14** | **PASS** — CAPABILITY_MAP covers 100 % of catalogue_v2 ids + Cube v2 members (0 gaps) |
-| 1–9 | not started | — |
+| 1 Order classification | in progress | FIN-13/14 contracts + owner review of outcome counts |
+| 2–9 | not started | — |
 
 ## Where the work lives
 - Agent Core: branch `semantic-v3`, worktree `/home/tervigon/work/agent_core_v3`. **Not** checked out in `/opt/seleric/Seleric_Agent_Core`: compose runs from there and bind-mounts `catalogue*/` into the live MCP, and Jenkins deploys `main` there. Commit locally; never push to `main`.
@@ -26,7 +27,7 @@ Read this file and spec §0B at the start of every session; append an entry at t
 7. Any unexplained ₹ in reconciliation (Phases 2–4, 7).
 8. **query_log retention is 7 days** (Phase 9): the "14 days of zero reads" check needs a longer `system.query_log`
    TTL (a server config change) or two consecutive 7-day checks. Owner to choose.
-9. **Live v2 defects (now):** F0-1 / F0-2 break Agent answers today. Options (both are production writes; neither was done):
+9. ~~**Live v2 defects (now):**~~ **DECIDED 2026-10-14 (D-26): leave broken in v2 until the v3 cutover.** F0-1 / F0-2 break Agent answers today. Options (both are production writes; neither was done):
    (a) apply the missing serve DDL — for F0-2 only `serve.customer_ltv` from 8a2b333; for F0-1 the f645091 SQL, which
    D-25 says is superseded, so (a) is not available for F0-1 without reopening D-25; (b) revert the Cube model_v2 members
    added by 8a2b333 / f645091 (hot reload makes it live). Or leave them broken until the v3 cutover. Owner to choose.
