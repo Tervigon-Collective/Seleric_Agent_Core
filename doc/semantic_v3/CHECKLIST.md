@@ -35,7 +35,7 @@ Where the work is:
 - [x] `serve/evaluations/v3_contracts.py`: grain, completeness, FIN-13, FIN-14, exchange roots, new customer, PII, spend-only scope.
 - [x] Owner reviewed outcome counts and samples (Q4) → D-22a–e. Later added D-22f/g.
 - [x] Before and after the apply, existing serve views are unchanged (fingerprints).
-- [~] **D-22f / D-22g** are in the SQL and spec, but **not yet applied** to production. Waiting for the owner's OK.
+- [x] **D-22f / D-22g** applied to production 2026-10-14: 52 orders cancelled (`refund_without_return_all_lines`), 15 lines cancelled, 2 lines returned. Contracts 15/15 live.
 - [ ] Attribution keys on `fct_order` (default model `last_non_direct`). Moved to Phase 3.
 - [ ] Cube login (`cube_serve`) read check of the new views. Not run: the owner declined the credential command. Covered in Phase 5.
 
@@ -123,4 +123,4 @@ Where the work is:
 | Q7 | Any unexplained ₹ in reconciliation | Phases 2–4, 7 |
 | Q8 | query_log retention: longer TTL or two 7-day checks | Phase 9 |
 | Q11 | Brand 28 value → refusal change | Phase 7 |
-| — | Apply D-22f / D-22g to production | now |
+

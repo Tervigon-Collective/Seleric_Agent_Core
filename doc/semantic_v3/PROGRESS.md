@@ -123,5 +123,5 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 ### 2026-10-14 — Phase 1 follow-up (owner rulings D-22f / D-22g)
 - D-22f: a line refunded with no return is `cancelled`. An order whose every line is refunded with no return is `cancelled` (45 sale + 7 other orders).
 - D-22g: a returned quantity with no refund on an active order is `returned` (2 lines).
-- SQL is updated in mage-ai `semantic-v3` and both rulings are in spec §0B. **Not yet applied** to production (waiting for the owner's OK).
+- SQL is updated in mage-ai `semantic-v3` (f0fe20b) and both rulings are in spec §0B. **Applied to production with the owner's OK; contracts 15/15 live.**
 - Added `CHECKLIST.md`.
