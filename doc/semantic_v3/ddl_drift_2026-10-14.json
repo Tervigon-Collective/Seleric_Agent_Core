@@ -1,0 +1,497 @@
+{
+ "mage_head": "6b6b663",
+ "counts": {
+  "same": 59,
+  "differs": 9,
+  "repo_only": 2
+ },
+ "objects": [
+  {
+   "object": "semantic.cfg_traffic_platforms",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/01_cfg_tables.sql",
+   "status": "same"
+  },
+  {
+   "object": "semantic.cfg_traffic_source_rules",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/01_cfg_tables.sql",
+   "status": "same"
+  },
+  {
+   "object": "semantic.dim_brand",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/05_dim_brand.sql",
+   "status": "same"
+  },
+  {
+   "object": "semantic.dim_product_variant",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/06_dim_product_variant.sql",
+   "status": "differs",
+   "changes": 1,
+   "detail": [
+    "insert: repo \u00ab\u00bb live \u00ab`product_cost_ex_gst` nullable ( float64 ) , `is_cost_set` uint8 ,\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.dim_traffic_source",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/02_dim_traffic_source.sql",
+   "status": "same"
+  },
+  {
+   "object": "semantic.fct_line_pnl",
+   "engine": null,
+   "file": "serve/semantic/views/06b_fct_line_pnl.sql",
+   "status": "repo_only"
+  },
+  {
+   "object": "semantic.fct_order_pnl_daily",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/08_fct_order_pnl_daily.sql",
+   "status": "differs",
+   "changes": 4,
+   "detail": [
+    "delete: repo \u00ab, `sub_channel` string , `is_new_customer` uint8 , `shipping_region` string , `payment_bucket` string\u00bb live \u00ab\u00bb",
+    "delete: repo \u00ab`shipping_revenue` float64 ,\u00bb live \u00ab\u00bb",
+    "delete: repo \u00abfloat64 , `taxes`\u00bb live \u00ab\u00bb",
+    "insert: repo \u00ab\u00bb live \u00ab, `sub_channel` string , `is_new_customer` uint8 , `shipping_state` string , `payment_bucket` string , `shipping_region` string\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.fct_pnl_daily",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/07_fct_pnl_daily.sql",
+   "status": "differs",
+   "changes": 2,
+   "detail": [
+    "delete: repo \u00ab`shipping_revenue` float64 ,\u00bb live \u00ab\u00bb",
+    "delete: repo \u00abfloat64 , `taxes`\u00bb live \u00ab\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.fct_product_pnl",
+   "engine": "MergeTree",
+   "file": "serve/semantic/views/09_product_pnl.sql",
+   "status": "differs",
+   "changes": 3,
+   "detail": [
+    "replace: repo \u00ab`gross_sales`\u00bb live \u00ab`revenue_share`\u00bb",
+    "replace: repo \u00ab`shipping_revenue`\u00bb live \u00ab`cost_share` float64 , `gross_sales`\u00bb",
+    "delete: repo \u00abfloat64 , `taxes`\u00bb live \u00ab\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.mv_dim_product_variant",
+   "engine": "MaterializedView",
+   "file": "serve/semantic/views/06_dim_product_variant.sql",
+   "status": "differs",
+   "changes": 2,
+   "detail": [
+    "insert: repo \u00ab\u00bb live \u00ab, argmax ( tofloat64 ( product_cost_ex_gst ) , _loaded_at ) as product_cost_ex_gst , argmax ( touint8 ( ifnull ( is_cost_set , 0 ) ) , _loaded_at ) as is_cost_s\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abc . product_cost_ex_gst as product_cost_ex_gst , ifnull ( c . is_cost_set , 0 ) as is_cost_set ,\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.mv_dim_traffic_source",
+   "engine": "MaterializedView",
+   "file": "serve/semantic/views/02_dim_traffic_source.sql",
+   "status": "same"
+  },
+  {
+   "object": "semantic.mv_fct_line_pnl",
+   "engine": null,
+   "file": "serve/semantic/views/06b_fct_line_pnl.sql",
+   "status": "repo_only"
+  },
+  {
+   "object": "semantic.mv_fct_order_pnl_daily",
+   "engine": "MaterializedView",
+   "file": "serve/semantic/views/08_fct_order_pnl_daily.sql",
+   "status": "differs",
+   "changes": 33,
+   "detail": [
+    "delete: repo \u00abdepends on semantic . mv_fct_line_pnl\u00bb live \u00ab\u00bb",
+    "replace: repo \u00aborder_arms\u00bb live \u00abattr\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abtoint64 ( order_id ) as order_id , nullif ( tostring ( argmax ( lt_campaign_id , _loaded_at ) ) , '' ) as campaign_id , nullif ( tostring ( argmax ( lt_adset_id\u00bb",
+    "replace: repo \u00abfinance_channel\u00bb live \u00abc . channel\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abtostring ( c . sub_channel ) as\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abtouint8 ( c . is_new_customer ) as\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abtostring ( c . shipping_region ) as\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abtostring ( c . payment_bucket ) as\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.mv_fct_pnl_daily",
+   "engine": "MaterializedView",
+   "file": "serve/semantic/views/07_fct_pnl_daily.sql",
+   "status": "differs",
+   "changes": 32,
+   "detail": [
+    "delete: repo \u00abdepends on semantic . mv_fct_line_pnl\u00bb live \u00ab\u00bb",
+    "delete: repo \u00abbrand_id , report_date , tostring ( finance_channel ) as finance_channel , ad_platform , campaign_id , adset_id , ad_id , touint8 ( ( ad_platform is not null ) \u00bb live \u00ab\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abas brand_id\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abas report_date\u00bb",
+    "replace: repo \u00abad_platform\u00bb live \u00abchannel ) as finance_channel , if ( ( tostring ( channel ) in ( 'meta' , 'google' )\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abchannel ) , null ) as\u00bb",
+    "delete: repo \u00ab)\u00bb live \u00ab\u00bb",
+    "insert: repo \u00ab\u00bb live \u00abas campaign_id\u00bb"
+   ]
+  },
+  {
+   "object": "semantic.mv_fct_product_pnl",
+   "engine": "MaterializedView",
+   "file": "serve/semantic/views/09_product_pnl.sql",
+   "status": "differs",
+   "changes": 93,
+   "detail": [
+    "delete: repo \u00abdepends on semantic . mv_fct_line_pnl\u00bb live \u00ab\u00bb",
+    "insert: repo \u00ab\u00bb live \u00ablines as ( select brand_id , order_id , line_item_id , variant_id , greatest ( tofloat64 ( gross_line_revenue_ex_gst ) , 0 ) as rev , greatest ( tofloat64 ( gro\u00bb",
+    "replace: repo \u00absum ( gross_sales ) over w\u00bb live \u00aborder_rev\u00bb",
+    "replace: repo \u00abgross_sales\u00bb live \u00abrev\u00bb",
+    "replace: repo \u00absum ( gross_sales ) over w\u00bb live \u00aborder_rev\u00bb",
+    "replace: repo \u00abcount ( ) over w\u00bb live \u00aborder_lines\u00bb",
+    "insert: repo \u00ab\u00bb live \u00ab, if ( order_cost > 0 , cost / order_cost , if ( order_rev > 0 , rev / order_rev , 1 / order_lines ) ) as w_cost\u00bb",
+    "replace: repo \u00absemantic . fct_line_pnl where arm = 'placement' window w\u00bb live \u00abtotals ) , order_campaign\u00bb"
+   ]
+  },
+  {
+   "object": "serve.ad_changes",
+   "engine": "View",
+   "file": "serve/paid_media/views/ad_changes.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.ad_channel_pnl_daily",
+   "engine": "View",
+   "file": "serve/attribution/views/ad_channel_pnl_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.ad_delivery_daily",
+   "engine": "View",
+   "file": "serve/paid_media/views/ad_delivery_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.ad_delivery_hourly",
+   "engine": "View",
+   "file": "serve/paid_media/views/ad_delivery_hourly.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.attribution_paths",
+   "engine": "View",
+   "file": "serve/attribution/views/attribution_paths.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.campaign_products",
+   "engine": "View",
+   "file": "serve/semantic/views/09_product_pnl.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.canonical_pnl",
+   "engine": "View",
+   "file": "serve/finance/views/canonical_pnl.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.cfg_traffic_platforms",
+   "engine": "View",
+   "file": "serve/semantic/views/04_serve_views.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.cfg_traffic_source_rules",
+   "engine": "View",
+   "file": "serve/semantic/views/04_serve_views.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.channel_attribution_daily",
+   "engine": "View",
+   "file": "serve/attribution/views/channel_attribution_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.channel_pnl",
+   "engine": "View",
+   "file": "serve/finance/views/channel_pnl.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.commerce_order_events",
+   "engine": "View",
+   "file": "serve/commerce/views/commerce_order_events.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.commerce_orders",
+   "engine": "View",
+   "file": "serve/commerce/views/commerce_orders.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.commerce_performance_daily",
+   "engine": "View",
+   "file": "serve/commerce/views/commerce_performance_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.customer_data",
+   "engine": "View",
+   "file": "serve/customer/views/customer_data.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.customer_ltv",
+   "engine": "View",
+   "file": "serve/customer/views/customer_ltv.sql",
+   "status": "differs",
+   "changes": 4,
+   "detail": [
+    "delete: repo \u00ab, argmin ( order_id , ( order_created_at_ist , order_id ) ) as first_order_id\u00bb live \u00ab\u00bb",
+    "delete: repo \u00ab) , first_line as ( select brand_id , order_id , argmax ( variant_id , ( tofloat64 ( coalesce ( net_pre_refund_excl_gst , 0 ) ) , - line_item_id ) ) as first_va\u00bb live \u00ab\u00bb",
+    "delete: repo \u00abnullif ( fl . first_variant_id , 0 ) as first_order_variant_id ,\u00bb live \u00ab\u00bb",
+    "delete: repo \u00ableft join first_line as fl on ( fl . brand_id = o . brand_id ) and ( fl . order_id = o . first_order_id )\u00bb live \u00ab\u00bb"
+   ]
+  },
+  {
+   "object": "serve.dim_ad",
+   "engine": "View",
+   "file": "serve/paid_media/views/dim_ad.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.dim_adset",
+   "engine": "View",
+   "file": "serve/paid_media/views/dim_adset.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.dim_brand",
+   "engine": "View",
+   "file": "serve/semantic/views/05_dim_brand.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.dim_campaign",
+   "engine": "View",
+   "file": "serve/paid_media/views/dim_campaign.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.dim_product_variant",
+   "engine": "View",
+   "file": "serve/semantic/views/06_dim_product_variant.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.dim_traffic_source",
+   "engine": "View",
+   "file": "serve/semantic/views/04_serve_views.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.finance_waterfall_daily",
+   "engine": "View",
+   "file": "serve/finance/views/finance_waterfall_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.funnel_daily",
+   "engine": "View",
+   "file": "serve/web_analytics/views/funnel_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.funnel_orders",
+   "engine": "View",
+   "file": "serve/semantic/views/09_product_pnl.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.google_ads_daily",
+   "engine": "View",
+   "file": "serve/paid_media/views/google_ads_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.google_ads_hourly",
+   "engine": "View",
+   "file": "serve/paid_media/views/google_ads_hourly.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.google_ads_status_history",
+   "engine": "View",
+   "file": "serve/paid_media/views/google_ads_status_history.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.ltv_cac_daily",
+   "engine": "View",
+   "file": "serve/customer/views/ltv_cac_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.meta_ad_attribution_daily",
+   "engine": "View",
+   "file": "serve/attribution/views/meta_ad_attribution_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.meta_ads_breakdown_daily",
+   "engine": "View",
+   "file": "serve/paid_media/views/meta_ads_breakdown_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.meta_ads_daily",
+   "engine": "View",
+   "file": "serve/paid_media/views/meta_ads_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.meta_ads_hourly",
+   "engine": "View",
+   "file": "serve/paid_media/views/meta_ads_hourly.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.meta_ads_status_history",
+   "engine": "View",
+   "file": "serve/paid_media/views/meta_ads_status_history.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.order_attribution",
+   "engine": "View",
+   "file": "serve/attribution/views/order_attribution.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.order_pnl_daily",
+   "engine": "View",
+   "file": "serve/semantic/views/08_fct_order_pnl_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.orders_all_channels",
+   "engine": "View",
+   "file": "serve/commerce/views/orders_all_channels.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.payments",
+   "engine": "View",
+   "file": "serve/finance/views/payments.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.platform_attribution_commerce",
+   "engine": "View",
+   "file": "serve/attribution/views/platform_attribution_commerce.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.pnl_daily",
+   "engine": "View",
+   "file": "serve/semantic/views/07_fct_pnl_daily.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.product_ad_line",
+   "engine": "View",
+   "file": "serve/semantic/views/09_product_pnl.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.product_hierarchy_conflicts",
+   "engine": "View",
+   "file": "serve/semantic/views/06_dim_product_variant.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.product_performance",
+   "engine": "View",
+   "file": "serve/product/views/product_performance.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.product_pnl",
+   "engine": "View",
+   "file": "serve/semantic/views/09_product_pnl.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.purchase_sequence",
+   "engine": "View",
+   "file": "serve/customer/views/purchase_sequence.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.refund_events",
+   "engine": "View",
+   "file": "serve/operations/views/refund_events.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.return_lifecycle",
+   "engine": "View",
+   "file": "serve/operations/views/return_lifecycle.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.returns_cancels_all_channels",
+   "engine": "View",
+   "file": "serve/commerce/views/returns_cancels_all_channels.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.sales_all_channels",
+   "engine": "View",
+   "file": "serve/commerce/views/sales_all_channels.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.session_funnel",
+   "engine": "View",
+   "file": "serve/web_analytics/views/session_funnel.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.touchpoints",
+   "engine": "View",
+   "file": "serve/attribution/views/touchpoints.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.traffic_hierarchy_conflicts",
+   "engine": "View",
+   "file": "serve/semantic/views/03_traffic_monitors.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.traffic_unmapped",
+   "engine": "View",
+   "file": "serve/semantic/views/03_traffic_monitors.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.web_events",
+   "engine": "View",
+   "file": "serve/web_analytics/views/web_events.sql",
+   "status": "same"
+  },
+  {
+   "object": "serve.web_events_daily",
+   "engine": "View",
+   "file": "serve/web_analytics/views/web_events_daily.sql",
+   "status": "same"
+  }
+ ]
+}
