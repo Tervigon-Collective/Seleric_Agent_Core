@@ -3,10 +3,10 @@ id: pnl_net_sales
 display_name: P&L net sales
 category: finance
 status: certified
-description: 'Net sales ex-GST = gross − discounts − returns − cancels (event date). = dashboard Net Sales. Date
+description: 'Net sales ex-GST = gross − discounts − returns − cancels (event date), compiled from the order lines. Date
   axis: report_date (event date); grain: brand_day_channel_ad.'
 formula:
-  human_readable: Net sales ex-GST = gross − discounts − returns − cancels (event date). = dashboard Net Sales.
+  human_readable: Net sales ex-GST = gross − discounts − returns − cancels (event date), compiled from the order lines.
   authoritative_source: cube
   depends_on:
   - pnl_gross_sales

@@ -3,10 +3,10 @@ id: pnl_net_profit
 display_name: P&L net profit
 category: finance
 status: certified
-description: 'Net profit = net sales − net COGS − ad spend. = dashboard Net Profit. Date axis: report_date (event
+description: 'Net profit = net sales − net COGS − ad spend (event date), compiled from the order lines. Date axis: report_date (event
   date); grain: brand_day_channel_ad. Also the home of the v1 meaning of: net_profit.'
 formula:
-  human_readable: Net profit = net sales − net COGS − ad spend. = dashboard Net Profit.
+  human_readable: Net profit = net sales − net COGS − ad spend (event date), compiled from the order lines.
   authoritative_source: cube
   depends_on:
   - pnl_contribution_margin
