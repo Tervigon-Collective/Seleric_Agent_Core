@@ -7,7 +7,7 @@ Read this file and spec §0B at the start of every session; append an entry at t
 | Phase | State | Gate |
 |---|---|---|
 | 0 Baseline + capability inventory | **done 2026-10-14** | **PASS** — CAPABILITY_MAP covers 100 % of catalogue_v2 ids + Cube v2 members (0 gaps) |
-| 1 Order classification | in progress | FIN-13/14 contracts + owner review of outcome counts |
+| 1 Order classification | **done 2026-10-14 (applied)** | **PASS** — v3_contracts 15/15 live; owner reviewed outcomes (D-22a–e) |
 | 2–9 | not started | — |
 
 ## Where the work lives
@@ -15,14 +15,14 @@ Read this file and spec §0B at the start of every session; append an entry at t
 - **Spec / plan:** the committed copies are in this worktree. `/opt/seleric/Seleric_Agent_Core/doc/Seleric_Enterprise_Data_Model_v2_Two_Planes.md`,
   its `.bak` and `/opt/seleric/Seleric_Agent_Core/plan/` are untracked snapshots from 2026-10-14 and are now **stale**: record
   §0B answers only in the worktree copy.
-- mage-ai: no branch yet (no edits in Phase 0). `/opt/seleric/mage-ai/infra/cube` is bind-mounted into the live `cube-v2` (dev mode, hot reload), so mage-ai work must also go in a worktree (`semantic-v3`), not a branch switch in `/opt/seleric/mage-ai`.
+- mage-ai: branch `semantic-v3`, worktree `/home/tervigon/work/mage_v3` (`.env` is a symlink to the main checkout's, untracked). Earlier: no branch (no edits in Phase 0). `/opt/seleric/mage-ai/infra/cube` is bind-mounted into the live `cube-v2` (dev mode, hot reload), so mage-ai work must also go in a worktree (`semantic-v3`), not a branch switch in `/opt/seleric/mage-ai`.
 
 ## Open questions (ask the owner when the phase reaches them)
 1. **D-11a** (Phase 2): historical rate card for COD handling, checkout fee, weight discrepancy before 2026-09.
 2. **Allocated-family period rule** (Phase 4): same day / same period / reproduce today's `product_ad_line` `delivery_share`.
 3. **Monthly-close history** (Phase 4): months before the first snapshot shown as "reconstructed from current state", or not offered?
-4. **Unknown-outcome review** (Phase 1 checkpoint): counts + samples per evidence code.
-5. **D-16 hashing proposal** (Phase 1): hashed phone/email keys in serve, no raw PII to the Agent.
+4. ~~**Unknown-outcome review**~~ done 2026-10-14 → D-22a–e; 68 sale orders (₹96k) remain Unknown.
+5. ~~**D-16 hashing proposal**~~ approved 2026-10-14 → D-16a.
 6. **Stop the Cube v1 container?** (Phase 9).
 7. Any unexplained ₹ in reconciliation (Phases 2–4, 7).
 8. **query_log retention is 7 days** (Phase 9): the "14 days of zero reads" check needs a longer `system.query_log`
@@ -34,7 +34,7 @@ Read this file and spec §0B at the start of every session; append an entry at t
 11. **Brand 28 refusal vs no-loss** (Phase 1 / 7): v2 computes brand-28 `net_profit` / `pnl_net_profit` (= −spend),
     ROAS and AOV; v3 refuses them (plan Phase 1 contract). Phase 7 will see value → refusal with no D-id: owner to
     confirm, then add a decision id.
-10. **Payments vs exchanges** (Phase 1): `payment_amount` / `payments.transactions` are `tbd` until we check whether
+10. ~~**Payments vs exchanges**~~ answered from data (Phase 1): replacements carry `manual`-gateway sale transactions (₹6.2L success) = non-cash exchange credits → payments `refine [D-01]`; separate them in Phase 2. Was: `payment_amount` / `payments.transactions` are `tbd` until we check whether
     non-cash exchange credits sit in payment transactions (D-01).
 
 ## Log
@@ -90,3 +90,31 @@ Findings (live today, not caused by this work):
 - F0-1 and F0-2 are recorded as `live_defect` on the CAPABILITY_MAP entries; v3 must deliver these capabilities.
 
 Gate: **PASS** (0 coverage gaps). Next: Phase 1 (order classification). First, open a mage-ai `semantic-v3` worktree.
+
+### 2026-10-14 — Phase 1 (order classification) — applied
+Owner decisions (spec §0B): D-26 (leave v2 defects until v3), D-22a–e (outcome rulings), D-08b (C2P stays a cancelled
+sale), D-16a (hashed person key). Owner approved the production apply.
+
+Built (mage-ai `semantic-v3` 4fd4d8e + LowCardinality fix; review: `PHASE1_OUTCOME_REVIEW.md`):
+- `semantic.core_order_class` / `mv_core_order_class` (refresh 5 min, ~4 s):
+  - order_type: sale 23,579 · exchange_replacement 499 · zero_value 18 · test 1 (brand 20).
+  - Exchange chain: parent from the ex-origin tag, the `Ex-n-` name, or attribution supersedes. All 499 resolve; max depth 5; `Ex-2-1-X` naming handled.
+  - Outcome + evidence code; person_key; is_new_customer.
+- `semantic.core_order_line_class` / `mv_core_order_line_class`: line outcome; kept lines in partial returns; in-order exchanges; outcome_quantity.
+- `serve.fct_order`, `serve.fct_order_line` (DEFINER serve_definer): no raw PII; `src_*` amounts as recorded; is_maturing (45 d).
+- `serve/semantic_v3/apply_v3.py`: applies only the v3 objects. `--preview` runs read-only with dependencies inlined.
+- `serve/evaluations/v3_contracts.py`: grain, completeness, FIN-13, FIN-13-LINE, FIN-14, FIN-14-LINE, exchange roots, new customer, line quantity, spend-only scope, PII.
+  - Result: **15/15 live**.
+- Before and after the apply, every existing serve view fingerprint is unchanged (except `canonical_pnl`, which already varies between runs).
+
+Brand 20 sale orders by outcome (all history):
+- active 18,851; cancelled 462; rto 2,822; returned 1,008; exchanged 366; exchange_in_progress 2; unknown 68 (₹96k).
+- The remaining Unknown is three groups: 52 cancelled after delivery, 11 returns with RTO evidence but delivered, 5 returns with no evidence.
+
+Not done / carried forward:
+- **Attribution keys on fct_order:** Phase 3. `fct_order_attribution_credit` covers 6,291 orders only, so last_non_direct coverage must be checked.
+- **Line refund without a return** (66 sale lines; ADJUSTMENT orders, active outcome): their money treatment is a Phase 2 interview item.
+- **cube_serve read check** of the new views was not run (the owner declined the credential-handling command). It is covered when Cube v3 queries them (Phase 5).
+- New-customer vs gold: 22 sale orders differ (identity merge / ordering, D-15 / D-16a).
+
+Next: Phase 2 — the component ledger (D-11a historical rate card is needed first).

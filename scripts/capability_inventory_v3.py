@@ -143,7 +143,8 @@ def metric_rule(mid: str, view: str) -> tuple[str, list[str], str]:
     if view == "attribution_paths":
         return "refine", ["D-01"], "replacement orders leave the order population"
     if view == "payments":
-        return "tbd", ["D-01"], "check in Phase 1 whether non-cash exchange credits sit in payment transactions"
+        return "refine", ["D-01"], ("non-cash exchange credits (gateway `manual` on exchange replacements, ₹6.2L success) "
+                                    "are separated from cash; price-difference payments stay cash (Phase 1 finding)")
     return "tbd", [], "no rule"
 
 
@@ -183,7 +184,7 @@ DIM_RULES: dict[str, tuple[str, list[str], str]] = {
 MEMBER_RULES: dict[str, tuple[str, list[str]]] = {
     "product.orders": ("refine", ORDER_POP),
     "product.product_attributed_revenue": ("refine", ORDER_POP + ["D-06", "D-02b", "D-09a"]),
-    "payments.transactions": ("tbd", ["D-01"]),
+    "payments.transactions": ("refine", ["D-01"]),
     "customers.first_order_variant_id": ("refine", ["D-16", "D-01"]),
 }
 ATTRIBUTED_DIMS = {"platform", "channel", "sub_channel", "finance_channel", "medium_group", "is_paid",
