@@ -11,6 +11,9 @@ Read this file and spec §0B at the start of every session; append an entry at t
 
 ## Where the work lives
 - Agent Core: branch `semantic-v3`, worktree `/home/tervigon/work/agent_core_v3`. **Not** checked out in `/opt/seleric/Seleric_Agent_Core`: compose runs from there and bind-mounts `catalogue*/` into the live MCP, and Jenkins deploys `main` there. Commit locally; never push to `main`.
+- **Spec / plan:** the committed copies are in this worktree. `/opt/seleric/Seleric_Agent_Core/doc/Seleric_Enterprise_Data_Model_v2_Two_Planes.md`,
+  its `.bak` and `/opt/seleric/Seleric_Agent_Core/plan/` are untracked snapshots from 2026-10-14 and are now **stale**: record
+  §0B answers only in the worktree copy.
 - mage-ai: no branch yet (no edits in Phase 0). `/opt/seleric/mage-ai/infra/cube` is bind-mounted into the live `cube-v2` (dev mode, hot reload), so mage-ai work must also go in a worktree (`semantic-v3`), not a branch switch in `/opt/seleric/mage-ai`.
 
 ## Open questions (ask the owner when the phase reaches them)
@@ -23,8 +26,13 @@ Read this file and spec §0B at the start of every session; append an entry at t
 7. Any unexplained ₹ in reconciliation (Phases 2–4, 7).
 8. **query_log retention is 7 days** (Phase 9): the "14 days of zero reads" check needs a longer `system.query_log`
    TTL (a server config change) or two consecutive 7-day checks. Owner to choose.
-9. **Live v2 defects (now):** fix in v2 (apply the missing columns / revert the model members — a production write),
-   or leave broken until the v3 cutover? See Phase 0 findings F0-1, F0-2.
+9. **Live v2 defects (now):** F0-1 / F0-2 break Agent answers today. Options (both are production writes; neither was done):
+   (a) apply the missing serve DDL — for F0-2 only `serve.customer_ltv` from 8a2b333; for F0-1 the f645091 SQL, which
+   D-25 says is superseded, so (a) is not available for F0-1 without reopening D-25; (b) revert the Cube model_v2 members
+   added by 8a2b333 / f645091 (hot reload makes it live). Or leave them broken until the v3 cutover. Owner to choose.
+11. **Brand 28 refusal vs no-loss** (Phase 1 / 7): v2 computes brand-28 `net_profit` / `pnl_net_profit` (= −spend),
+    ROAS and AOV; v3 refuses them (plan Phase 1 contract). Phase 7 will see value → refusal with no D-id: owner to
+    confirm, then add a decision id.
 10. **Payments vs exchanges** (Phase 1): `payment_amount` / `payments.transactions` are `tbd` until we check whether
     non-cash exchange credits sit in payment transactions (D-01).
 
@@ -71,6 +79,12 @@ Findings (live today, not caused by this work):
 - **Root cause of F0-1 and F0-2:** `cube-v2` runs dev mode and bind-mounts `/opt/seleric/mage-ai/infra/cube`, so every commit or checkout on that working tree changes
   the live Agent surface, while serve DDL is applied by hand. Rule for this rebuild: no branch switch in
   `/opt/seleric/mage-ai`; v3 work goes in a worktree.
+- **Sweep for more defects:** every public Cube v2 member was queried once (brand 20, Sep 2026): 507 dimension and
+  232 measure queries. The only failures are F0-1 (3 measures) and F0-2 (4 dimensions); the list is complete.
+- **Commits that made them live:** `8a2b333` (model customers.yml + customer_ltv.sql) and `f645091` (model taxes
+  members + fct_line_pnl SQL). Each commit changed the model and the SQL together; hot reload applied the model,
+  and nobody applied the SQL.
+- Cube v1 is confirmed to connect as `seleric_admin789` (`CUBEJS_DB_USER`); Cube v2 connects as `cube_serve`. The CONSUMERS.md classes are therefore exact.
 - **F0-3:** brand 28 (spend only) gets computed `net_profit` / `pnl_net_profit` (= −spend) instead of a refusal. That is a Phase 1 contract item.
 - F0-1 and F0-2 are recorded as `live_defect` on the CAPABILITY_MAP entries; v3 must deliver these capabilities.
 

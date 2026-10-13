@@ -210,7 +210,9 @@ BEHAVIOURS = [
     ("refusal.metric_x_slice", "keep", [], "1,379 / 1,379 answered on 2026-10-09 (direct / grain twin / conformed "
                                            "sibling); each previously refused combination stays refused or "
                                            "becomes supported, never a crash"),
-    ("refusal.brand_28_commerce", "keep", ["D-04"], "brand 28 is spend-only: profitability, ROAS, AOV refused"),
+    ("refusal.brand_28_spend_only", "new", [], "brand 28 (Commbitz) is spend-only (§0C C7): profitability, ROAS, AOV must "
+                                              "be refused (plan Phase 1 contract). v2 does NOT refuse today: it computes "
+                                              "net_profit = pnl_net_profit = −spend (finding F0-3)"),
     ("retired_id_error", "keep", [], "retired v1 ids rejected with an error naming the replacement"),
 ]
 
@@ -222,6 +224,9 @@ LIVE_DEFECTS = {
     "product_taxes_on_net_sales": "Cube error: product_economics.taxes not in live serve.product_pnl (f645091 unapplied)",
     "product_pnl_taxes_on_net_sales": "Cube error: product_economics.taxes not in live serve.product_pnl (f645091)",
 }
+for _m, _src in (("order_pnl.taxes_on_net_sales", "taxes_on_net_sales"), ("pnl.pnl_taxes_on_net_sales", "pnl_taxes_on_net_sales"),
+                 ("product_pnl.pl_taxes_on_net_sales", "product_pnl_taxes_on_net_sales")):
+    LIVE_DEFECTS[_m] = LIVE_DEFECTS[_src]
 for _m in ("first_order_variant_id", "first_order_sku", "first_order_product_title", "first_order_product_type"):
     LIVE_DEFECTS[f"customers.{_m}"] = ("Cube error: serve.customer_ltv.first_order_variant_id not live (8a2b333 unapplied); "
                                        "the first_order_product join fails for every query using it")
