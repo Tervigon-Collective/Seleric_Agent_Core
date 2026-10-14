@@ -115,11 +115,30 @@ Where the work is:
 | other D-01 | +3,025 |
 | **unexplained** | **0** |
 
-## Phase 3 — Ads, web, attribution · IN PROGRESS
-- [ ] `fct_ad_delivery` at native grain (Google ad × device × network; PMax ad = NULL). Fix the 304,008 duplicate hourly rows.
-- [ ] Website LPV (D-17) with `ad unknown` / `campaign unknown` members; platform LPV twin hidden.
-- [ ] `bridge_order_attribution` with a model parameter (default last_non_direct). Check coverage: the credit table has only 6,291 orders.
-- [ ] Tests: spend = gold per platform and day; sessions roll up (C5); FIN-15.
+## Phase 3 — Ads, web, attribution · DONE · applied to production · contracts 39/39
+
+- [x] **`serve.fct_ad_delivery`** (daily) at each platform's native grain:
+  - Meta: ad × day.
+  - Google: campaign × ad group × ad × device × network × day. PMax stops at campaign: the synthetic `pmax`, `pmax_*` and `camp_*` ids are NULL (D-14).
+  - Measures native to one platform are NULL on the other. No platform conversions (D-13).
+  - Meta's LPV is kept only as the hidden twin `platform_reported_landing_page_views` (D-13r). `reach_native` is per ad-day only, never summed.
+- [x] **`serve.fct_ad_delivery_hourly`**: Meta ad × hour; Google campaign × hour × device × network. Device and network are in the key, which fixes v2's 304,008 duplicate rows.
+- [x] **Spend = gold exactly:** spend, impressions and clicks per brand × platform × day (contract ADS-SPEND-GOLD).
+- [x] **`serve.fct_web_session`**: website LPV = sessions with ≥ 1 page view (D-17, D-00).
+  - Paid sessions without ids roll up to explicit `campaign unknown` / `ad unknown` members (C5).
+  - No raw identity columns (D-16a). `website_purchase_value` is a tracking-quality metric only (D-09).
+  - **`serve.fct_web_event`** carries the v2 event capability.
+- [x] **`semantic.bridge_order_attribution`** + serve view: order × model × touch.
+  - Models: `last_non_direct` (default), `last_touch`, `last_touch_journey`, `first_touch`, `linear`.
+  - Default-model fallback to last-touch, flagged (D-06a). Campaign fill from same-platform last-touch, flagged (D-06b). Other models give `no_model_data` rows instead of mixing models.
+  - Zero-value orders that root an exchange keep their attribution (D-01).
+- [x] **FIN-07 (default model):** Σ credit × net sales over all members = brand net sales, every brand × cohort month. Sep 2026: ₹15,74,661 = ₹15,74,661.
+- [x] **Spot checks, Sep 2026, brand 20:**
+  - Meta website LPV 29,979 vs Meta-reported 21,067.
+  - Google drill to ad group works for non-PMax campaigns.
+  - Hourly = daily on overlapping days, except 3 days of partial data (₹164).
+- [ ] **Hourly coverage:** Meta hourly exists only from 2026-04-01; Google hourly from 2024-11-15. Older hours are not in gold, so hourly answers before then are unavailable, never zero.
+- [ ] Meta breakdowns (`meta_ads_breakdown_daily`), ad change log and dims (`dim_campaign` / `adset` / `ad`) are reused unchanged from v2. Cube v3 wires them in Phase 5.
 
 ## Phase 4 — Marts · NOT STARTED
 - [ ] `mart_period_profit` (default), `mart_pnl_event` (D-21), `mart_product_ad_allocated` (D-19o).
@@ -178,6 +197,8 @@ To change a decision:
 | D-22k | Item came back with nothing refunded (unpaid COD RTO) → deduct the item value |
 | D-11c / D-11d | RTO reverse shipping back-filled from the line rate; reverse shipping kept wherever gold posted it |
 | D-01c / D-01d | In-order swaps leave gross; a failed exchange becomes a return |
+| D-06a | Default model: orders without last_non_direct credit fall back to last-touch (flagged); other models show no_model_data |
+| D-06b | Session without campaign id: fill from the same-platform last-touch (flagged) |
 | D-05a / D-05b / D-08c | Full packaging once shipped; gateway fee kept on cancels; free-order costs counted |
 
 ## Findings
@@ -212,6 +233,11 @@ To change a decision:
 | F2-10 | 97 returned lines (₹1.51L, mostly unpaid COD RTO) carry no gold deduction or refund at all | D-22k |
 | F2-11 | 116 returned lines (₹1.43L) have return / refund evidence only at order level | D-22i (order outcome applies) — **owner re-confirmed 2026-10-14: deduct** |
 | F2-12 | v2 net_cogs is ₹17–18L below gold's posted line costs (v2 composition) | open, Phase 7 variance sign-off |
+| F3-1 | Multi-touch credit exists only from 2026-06-01 (journey tracking); ~8 % of later orders lack it too | D-06a fallback, coverage shown |
+| F3-2 | Google sessions often lack campaign (29 %) and ad (88 %) ids; credited Google touches 45 % without campaign | D-06b fill + `campaign unknown` |
+| F3-3 | Google synthetic ids: `pmax` ad, `pmax_*` and `camp_*` ad groups (camp_ = zero-spend placeholders) | NULL in v3 (D-14) |
+| F3-4 | Meta hourly data only from 2026-04-01 | hourly answers unavailable before then |
+| F3-5 | One free order was exchanged into a paid item (₹2,117.80 price difference) | root keeps attribution (D-01) |
 
 ## Still Unknown after the rulings (brand 20 sale orders)
 

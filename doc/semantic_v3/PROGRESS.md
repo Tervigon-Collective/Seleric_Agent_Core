@@ -11,7 +11,7 @@ Read this file and spec §0B at the start of every session; append an entry at t
 | 0 Baseline + capability inventory | **done 2026-10-14** | **PASS** — CAPABILITY_MAP covers 100 % of catalogue_v2 ids + Cube v2 members (0 gaps) |
 | 1 Order classification | **done 2026-10-14 (applied)** | **PASS** — v3_contracts 15/15 live; owner reviewed outcomes (D-22a–e) |
 | 2 Component ledger | **done 2026-10-14 (applied)** | **PASS** — contracts 27/27 live; strict reconciliation (line-verified net-sales + cost bridges) 0 unexplained ₹ |
-| 3 Ads, web, attribution | in progress | spend = gold; sessions roll up (C5); FIN-15 |
+| 3 Ads, web, attribution | **done 2026-10-14 (applied)** | **PASS** — contracts 39/39 live (spend = gold, native grains, LPV, FIN-15, FIN-07 attribution) |
 | 4–9 | not started | — |
 
 ## Where the work lives
@@ -154,3 +154,14 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
   - ~~F2-11~~ owner re-confirmed 2026-10-14: deduct;
   - F2-12 v2 cost-composition gap → Phase 7.
 - Decision register: `DECISIONS.yaml` + `scripts/check_decisions_v3.py` (61 decisions, OK).
+
+### 2026-10-14 — Phase 3 (ads, web, attribution) — applied
+- Owner decisions: D-06a (last-touch fallback for the default model, flagged), D-06b (campaign fill from same-platform last-touch). D-22i re-confirmed.
+- Built (mage-ai `semantic-v3` 3b81fd4…f06b66f):
+  - `serve.fct_ad_delivery`, `fct_ad_delivery_hourly` (native grain);
+  - `fct_web_session` (LPV, unknown members), `fct_web_event`;
+  - `semantic.bridge_order_attribution` + serve view;
+  - 12 new contracts (ADS-*, WEB-*, ATTR-*, FIN-15).
+- Applied with the owner's OK. Live contracts 39/39. FIN-07 for attributed net sales is exact per brand × month.
+- Findings F3-1…F3-5 in CHECKLIST. Register: 63 decisions (53 implemented), check OK.
+- Next: Phase 4 (marts: period profit, event-date pnl_*, allocated product ads, monthly close). Owner questions Q2 (allocation period rule) and Q3 (close history) come up there.
