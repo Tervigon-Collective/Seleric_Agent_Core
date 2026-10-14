@@ -1,0 +1,191 @@
+register: Semantic v3 known limits — what the data or the model cannot do (yet), its impact, and what happens next
+source_of_truth: this file; rendered into KNOWN_LIMITS.md and the plan by scripts/render_semantic_v3_docs.py
+status_values:
+  accepted: owner-accepted limit, shown to users (coverage flags / labels)
+  open: needs a fix or an owner decision — next_step says which
+  planned: removed in the named phase
+limits:
+- id: L-01
+  area: Attribution
+  limit: Multi-touch attribution (last_non_direct, first_touch, linear, journey last-touch) exists only from 2026-06-01; ~8 % of later orders lack it too.
+  impact: 16,484 pre-June sale orders (₹2.87 Cr gross) + 811 since (₹17.5L) use the last-touch fallback under the default model; other models show no_model_data.
+  affects: campaign / ad / channel revenue, ROAS, CAC by model
+  handled_by: [D-06a]
+  status: accepted
+  next_step: rows carry model_used; Agent shows coverage % with every model answer (Phase 6)
+- id: L-02
+  area: Attribution
+  limit: Google website sessions often lack campaign (29 %) and ad (88 %) ids; 45 % of credited Google touches have no campaign.
+  impact: 792 Google orders (₹17.8L) + 279 Meta (₹5.6L) credited to a session without campaign; 328 filled from last-touch, the rest sit in `campaign unknown`.
+  affects: Google campaign / ad ROAS and LPV
+  handled_by: [D-06b, D-17]
+  status: accepted
+  next_step: tracking fix upstream (gclid → campaign mapping) would shrink `campaign unknown`
+- id: L-03
+  area: Ads
+  limit: Google Performance Max (74 % of Google spend) has no ad group / ad level.
+  impact: PMax drill stops at campaign (+ device / network); synthetic pmax / pmax_* / camp_* ids are NULL.
+  affects: Google ad-level questions
+  handled_by: [D-14]
+  status: accepted
+  next_step: none — platform limitation
+- id: L-04
+  area: Ads
+  limit: Hourly delivery exists only from 2026-04-01 for Meta and 2024-11-15 for Google; Google hourly has no ad group / ad level.
+  impact: hourly answers before those dates are unavailable (not zero).
+  affects: hour-of-day analysis
+  handled_by: []
+  status: accepted
+  next_step: Cube v3 refuses hourly queries before coverage starts (Phase 5)
+- id: L-05
+  area: Ads
+  limit: Meta reach is only valid per ad-day; it cannot be summed across ads or days, and frequency cannot be averaged.
+  impact: no brand / campaign reach totals.
+  affects: reach / frequency questions
+  handled_by: []
+  status: accepted
+  next_step: expose reach only at native grain (reach_native)
+- id: L-06
+  area: Ads
+  limit: Platform-reported conversions (Meta purchases / value, Google conversions) are hidden; website purchase value is a tracking-quality metric only.
+  impact: platform ROAS is not available as a business metric.
+  affects: ROAS comparisons with Ads Manager
+  handled_by: [D-00, D-13, D-13r, D-09]
+  status: accepted
+  next_step: none
+- id: L-07
+  area: Costs
+  limit: COD handling, checkout fee and weight discrepancy were never recorded before 2026-09.
+  impact: legacy-era variable cost is understated by those three components (shown as cost_method not_recorded, never estimated).
+  affects: contribution / margin before 2026-09, cross-era comparisons
+  handled_by: [D-11a]
+  status: accepted
+  next_step: none unless a historical rate card appears
+- id: L-08
+  area: Costs
+  limit: Legacy shipping, packaging, gateway and RTO costs are per-unit rate-card estimates, not courier / gateway invoices.
+  impact: cost_method rate_card / estimated_backfill; legacy RTO reverse shipping back-filled (₹2.75L).
+  affects: cost accuracy before 2026-09
+  handled_by: [D-11, D-11c]
+  status: accepted
+  next_step: invoice-based costs would be a new cost source
+- id: L-09
+  area: Costs
+  limit: Product cost is missing on 247 brand-20 lines (0.8 %); 410 lines since 2026-09 are provisional (one lump estimated_ops_cost).
+  impact: shown as cost_status missing / provisional, never zero.
+  affects: COGS, gross profit, contribution
+  handled_by: [D-03]
+  status: accepted
+  next_step: cost data owner fills product cost; provisional rows finalise upstream
+- id: L-10
+  area: Orders
+  limit: 68 sale orders (₹96k) have conflicting or no outcome evidence (Unknown).
+  impact: booked as cancelled in the ledger; outcome stays `unknown` and visible.
+  affects: cancel / RTO / return rates
+  handled_by: [D-22, D-22h]
+  status: accepted
+  next_step: none
+- id: L-11
+  area: Orders
+  limit: Delivery and RTO evidence depends on the era — bare RTO tag (Dec 2024 – Nov 2025), no tagging (Jan – Jun 2026), Logisy tags (Jul 2026 on); courier status is mostly empty on older returns.
+  impact: outcomes for those eras follow owner rulings on evidence patterns, not direct proof.
+  affects: RTO vs return vs cancel split before 2026-07
+  handled_by: [D-22a, D-22b, D-22c, D-22d, D-22e]
+  status: accepted
+  next_step: none
+- id: L-12
+  area: Revenue
+  limit: Gold's order header treats shipping as tax-free; v3 taxes shipping at the principal line rate (composite supply).
+  impact: ex-GST view differs from gold's header by ₹23k (= shipping GST); incl-GST ties to the paisa.
+  affects: comparisons with gold / v2 headers
+  handled_by: [D-25, D-10]
+  status: accepted
+  next_step: none
+- id: L-13
+  area: Revenue
+  limit: Exchange price adjustment is a value difference; same-value exchanges show ₹134 average noise from discounts.
+  impact: small residual on same-value exchanges.
+  affects: exchange price adjustment
+  handled_by: [D-01a]
+  status: accepted
+  next_step: none
+- id: L-14
+  area: Revenue
+  limit: No operating-expense source in the warehouse.
+  impact: top figure is contribution after ads; `net_profit` ids mean contribution after ads (opex excluded).
+  affects: net profit questions
+  handled_by: [D-18, D-18r]
+  status: accepted
+  next_step: add an opex source to enable true net profit
+- id: L-15
+  area: Scope
+  limit: Amazon (marketplace + Amazon Ads) is out of scope; brand overview = D2C Shopify only.
+  impact: brand 20 Amazon sales and spend are not in any total.
+  affects: brand overview
+  handled_by: [D-04]
+  status: accepted
+  next_step: separate project
+- id: L-16
+  area: Scope
+  limit: Brand 28 is spend-only (no commerce); brands 24–27 have 1–32 orders.
+  impact: profit / ROAS / AOV must be refused for brand 28 (v2 computes −spend today, F0-3); 24–27 flagged low-volume, not certified.
+  affects: those brands
+  handled_by: []
+  status: planned
+  next_step: refusal in Cube v3 / catalogue v3 (Phases 5–6); owner confirms the value → refusal change in Phase 7 (Q11)
+- id: L-17
+  area: Reconciliation
+  limit: v2's cost total (order_pnl_daily.net_cogs) is ₹17–18L below gold's posted line costs; that v2-internal composition is not decomposed by cause.
+  impact: the v2 → v3 contribution change (−₹16.9L all history) is only partly itemised (gold → v3 is fully proven).
+  affects: variance sign-off
+  handled_by: []
+  status: open
+  next_step: decompose v2 cost composition for the Phase 7 variance report
+- id: L-18
+  area: Freshness
+  limit: v3 semantic tables refresh every 5 minutes while gold reloads continuously (CDC).
+  impact: up to ~5 min lag; live checks exclude orders gold changed after the last refresh and report them as pending.
+  affects: near-real-time questions, live reconciliation
+  handled_by: []
+  status: accepted
+  next_step: none
+- id: L-19
+  area: Data quality
+  limit: 12 gold payments belong to orders missing from gold.fct_orders.
+  impact: excluded from serve.fct_payment.
+  affects: payment totals (tiny)
+  handled_by: []
+  status: open
+  next_step: upstream (dbt) investigation
+- id: L-20
+  area: Web
+  limit: Checkout-timing session metrics (seconds to checkout / purchase, checkout steps) are structurally empty — Shopify checkout events are server-side without a session id.
+  impact: those metrics stay unavailable (data-quality waiver).
+  affects: funnel timing questions
+  handled_by: []
+  status: open
+  next_step: dbt fix (plumb cart journey checkout time into sessions)
+- id: L-21
+  area: Operations
+  limit: system.query_log keeps 7 days.
+  impact: the "14 days of zero reads" rule before dropping old views cannot run as written.
+  affects: Phase 9 cleanup
+  handled_by: []
+  status: open
+  next_step: owner chooses longer TTL or two 7-day checks (Q8)
+- id: L-22
+  area: Operations
+  limit: Live v2 defects — 4 tax metrics and customers × first-order product fail in Cube v2 today.
+  impact: those Agent answers error until the v3 cutover.
+  affects: Agent today
+  handled_by: [D-26]
+  status: planned
+  next_step: delivered by v3 (Phase 5–8)
+- id: L-23
+  area: Model
+  limit: Event-date P&L, monthly close / as-of snapshots, allocated product-ad metrics and period profit are not built yet.
+  impact: only order-cohort figures exist in v3 so far.
+  affects: pnl_* family, closed months, product ad metrics
+  handled_by: [D-07, D-12, D-19o, D-21]
+  status: planned
+  next_step: Phase 4

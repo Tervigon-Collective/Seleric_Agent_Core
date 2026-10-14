@@ -6,7 +6,9 @@ Checks (exit 1 on any failure):
   2 status / phase are valid; implemented entries list where they live and how to change them;
   3 every file an implemented entry cites exists and mentions the decision id;
   4 every decision id cited in v3 code is in the register;
-  5 every outcome evidence code the v3 SQL can emit is mapped to a decision, and every mapped code exists in the SQL.
+  5 every outcome evidence code the v3 SQL can emit is mapped to a decision, and every mapped code exists in the SQL;
+  6 every known limit (KNOWN_LIMITS.yaml) points at registered decisions;
+  7 the rendered docs (DECISIONS.md, KNOWN_LIMITS.md, the plan sections) are current.
 
   python3 scripts/check_decisions_v3.py --mage /home/tervigon/work/mage_v3
 """
@@ -87,6 +89,24 @@ def main() -> int:
         errs.append(f"evidence code {c} is emitted by the SQL but mapped to no decision")
     for c in sorted(cited_codes - emitted):
         errs.append(f"evidence code {c} is mapped in the register but not emitted by the SQL")
+
+    # known limits: handled_by must name registered decisions; ids unique; statuses valid
+    lims = yaml.safe_load(open(os.path.join(ROOT, "doc", "semantic_v3", "KNOWN_LIMITS.yaml")))["limits"]
+    lids = [l["id"] for l in lims]
+    if len(lids) != len(set(lids)):
+        errs.append("duplicate known-limit ids")
+    for l in lims:
+        if l.get("status") not in ("accepted", "open", "planned"):
+            errs.append(f"{l['id']}: bad status {l.get('status')}")
+        for d in l.get("handled_by") or []:
+            if d not in known:
+                errs.append(f"{l['id']}: handled_by {d} is not in the decision register")
+    # rendered docs (DECISIONS.md, KNOWN_LIMITS.md, plan sections) must be current
+    import subprocess
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "render_semantic_v3_docs.py"), "--check"],
+                       capture_output=True, text=True)
+    if r.returncode:
+        errs.append("rendered docs stale — run scripts/render_semantic_v3_docs.py")
 
     for e in errs:
         print("FAIL", e)

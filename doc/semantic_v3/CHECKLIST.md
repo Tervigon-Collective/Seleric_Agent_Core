@@ -166,6 +166,8 @@ Where the work is:
 - **The code cites the decision id** at each rule, so `grep D-22i` finds every place it lives.
 - **Every data row carries its evidence code** (`outcome_evidence`, `line_outcome_evidence`, `cost_method`), so a number traces back to its decision.
 - **`scripts/check_decisions_v3.py --mage /home/tervigon/work/mage_v3`** fails if spec, register and code drift apart: a decision with no entry, a cited file that no longer mentions its id, code citing an unknown id, or an evidence code with no decision.
+- **Known limits** live in `doc/semantic_v3/KNOWN_LIMITS.yaml` (limit, impact, what it affects, handled_by decisions, status, next step).
+- **Readable copies are generated:** `scripts/render_semantic_v3_docs.py` writes `DECISIONS.md`, `KNOWN_LIMITS.md` and the "All decisions taken" / "Known limits" sections of the plan (`plan/SEMANTIC_V3_REBUILD_PLAN.md` = `doc/semantic_v3/PLAN.md`). Edit the YAML, then re-render; the checker fails on stale copies.
 
 To change a decision:
 1. Find it in `DECISIONS.yaml` and open the files in `implemented_in`; the rule is marked with its id.
