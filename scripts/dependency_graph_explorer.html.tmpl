@@ -1,0 +1,295 @@
+<title>Seleric Metric Graph</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the funnel runs left to right as tier columns; metrics are chips in their tier; edges are drawn over the
+   columns; the selected metric's detail sits beside (desktop) or below (phone). */
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --ink: #18202c; --muted: #5d6878; --line: #d7dce4;
+  --accent: #2856c7;
+  --e-acct: #2856c7; --e-same: #8a94a3; --e-mech: #0f8a6a; --e-feed: #b7791f; --e-alloc: #b5475b;
+  --warn: #a8442c;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11151c; --surface: #19202a; --ink: #e6eaf0; --muted: #98a3b3; --line: #2c3542;
+  --accent: #7ea3ff; --e-acct: #7ea3ff; --e-same: #7d8796; --e-mech: #3fc59c; --e-feed: #e0a84a; --e-alloc: #e57a8c;
+  --warn: #f08a6c; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #19202a; --ink: #e6eaf0; --muted: #98a3b3; --line: #2c3542;
+  --accent: #7ea3ff; --e-acct: #7ea3ff; --e-same: #7d8796; --e-mech: #3fc59c; --e-feed: #e0a84a; --e-alloc: #e57a8c;
+  --warn: #f08a6c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 32px; }
+header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 4px 0 0; max-width: 70ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 12px; }
+.controls input[type=search] { font: inherit; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface); color: var(--ink); width: 15rem; max-width: 100%; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--muted); cursor: pointer; user-select: none; }
+.toggle input { accent-color: var(--accent); }
+.sw { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; }
+.sw.dash { border-top-style: dashed; }
+.wrap { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); } aside { position: static; max-height: none; } }
+.board { position: relative; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.cols { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 9.6rem; gap: 10px; padding: 12px; width: max-content; }
+.col { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
+.col h3 { margin: 0 0 4px; font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.col h3 b { font-family: var(--mono); font-weight: 500; color: var(--ink); margin-right: 4px; }
+.chip { all: unset; display: block; cursor: pointer; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--bg); font-size: 0.8rem; line-height: 1.25; transition: opacity .15s, border-color .15s; }
+.chip small { display: block; font-family: var(--mono); font-size: 0.66rem; color: var(--muted); overflow-wrap: anywhere; }
+.chip.ratio { border-style: dashed; }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--surface); }
+.chip.dim { opacity: 0.28; }
+.chip .flag { font-family: var(--mono); font-size: 0.62rem; color: var(--warn); margin-left: 4px; }
+svg.edges { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: visible; }
+svg.edges path { fill: none; }
+aside { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+aside h2 { font-family: var(--display); font-size: 1.15rem; margin: 0; text-wrap: balance; }
+aside .id { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
+dl.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 10px; margin: 10px 0; font-size: 0.82rem; }
+dl.facts dt { color: var(--muted); } dl.facts dd { margin: 0; overflow-wrap: anywhere; }
+.formula { font-size: 0.85rem; background: var(--bg); border-radius: 6px; padding: 8px 10px; margin: 8px 0 12px; }
+aside h4 { margin: 14px 0 6px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500;
+  display: flex; align-items: center; gap: 8px; }
+aside ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+aside li { font-size: 0.82rem; }
+aside li button { all: unset; cursor: pointer; color: var(--accent); font-weight: 500; }
+aside li button:focus-visible { outline: 2px solid var(--accent); }
+aside li .meta { color: var(--muted); font-size: 0.76rem; }
+.trust { font-size: 0.7rem; font-family: var(--mono); padding: 1px 6px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); }
+.note { color: var(--muted); font-size: 0.8rem; margin-top: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
+</style>
+
+<header>
+  <div>
+    <h1>Seleric Metric Graph</h1>
+    <p class="sub">Every catalogue v2 metric by funnel tier, and how they relate: exact accounting, same quantity on another basis, and the business mechanisms that drive one from another. Click a metric to see its edges.</p>
+  </div>
+  <p class="sub" id="stats"></p>
+</header>
+
+<div class="controls">
+  <input type="search" id="q" placeholder="Find a metric (e.g. orders, roas)" aria-label="Find a metric" list="ids">
+  <datalist id="ids"></datalist>
+  <label class="toggle"><input type="checkbox" id="t-acct" checked><span class="sw" style="color:var(--e-acct)"></span>Accounting</label>
+  <label class="toggle"><input type="checkbox" id="t-mech" checked><span class="sw" style="color:var(--e-mech)"></span>Mechanisms</label>
+  <label class="toggle"><input type="checkbox" id="t-feed" checked><span class="sw dash" style="color:var(--e-feed)"></span>Feedback</label>
+  <label class="toggle"><input type="checkbox" id="t-same" checked><span class="sw dash" style="color:var(--e-same)"></span>Same quantity</label>
+  <label class="toggle"><input type="checkbox" id="t-ratios"> Show ratios</label>
+  <label class="toggle"><input type="checkbox" id="t-twins"> Show every twin</label>
+</div>
+
+<div class="wrap">
+  <div class="board" id="board"><div class="cols" id="cols"><svg class="edges" id="edges"></svg></div></div>
+  <aside id="detail" aria-live="polite"></aside>
+</div>
+<div class="legend">
+  <span><span class="sw" style="color:var(--e-acct)"></span> Accounting: exact, verified on real rows</span>
+  <span><span class="sw" style="color:var(--e-mech)"></span> Mechanism: direction is business knowledge, size is for the data</span>
+  <span><span class="sw dash" style="color:var(--e-feed)"></span> Feedback: results move a lever, lagged</span>
+  <span><span class="sw dash" style="color:var(--e-same)"></span> Same quantity: never a cause of each other</span>
+  <span><span class="sw dash" style="color:var(--e-alloc)"></span> Allocation: model share keyed on revenue</span>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+const N = Object.fromEntries(DATA.nodes.map(n => [n.id, n]));
+const KIND = {
+  composition: {layer: "acct", color: "--e-acct", dash: "", word: "Sum", trust: "exact"},
+  ratio_component: {layer: "acct", color: "--e-acct", dash: "", word: "Ratio", trust: "exact"},
+  declared_input: {layer: "acct", color: "--e-acct", dash: "2 3", word: "Declared input", trust: "input, role not stated"},
+  twin: {layer: "same", color: "--e-same", dash: "4 3", word: "Same quantity", trust: "exact"},
+  co_measure: {layer: "same", color: "--e-same", dash: "4 3", word: "Same events, other system", trust: "reviewed"},
+  subset: {layer: "same", color: "--e-same", dash: "1 3", word: "Subset", trust: "reviewed"},
+  allocation: {layer: "same", color: "--e-alloc", dash: "4 3", word: "Allocation", trust: "model"},
+  mechanism: {layer: "mech", color: "--e-mech", dash: "", word: "Mechanism", trust: ""},
+  feedback: {layer: "feed", color: "--e-feed", dash: "5 4", word: "Feedback", trust: ""},
+};
+const ORDER = ["mechanism", "feedback", "composition", "ratio_component", "declared_input", "twin", "co_measure", "subset", "allocation"];
+
+// One representative per same-quantity group: the member the mechanisms use, else the plainest id.
+const causalIds = new Set(DATA.edges.filter(e => e.kind === "mechanism" || e.kind === "feedback").flatMap(e => [e.from, e.to]));
+const rep = {};
+for (const n of DATA.nodes) {
+  const g = n.same_quantity_group;
+  if (!g.length) { rep[n.id] = n.id; continue; }
+  const mech = g.filter(x => causalIds.has(x));
+  const plain = (x) => [/^(product_|pnl_|order_pnl_|funnel_)/.test(x) ? 1 : 0, x.length, x];
+  const pick = (mech.length ? mech : g).slice().sort((a, b) => { const A = plain(a), B = plain(b); return A[0] - B[0] || A[1] - B[1] || (A[2] < B[2] ? -1 : 1); })[0];
+  rep[n.id] = pick;
+}
+// A ratio sits in the tier of its latest component.
+function tierOf(n) {
+  if (n.tier !== null && n.tier !== undefined && n.aggregation !== "ratio") return n.tier;
+  const ins = DATA.edges.filter(e => e.to === n.id && (e.kind === "ratio_component" || e.kind === "declared_input")).map(e => N[e.from].tier ?? 0);
+  return ins.length ? Math.max(...ins) : (n.tier ?? 0);
+}
+
+const state = { sel: "net_sales", layers: {acct: true, mech: true, feed: true, same: true}, ratios: false, twins: false };
+const $ = (id) => document.getElementById(id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+try { const s = JSON.parse(store.get("smg-state") || "null"); if (s && N[s.sel]) Object.assign(state, s); } catch {}
+
+function visible(n) {
+  if (!state.twins && rep[n.id] !== n.id) return false;
+  if (!state.ratios && n.aggregation === "ratio" && n.id !== state.sel) return false;
+  return true;
+}
+const shown = (id) => state.twins ? id : rep[id];
+
+function render() {
+  store.set("smg-state", JSON.stringify(state));
+  const cols = $("cols");
+  cols.querySelectorAll(".col").forEach(c => c.remove());
+  const byTier = {};
+  for (const n of DATA.nodes) if (visible(n)) (byTier[tierOf(n)] ??= []).push(n);
+  for (const t of Object.keys(DATA.tiers).map(Number).sort((a, b) => a - b)) {
+    const col = document.createElement("div");
+    col.className = "col";
+    col.innerHTML = `<h3><b>${t}</b>${DATA.tiers[t].name.replace(/_/g, " ")}</h3>`;
+    for (const n of (byTier[t] || []).sort((a, b) => a.label.localeCompare(b.label))) {
+      const b = document.createElement("button");
+      b.className = "chip" + (n.aggregation === "ratio" ? " ratio" : "");
+      b.dataset.id = n.id;
+      const flag = n.status === "broken" ? '<span class="flag">broken</span>' : n.allocated ? '<span class="flag">allocated</span>' : "";
+      b.innerHTML = `${n.label}${flag}<small>${n.id}</small>`;
+      b.title = n.formula;
+      b.addEventListener("click", () => select(n.id));
+      col.appendChild(b);
+    }
+    cols.appendChild(col);
+  }
+  $("stats").textContent = `${DATA.nodes.length} metrics · ${DATA.edges.length} edges · ${document.querySelectorAll(".chip").length} on screen`;
+  draw();
+  detail();
+}
+
+function edgesFor(id) {
+  const mine = new Set(state.twins ? [id] : DATA.nodes.filter(n => rep[n.id] === rep[id]).map(n => n.id));
+  return DATA.edges.filter(e => mine.has(e.from) || mine.has(e.to));
+}
+
+function draw() {
+  const svg = $("edges"), cols = $("cols");
+  const box = cols.getBoundingClientRect();
+  svg.setAttribute("width", cols.scrollWidth); svg.setAttribute("height", cols.scrollHeight);
+  svg.innerHTML = "";
+  const chips = {};
+  cols.querySelectorAll(".chip").forEach(c => chips[c.dataset.id] = c);
+  const sel = state.sel;
+  const selEdges = new Set(edgesFor(sel));
+  const near = new Set([shown(sel)]);
+  const list = [...DATA.edges.filter(e => e.kind === "mechanism" || e.kind === "feedback"), ...selEdges];
+  const drawn = new Set();
+  const cs = getComputedStyle(document.documentElement);
+  for (const e of list) {
+    const k = KIND[e.kind];
+    if (!state.layers[k.layer]) continue;
+    const a = chips[shown(e.from)], b = chips[shown(e.to)];
+    if (!a || !b || a === b) continue;
+    const key = a.dataset.id + ">" + b.dataset.id + ">" + e.kind;
+    if (drawn.has(key)) continue;
+    drawn.add(key);
+    const hot = selEdges.has(e);
+    if (hot) { near.add(a.dataset.id); near.add(b.dataset.id); }
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    let x1 = ra.right - box.left, y1 = ra.top + ra.height / 2 - box.top, x2 = rb.left - box.left, y2 = rb.top + rb.height / 2 - box.top;
+    if (ra.left === rb.left) { x1 = ra.left - box.left; x2 = rb.left - box.left; }
+    else if (ra.left > rb.left) { x1 = ra.left - box.left; x2 = rb.right - box.left; }
+    const dx = ra.left === rb.left ? -40 : (x2 - x1) * 0.45;
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", `M${x1},${y1} C${x1 + dx},${y1} ${x2 - (ra.left === rb.left ? dx : dx)},${y2} ${x2},${y2}`);
+    p.setAttribute("stroke", cs.getPropertyValue(k.color).trim());
+    p.setAttribute("stroke-width", hot ? 2 : 1);
+    p.setAttribute("stroke-opacity", hot ? 0.95 : 0.22);
+    if (k.dash) p.setAttribute("stroke-dasharray", k.dash);
+    svg.appendChild(p);
+  }
+  cols.querySelectorAll(".chip").forEach(c => {
+    c.classList.toggle("sel", c.dataset.id === shown(sel));
+    c.classList.toggle("dim", near.size > 1 && !near.has(c.dataset.id));
+  });
+}
+
+function lag(e) { const l = e.lag_days || [0, 0]; return (l[0] || l[1]) ? `, ${l[0]}–${l[1]} days` : ""; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c])); }
+
+function detail() {
+  const n = N[state.sel];
+  // The panel lists this metric's own edges; its twins are one click away in the Same quantity section.
+  const es = DATA.edges.filter(e => (e.from === n.id) !== (e.to === n.id));
+  const groups = {};
+  for (const e of es) (groups[e.kind] ??= []).push(e);
+  const link = (id) => `<button data-go="${id}">${esc(N[id].label)}</button> <span class="meta">${id}</span>`;
+  let html = `<h2>${esc(n.label)}</h2><div class="id">${n.id}</div>
+    <div class="formula">${esc(n.formula)}</div>
+    <dl class="facts"><dt>View</dt><dd>${n.view}</dd><dt>Date axis</dt><dd>${n.date_axis}</dd><dt>Grain</dt><dd>${n.grain}</dd>
+    <dt>Aggregation</dt><dd>${n.aggregation} · ${n.unit}</dd><dt>Tier</dt><dd>${tierOf(n)} · ${(DATA.tiers[tierOf(n)] || {}).name || ""}</dd>
+    <dt>Status</dt><dd>${n.status}${n.allocated ? " · allocated (never a driver of its own product's revenue)" : ""}</dd></dl>`;
+  for (const kind of ORDER) {
+    const list = groups[kind];
+    if (!list) continue;
+    const k = KIND[kind];
+    html += `<h4><span class="sw${k.dash ? " dash" : ""}" style="color:var(${k.color})"></span>${k.word}</h4><ul>`;
+    for (const e of list) {
+      const out = e.from === n.id;
+      const other = out ? e.to : e.from;
+      let rel = "";
+      if (kind === "composition") rel = out ? `is ${e.sign > 0 ? "added to" : "subtracted from"}` : `${e.sign > 0 ? "+" : "−"} part`;
+      else if (kind === "ratio_component") rel = out ? `is the ${e.role} of` : e.role;
+      else if (kind === "mechanism" || kind === "feedback") rel = out ? "drives" : "driven by";
+      else if (kind === "declared_input") rel = out ? "is an input of" : "input";
+      else if (kind === "allocation") rel = out ? "is allocated into" : "allocated from";
+      else if (kind === "subset") rel = out ? "is part of" : "contains";
+      else rel = (e.twin_of || []).join(", ").replace("_", " ") || (e.systems || []).join(" vs ");
+      const trust = kind === "mechanism" || kind === "feedback" ? e.confidence : k.trust;
+      const extra = [e.sign && (kind === "mechanism" || kind === "feedback") ? `sign ${e.sign}` : "", e.rate ? `rate on edge: ${N[e.rate].label}` : ""].filter(Boolean).join(" · ");
+      html += `<li><span class="meta">${rel}</span> ${link(other)} <span class="trust">${esc(trust)}</span>
+        ${extra || lag(e) ? `<div class="meta">${esc(extra)}${lag(e)}</div>` : ""}
+        ${e.note || e.expected ? `<div class="meta">${esc(e.note || e.expected)}</div>` : ""}</li>`;
+    }
+    html += "</ul>";
+  }
+  if (!es.length) html += `<p class="note">No edge yet: the engine can scan this metric for anomalies but has no prior on how it relates to others.</p>`;
+  $("detail").innerHTML = html;
+  $("detail").querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => select(b.dataset.go)));
+}
+
+function select(id) {
+  state.sel = id;
+  if (!visible(N[id])) render(); else { draw(); detail(); }
+  const chip = document.querySelector(`.chip[data-id="${shown(id)}"]`);
+  if (chip) chip.scrollIntoView({block: "nearest", inline: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+}
+
+$("ids").innerHTML = DATA.nodes.map(n => `<option value="${n.id}">${esc(n.label)}</option>`).join("");
+$("q").addEventListener("change", (ev) => {
+  const v = ev.target.value.trim().toLowerCase();
+  const hit = N[v] || DATA.nodes.find(n => n.label.toLowerCase() === v) || DATA.nodes.find(n => n.id.includes(v) || n.label.toLowerCase().includes(v));
+  if (hit) select(hit.id);
+});
+for (const [id, layer] of [["t-acct", "acct"], ["t-mech", "mech"], ["t-feed", "feed"], ["t-same", "same"]]) {
+  $(id).checked = state.layers[layer];
+  $(id).addEventListener("change", (ev) => { state.layers[layer] = ev.target.checked; draw(); });
+}
+$("t-ratios").checked = state.ratios; $("t-twins").checked = state.twins;
+$("t-ratios").addEventListener("change", (ev) => { state.ratios = ev.target.checked; render(); });
+$("t-twins").addEventListener("change", (ev) => { state.twins = ev.target.checked; render(); });
+addEventListener("resize", () => draw());
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => draw());
+new MutationObserver(() => draw()).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+document.fonts?.ready.then(() => draw());
+render();
+</script>

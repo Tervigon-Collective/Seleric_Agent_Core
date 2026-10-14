@@ -1,0 +1,318 @@
+# Business mechanism layer of the metric dependency graph: hand-authored, reviewed by people who know the business.
+# scripts/build_dependency_graph.py merges it with what the catalogue already states (compositions, ratio
+# components, concept twins) into doc/dependency_graph/dependency_graph.json, and refuses ids that do not exist,
+# causal edges between two measurements of the same quantity, and lag-0 cycles.
+#
+# What belongs here and what does not
+#   - Accounting (net_sales = gross − discounts − deductions) is NOT authored here: it comes from formula.composition
+#     and ratio_components in catalogue_v2/metrics, which scripts/verify_compositions.py checks on real rows.
+#   - Two metrics that measure the same quantity on another date basis or grain (net_sales / pnl_net_sales,
+#     orders / product_orders) are NOT authored here: they come from the concepts' date / scope axes.
+#   - This file holds what no formula can state: which volume drives which (mechanisms), which metrics measure the
+#     same events in different systems (co_measures), which ones are a subset or allocation of another, how results
+#     feed back into decisions, and the funnel order (tiers) that discovery must respect.
+#
+# Mechanism edges are PRIORS: the direction is business knowledge, the existence and size of the effect in a
+# given brand and period are for the data to show (DoWhy / discovery). `confidence` says how sure the direction is:
+#   structural  the business cannot work otherwise (a unit shipped costs shipping)
+#   strong      standard performance-marketing / e-commerce mechanism, direction not in doubt
+#   moderate    usual direction, but known to reverse or vanish in some setups
+# `lag_days` is [min, max] days between a move in `from` and its effect on `to` on their own date axes.
+# `rate` names the catalogue ratio that measures the mechanism on that edge when one exists: a change in the rate
+# is a change in the mechanism itself (CTR down = the impressions→clicks mechanism weakened), not a separate node.
+
+version: 1
+
+# --------------------------------------------------------------------------- funnel tiers
+# Lag-0 edges may only point from a lower tier to a higher one. A metric not listed gets its view's tier.
+tiers:
+  0: {name: intervention, note: "Changes people make: budget, bid strategy, status edits"}
+  1: {name: spend, note: "Money put into acquisition"}
+  2: {name: delivery, note: "Ad delivery bought with it"}
+  3: {name: ad_engagement, note: "Interaction with the ad"}
+  4: {name: site_traffic, note: "Arrivals on the store"}
+  5: {name: on_site_intent, note: "Browsing and cart actions"}
+  6: {name: purchase, note: "Orders and the customers who place them"}
+  7: {name: order_value, note: "What the orders are worth"}
+  8: {name: post_purchase, note: "Cancellations, returns, refunds, RTO: happen after the order"}
+  9: {name: cost, note: "Cost of fulfilling and selling"}
+  10: {name: profit, note: "What is left"}
+
+view_tiers:
+  paid_media_changes: 0
+  paid_media: 2
+  paid_media_hourly: 2
+  paid_media_breakdowns: 2
+  web_sessions: 4
+  web_events: 4
+  web_event_detail: 4
+  web_funnel: 6
+  funnel_orders: 6
+  attribution: 6
+  attribution_paths: 6
+  commerce: 7
+  customers: 6
+  product: 7
+  returns: 8
+  payments: 7
+  order_pnl: 9
+  pnl: 9
+  product_pnl: 9
+  unit_economics: 10
+
+tier_overrides:
+  ad_spend: 1
+  pnl_ad_spend: 1
+  order_pnl_ad_spend: 1
+  product_ad_spend: 1
+  product_order_ad_spend: 1
+  product_pnl_ad_spend: 1
+  impressions: 2
+  product_impressions: 2
+  thruplays: 3
+  product_thruplays: 3
+  clicks: 3
+  link_clicks: 3
+  landing_page_views: 3
+  product_clicks: 3
+  product_link_clicks: 3
+  product_landing_page_views: 3
+  sessions: 4
+  session_page_views: 4
+  page_views: 4
+  event_page_views: 4
+  web_events: 4
+  event_count: 4
+  session_product_views: 5
+  product_view_events: 5
+  event_product_views: 5
+  session_collection_views: 5
+  collection_view_events: 5
+  event_collection_views: 5
+  site_searches: 5
+  site_search_events: 5
+  event_site_searches: 5
+  add_to_carts: 5
+  add_to_cart_events: 5
+  event_add_to_carts: 5
+  remove_from_carts: 5
+  checkout_steps: 5
+  orders: 6
+  channel_orders: 6
+  product_orders: 6
+  product_order_orders: 6
+  cod_orders: 6
+  prepaid_orders: 6
+  payment_orders: 6
+  new_customers: 6
+  channel_new_customers: 6
+  product_new_customers: 6
+  units_ordered: 6
+  orders_with_touchpoints: 6
+  touches: 5
+  # Discounts are a promotion decision taken before the order (tier 1, like spend), measured on the orders.
+  discounts: 1
+  discounts_incl_tax: 1
+  order_pnl_discounts: 1
+  pnl_discounts: 1
+  product_discounts: 1
+  product_order_discounts: 1
+  product_pnl_discounts: 1
+  cancelled_orders: 8
+  returned_orders: 8
+  returned_or_cancelled_orders: 8
+  channel_returned_orders: 8
+  cancel_revenue: 8
+  return_revenue: 8
+  return_cancel_revenue: 8
+  net_sales_deductions: 8
+  refund_amount: 8
+  returned_units: 8
+  units_sold: 8
+  net_sales: 8
+  order_pnl_net_sales: 8
+  order_pnl_return_revenue: 8
+  order_pnl_cancel_revenue: 8
+  product_return_revenue: 8
+  product_cancel_revenue: 8
+  product_net_revenue: 8
+  order_pnl_gross_sales: 7
+  gross_sales: 7
+  product_gross_sale: 7
+  product_gross_cogs: 9
+  product_line_cost: 9
+  product_net_cogs: 9
+  contribution_margin: 10
+  net_profit: 10
+  gross_profit: 10
+  pnl_contribution_margin: 10
+  pnl_net_profit: 10
+  product_gross_profit: 10
+  product_contribution_margin: 10
+  product_net_profit: 10
+  product_pnl_contribution_margin: 10
+  product_pnl_net_profit: 10
+
+# --------------------------------------------------------------------------- mechanisms (directed priors)
+# Canonical nodes are the brand-level, order-date (or delivery / session date) metrics. Their twins on other date
+# bases and grains inherit the edge through the twin relation; they are not repeated here.
+mechanisms:
+  # Interventions -> spend and delivery
+  - {from: budget_changes, to: ad_spend, sign: "+/-", lag_days: [0, 1], confidence: strong,
+     note: "A budget edit changes what the platform may spend from the next delivery hour"}
+  - {from: status_changes, to: ad_spend, sign: "+/-", lag_days: [0, 1], confidence: strong,
+     note: "Pausing / enabling a campaign, ad set or ad stops or starts its spend"}
+  - {from: bid_strategy_changes, to: impressions, sign: "+/-", lag_days: [0, 3], confidence: moderate,
+     note: "A new bid strategy changes how much delivery the same spend buys; platforms re-learn for days"}
+
+  # Spend -> delivery -> engagement (paid media, delivery date)
+  - {from: ad_spend, to: impressions, sign: "+", lag_days: [0, 0], rate: cpm, confidence: strong,
+     note: "Spend buys impressions at the auction price; CPM is the price of that mechanism (higher CPM = fewer impressions per rupee)"}
+  - {from: impressions, to: clicks, sign: "+", lag_days: [0, 0], rate: ctr, confidence: strong,
+     note: "CTR is the mechanism: creative fatigue or audience change shows up as a CTR change"}
+  - {from: impressions, to: link_clicks, sign: "+", lag_days: [0, 0], confidence: strong}
+  - {from: impressions, to: thruplays, sign: "+", lag_days: [0, 0], rate: hook_rate, confidence: strong,
+     note: "Video ads only; hook and hold rates measure the creative"}
+  - {from: link_clicks, to: landing_page_views, sign: "+", lag_days: [0, 0], confidence: strong,
+     note: "Meta only; the gap is page-load loss (slow site, broken link)"}
+
+  # Ad engagement -> site traffic (crosses from the ad platform to the site tracker)
+  - {from: landing_page_views, to: sessions, sign: "+", lag_days: [0, 0], confidence: strong,
+     note: "Paid Meta arrivals; read on the paid / Meta slice of sessions, the rest is organic and other channels. LPV and paid Meta sessions count nearly the same arrivals in two systems, so a widening gap between them is a tracking or site-speed signal, not a cause"}
+  - {from: link_clicks, to: sessions, sign: "+", lag_days: [0, 0], confidence: strong,
+     note: "Paid arrivals incl. Google, which reports no landing page views"}
+
+  # Site traffic -> intent -> purchase (session date)
+  - {from: sessions, to: session_product_views, sign: "+", lag_days: [0, 0], rate: product_view_rate, confidence: strong}
+  - {from: session_collection_views, to: session_product_views, sign: "+", lag_days: [0, 0], confidence: moderate,
+     note: "Browsing collections leads to product pages"}
+  - {from: site_searches, to: session_product_views, sign: "+", lag_days: [0, 0], confidence: moderate}
+  - {from: session_product_views, to: add_to_carts, sign: "+", lag_days: [0, 0], rate: add_to_cart_rate, confidence: strong}
+  - {from: add_to_carts, to: funnel_purchases, sign: "+", lag_days: [0, 1], rate: checkout_to_purchase_rate, confidence: strong,
+     note: "Through checkout (add_to_cart_to_checkout_rate, checkout_to_purchase_rate); no reliable checkout count exists (checkout_steps is broken)"}
+  - {from: sessions, to: orders, sign: "+", lag_days: [0, 1], rate: conversion_rate, confidence: strong,
+     note: "The store-wide conversion mechanism; crosses from the web tracker to the order ledger"}
+  - {from: add_to_carts, to: orders, sign: "+", lag_days: [0, 1], confidence: strong}
+
+  # Price and promotion
+  - {from: discounts, to: orders, sign: "+", lag_days: [0, 0], confidence: moderate,
+     note: "Deeper discounts win orders. Discounts in rupees also scale with orders, so test the discount RATE (discounts ÷ gross_sales) as the lever, not the rupee amount, or the edge is circular"}
+  - {from: discounts, to: net_aov, sign: "-", lag_days: [0, 0], confidence: strong,
+     note: "Also an accounting fact (net sales deduct discounts); the behavioural part is basket composition"}
+
+  # Purchase -> order value
+  - {from: orders, to: units_ordered, sign: "+", lag_days: [0, 0], rate: units_per_order, confidence: structural}
+  - {from: units_ordered, to: gross_sales, sign: "+", lag_days: [0, 0], confidence: structural,
+     note: "Units × selling price; a price change is a change in this mechanism"}
+  - {from: orders, to: new_customers, sign: "+", lag_days: [0, 0], confidence: structural,
+     note: "New customers are first orders; the share of new vs repeat is the mechanism"}
+  - {from: orders, to: cod_orders, sign: "+", lag_days: [0, 0], confidence: structural,
+     note: "COD share is the mechanism (checkout payment options, COD fees, pincode serviceability)"}
+  - {from: orders, to: prepaid_orders, sign: "+", lag_days: [0, 0], confidence: structural}
+
+  # Purchase -> post-purchase (order-date cohort: these mature over days / weeks)
+  - {from: orders, to: cancelled_orders, sign: "+", lag_days: [0, 3], confidence: structural}
+  - {from: cod_orders, to: cancelled_orders, sign: "+", lag_days: [0, 3], confidence: strong,
+     note: "COD orders are cancelled far more often than prepaid ones"}
+  - {from: cod_orders, to: rto_cost, sign: "+", lag_days: [3, 15], confidence: strong,
+     note: "Return-to-origin is mostly refused COD deliveries"}
+  - {from: orders, to: returned_orders, sign: "+", lag_days: [3, 30], rate: return_rate, confidence: structural,
+     note: "Order-date return metrics are incomplete for orders younger than the return window: a recent 'drop in returns' or 'rise in net sales' can be immaturity, not behaviour"}
+  - {from: returned_orders, to: return_revenue, sign: "+", lag_days: [0, 0], confidence: structural}
+  - {from: cancelled_orders, to: cancel_revenue, sign: "+", lag_days: [0, 0], confidence: structural}
+  - {from: units_ordered, to: returned_units, sign: "+", lag_days: [3, 30], rate: unit_return_rate, confidence: structural}
+
+  # Purchase -> cost
+  - {from: units_sold, to: product_cost, sign: "+", lag_days: [0, 0], confidence: structural,
+     note: "Unit cost × units; a supplier price change is a change in this mechanism"}
+  - {from: orders, to: shipping_cost, sign: "+", lag_days: [0, 0], confidence: structural,
+     note: "Per-shipment rate × orders; a courier rate change is a change in this mechanism"}
+  - {from: orders, to: packaging_cost, sign: "+", lag_days: [0, 0], confidence: structural}
+  - {from: prepaid_orders, to: payment_gateway_fees, sign: "+", lag_days: [0, 0], confidence: structural}
+
+  # Customers
+  - {from: new_customers, to: customers, sign: "+", lag_days: [0, 0], confidence: structural}
+  - {from: new_customers, to: repeat_customers, sign: "+", lag_days: [14, 180], rate: repeat_rate, confidence: strong,
+     note: "Today's new customers are the repeat customers of the coming months"}
+
+# --------------------------------------------------------------------------- feedback (lagged only)
+# Results feed back into the levers: people raise budgets on good ROAS, platform algorithms bid toward conversions.
+# Never at lag 0. Without these, discovery reads "orders cause spend" as a contradiction instead of a known loop.
+feedback:
+  - {from: net_sales, to: ad_spend, sign: "+", lag_days: [1, 14], confidence: strong,
+     note: "Budget decisions follow results; value-based bidding spends more where it converts"}
+  - {from: orders, to: ad_spend, sign: "+", lag_days: [1, 7], confidence: moderate,
+     note: "Conversion-optimised campaigns pace spend on conversions"}
+  - {from: orders, to: cpm, sign: "-", lag_days: [1, 7], confidence: moderate,
+     note: "Conversion signal improves auction outcomes"}
+
+# --------------------------------------------------------------------------- co-measures (no causal edge)
+# The same real-world events counted by two systems. Never use one to explain the other; a divergence between them
+# is a data / measurement observation (tracking break, pixel loss, sync lag).
+co_measures:
+  - {a: orders, b: funnel_purchases, systems: [shopify, snowplow], expected: "funnel ≤ orders (ad blockers, app orders, server-side gaps)"}
+  - {a: orders, b: funnel_order_purchases, systems: [shopify, snowplow]}
+  - {a: net_sales, b: funnel_revenue, systems: [shopify, snowplow], expected: "Snowplow revenue is ex-tax at purchase; net sales also nets later returns / cancels"}
+  - {a: net_sales, b: funnel_order_revenue, systems: [shopify, snowplow]}
+  - {a: ad_spend, b: pnl_ad_spend, systems: [paid_media, finance_pnl], expected: equal}
+  - {a: ad_spend, b: order_pnl_ad_spend, systems: [paid_media, order_pnl], expected: equal}
+  - {a: net_sales, b: order_pnl_net_sales, systems: [commerce, order_pnl], expected: "near-equal, both order date"}
+  - {a: gross_sales, b: order_pnl_gross_sales, systems: [commerce, order_pnl], expected: "near-equal, both order date"}
+  - {a: discounts, b: order_pnl_discounts, systems: [commerce, order_pnl], expected: "near-equal, both order date"}
+  - {a: return_revenue, b: order_pnl_return_revenue, systems: [commerce, order_pnl], expected: "near-equal, both order date"}
+  - {a: cancel_revenue, b: order_pnl_cancel_revenue, systems: [commerce, order_pnl], expected: "near-equal, both order date"}
+  - {a: product_cost, b: product_line_cost, systems: [order_pnl, product], expected: "equal in total (catalogue: product-grain twin)"}
+  - {a: gross_cogs, b: product_gross_cogs, systems: [order_pnl, product], expected: "equal in total"}
+  - {a: gross_sales, b: product_gross_sale, systems: [commerce, product], expected: "equal in total (catalogue: product-grain twin)"}
+  - {a: product_gross_sale, b: product_order_gross_sales, systems: [product, product_pnl], expected: "near-equal, both order date"}
+  - {a: product_net_revenue, b: product_order_net_sales, systems: [product, product_pnl], expected: "near-equal, both order date"}
+  - {a: product_orders, b: product_order_orders, systems: [product, product_pnl]}
+  - {a: product_line_cost, b: product_order_product_cost, systems: [product, product_pnl]}
+  - {a: product_discounts, b: product_order_discounts, systems: [product, product_pnl]}
+  - {a: product_return_revenue, b: product_order_return_revenue, systems: [product, product_pnl]}
+  - {a: product_cancel_revenue, b: product_order_cancel_revenue, systems: [product, product_pnl]}
+  - {a: product_net_cogs, b: product_order_net_cogs, systems: [product, product_pnl]}
+  - {a: product_ad_spend, b: product_order_ad_spend, systems: [product, product_pnl], expected: equal}
+  - {a: returns_excl_tax, b: pnl_return_revenue, systems: [returns, finance_pnl], expected: "both on the return / refund date; near-equal"}
+  - {a: refund_count, b: pnl_returned_orders, systems: [returns, finance_pnl]}
+  - {a: payment_amount, b: paid_sales, systems: [payments, commerce], expected: "different dates (transaction vs order) and refunds negative"}
+  - {a: page_views, b: session_page_views, systems: [web_events, web_sessions], expected: "session_page_views ≈1.3% below page_views"}
+
+# --------------------------------------------------------------------------- product-grain twins on two date bases
+# product_order_X (order date) and product_pnl_X (event / finance date) are the same quantity on two date axes.
+# Stated here because the concepts map the finance product P&L but not product_order_*.
+date_twin_prefixes:
+  # concepts.yaml header: "pnl_X = event date, X = its order-date twin".
+  - {order_date: "", finance_date: "pnl_"}
+  - {order_date: "product_order_", finance_date: "product_pnl_"}
+  - {order_date: "product_", finance_date: "product_pnl_"}
+
+# --------------------------------------------------------------------------- subsets and partitions (no causal edge)
+subsets:
+  - {part: link_clicks, whole: clicks}
+  - {part: new_customers, whole: orders, note: "first orders ⊂ orders"}
+  - {part: cod_orders, whole: orders}
+  - {part: prepaid_orders, whole: orders}
+  - {part: payment_orders, whole: orders}
+  - {part: orders_with_touchpoints, whole: orders}
+  - {part: cancelled_orders, whole: orders}
+  - {part: returned_orders, whole: orders}
+  - {part: repeat_customers, whole: customers}
+
+# --------------------------------------------------------------------------- allocations (model output, no causal edge)
+# Allocated metrics are a share of a platform metric, split by the product's share of attributed REVENUE. They are
+# computed FROM the product's sales, so "product_ad_spend explains product sales" is circular: never use an
+# allocated metric as a driver of the same product's revenue, orders or profit.
+allocations:
+  - {allocated: product_ad_spend, source: ad_spend, key: product share of attributed line revenue}
+  - {allocated: product_order_ad_spend, source: ad_spend, key: product share of attributed line revenue}
+  - {allocated: product_pnl_ad_spend, source: ad_spend, key: product share of attributed line revenue}
+  - {allocated: product_impressions, source: impressions, key: product share of attributed revenue}
+  - {allocated: product_clicks, source: clicks, key: product share of attributed revenue}
+  - {allocated: product_link_clicks, source: link_clicks, key: product share of attributed revenue}
+  - {allocated: product_landing_page_views, source: landing_page_views, key: product share of attributed revenue}
+  - {allocated: product_thruplays, source: thruplays, key: product share of attributed revenue}
+  - {allocated: product_shipping_cost, source: shipping_cost, key: line revenue share of the order}
+  - {allocated: product_packaging_cost, source: packaging_cost, key: line revenue share of the order}
+  - {allocated: product_payment_gateway_fees, source: payment_gateway_fees, key: line revenue share of the order}
+  - {allocated: product_rto_cost, source: rto_cost, key: line revenue share of the order}
