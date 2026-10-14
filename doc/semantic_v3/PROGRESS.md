@@ -10,7 +10,7 @@ Read this file and spec §0B at the start of every session; append an entry at t
 |---|---|---|
 | 0 Baseline + capability inventory | **done 2026-10-14** | **PASS** — CAPABILITY_MAP covers 100 % of catalogue_v2 ids + Cube v2 members (0 gaps) |
 | 1 Order classification | **done 2026-10-14 (applied)** | **PASS** — v3_contracts 15/15 live; owner reviewed outcomes (D-22a–e) |
-| 2 Component ledger | **done 2026-10-14 (applied)** | **PASS** — contracts 26/26 live; reconciliation 0 unexplained ₹ |
+| 2 Component ledger | **done 2026-10-14 (applied)** | **PASS** — contracts 27/27 live; strict reconciliation (line-verified net-sales + cost bridges) 0 unexplained ₹ |
 | 3–9 | not started | — |
 
 ## Where the work lives
@@ -141,3 +141,15 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 - Results are in `mage-ai/serve/evaluations/results/v3_*_20261014.json`. The full bridge table and findings F2-1…F2-8 are in `CHECKLIST.md`.
 - Fingerprint after the apply: only live-data changes (gold CDC batch 23:29 + v2 refresh 23:35) and the new views.
 - Next: Phase 3 (ads at native grain, website LPV, attribution bridge with the model parameter).
+
+### 2026-10-14 — Phase 2 hardened (after review)
+- The first bridge partitioned orders by outcome, so it could not fail. It was replaced:
+  - every line's v3 deduction is compared with gold's own line deduction, and each delta must match a named decision rule;
+  - costs are bridged gold-raw → v3 transform by transform, computed from gold columns only.
+- The strict bridge surfaced rules I had applied without a ruling. The owner ruled on all of them: D-22i, D-22j, D-22k, D-11c, D-11d, D-01c, D-01d, D-05a, D-05b, D-08c (spec §0B + `DECISIONS.yaml`).
+- Applied with the owner's OK (class + line class + ledger). Live results: contracts 27/27; LINE / ORDER / PRODUCT exact; net-sales and cost bridges 0 unexplained, all history and Jul / Aug / Sep.
+- Business effect, all history: net sales −₹4.16L, variable cost +₹12.7L, contribution before ads −₹16.9L vs v2 (table in CHECKLIST).
+- Open:
+  - F2-11 re-confirmation (116 returned lines deducted under the "no item evidence" rule);
+  - F2-12 v2 cost-composition gap → Phase 7.
+- Decision register: `DECISIONS.yaml` + `scripts/check_decisions_v3.py` (61 decisions, OK).

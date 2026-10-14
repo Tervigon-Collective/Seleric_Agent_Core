@@ -39,52 +39,81 @@ Where the work is:
 - [ ] Attribution keys on `fct_order` (default model `last_non_direct`). Moved to Phase 3.
 - [ ] Cube login (`cube_serve`) read check of the new views. Not run: the owner declined the credential command. Covered in Phase 5.
 
-## Phase 2 — Component ledger · DONE · applied to production · contracts 26/26 · reconciliation 0 unexplained ₹
+## Phase 2 — Component ledger · DONE · applied to production · contracts 27/27 · reconciliation 0 unexplained ₹
 
 - [x] `semantic.ledger_order_component` and its MV (refresh 5 min after the class MVs, ~277k rows). Served as `serve.ledger_order_component`.
   - One signed ex-GST row per order, line and component; `line_item_id = 0` for order-level postings.
   - Every row carries cohort_date (root sale date, the default), order_date, event_date, cost_method and cost_status.
-- [x] Revenue: gross_sales (line, after discount, ex-GST), shipping_revenue (order, composite-supply GST), cancelled / rto / returned sales, shipping reversal on cancel and RTO (D-10a), exchange price adjustment (value difference, D-01a). GST is kept as memo rows.
-- [x] Costs:
-  - product_cogs, plus a credit for every unit that came back (D-03a);
-  - fulfilment from gold's posted amounts, with none on pre-dispatch cancels (D-05);
-  - exchange family: replacement COGS, inventory recovery, exchange shipping and handling.
-- [x] D-11 / D-11a:
-  - legacy RTO reverse shipping back-filled from the line's own rate (₹2.75L, `estimated_backfill`);
-  - legacy COD handling, checkout fee and weight discrepancy stay unrecorded (`not_recorded`, never estimated).
-- [x] Unknown orders booked as cancelled (D-22h); their outcome stays visible on every row.
-- [x] `serve.fct_payment`: payment_class is cash, exchange_credit or void (D-01b). Exchange credits total ₹12.4L, previously counted as payments.
-- [x] `v3_contracts.py`: 26/26 live (adds ledger grain, one row per component, deductions ≤ gross, credit ≤ cost, no revenue on non-sale orders, no test rows, cost signs, payment grain / completeness / credit scope).
-- [x] `v3_reconcile_gold.py` (results in `serve/evaluations/results/v3_reconcile_20261014.json`):
-  - LINE: 29,752 sale lines match gold after the decision transforms (0 mismatches).
-  - ORDER (FIN-01): incl-GST matches gold to the paisa on all 23,581 sale orders. The ex-GST difference vs gold's header is exactly the shipping GST (D-25).
-  - PRODUCT: 755 variants match.
-  - BRIDGE vs v2 (`channel_pnl` = `order_pnl_daily`): every ₹ is assigned to a decision id; 0 unexplained, all history and Jul / Aug / Sep 2026.
-- [x] Existing serve views untouched: fingerprint changes are live data only (CDC batch + v2 refresh).
+- [x] **Revenue:**
+  - gross_sales: line value after discount, ex-GST. An item swapped out inside the same order leaves gross (D-01c).
+  - shipping_revenue: order level, composite-supply GST (D-10, D-25).
+  - cancelled / rto / returned sales: item level (D-22i). The deduction is the refunded amount (D-22j), or the item value when the item came back unpaid (D-22k).
+  - shipping reversed on cancel and RTO (D-10a).
+  - exchange price adjustment by value difference (D-01a).
+  - GST kept as memo rows.
+- [x] **Costs:**
+  - product_cogs, plus a credit for every unit that came back (D-03a).
+  - fulfilment from gold's posted amounts: no packaging or shipping on pre-dispatch cancels (D-05); full packaging once shipped (D-05a); gateway fee kept (D-05b); reverse shipping wherever gold posted it (D-11d).
+  - exchange family: replacement COGS and its credit, inventory recovery, exchange shipping and handling (D-01).
+  - free-order costs counted (D-08c).
+- [x] **Gaps and back-fill:**
+  - legacy RTO reverse shipping back-filled from the line rate (₹2.75L, D-11c);
+  - legacy COD handling, checkout fee and weight discrepancy left unrecorded (`not_recorded`, D-11a);
+  - Unknown orders booked as cancelled (D-22h);
+  - a failed exchange becomes a customer return (D-01d).
+- [x] `serve.fct_payment`: payment_class is cash, exchange_credit or void (D-01b); exchange credits total ₹12.4L.
+- [x] `v3_contracts.py` 27/27 live: ledger grain, one row per component, deductions ≤ gross, credit ≤ cost, no revenue on non-sale orders, no test rows, cost signs, item-level rule, payment checks.
+- [x] `v3_reconcile_gold.py`. It now **can fail**: every line delta must match a named decision rule, and costs are bridged transform by transform from gold columns. Results are in `serve/evaluations/results/v3_reconcile_20261014.json`.
+  - LINE: 0 mismatches vs gold after decision transforms.
+  - ORDER (FIN-01): incl-GST matches to the paisa; the ex-GST difference vs gold's header is exactly the shipping GST.
+  - PRODUCT: matches.
+  - NET-SALES BRIDGE and COST BRIDGE: 0 unexplained ₹ and 0 unexplained lines, all history and Jul / Aug / Sep 2026.
+  - Live runs use a snapshot cut: orders gold re-loaded after the last v3 refresh are reported as pending and excluded (247 in the final run).
+- [x] Decision register `DECISIONS.yaml` (61 decisions) + `check_decisions_v3.py`: OK.
+- [ ] **Open for Phase 7 sign-off:** v2's cost total (`order_pnl_daily.net_cogs` ₹1.619 Cr all history) is ₹17–18L below gold's posted line costs. This is v2's own superseded composition (e.g. which credits / fees it nets) and is not decomposed by cause. The gold → v3 cost leg is fully proven.
 - [ ] Event-date vs cohort cross-period bridge and the monthly close / `as_of` → Phase 4.
-- [ ] Channel / campaign / ad roll-ups (reconcile check 4) → Phases 3–4.
-- [ ] Cost coverage is shown as a contract INFO line only. A coverage % metric comes with Cube v3 (Phase 5).
+- [ ] Channel / campaign / ad roll-ups → Phases 3–4.
 
-### v2 → v3 net sales bridge, brand 20 (ex-GST)
+### What changes for the business (brand 20, ex-GST)
 
-| Cause | All history | Sep 2026 |
-|---|---|---|
-| v2 net sales | 3,53,55,650 | 16,97,336 |
-| D-01 replacement not a sale | −8,29,557 | −2,60,811 |
-| D-01 exchanged original not a return | +7,26,016 | +1,85,553 |
-| D-22/D-22d customer return basis | −1,37,590 | +339 |
-| D-05/D-22f cancellation basis | −84,371 | −3,981 |
-| D-02b/D-10/D-25 gross basis (tax split) | +51,098 | −151 |
-| D-05/D-22a–e RTO basis | −49,800 | −14,780 |
-| D-02a/D-22f/g line refunds on active orders | −24,184 | −2,795 |
-| D-10a shipping reversed | −24,181 | −3,754 |
-| D-01a exchange price adjustment | −21,618 | −11,865 |
-| D-22h unknown as cancelled | −15,756 | −5,083 |
-| D-20b replacement returned for cash | −9,741 | −4,658 |
-| D-08/D-08a zero-value + test | +8,002 | +2,543 |
-| tax-exclusive order (#1001) | −72 | — |
-| **v3 net sales** | **3,49,43,898** | **15,77,891** |
-| unexplained | 0.01 | 0.00 |
+| | v2 today | v3 | Δ |
+|---|---|---|---|
+| Net sales, all history | 3,53,93,640 | 3,49,77,590 | −4,16,050 |
+| Total variable cost, all history | 1,61,94,074 | 1,74,67,633 | +12,73,559 |
+| Contribution before ads, all history | 1,91,99,566 | 1,75,09,957 | −16,89,609 |
+| Net sales, Sep 2026 (order date) | 16,97,336 | 15,81,406 | −1,15,930 |
+
+**Net-sales bridge**, all history (live, 247 pending orders excluded):
+
+| Cause | ₹ |
+|---|---|
+| D-01 exchanged item is not a return | +6,82,905 |
+| D-01 replacement not a sale | −7,62,090 |
+| D-22i order outcome when no line has item evidence | −1,50,940 |
+| D-22k item came back unpaid = item value | −1,35,984 |
+| D-25 deduction basis: v2 header ratio → gold line | +81,088 |
+| D-22e RTO-tagged active orders | −64,380 |
+| D-01c in-order swap out of gross | −56,312 |
+| D-02b/D-10/D-25 gross basis (tax split, FIN-01 proven) | +52,229 |
+| D-01a exchange price adjustment | +36,048 |
+| D-10a shipping reversed | −23,932 |
+| D-20b replacement returned for cash | −13,298 |
+| D-08 zero-value + test | +8,002 |
+| D-22h / D-22g / tax-exclusive #1001 | −5,154 |
+| **unexplained** | **0** |
+
+**Cost bridge** gold-raw → v3, all history:
+
+| Cause | ₹ |
+|---|---|
+| D-03a full product credit | +6,62,569 |
+| D-01 exchange inventory recovery | +2,62,398 |
+| D-05 no packaging / shipping on pre-dispatch cancel | +1,19,773 |
+| D-11c RTO reverse shipping back-filled | −2,74,968 |
+| D-01 replacement cost credit | −48,032 |
+| D-05a full packaging | −41,060 |
+| other D-01 | +3,025 |
+| **unexplained** | **0** |
 
 ## Phase 3 — Ads, web, attribution · NOT STARTED
 - [ ] `fct_ad_delivery` at native grain (Google ad × device × network; PMax ad = NULL). Fix the 304,008 duplicate hourly rows.
@@ -144,6 +173,12 @@ To change a decision:
 | D-01a | Exchange price adjustment = replacement value − exchanged item value (ex-GST, root cohort) |
 | D-01b | Exchange credits = manual, store credit, partially_paid, blank gateways on replacements |
 | D-11a | No extra data: legacy COD / checkout / weight costs stay unrecorded; rates present in data are used (D-11) |
+| D-22i | Deductions are item level; the order outcome applies to all lines only when no line has item evidence |
+| D-22j | A deduction is the refunded amount (gold's line deduction) |
+| D-22k | Item came back with nothing refunded (unpaid COD RTO) → deduct the item value |
+| D-11c / D-11d | RTO reverse shipping back-filled from the line rate; reverse shipping kept wherever gold posted it |
+| D-01c / D-01d | In-order swaps leave gross; a failed exchange becomes a return |
+| D-05a / D-05b / D-08c | Full packaging once shipped; gateway fee kept on cancels; free-order costs counted |
 
 ## Findings
 
@@ -173,6 +208,10 @@ To change a decision:
 | F2-6 | 12 gold payments belong to orders missing from gold.fct_orders | upstream orphans, not in fct_payment |
 | F2-7 | Exchange credits ₹12.4L were counted as payments in v2 `payment_amount` | separated (D-01b) |
 | F2-8 | Product cost missing on 247 brand-20 lines (0.8 %) | shown as `missing`, never zero |
+| F2-9 | Gold re-loads orders continuously (CDC); a live check can catch gold newer than the 5-min v3 refresh | live checks use a snapshot cut and report pending orders |
+| F2-10 | 97 returned lines (₹1.51L, mostly unpaid COD RTO) carry no gold deduction or refund at all | D-22k |
+| F2-11 | 116 returned lines (₹1.43L) have return / refund evidence only at order level | D-22i (order outcome applies). **Re-confirm**: the clarifying question quoted this group as 5 orders / ₹13k |
+| F2-12 | v2 net_cogs is ₹17–18L below gold's posted line costs (v2 composition) | open, Phase 7 variance sign-off |
 
 ## Still Unknown after the rulings (brand 20 sale orders)
 
