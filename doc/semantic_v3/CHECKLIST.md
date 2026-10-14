@@ -1,6 +1,6 @@
 # Semantic v3 rebuild — checklist and notes
 
-Status at 2026-10-14 (Phases 0–2 done). Companion to `PROGRESS.md` (the session log) and `PLAN.md` (the plan). Decisions live in spec §0B
+Status at 2026-10-14 (Phases 0–4 done). Companion to `PROGRESS.md` (the session log) and `PLAN.md` (the plan). Decisions live in spec §0B
 (`doc/Seleric_Enterprise_Data_Model_v2_Two_Planes.md`). `[x]` done · `[ ]` not done · `[~]` partly done / waiting.
 
 Where the work is:
@@ -71,7 +71,7 @@ Where the work is:
   - Live runs use a snapshot cut: orders gold re-loaded after the last v3 refresh are reported as pending and excluded (247 in the final run).
 - [x] Decision register `DECISIONS.yaml` (61 decisions) + `check_decisions_v3.py`: OK.
 - [ ] **Open for Phase 7 sign-off:** v2's cost total (`order_pnl_daily.net_cogs` ₹1.619 Cr all history) is ₹17–18L below gold's posted line costs. This is v2's own superseded composition (e.g. which credits / fees it nets) and is not decomposed by cause. The gold → v3 cost leg is fully proven.
-- [ ] Event-date vs cohort cross-period bridge and the monthly close / `as_of` → Phase 4.
+- [x] Event-date vs cohort cross-period bridge and the monthly close / `as_of` → Phase 4 (below).
 - [ ] Channel / campaign / ad roll-ups → Phases 3–4.
 
 ### What changes for the business (brand 20, ex-GST)
@@ -140,10 +140,33 @@ Where the work is:
 - [ ] **Hourly coverage:** Meta hourly exists only from 2026-04-01; Google hourly from 2024-11-15. Older hours are not in gold, so hourly answers before then are unavailable, never zero.
 - [ ] Meta breakdowns (`meta_ads_breakdown_daily`), ad change log and dims (`dim_campaign` / `adset` / `ad`) are reused unchanged from v2. Cube v3 wires them in Phase 5.
 
-## Phase 4 — Marts · NOT STARTED
-- [ ] `mart_period_profit` (default), `mart_pnl_event` (D-21), `mart_product_ad_allocated` (D-19o).
-- [ ] FIN-07 roll-ups; event vs cohort cross-period bridge; monthly close + `as_of` (D-12, D-12a).
-- [ ] Owner questions: allocated-family period rule (Q2), monthly-close history (Q3).
+## Phase 4 — Marts · DONE · applied to production · contracts 57/57
+- [x] **`semantic.mart_profit_fact`** (refresh 5 min, depends on the ledger and bridge MVs): one row-level fact with `cohort_date` and `event_date`.
+  - Order rows: the component ledger joined, on the root sale, to the default attribution model (`last_non_direct`, credit 1) and the root order's dims (`finance_channel`, `sub_channel`, `is_paid`, `is_new_customer`, `shipping_region`, `payment_bucket`).
+  - Spend rows: `fct_ad_delivery` rolled to platform × campaign × ad set × ad × day (D-07: delivery date, no allocation), with v2's `sub_channel` spend split (Meta placement share, Google campaign type).
+  - Order counts (orders, new customers, Unknown, cancelled / RTO / returned) are rows of their own. Zero-value orders without attribution are `unattributed`.
+  - `attribution_member` on every row: ad · ad_unknown · ad_not_applicable (PMax, D-14) · campaign_unknown · no_paid_platform.
+- [x] **`serve.mart_period_profit`** (default, order-date cohort) and **`serve.mart_pnl_event`** (D-21): thin views; they derive net sales, taxes, product / fulfilment / exchange cost, `contribution_before_ads`, `ad_spend` and `contribution_after_ads` (= what the `net_profit` ids resolve to; opex excluded, D-18r) and carry `is_maturing` (D-12a) and `close_status`.
+- [x] **`serve.mart_product_ad_allocated`** (explicit family, D-19o): campaign-day delivery (spend, impressions, clicks, link clicks, thruplays, 3 s / 100 % video views) spread over the credited sale lines by credit × line gross sales (D-27); landing page views from **website sessions** (D-27b); one `Unallocated` row per campaign-day with no credited line; `allocation_rule_version = d27_same_day_credit_v1`.
+  - Sep 2026, brand 20: ₹7,85,606 allocated + ₹4,07,716 unallocated = ₹11,93,322 (= gold). Zero-sales lines (free gifts) carry no weight.
+- [x] **Monthly close (D-12, D-12b):** append-only `semantic.snap_profit_monthly`, locked views `serve.mart_period_profit_closed` / `mart_pnl_event_closed`, and `serve/semantic_v3/close_month.py`.
+  - The script locks a month's rows on both axes at the moment it runs. It refuses a month that has not ended, a month already closed, and a stale or running refresh. Dry run tested on Sep 2026 and Oct 2026.
+  - Live views label each month `open` (current month), `restatable` (has a snapshot) or `reconstructed` (no snapshot, rebuilt from today's state, D-12b).
+- [x] **`apply_v3.py`** accepts plain append-only tables (marker `-- v3:append-only`, one CREATE TABLE, no MV); the destructive-statement check is unchanged.
+- [x] **Contracts 57/57 live** (13 mart, 4 allocated, 4 close). They can fail: the cross-period bridge contract was perturbed and caught.
+  - MART-CONTRIB-LEDGER / MART-NETSALES-LEDGER: mart = ledger, per brand × cohort month.
+  - MART-SPEND-GOLD: spend = gold Meta + Google, per brand × platform × day, to the paisa.
+  - MART-MEMBERS, MART-AD-KEYS, MART-ORDERS, MART-OUTCOME-ORDERS, MART-EVENT-COHORT-ALL.
+  - **MART-EVENT-BRIDGE:** event − cohort per brand × month = the cross-period bridge computed from the ledger, 0 unexplained ₹.
+  - ALLOC-SUM / LPV / SHARE / GRAIN; CLOSE-ONCE / SCOPE / STATUS / VIEW-SCOPE.
+- [x] **Reconciliation to v2 `pnl_*`** (`v3_reconcile_gold.py`, EVENT BRIDGE): all history v2 event = v2 cohort and v3 event = v3 cohort (so the proven cohort bridge carries over); ad spend = v2 every month; v3 product cost has no event timing (D-21a).
+  - Sep 2026 `pnl_net_profit`: v2 −15,27,829.44 → v3 −15,52,748.81 (Δ −24,919) = cohort leg −1,17,397 + event-dating leg +92,478.
+  - The cohort leg is bridged with causes (Phase 2). The event-dating leg is not itemised by cause (**L-24**, open): Jul −1.50L, Aug +0.48L, Sep +0.92L, nets to 0 over all history.
+- [x] **Owner rulings:** D-27 (same-day default-model credit), D-27b (website LPV), D-12b (reconstructed and flagged), D-21a (restock credit on the order date in the event family; Sep event-date product cost moved by ₹3,60,032 before this ruling).
+- [x] Nothing existing changed: only the new `semantic.*` / `serve.*` objects have new DDL; v2 objects untouched.
+- [ ] **No month is locked yet** and there is no schedule (L-27). The owner chooses the first close (Sep 2026 is `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule.
+- [ ] Default model only in the marts (L-25); the event-dating leg (L-24) goes to the Phase 7 variance report.
+- [ ] Cube v3 wiring of these views → Phase 5.
 
 ## Phase 5 — Cube v3 · NOT STARTED
 - [ ] `infra/cube/model_v3`; `cube-v3` service on :4003 (dev mode off); pre-aggregations; move the inline SQL (`ltv_cac_daily`, `funnel_channel`) into serve.
@@ -252,8 +275,8 @@ To change a decision:
 
 | # | Question | Needed by |
 |---|---|---|
-| Q2 | Allocated-family period rule | Phase 4 |
-| Q3 | Monthly-close history before the first snapshot | Phase 4 |
+| Q2 | Allocated-family period rule → D-27 same day, default-model credit; LPV → D-27b website sessions | Phase 4 · answered |
+| Q3 | Monthly-close history before the first snapshot → D-12b reconstructed and flagged | Phase 4 · answered |
 | Q6 | Stop the Cube v1 container? | Phase 9 |
 | Q7 | Any unexplained ₹ in reconciliation | Phases 2–4, 7 |
 | Q8 | query_log retention: longer TTL or two 7-day checks | Phase 9 |

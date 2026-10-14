@@ -298,7 +298,7 @@ decisions:
     entry + spec §0B row'
 - id: D-07
   title: Ad cost allocation to orders/products
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: Period match, no allocation. Period profit = contribution of orders placed in the period − ad spend delivered
@@ -308,6 +308,17 @@ decisions:
     `allocated` product family (D-19o) is the only allocation and never feeds default/overview answers.'
   options: none (spend stays at ad level, revenue credited) vs allocate by attribution credit
   evidence: §6.5
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-07, delivery-date spend, no allocation)
+  - mage-ai:serve/core/views/mart_period_profit.sql (D-07)
+  tests:
+  - MART-SPEND-GOLD
+  - MART-CONTRIB-LEDGER
+  - MART-MEMBERS
+  - MART-AD-KEYS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-08
   title: Draft / POS / test / revenue-adjustment orders
   status: implemented
@@ -484,13 +495,25 @@ decisions:
     entry + spec §0B row'
 - id: D-12
   title: As-of / closing cutoff
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: Live + monthly close. Default = latest state; locked month-end snapshots make closed months reproducible;
     recent cohorts flagged `maturing` for a defined window (D-12a).'
   options: rolling (today) vs locked monthly snapshot
   evidence: §4
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/07_snap_profit_monthly.sql (D-12)
+  - mage-ai:serve/semantic_v3/close_month.py (D-12)
+  - mage-ai:serve/core/views/mart_period_profit_closed.sql (D-12)
+  tests:
+  - CLOSE-ONCE
+  - CLOSE-SCOPE
+  - CLOSE-STATUS
+  - CLOSE-VIEW-SCOPE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-12a
   title: Maturity window
   status: implemented
@@ -657,7 +680,7 @@ decisions:
   evidence: §0C-C5
 - id: D-19o
   title: Product-level ad metrics vs no-capability-loss
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (plan): kept as an explicit `allocated` family — allocation = attribution credit (default model) × line
@@ -665,6 +688,16 @@ decisions:
     answers. Period rule for allocation still open (§0D Q2).'
   options: keep as allocated family / retire
   evidence: ~25 `product_*` spend/ROAS/MER/CAC/delivery ids exist today
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (D-19o)
+  - mage-ai:serve/core/views/mart_product_ad_allocated.sql (D-19o)
+  tests:
+  - ALLOC-SUM
+  - ALLOC-SHARE
+  - ALLOC-GRAIN
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-20
   title: Exchange edge cases
   status: implemented
@@ -700,7 +733,7 @@ decisions:
     entry + spec §0B row'
 - id: D-21
   title: Event-date P&L family (`pnl_*`, 25 ids)
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (plan): kept as explicit family, rebuilt on the same component ledger. Order-date cohort stays the default.
@@ -708,6 +741,16 @@ decisions:
     per month, see §4.1).'
   options: keep explicit / retire
   evidence: dashboard-style "processed in period"
+  implemented_in:
+  - mage-ai:serve/core/views/mart_pnl_event.sql (D-21)
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-21)
+  tests:
+  - MART-EVENT-BRIDGE
+  - MART-EVENT-COHORT-ALL
+  - reconcile: EVENT BRIDGE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22
   title: RTO / return / cancel evidence rule
   status: implemented
@@ -1020,29 +1063,30 @@ decisions:
     entry + spec §0B row'
 - id: D-27
   title: 'Allocated product-ad family: period rule'
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner): same day, default-model credit. A campaign-day''s spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order that day is the Unallocated row; allocation_rule_version on every row.'
   options: same day + default credit / reproduce v2 last-touch / same month
   evidence: 'Sep 2026 brand 20 spend 11,93,322: same day default credit allocates 7,87,188; v2 last-touch 4,15,479; same month 10,70,692'
   implemented_in:
-  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (allocation_rule_version)
+  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (D-27)
   tests:
   - ALLOC-SUM
+  - ALLOC-SHARE
   change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
     <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
     entry + spec §0B row'
 - id: D-27b
   title: 'Allocated product family: LPV source'
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner): website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today''s Meta-reported product_landing_page_views.'
   options: website sessions / platform twin / drop
   evidence: 'F-26'
   implemented_in:
-  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (allocated_landing_page_views)
+  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (D-27b)
   tests:
   - ALLOC-LPV
   change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
@@ -1050,16 +1094,33 @@ decisions:
     entry + spec §0B row'
 - id: D-12b
   title: 'Monthly close: months before the first snapshot'
-  status: planned
+  status: implemented
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner): reconstructed, flagged. Earlier months are rebuilt from today''s state and carry close_status = reconstructed (never presented as locked); real closes carry locked.'
   options: reconstructed + flagged / not offered / back-lock now
   evidence: 'snapshots exist only from the first close'
   implemented_in:
-  - mage-ai:serve/semantic_v3/close_month.py (close_status)
+  - mage-ai:serve/core/views/mart_period_profit.sql (D-12b)
+  - mage-ai:serve/semantic_v3/close_month.py (D-12b)
   tests:
-  - CLOSE-IMMUTABLE
+  - CLOSE-STATUS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-21a
+  title: 'Event-date family: date of the product-cost restock credit'
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order''s placement date;
+    every other component falls on its own event date.'
+  options: order date (as v2) / event date
+  evidence: 'Brand 20 Sep 2026 product cost differs by 3,60,032 (Aug 26,475); all-history totals identical; v2 event minus cohort product cost = 0 in every month'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-21a)
+  tests:
+  - MART-EVENT-BRIDGE
   change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
     <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
     entry + spec §0B row'

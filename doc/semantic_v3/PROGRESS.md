@@ -165,3 +165,18 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 - Applied with the owner's OK. Live contracts 39/39. FIN-07 for attributed net sales is exact per brand × month.
 - Findings F3-1…F3-5 in CHECKLIST. Register: 63 decisions (53 implemented), check OK.
 - Next: Phase 4 (marts: period profit, event-date pnl_*, allocated product ads, monthly close). Owner questions Q2 (allocation period rule) and Q3 (close history) come up there.
+
+### 2026-10-14 — Phase 4 (marts) — applied
+- Owner decisions: D-27 (allocated rule: same day, default-model credit), D-27b (allocated LPV = website sessions), D-12b (months before the first close are reconstructed and flagged), D-21a (event-date family keeps the product-cost restock credit on the order date, as v2).
+  - Evidence shown for D-21a: Sep 2026 event-date product cost differs by ₹3,60,032 between the two dating rules (Aug ₹26,475); v2's event minus cohort product cost is 0 in every month.
+- Built (mage-ai `semantic-v3` e26f74c, c8ea8e8 and later; applied in two batches with the owner's OK, nothing in v2 touched):
+  - `semantic.mart_profit_fact` + `serve.mart_period_profit` / `mart_pnl_event`;
+  - `semantic.mart_product_ad_allocated` + `serve.mart_product_ad_allocated`;
+  - `semantic.snap_profit_monthly` (append-only) + `serve.mart_period_profit_closed` / `mart_pnl_event_closed` + `serve/semantic_v3/close_month.py`;
+  - `apply_v3.py` append-only table support; 21 new contracts (57/57 live); event bridge in `v3_reconcile_gold.py`.
+- Live results: contracts 57/57; reconciliation: LINE / ORDER / PRODUCT and the Phase 2 net-sales and cost bridges still pass; EVENT BRIDGE passes (results in `serve/evaluations/results/v3_reconcile_p4_20261014.json`).
+  - Anchors, brand 20 Sep 2026: cohort `net_profit` −1,72,227 (v2) → −2,89,624 (v3), Δ −1,17,397 = the cohort leg; event-date `pnl_net_profit` −15,27,829.44 → −15,52,748.81.
+- Harness fix: COMPLETE-ORDER / COMPLETE-LINE now allow 60 s for loads in flight during a refresh (one order loaded during a refresh made them fail intermittently).
+- Open (KNOWN_LIMITS): **L-24** event-dating leg not itemised by cause; **L-25** default attribution model only in the marts; **L-27** no month locked and no schedule yet.
+- Next: Phase 5 (Cube v3 model, `cube-v3` on :4003). First owner item there: which month to lock first and the close schedule (can wait).
+

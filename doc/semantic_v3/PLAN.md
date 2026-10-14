@@ -37,12 +37,12 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
   - Every row has an `outcome_evidence` code. Order date is kept, and each deduction is counted once.
 
 ## Status (see doc/semantic_v3/PROGRESS.md and CHECKLIST.md)
-- [x] Phase 0 baseline · [x] Phase 1 order classification · [x] Phase 2 component ledger · [x] Phase 3 ads / web / attribution (all applied 2026-10-14)
-- [ ] Phase 4 marts (next) · [ ] 5 Cube v3 · [ ] 6 catalogue v3 + MCP · [ ] 7 certification · [ ] 8 cutover · [ ] 9 cleanup
+- [x] Phase 0 baseline · [x] Phase 1 order classification · [x] Phase 2 component ledger · [x] Phase 3 ads / web / attribution · [x] Phase 4 marts (all applied 2026-10-14)
+- [ ] 5 Cube v3 (next) · [ ] 6 catalogue v3 + MCP · [ ] 7 certification · [ ] 8 cutover · [ ] 9 cleanup
 
 ## All decisions taken (planning + interviews during the build)
 <!-- BEGIN GENERATED: decisions -->
-66 decisions (53 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
+67 decisions (61 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
 
 #### Orders, outcomes and customers
 - [x] **D-01** Exchange treatment — Continuation + separate exchange lifecycle. Original order is the only commercial sale (keeps order date, customer, attribution). Replacement = linked fulfilment child: no order count, no sales revenue.… _(implemented, phase 1)_ · `01_core_order_class.sql`, `03_ledger_order_component.sql`, `fct_order.sql`
@@ -104,14 +104,14 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **D-17** Website LPV definition — LPV = website sessions attributed to the platform/campaign/ad (UTM/click-id) with ≥1 tracked page view. Sessions without `ad_id`/`campaign_id` roll up as explicit `ad unknown` / `campaign unknown` members (Meta 19% /… _(implemented, phase 3)_ · `fct_web_session.sql`
 
 #### Profit, periods and product ads
-- [ ] **D-07** Ad cost allocation to orders/products — Period match, no allocation. Period profit = contribution of orders placed in the period − ad spend delivered in the period. Campaign drill = attributed contribution (default model D-06) − that campaign's spend;… _(planned, phase 4)_
-- [ ] **D-12** As-of / closing cutoff — Live + monthly close. Default = latest state; locked month-end snapshots make closed months reproducible; recent cohorts flagged `maturing` for a defined window (D-12a). _(planned, phase 4)_
+- [x] **D-07** Ad cost allocation to orders/products — Period match, no allocation. Period profit = contribution of orders placed in the period − ad spend delivered in the period. Campaign drill = attributed contribution (default model D-06) − that campaign's spend;… _(implemented, phase 4)_ · `05_mart_profit_fact.sql`, `mart_period_profit.sql`
+- [x] **D-12** As-of / closing cutoff — Live + monthly close. Default = latest state; locked month-end snapshots make closed months reproducible; recent cohorts flagged `maturing` for a defined window (D-12a). _(implemented, phase 4)_ · `07_snap_profit_monthly.sql`, `mart_period_profit_closed.sql`, `semantic_v3/close_month.py`
 - [x] **D-12a** Maturity window — 45 days after order date a cohort is `maturing`. _(implemented, phase 1)_ · `fct_order.sql`, `ledger_order_component.sql`
 - [ ] **D-18** Net profit — Contribution only. Top published metric = *contribution after ads*. No metric named "net profit" until an opex source exists; Agent explains the gap. `canonical_pnl.net_profit` retired with it. Refined by D-18r:… _(planned, phase 4)_
 - [ ] **D-18r** `net_profit` ids — ids kept; resolve to contribution after ads; description and Agent answer state opex is excluded. _(planned, phase 6)_
 - [x] **D-19** Product-level ad metrics — Credit-based, no spend split. Product drill shows attributed orders/sales per campaign/ad (which products each ad sold); `product_ad_spend`, `product_gross_roas`, `product_net_roas`, `product_mer`,… _(superseded)_
-- [ ] **D-19o** Product-level ad metrics vs no-capability-loss — kept as an explicit `allocated` family — allocation = attribution credit (default model) × line gross-sales share; `allocation_rule_version` on every row; Unallocated spend row so totals reconcile; never used in… _(planned, phase 4)_
-- [ ] **D-21** Event-date P&L family (`pnl_*`, 25 ids) — kept as explicit family, rebuilt on the same component ledger. Order-date cohort stays the default. Reconciliation: equal over all history; per period, event − cohort = itemised cross-period bridge with 0 unexplained ₹… _(planned, phase 4)_
+- [x] **D-19o** Product-level ad metrics vs no-capability-loss — kept as an explicit `allocated` family — allocation = attribution credit (default model) × line gross-sales share; `allocation_rule_version` on every row; Unallocated spend row so totals reconcile; never used in… _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`, `mart_product_ad_allocated.sql`
+- [x] **D-21** Event-date P&L family (`pnl_*`, 25 ids) — kept as explicit family, rebuilt on the same component ledger. Order-date cohort stays the default. Reconciliation: equal over all history; per period, event − cohort = itemised cross-period bridge with 0 unexplained ₹… _(implemented, phase 4)_ · `05_mart_profit_fact.sql`, `mart_pnl_event.sql`
 
 #### Scope and process
 - [x] **D-04** Amazon in overview roll-up — Out of scope for this rebuild. Brand overview is labelled D2C (Shopify) only; Amazon remains a documented gap; Amazon gold tables are untouched (not deleted) _(scope)_
@@ -120,14 +120,15 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **D-26** Live v2 defects F0-1 (4 tax metrics error) / F0-2 (customers × first-order product errors) — leave broken in v2; v3 delivers them (CAPABILITY_MAP `live_defect`). No v2 production write. _(implemented, phase 0)_ · `(no code: v2 left unchanged)`
 
 #### Other
-- [ ] **D-12b** Monthly close: months before the first snapshot — reconstructed, flagged. Earlier months are rebuilt from today's state and carry close_status = reconstructed (never presented as locked); real closes carry locked. _(planned, phase 4)_ · `semantic_v3/close_month.py`
-- [ ] **D-27** Allocated product-ad family: period rule — same day, default-model credit. A campaign-day's spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order… _(planned, phase 4)_ · `06_mart_product_ad_allocated.sql`
-- [ ] **D-27b** Allocated product family: LPV source — website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today's Meta-reported product_landing_page_views. _(planned, phase 4)_ · `06_mart_product_ad_allocated.sql`
+- [x] **D-12b** Monthly close: months before the first snapshot — reconstructed, flagged. Earlier months are rebuilt from today's state and carry close_status = reconstructed (never presented as locked); real closes carry locked. _(implemented, phase 4)_ · `mart_period_profit.sql`, `semantic_v3/close_month.py`
+- [x] **D-21a** Event-date family: date of the product-cost restock credit — order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order's placement date; every other component falls on its own event date. _(implemented, phase 4)_ · `05_mart_profit_fact.sql`
+- [x] **D-27** Allocated product-ad family: period rule — same day, default-model credit. A campaign-day's spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order… _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`
+- [x] **D-27b** Allocated product family: LPV source — website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today's Meta-reported product_landing_page_views. _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`
 <!-- END GENERATED: decisions -->
 
 ## Known limits
 <!-- BEGIN GENERATED: limits -->
-23 known limits (4 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
+27 known limits (6 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
 
 - [x] **L-01** (Attribution, accepted) Multi-touch attribution (last_non_direct, first_touch, linear, journey last-touch) exists only from 2026-06-01; ~8 % of later orders lack it too. Impact: 16,484 pre-June sale orders (₹2.87 Cr gross) + 811 since (₹17.5L) use the last-touch fallback under the default model; other models show no_model_data. Handled by D-06a. Next: rows carry model_used; Agent shows coverage % with every model answer (Phase 6)
 - [x] **L-02** (Attribution, accepted) Google website sessions often lack campaign (29 %) and ad (88 %) ids; 45 % of credited Google touches have no campaign. Impact: 792 Google orders (₹17.8L) + 279 Meta (₹5.6L) credited to a session without campaign; 328 filled from last-touch, the rest sit in `campaign unknown`. Handled by D-06b, D-17. Next: tracking fix upstream (gclid → campaign mapping) would shrink `campaign unknown`
@@ -151,7 +152,11 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [ ] **L-20** (Web, open) Checkout-timing session metrics (seconds to checkout / purchase, checkout steps) are structurally empty — Shopify checkout events are server-side without a session id. Impact: those metrics stay unavailable (data-quality waiver). Next: dbt fix (plumb cart journey checkout time into sessions)
 - [ ] **L-21** (Operations, open) system.query_log keeps 7 days. Impact: the "14 days of zero reads" rule before dropping old views cannot run as written. Next: owner chooses longer TTL or two 7-day checks (Q8)
 - [ ] **L-22** (Operations, planned) Live v2 defects — 4 tax metrics and customers × first-order product fail in Cube v2 today. Impact: those Agent answers error until the v3 cutover. Handled by D-26. Next: delivered by v3 (Phase 5–8)
-- [ ] **L-23** (Model, planned) Event-date P&L, monthly close / as-of snapshots, allocated product-ad metrics and period profit are not built yet. Impact: only order-cohort figures exist in v3 so far. Handled by D-07, D-12, D-19o, D-21. Next: Phase 4
+- [x] **L-23** (Model, accepted) Event-date P&L, monthly close / as-of snapshots, allocated product-ad metrics and period profit were not built. Impact: resolved in Phase 4 — serve.mart_period_profit, mart_pnl_event, mart_product_ad_allocated and the closed views exist. Handled by D-07, D-12, D-19o, D-21. Next: Cube v3 wires them in Phase 5
+- [ ] **L-24** (Marts, open) The event-date family (pnl_*) dates cancels / RTO / returns by the v3 ledger event date; v2 dated some of them differently. Impact: per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg that is NOT itemised by cause (brand 20 Jul ₹-1.50L, Aug +₹0.48L, Sep +₹0.92L); it nets to 0 over all history (v2 event = v2 cohort, v3 event = v3 cohort). Handled by D-21, D-21a. Next: Phase 7 variance report to the owner; itemise the dating leg per order if the owner wants the individual months signed off
+- [x] **L-25** (Marts, accepted) Period profit and the event-date family use the default attribution model only (last_non_direct, credit 1 per order). Impact: campaign / ad profit under first_touch, linear or last_touch is not offered; those models stay in serve.bridge_order_attribution for attribution questions. Handled by D-06. Next: none — fractional credits would break the exact roll-up (FIN-07); no v2 capability did this
+- [x] **L-26** (Allocated family, accepted) Spend is allocated only within a campaign-day that has a credited sale line with sales; the rest is an `Unallocated` row. Impact: Sep 2026 brand 20: ₹7.86L allocated, ₹4.08L unallocated of ₹11.93L. Free-gift lines (zero sales) get no share. Website LPV of sessions without a campaign id stays out of the allocation. Handled by D-19o, D-27, D-27b. Next: none — owner chose the same-day rule (D-27); never used in default answers
+- [ ] **L-27** (Monthly close, open) No month is locked yet; the close script exists but has not run, and there is no schedule. Impact: every past month is labelled `reconstructed` (rebuilt from today's state); `serve.mart_*_closed` is empty. Handled by D-12, D-12b. Next: owner decides when to lock the first month (Sep 2026 is still `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule
 <!-- END GENERATED: limits -->
 
 ## Architecture choices (technical, from repo conventions)
@@ -231,12 +236,13 @@ Progress folder: `doc/semantic_v3/` holds `PLAN.md` (= this file), `PROGRESS.md`
 - [x] `bridge_order_attribution` with the model parameter: default last_non_direct, last-touch fallback (D-06a), campaign fill (D-06b).
 - [x] Tests: spend = gold per platform and day; session members roll up (C5); FIN-15; credits Σ = 1; FIN-07 attributed net sales = brand. Contracts 39/39 live.
 
-### Phase 4 — Marts · NEXT
-- [ ] `mart_period_profit` (default), `mart_pnl_event` (D-21), `mart_product_ad_allocated` (D-19o).
-- [ ] FIN-07 roll-up tests: Σ campaigns + Unattributed = brand, for sales, spend and contribution.
-- [ ] Event-date vs order-date totals reconcile over closed months (cross-period bridge).
-- [ ] Monthly close script and `as_of` mode (D-12, D-12a maturing flag).
-- [ ] Owner questions: allocated-family period rule (Q2), monthly-close history (Q3).
+### Phase 4 — Marts · DONE (applied 2026-10-14, contracts 57/57 live)
+- [x] `semantic.mart_profit_fact`: ONE fact for both date axes (cohort + event) and for orders and ad spend. `serve.mart_period_profit` (default, order-date cohort) and `serve.mart_pnl_event` (D-21, event date) are thin views over it, so they reconcile over all history by construction.
+- [x] `serve.mart_product_ad_allocated` (D-19o): same-day, default-model-credit allocation of campaign-day delivery to sale lines (D-27); website LPV (D-27b); an `Unallocated` row, so Σ allocated + unallocated = delivery exactly.
+- [x] FIN-07 roll-ups: mart contribution and net sales = the ledger and spend = gold, per brand × month; every row has an attribution member (ad · ad_unknown · ad_not_applicable · campaign_unknown · no_paid_platform), so nothing is dropped.
+- [x] Event − cohort: per brand × month it equals an itemised cross-period bridge computed independently from the ledger (MART-EVENT-BRIDGE, can fail). All history: event = cohort in v2 and in v3. Sep 2026 `pnl_net_profit` ties to the v2 anchor: −15,27,829.44 → −15,52,748.81 (cohort leg −1,17,397 + event-dating leg +92,478).
+- [x] Monthly close (D-12, D-12b): append-only `semantic.snap_profit_monthly`, `serve.mart_*_closed`, `serve/semantic_v3/close_month.py` (refuses an unfinished month, a closed month, a stale refresh). Live views label each month `open` / `restatable` / `reconstructed`.
+- [ ] No month is locked yet and there is no schedule (L-27): the owner chooses the first close and approves the schedule.
 
 ### Phase 5 — Cube v3 model (`mage-ai/infra/cube/model_v3`, copied from model_v2 then rebased)
 - [ ] Same conventions: one root fact per view, `public:false` cubes, `meta.v2` mapping (in place of `meta.v1`), composite pk, `nullIf` counts, fiscal_year.
@@ -302,12 +308,12 @@ The tolerance is 0 in paise for sums of the same Decimal source. Float sources (
 
 ## Open questions — checklist (ask the owner when the phase reaches them)
 - [x] Q1 **D-11a** (Phase 2): historical rate card → answered: no extra data; legacy COD / checkout / weight stay unrecorded.
-- [ ] Q2 **Allocated-family period rule** (Phase 4): which spend is allocated to which orders — same day, same period, or reproduce today's `product_ad_line` `delivery_share` first?
-- [ ] Q3 **Monthly-close history** (Phase 4): months before the first snapshot shown as "reconstructed from current state", or not offered?
+- [x] Q2 **Allocated-family period rule** (Phase 4) → answered: D-27 same day, default-model credit; D-27b website LPV.
+- [x] Q3 **Monthly-close history** (Phase 4) → answered: D-12b reconstructed and flagged. Also D-21a: the restock credit stays on the order date in the event family.
 - [x] Q4 **Unknown-outcome review** (Phase 1) → answered: D-22a–e (Unknown 2,372 → 68 orders).
 - [x] Q5 **D-16 hashing** (Phase 1) → answered: D-16a hashed person key.
 - [ ] Q6 **Stop the Cube v1 container?** (Phase 9).
-- [ ] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7). Phases 2–3: none.
+- [ ] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7). Phases 2–4: none (the event-dating leg is not itemised by cause, L-24).
 - [ ] Q8 **query_log keeps 7 days** (Phase 9): longer TTL or two consecutive 7-day checks?
 - [x] Q9 **Live v2 defects** → answered: D-26, leave them until v3.
 - [x] Q10 **Payments vs exchanges** → answered: D-01b exchange credits.
