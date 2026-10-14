@@ -108,6 +108,23 @@ Where the work is:
 
 ---
 
+## How decisions are stored, and how to change one
+
+- **`doc/semantic_v3/DECISIONS.yaml`** is the machine-readable register, with one entry per decision (58). Each entry has:
+  - `ruling`, `options`, `evidence` (₹);
+  - `status` (implemented / planned / scope / process / superseded) and `phase`;
+  - `implemented_in` (file + rule), `evidence_codes` (the `outcome_evidence` values the data carries), `tests` (contracts / reconciliation checks that guard it), `change_how`.
+- **Spec §0B** holds the same decisions in business wording. Every row has a register entry.
+- **The code cites the decision id** at each rule, so `grep D-22i` finds every place it lives.
+- **Every data row carries its evidence code** (`outcome_evidence`, `line_outcome_evidence`, `cost_method`), so a number traces back to its decision.
+- **`scripts/check_decisions_v3.py --mage /home/tervigon/work/mage_v3`** fails if spec, register and code drift apart: a decision with no entry, a cited file that no longer mentions its id, code citing an unknown id, or an evidence code with no decision.
+
+To change a decision:
+1. Find it in `DECISIONS.yaml` and open the files in `implemented_in`; the rule is marked with its id.
+2. Edit the rule, update the register entry and the spec §0B row (date + new ruling), and run `check_decisions_v3.py`.
+3. Preview: `apply_v3.py --check`, `v3_contracts.py --preview --inline-all`, `v3_reconcile_gold.py --preview`. The bridge shows the ₹ moved by the change under the decision's own cause.
+4. Owner OK → `apply_v3.py --apply <objects>` → live contracts + reconciliation → note it in PROGRESS.
+
 ## Decisions taken in this rebuild (spec §0B)
 
 | ID | Decision |

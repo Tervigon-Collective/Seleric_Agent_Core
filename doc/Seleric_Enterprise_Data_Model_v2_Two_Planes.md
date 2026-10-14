@@ -81,6 +81,8 @@ All figures are brand 20 (Tilting Heads), all time (2024-10-23 → 2026-10-13), 
 
 Status values: **PENDING** (not answered), **DECIDED** (owner answer recorded with date). No modelling choice below is to be implemented while PENDING.
 
+Machine-readable register (implementation location, evidence codes, tests, how to change): `doc/semantic_v3/DECISIONS.yaml`; consistency check `scripts/check_decisions_v3.py`.
+
 | ID | Decision | Options | Evidence / ₹ impact | Status |
 |---|---|---|---|---|
 | D-00 | Source of truth for ad-facing LPV and revenue | Website sessions for LPV; Shopify orders (via attribution) for revenue; platform conversion numbers hidden (D-13) | F-25, F-26 | **DECIDED (2026-10-14, owner instruction)** — platform-reported LPV/revenue must not be used as the ad metric |

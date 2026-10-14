@@ -3,6 +3,7 @@
 Plan: `doc/semantic_v3/PLAN.md` (copy of `plan/SEMANTIC_V3_REBUILD_PLAN.md`). Spec: `doc/Seleric_Enterprise_Data_Model_v2_Two_Planes.md` v2.2 (§0B decisions, §0C target semantics, §0D constraints).
 Read this file and spec §0B at the start of every session; append an entry at the end.
 **Checklist (done / not done / findings / decisions / open questions): `CHECKLIST.md`** — keep it current.
+**Decision register: `DECISIONS.yaml`** (where each decision lives, evidence codes, tests, how to change); `scripts/check_decisions_v3.py` keeps spec, register and code in step.
 
 ## Status
 | Phase | State | Gate |
