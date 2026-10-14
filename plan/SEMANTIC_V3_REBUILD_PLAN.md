@@ -42,7 +42,7 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 ## All decisions taken (planning + interviews during the build)
 <!-- BEGIN GENERATED: decisions -->
-67 decisions (61 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
+68 decisions (62 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
 
 #### Orders, outcomes and customers
 - [x] **D-01** Exchange treatment — Continuation + separate exchange lifecycle. Original order is the only commercial sale (keeps order date, customer, attribution). Replacement = linked fulfilment child: no order count, no sales revenue.… _(implemented, phase 1)_ · `01_core_order_class.sql`, `03_ledger_order_component.sql`, `fct_order.sql`
@@ -121,14 +121,15 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 #### Other
 - [x] **D-12b** Monthly close: months before the first snapshot — reconstructed, flagged. Earlier months are rebuilt from today's state and carry close_status = reconstructed (never presented as locked); real closes carry locked. _(implemented, phase 4)_ · `mart_period_profit.sql`, `semantic_v3/close_month.py`
-- [x] **D-21a** Event-date family: date of the product-cost restock credit — order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order's placement date; every other component falls on its own event date. _(implemented, phase 4)_ · `05_mart_profit_fact.sql`
+- [x] **D-21a** Event-date family: date of the product-cost restock credit — order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order's placement date; every other component falls on its own event date. Scope note (implementation): only product_cogs_credit; the exchange… _(implemented, phase 4)_ · `05_mart_profit_fact.sql`
+- [x] **D-21b** Event-date family: month-by-month differences to v2 pnl_daily — accept v3 event dating. Every deduction is dated by its ledger event date, one rule for every component; v2 pnl_daily builds the event axis from a different gold fact plus an undated reconciliation plug row (brand 20… _(implemented, phase 4)_ · `evaluations/v3_reconcile_gold.py`
 - [x] **D-27** Allocated product-ad family: period rule — same day, default-model credit. A campaign-day's spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order… _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`
 - [x] **D-27b** Allocated product family: LPV source — website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today's Meta-reported product_landing_page_views. _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`
 <!-- END GENERATED: decisions -->
 
 ## Known limits
 <!-- BEGIN GENERATED: limits -->
-27 known limits (6 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
+28 known limits (5 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
 
 - [x] **L-01** (Attribution, accepted) Multi-touch attribution (last_non_direct, first_touch, linear, journey last-touch) exists only from 2026-06-01; ~8 % of later orders lack it too. Impact: 16,484 pre-June sale orders (₹2.87 Cr gross) + 811 since (₹17.5L) use the last-touch fallback under the default model; other models show no_model_data. Handled by D-06a. Next: rows carry model_used; Agent shows coverage % with every model answer (Phase 6)
 - [x] **L-02** (Attribution, accepted) Google website sessions often lack campaign (29 %) and ad (88 %) ids; 45 % of credited Google touches have no campaign. Impact: 792 Google orders (₹17.8L) + 279 Meta (₹5.6L) credited to a session without campaign; 328 filled from last-touch, the rest sit in `campaign unknown`. Handled by D-06b, D-17. Next: tracking fix upstream (gclid → campaign mapping) would shrink `campaign unknown`
@@ -153,10 +154,11 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [ ] **L-21** (Operations, open) system.query_log keeps 7 days. Impact: the "14 days of zero reads" rule before dropping old views cannot run as written. Next: owner chooses longer TTL or two 7-day checks (Q8)
 - [ ] **L-22** (Operations, planned) Live v2 defects — 4 tax metrics and customers × first-order product fail in Cube v2 today. Impact: those Agent answers error until the v3 cutover. Handled by D-26. Next: delivered by v3 (Phase 5–8)
 - [x] **L-23** (Model, accepted) Event-date P&L, monthly close / as-of snapshots, allocated product-ad metrics and period profit were not built. Impact: resolved in Phase 4 — serve.mart_period_profit, mart_pnl_event, mart_product_ad_allocated and the closed views exist. Handled by D-07, D-12, D-19o, D-21. Next: Cube v3 wires them in Phase 5
-- [ ] **L-24** (Marts, open) The event-date family (pnl_*) dates cancels / RTO / returns by the v3 ledger event date; v2 dated some of them differently. Impact: per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg that is NOT itemised by cause (brand 20 Jul ₹-1.50L, Aug +₹0.48L, Sep +₹0.92L); it nets to 0 over all history (v2 event = v2 cohort, v3 event = v3 cohort). Handled by D-21, D-21a. Next: Phase 7 variance report to the owner; itemise the dating leg per order if the owner wants the individual months signed off
+- [x] **L-24** (Marts, accepted) The event-date family (pnl_*) dates cancels / RTO / returns by the v3 ledger event date; v2 pnl_daily used another gold fact plus an undated reconciliation plug row. Impact: per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg that is not itemised (brand 20 Jul −1.50L, Aug +0.48L, Sep +0.92L); it nets to 0 over all history. Owner accepted v3 dating (D-21b). Handled by D-21, D-21a, D-21b. Next: month-by-month differences go into the Phase 7 variance report for sign-off
 - [x] **L-25** (Marts, accepted) Period profit and the event-date family use the default attribution model only (last_non_direct, credit 1 per order). Impact: campaign / ad profit under first_touch, linear or last_touch is not offered; those models stay in serve.bridge_order_attribution for attribution questions. Handled by D-06. Next: none — fractional credits would break the exact roll-up (FIN-07); no v2 capability did this
 - [x] **L-26** (Allocated family, accepted) Spend is allocated only within a campaign-day that has a credited sale line with sales; the rest is an `Unallocated` row. Impact: Sep 2026 brand 20: ₹7.86L allocated, ₹4.08L unallocated of ₹11.93L. Free-gift lines (zero sales) get no share. Website LPV of sessions without a campaign id stays out of the allocation. Handled by D-19o, D-27, D-27b. Next: none — owner chose the same-day rule (D-27); never used in default answers
 - [ ] **L-27** (Monthly close, open) No month is locked yet; the close script exists but has not run, and there is no schedule. Impact: every past month is labelled `reconstructed` (rebuilt from today's state); `serve.mart_*_closed` is empty. Handled by D-12, D-12b. Next: owner decides when to lock the first month (Sep 2026 is still `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule
+- [x] **L-28** (Schema, accepted) apply_v3.py never ALTERs and tables are CREATE IF NOT EXISTS, so a column added to an applied v3 table does not land by itself. Impact: a new column in mart_profit_fact needs a reviewed manual ALTER of the table (and of snap_profit_monthly); close_month.py refuses on drift and inserts by explicit column list. Next: decide with the owner whether apply_v3 may run ADD COLUMN IF NOT EXISTS before the first Cube v3 column request
 <!-- END GENERATED: limits -->
 
 ## Architecture choices (technical, from repo conventions)
@@ -242,6 +244,7 @@ Progress folder: `doc/semantic_v3/` holds `PLAN.md` (= this file), `PROGRESS.md`
 - [x] FIN-07 roll-ups: mart contribution and net sales = the ledger and spend = gold, per brand × month; every row has an attribution member (ad · ad_unknown · ad_not_applicable · campaign_unknown · no_paid_platform), so nothing is dropped.
 - [x] Event − cohort: per brand × month it equals an itemised cross-period bridge computed independently from the ledger (MART-EVENT-BRIDGE, can fail). All history: event = cohort in v2 and in v3. Sep 2026 `pnl_net_profit` ties to the v2 anchor: −15,27,829.44 → −15,52,748.81 (cohort leg −1,17,397 + event-dating leg +92,478).
 - [x] Monthly close (D-12, D-12b): append-only `semantic.snap_profit_monthly`, `serve.mart_*_closed`, `serve/semantic_v3/close_month.py` (refuses an unfinished month, a closed month, a stale refresh). Live views label each month `open` / `restatable` / `reconstructed`.
+- [x] Owner rulings D-27, D-27b, D-12b, D-21a, D-21b.
 - [ ] No month is locked yet and there is no schedule (L-27): the owner chooses the first close and approves the schedule.
 
 ### Phase 5 — Cube v3 model (`mage-ai/infra/cube/model_v3`, copied from model_v2 then rebased)
@@ -313,7 +316,7 @@ The tolerance is 0 in paise for sums of the same Decimal source. Float sources (
 - [x] Q4 **Unknown-outcome review** (Phase 1) → answered: D-22a–e (Unknown 2,372 → 68 orders).
 - [x] Q5 **D-16 hashing** (Phase 1) → answered: D-16a hashed person key.
 - [ ] Q6 **Stop the Cube v1 container?** (Phase 9).
-- [ ] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7). Phases 2–4: none (the event-dating leg is not itemised by cause, L-24).
+- [ ] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7). Phases 2–4: none unexplained. The event-dating leg of the monthly pnl_* comparison is not itemised; the owner accepted v3 dating (D-21b, L-24).
 - [ ] Q8 **query_log keeps 7 days** (Phase 9): longer TTL or two consecutive 7-day checks?
 - [x] Q9 **Live v2 defects** → answered: D-26, leave them until v3.
 - [x] Q10 **Payments vs exchanges** → answered: D-01b exchange credits.

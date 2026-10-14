@@ -179,4 +179,4 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 - Harness fix: COMPLETE-ORDER / COMPLETE-LINE now allow 60 s for loads in flight during a refresh (one order loaded during a refresh made them fail intermittently).
 - Open (KNOWN_LIMITS): **L-24** event-dating leg not itemised by cause; **L-25** default attribution model only in the marts; **L-27** no month locked and no schedule yet.
 - Next: Phase 5 (Cube v3 model, `cube-v3` on :4003). First owner item there: which month to lock first and the close schedule (can wait).
-
+- Review round (same day): the mart order-outcome counts were compared with the classified outcomes (differences are exactly D-22h / D-22f / D-22g, now a line-based contract); the event-dating leg went to the owner (D-21b: accept v3 dating); snapshot-vs-live contracts got cut-awareness and a REFRESH-IN-FLIGHT gate; closed views take `is_maturing` from the close time; `close_month.py` inserts by column list and refuses on schema drift (L-28); D-21a scope noted. Phase 5 inputs for the allocated and product P&L ids are in CHECKLIST.

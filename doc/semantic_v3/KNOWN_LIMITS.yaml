@@ -191,12 +191,12 @@ limits:
   next_step: Cube v3 wires them in Phase 5
 - id: L-24
   area: 'Marts'
-  limit: 'The event-date family (pnl_*) dates cancels / RTO / returns by the v3 ledger event date; v2 dated some of them differently.'
-  impact: 'per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg that is NOT itemised by cause (brand 20 Jul ₹-1.50L, Aug +₹0.48L, Sep +₹0.92L); it nets to 0 over all history (v2 event = v2 cohort, v3 event = v3 cohort).'
+  limit: 'The event-date family (pnl_*) dates cancels / RTO / returns by the v3 ledger event date; v2 pnl_daily used another gold fact plus an undated reconciliation plug row.'
+  impact: 'per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg that is not itemised (brand 20 Jul −1.50L, Aug +0.48L, Sep +0.92L); it nets to 0 over all history. Owner accepted v3 dating (D-21b).'
   affects: 'month-by-month pnl_* comparisons with v2'
-  handled_by: [D-21, D-21a]
-  status: open
-  next_step: 'Phase 7 variance report to the owner; itemise the dating leg per order if the owner wants the individual months signed off'
+  handled_by: [D-21, D-21a, D-21b]
+  status: accepted
+  next_step: 'month-by-month differences go into the Phase 7 variance report for sign-off'
 - id: L-25
   area: 'Marts'
   limit: 'Period profit and the event-date family use the default attribution model only (last_non_direct, credit 1 per order).'
@@ -221,3 +221,11 @@ limits:
   handled_by: [D-12, D-12b]
   status: open
   next_step: 'owner decides when to lock the first month (Sep 2026 is still `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule'
+- id: L-28
+  area: 'Schema'
+  limit: 'apply_v3.py never ALTERs and tables are CREATE IF NOT EXISTS, so a column added to an applied v3 table does not land by itself.'
+  impact: 'a new column in mart_profit_fact needs a reviewed manual ALTER of the table (and of snap_profit_monthly); close_month.py refuses on drift and inserts by explicit column list.'
+  affects: 'Phase 5 additions to the marts or the snapshot'
+  handled_by: []
+  status: accepted
+  next_step: 'decide with the owner whether apply_v3 may run ADD COLUMN IF NOT EXISTS before the first Cube v3 column request'

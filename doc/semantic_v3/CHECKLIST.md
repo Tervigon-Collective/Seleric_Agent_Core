@@ -161,11 +161,18 @@ Where the work is:
   - ALLOC-SUM / LPV / SHARE / GRAIN; CLOSE-ONCE / SCOPE / STATUS / VIEW-SCOPE.
 - [x] **Reconciliation to v2 `pnl_*`** (`v3_reconcile_gold.py`, EVENT BRIDGE): all history v2 event = v2 cohort and v3 event = v3 cohort (so the proven cohort bridge carries over); ad spend = v2 every month; v3 product cost has no event timing (D-21a).
   - Sep 2026 `pnl_net_profit`: v2 −15,27,829.44 → v3 −15,52,748.81 (Δ −24,919) = cohort leg −1,17,397 + event-dating leg +92,478.
-  - The cohort leg is bridged with causes (Phase 2). The event-dating leg is not itemised by cause (**L-24**, open): Jul −1.50L, Aug +0.48L, Sep +0.92L, nets to 0 over all history.
-- [x] **Owner rulings:** D-27 (same-day default-model credit), D-27b (website LPV), D-12b (reconstructed and flagged), D-21a (restock credit on the order date in the event family; Sep event-date product cost moved by ₹3,60,032 before this ruling).
+  - The cohort leg is bridged with causes (Phase 2). The event-dating leg (Jul −1.50L, Aug +0.48L, Sep +0.92L, nets to 0 over all history) is not itemised: v2 builds its event axis from another gold fact plus an undated `reconciliation` plug row (Jul −0.84L, Aug −3.44L, Sep −1.96L contribution). **Owner accepted v3 dating (D-21b, L-24 accepted)**; the month-by-month differences go into the Phase 7 variance report.
+- [x] **Owner rulings:** D-27 (same-day default-model credit), D-27b (website LPV), D-12b (reconstructed and flagged), D-21a (restock credit on the order date in the event family; Sep event-date product cost moved by ₹3,60,032 before this ruling; scope: only `product_cogs_credit`, the new exchange stock-return components stay on their event date), D-21b (accept v3 event dating).
 - [x] Nothing existing changed: only the new `semantic.*` / `serve.*` objects have new DDL; v2 objects untouched.
 - [ ] **No month is locked yet** and there is no schedule (L-27). The owner chooses the first close (Sep 2026 is `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule.
-- [ ] Default model only in the marts (L-25); the event-dating leg (L-24) goes to the Phase 7 variance report.
+- [x] **Order counts in the marts** (`cancelled_orders`, `rto_orders`, `returned_orders`) count sale orders with ≥ 1 cancelled-or-Unknown / RTO / returned LINE (v2's meaning). Compared with the order outcome (brand 20, all history): cancelled 587 = 508 cancelled + 68 Unknown (booked as cancelled, D-22h) + 11 active orders with a refunded line (D-22f); returned 1,016 = 1,014 + 2 active with a returned quantity and no refund (D-22g); RTO 2,823 = 2,823. The contract MART-OUTCOME-ORDERS checks this against the line classification, not the ledger. `return_rate` and `pnl_returned_or_cancelled_orders` use these counts.
+- [x] **Contracts that compare a snapshot with live data are cut-aware** (same failure as COMPLETE-*): MART-SPEND-GOLD, ALLOC-SUM and ALLOC-LPV skip days or campaign-days gold re-loaded after the table's last refresh (−60 s); the live run first waits (up to 3 min) until the ledger and bridge are no newer than the marts built on them and otherwise fails with REFRESH-IN-FLIGHT.
+- [x] `close_month.py` inserts by an explicit column list and refuses when the snapshot table lacks a fact column (L-28); closed views compute `is_maturing` from the close time (D-12a).
+- [ ] Default model only in the marts (L-25).
+- [ ] **Phase 5 inputs from the capability check** (21 allocated `product_*` ids, 51 `product_pnl` ids):
+  - Allocated ids: product dims come from `variant_id` / `product_id` via `dim_product_variant`; campaign dims from `ad_platform` / `campaign_id` / `ad_id`. `adset_id`, `is_new_customer`, `payment_bucket`, `shipping_region` are not on the allocated mart: Cube joins `fct_order` on `order_id` for the order dims and `dim_adset` for the ad set.
+  - `product_pnl` by channel / campaign / ad needs line grain plus attribution. `mart_profit_fact` has no line grain, so Cube v3 builds it from `ledger_order_component` ⨝ `fct_order_line` (variant) ⨝ `bridge_order_attribution` (default model, `root_order_id`).
+  - `product_cac` / `product_new_customers`: `is_new_customer` from `fct_order` (root order).
 - [ ] Cube v3 wiring of these views → Phase 5.
 
 ## Phase 5 — Cube v3 · NOT STARTED
