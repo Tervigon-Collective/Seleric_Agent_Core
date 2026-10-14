@@ -43,8 +43,9 @@ decisions:
   - EXCH-ROOT
   - LEDGER-NO-REVENUE-NONSALE
   - 'bridge: D-01 replacement not a sale / exchanged item is not a return'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-01a
   title: Exchange price-adjustment basis
   status: implemented
@@ -58,8 +59,9 @@ decisions:
   - 'mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (adj_rows: exchange_price_adjustment)'
   tests:
   - 'bridge: D-01a exchange price adjustment'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-01b
   title: Which payments are non-cash exchange credits
   status: implemented
@@ -73,8 +75,9 @@ decisions:
   - mage-ai:serve/core/views/fct_payment.sql (payment_class)
   tests:
   - PAY-CREDIT-SCOPE
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-01c
   title: In-order exchange (item swapped inside the same order) in gross sales
   status: implemented
@@ -92,8 +95,9 @@ decisions:
   tests:
   - LINE gross
   - 'bridge: D-01c'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-01d
   title: Exchange whose replacement was cancelled / RTO (customer never got the swap)
   status: implemented
@@ -109,8 +113,9 @@ decisions:
   - exchange_failed_replacement
   tests:
   - 'bridge: D-01d failed exchange = return'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-02
   title: Revenue recognition basis
   status: implemented
@@ -130,8 +135,9 @@ decisions:
   - active_not_shipped
   tests:
   - FIN-13
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-02a
   title: Revenue recognition basis
   status: implemented
@@ -149,8 +155,9 @@ decisions:
   - active_not_shipped
   tests:
   - FIN-13
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-02b
   title: GST
   status: implemented
@@ -165,8 +172,9 @@ decisions:
   tests:
   - ORDER FIN-01
   - 'bridge: gross basis'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-03
   title: COGS definition and return recovery
   status: implemented
@@ -181,8 +189,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (product_cost vs fulfilment_cost families)
   tests:
   - LINE product_cost
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-03a
   title: Returned/RTO stock cost recovery
   status: implemented
@@ -198,8 +207,9 @@ decisions:
   - LINE credit_D03a
   - LEDGER-CREDIT-LE-COST
   - 'cost bridge: D-03a'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-04
   title: Amazon in overview roll-up
   status: scope
@@ -224,8 +234,9 @@ decisions:
   tests:
   - LINE packaging_D05 / fwd_shipping_D05
   - 'cost bridge: D-05'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-05a
   title: Packaging on shipped orders when gold refunds it
   status: implemented
@@ -239,8 +250,9 @@ decisions:
   tests:
   - LINE packaging_D05
   - 'cost bridge: D-05a'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-05b
   title: Gateway fee on pre-dispatch cancellations
   status: implemented
@@ -253,8 +265,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (payment_gateway_fee = gold gateway_fee, also on cancels)
   tests:
   - LINE gateway
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-06
   title: Default attribution model for campaign/ad revenue
   status: planned
@@ -289,8 +302,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (order_type zero_value; draft/POS/adjustment = sale)
   tests:
   - FIN-14
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-08a
   title: Test orders
   status: implemented
@@ -305,8 +319,9 @@ decisions:
   - mage-ai:serve/core/views/fct_payment.sql (test excluded)
   tests:
   - LEDGER-NO-TEST
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-08b
   title: COD order cancelled and re-placed as prepaid (C2P)
   status: implemented
@@ -319,8 +334,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (c2p, superseded_by_order_id)
   evidence_codes:
   - cancel_cod_to_prepaid
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-08c
   title: Costs of zero-value / free orders
   status: implemented
@@ -331,8 +347,9 @@ decisions:
   evidence: 18 orders, ₹15.8k
   implemented_in:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (zero_value orders post costs, no revenue)
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-09
   title: Ad revenue measure
   status: planned
@@ -356,8 +373,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (gross_sales = line price − discounts ex-GST, sale orders)
   tests:
   - LINE gross
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-10
   title: Shipping charged to customer
   status: implemented
@@ -371,8 +389,9 @@ decisions:
   - 'mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (ship_rows: shipping_revenue, order level)'
   tests:
   - ORDER FIN-01
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-10a
   title: Shipping revenue on undelivered / returned orders
   status: implemented
@@ -386,8 +405,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (shipping_revenue_reversal on cancelled / rto / unknown)
   tests:
   - 'bridge: D-10a'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-11
   title: COGS era break 2026-09
   status: implemented
@@ -400,9 +420,10 @@ decisions:
   implemented_in:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (cost_method; rate-card amounts as recorded)
   tests:
-  - LINE reverse_D11
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  - LINE reverse_D11c_D11d
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-11a
   title: Back-fill rates not present in data
   status: implemented
@@ -416,8 +437,9 @@ decisions:
     2026-09'
   implemented_in:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (cost_method not_recorded for legacy COD / checkout / weight)
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-11c
   title: Legacy RTO reverse-shipping back-fill
   status: implemented
@@ -429,10 +451,11 @@ decisions:
   implemented_in:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (reverse_shipping_cost estimated_backfill = rto_per_unit × qty)
   tests:
-  - LINE reverse_D11
+  - LINE reverse_D11c_D11d
   - 'cost bridge: D-11c'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-12
   title: As-of / closing cutoff
   status: planned
@@ -453,8 +476,9 @@ decisions:
   implemented_in:
   - mage-ai:serve/core/views/fct_order.sql (is_maturing)
   - mage-ai:serve/core/views/ledger_order_component.sql (is_maturing)
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-13
   title: Platform-reported conversions (Meta purchases/value/LPV, Google conversions/value)
   status: planned
@@ -495,8 +519,9 @@ decisions:
   tests:
   - NEW-CUST
   - NEW-CUST-ALL
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-16
   title: Guest identity
   status: implemented
@@ -510,8 +535,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (person CTE)
   tests:
   - NEW-CUST
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-16a
   title: Identity key in serve
   status: implemented
@@ -526,8 +552,9 @@ decisions:
   - mage-ai:serve/core/views/fct_order.sql (no raw PII)
   tests:
   - PII
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-17
   title: Website LPV definition
   status: planned
@@ -591,8 +618,9 @@ decisions:
   evidence_codes:
   - exchange_marker_money_refund
   - exchange_marker_no_replacement
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-20b
   title: Exchange edge cases
   status: implemented
@@ -605,8 +633,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (returned_sales on a replacement returned for cash, root cohort)
   tests:
   - 'bridge: D-20b'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-21
   title: Event-date P&L family (`pnl_*`, 25 ids)
   status: planned
@@ -642,8 +671,9 @@ decisions:
   tests:
   - FIN-13
   - FIN-13-LINE
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22a
   title: Bare `RTO` tag on unshipped cancellations
   status: implemented
@@ -658,8 +688,9 @@ decisions:
   - cancel_rto_tag_shipment_record_lost
   tests:
   - 'bridge: D-05/D-22a-e'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22b
   title: RETURN with merchant-created return record, no money refund, no delivery status, no RTO evidence
   status: implemented
@@ -672,8 +703,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
   evidence_codes:
   - return_record_no_money_no_delivery
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22c
   title: Shipped cancellation, never delivered, no RTO evidence
   status: implemented
@@ -686,8 +718,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
   evidence_codes:
   - cancel_shipped_never_delivered
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22d
   title: RETURN with money refunded but no delivery status
   status: implemented
@@ -701,8 +734,9 @@ decisions:
   evidence_codes:
   - return_request_money_refund
   - return_money_refund_only
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22e
   title: ACTIVE order with RTO evidence (Logisy rto_in_transit / rto_delivered tags, courier `failure`, or the 2025 bare `RTO` tag)
   status: implemented
@@ -717,8 +751,9 @@ decisions:
   - active_with_rto_evidence
   tests:
   - 'bridge: D-22e'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22f
   title: Line refunded with no return (ACTIVE / ADJUSTMENT orders)
   status: implemented
@@ -736,8 +771,9 @@ decisions:
   - line_refund_without_return
   tests:
   - 'bridge: D-22f'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22g
   title: Returned quantity with no refund on an ACTIVE order
   status: implemented
@@ -752,8 +788,9 @@ decisions:
   - line_return_qty_without_refund
   tests:
   - 'bridge: D-22g'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22h
   title: Ledger treatment of Unknown-outcome orders
   status: implemented
@@ -767,8 +804,9 @@ decisions:
   - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (treat unknown as cancelled)
   tests:
   - 'bridge: D-22h'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-22i
   title: Which lines a cancel / RTO / return deducts
   status: implemented
@@ -790,8 +828,9 @@ decisions:
   - FIN-13-LINE
   - ITEM-LEVEL
   - 'bridge: D-22i'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-23
   title: Rebuild scope and consumers
   status: process
@@ -824,8 +863,9 @@ decisions:
   tests:
   - ORDER FIN-01
   - 'bridge: gross basis'
-  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline-all;
-    v3_reconcile_gold.py --preview; owner OK; apply_v3.py --apply <objects>; update this entry + spec §0B row'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-26
   title: Live v2 defects F0-1 (4 tax metrics error) / F0-2 (customers × first-order product errors)
   status: implemented
@@ -836,3 +876,51 @@ decisions:
   evidence: 'Phase 0 sweep 2026-10-14: 7 of 739 Cube v2 members fail; caused by unapplied mage-ai f645091 / 8a2b333'
   implemented_in:
   - '(no code: v2 left unchanged)'
+- id: D-22j
+  title: How much a cancel / RTO / return deducts
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'The refunded amount: the deduction is gold''s line cancelled / returned revenue (ex-GST) when present.'
+  options: item value / refunded amount
+  evidence: no line had a partial refund below item value on 2026-10-14 (₹0 effect today)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (lines.gold_ded, lt.ded)
+  tests:
+  - LINE deduction_D22j
+  - LEDGER-DED-LE-GROSS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22k
+  title: Item came back but nothing was refunded (unpaid COD RTO)
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: Deduct the item value (nothing paid + item returned = no sale).
+  options: deduct item value / keep in sales
+  evidence: 97 lines, ₹1.51L
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (lt.ded fallback = gs × share)
+  tests:
+  - LINE deduction_D22j
+  - 'bridge: D-22k'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-11d
+  title: Reverse shipping posted by gold on kept / pre-dispatch cancelled lines
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: Keep the cost wherever gold posted it.
+  options: keep cost / drop
+  evidence: ₹20k
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (reverse_shipping_cost)
+  tests:
+  - LINE reverse_D11c_D11d
+  - cost bridge
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
