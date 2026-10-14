@@ -42,7 +42,7 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 ## All decisions taken (planning + interviews during the build)
 <!-- BEGIN GENERATED: decisions -->
-63 decisions (53 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
+66 decisions (53 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
 
 #### Orders, outcomes and customers
 - [x] **D-01** Exchange treatment — Continuation + separate exchange lifecycle. Original order is the only commercial sale (keeps order date, customer, attribution). Replacement = linked fulfilment child: no order count, no sales revenue.… _(implemented, phase 1)_ · `01_core_order_class.sql`, `03_ledger_order_component.sql`, `fct_order.sql`
@@ -118,6 +118,11 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **D-23** Rebuild scope and consumers — `seleric_systems` web dashboard is not used — it and Cube v1 are excluded. Scope = Seleric Agent, Core MCP, Cube v3, new canonical serve. Migrate only `/opt/seleric/reports` scripts still in use. Reconcile new serve… _(process)_
 - [x] **D-24** Cutover style — parallel build (new serve objects, Cube v3 on :4003, catalogue_v3), switch after the no-capability-loss gate; rollback = env flip; old objects dropped after 2 stable weeks + zero-read check. _(process)_
 - [x] **D-26** Live v2 defects F0-1 (4 tax metrics error) / F0-2 (customers × first-order product errors) — leave broken in v2; v3 delivers them (CAPABILITY_MAP `live_defect`). No v2 production write. _(implemented, phase 0)_ · `(no code: v2 left unchanged)`
+
+#### Other
+- [ ] **D-12b** Monthly close: months before the first snapshot — reconstructed, flagged. Earlier months are rebuilt from today's state and carry close_status = reconstructed (never presented as locked); real closes carry locked. _(planned, phase 4)_ · `semantic_v3/close_month.py`
+- [ ] **D-27** Allocated product-ad family: period rule — same day, default-model credit. A campaign-day's spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order… _(planned, phase 4)_ · `06_mart_product_ad_allocated.sql`
+- [ ] **D-27b** Allocated product family: LPV source — website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today's Meta-reported product_landing_page_views. _(planned, phase 4)_ · `06_mart_product_ad_allocated.sql`
 <!-- END GENERATED: decisions -->
 
 ## Known limits
