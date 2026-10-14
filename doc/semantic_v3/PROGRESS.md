@@ -11,7 +11,8 @@ Read this file and spec §0B at the start of every session; append an entry at t
 | 0 Baseline + capability inventory | **done 2026-10-14** | **PASS** — CAPABILITY_MAP covers 100 % of catalogue_v2 ids + Cube v2 members (0 gaps) |
 | 1 Order classification | **done 2026-10-14 (applied)** | **PASS** — v3_contracts 15/15 live; owner reviewed outcomes (D-22a–e) |
 | 2 Component ledger | **done 2026-10-14 (applied)** | **PASS** — contracts 27/27 live; strict reconciliation (line-verified net-sales + cost bridges) 0 unexplained ₹ |
-| 3–9 | not started | — |
+| 3 Ads, web, attribution | in progress | spend = gold; sessions roll up (C5); FIN-15 |
+| 4–9 | not started | — |
 
 ## Where the work lives
 - Agent Core: branch `semantic-v3`, worktree `/home/tervigon/work/agent_core_v3`. **Not** checked out in `/opt/seleric/Seleric_Agent_Core`: compose runs from there and bind-mounts `catalogue*/` into the live MCP, and Jenkins deploys `main` there. Commit locally; never push to `main`.
@@ -150,6 +151,6 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 - Applied with the owner's OK (class + line class + ledger). Live results: contracts 27/27; LINE / ORDER / PRODUCT exact; net-sales and cost bridges 0 unexplained, all history and Jul / Aug / Sep.
 - Business effect, all history: net sales −₹4.16L, variable cost +₹12.7L, contribution before ads −₹16.9L vs v2 (table in CHECKLIST).
 - Open:
-  - F2-11 re-confirmation (116 returned lines deducted under the "no item evidence" rule);
+  - ~~F2-11~~ owner re-confirmed 2026-10-14: deduct;
   - F2-12 v2 cost-composition gap → Phase 7.
 - Decision register: `DECISIONS.yaml` + `scripts/check_decisions_v3.py` (61 decisions, OK).

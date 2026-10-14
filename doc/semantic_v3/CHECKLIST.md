@@ -115,7 +115,7 @@ Where the work is:
 | other D-01 | +3,025 |
 | **unexplained** | **0** |
 
-## Phase 3 — Ads, web, attribution · NOT STARTED
+## Phase 3 — Ads, web, attribution · IN PROGRESS
 - [ ] `fct_ad_delivery` at native grain (Google ad × device × network; PMax ad = NULL). Fix the 304,008 duplicate hourly rows.
 - [ ] Website LPV (D-17) with `ad unknown` / `campaign unknown` members; platform LPV twin hidden.
 - [ ] `bridge_order_attribution` with a model parameter (default last_non_direct). Check coverage: the credit table has only 6,291 orders.
@@ -210,7 +210,7 @@ To change a decision:
 | F2-8 | Product cost missing on 247 brand-20 lines (0.8 %) | shown as `missing`, never zero |
 | F2-9 | Gold re-loads orders continuously (CDC); a live check can catch gold newer than the 5-min v3 refresh | live checks use a snapshot cut and report pending orders |
 | F2-10 | 97 returned lines (₹1.51L, mostly unpaid COD RTO) carry no gold deduction or refund at all | D-22k |
-| F2-11 | 116 returned lines (₹1.43L) have return / refund evidence only at order level | D-22i (order outcome applies). **Re-confirm**: the clarifying question quoted this group as 5 orders / ₹13k |
+| F2-11 | 116 returned lines (₹1.43L) have return / refund evidence only at order level | D-22i (order outcome applies) — **owner re-confirmed 2026-10-14: deduct** |
 | F2-12 | v2 net_cogs is ₹17–18L below gold's posted line costs (v2 composition) | open, Phase 7 variance sign-off |
 
 ## Still Unknown after the rulings (brand 20 sale orders)

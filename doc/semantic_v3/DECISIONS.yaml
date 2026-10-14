@@ -815,7 +815,7 @@ decisions:
   ruling: 'DECIDED 2026-10-14 (owner): item level for everything — only lines with item evidence (returned / refunded / exchanged quantity,
     or gold line cancelled / returned revenue) are deducted; other lines of the order stay sold. Clarified: when NO line of the order
     has item evidence, the order outcome applies to every line (e.g. D-22e RTO-tagged active orders, and returned orders whose refund
-    / return exists only at order level — 116 lines ₹1.43L; to re-confirm, the question quoted that group as 5 orders ₹13k).'
+    / return exists only at order level — 116 lines ₹1.43L; re-confirmed by the owner 2026-10-14: deduct them).'
   options: whole order / item level
   evidence: 'RTO orders: 132 lines ₹1.99L had no item evidence; returned orders with no line evidence: 116 lines ₹1.43L'
   implemented_in:
