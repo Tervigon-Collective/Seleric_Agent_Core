@@ -13,12 +13,21 @@ status_values:
 decisions:
 - id: D-00
   title: Source of truth for ad-facing LPV and revenue
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: DECIDED (2026-10-14, owner instruction) — platform-reported LPV/revenue must not be used as the ad metric
   options: Website sessions for LPV; Shopify orders (via attribution) for revenue; platform conversion numbers hidden (D-13)
   evidence: F-25, F-26
+  implemented_in:
+  - mage-ai:serve/core/views/fct_web_session.sql (is_lpv from website sessions)
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (Shopify orders via attribution)
+  tests:
+  - FIN-15
+  - WEB-LPV
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-01
   title: Exchange treatment
   status: implemented
@@ -270,13 +279,23 @@ decisions:
     entry + spec §0B row'
 - id: D-06
   title: Default attribution model for campaign/ad revenue
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: `last_non_direct` is the default; model must be a parameter so the default can be changed later; other
     models selectable explicitly and never mixed in one total.'
   options: last_touch / last_non_direct / first / linear
   evidence: F-29 coverage
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (model parameter, default last_non_direct)
+  tests:
+  - ATTR-CREDIT
+  - ATTR-COMPLETE
+  - ATTR-DEFAULT-FLAG
+  - ATTR-FIN07
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-07
   title: Ad cost allocation to orders/products
   status: planned
@@ -352,7 +371,7 @@ decisions:
     entry + spec §0B row'
 - id: D-09
   title: Ad revenue measure
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: primary first-party ad revenue = attributed gross sale (Shopify, at placement) → *Gross ROAS*; *Net ROAS*
@@ -361,6 +380,13 @@ decisions:
     exchange replacements.'
   options: Shopify order net revenue via attribution vs website purchase-event value
   evidence: F-25
+  implemented_in:
+  - mage-ai:serve/core/views/fct_web_session.sql (website_purchase_value = tracking-quality only)
+  - mage-ai:serve/core/views/fct_web_event.sql
+  tests: []
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-09a
   title: Ad revenue measure
   status: implemented
@@ -481,31 +507,59 @@ decisions:
     entry + spec §0B row'
 - id: D-13
   title: Platform-reported conversions (Meta purchases/value/LPV, Google conversions/value)
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: Hide completely — not exposed in `serve`, Cube or to the Agent. Relaxed by D-13r for LPV only: hidden-by-default
     diagnostic twin `platform_reported_landing_page_views` is kept.'
   options: keep labelled / hide
   evidence: F-25, F-26
+  implemented_in:
+  - mage-ai:serve/core/views/fct_ad_delivery.sql (no platform conversions)
+  - mage-ai:serve/core/views/fct_ad_delivery_hourly.sql
+  tests:
+  - FIN-15
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-13r
   title: LPV ids
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (plan): `landing_page_views` / `cost_per_landing_page_view` rebound to website LPV (D-17), major version
     bump; hidden-by-default `platform_reported_landing_page_views` kept for diagnostics. All other platform conversions stay hidden.'
   options: website source / + platform twin
   evidence: F-26
+  implemented_in:
+  - mage-ai:serve/core/views/fct_ad_delivery.sql (platform_reported_landing_page_views twin)
+  - mage-ai:serve/core/views/fct_ad_delivery_hourly.sql
+  tests:
+  - FIN-15
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-14
   title: Google hierarchy
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: Native per platform — account → campaign type → campaign → ad group → ad (non-PMax) + device and network
     as Google-only breakdowns; PMax stops at campaign (+device/network). Cross-platform overview uses only common levels.'
   options: native per platform / campaign only
   evidence: F-23, F-24
+  implemented_in:
+  - mage-ai:serve/core/views/fct_ad_delivery.sql (native Google grain, PMax / camp_ ids NULL)
+  - mage-ai:serve/core/views/fct_ad_delivery_hourly.sql (device + network in key)
+  - mage-ai:serve/core/views/fct_web_session.sql
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql
+  tests:
+  - ADS-GRAIN
+  - ADS-HOURLY-GRAIN
+  - ADS-NO-PMAX-AD
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-15
   title: New-customer definition
   status: implemented
@@ -557,7 +611,7 @@ decisions:
     entry + spec §0B row'
 - id: D-17
   title: Website LPV definition
-  status: planned
+  status: implemented
   phase: 3
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14: LPV = website sessions attributed to the platform/campaign/ad (UTM/click-id) with ≥1 tracked page view.
@@ -565,6 +619,14 @@ decisions:
     lack ad_id).'
   options: sessions with ≥1 page view / all sessions / engaged
   evidence: F-27, F-28
+  implemented_in:
+  - mage-ai:serve/core/views/fct_web_session.sql (is_lpv, campaign / ad unknown members)
+  tests:
+  - WEB-LPV
+  - WEB-PAID-MEMBERS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
 - id: D-18
   title: Net profit
   status: planned
@@ -921,6 +983,38 @@ decisions:
   tests:
   - LINE reverse_D11c_D11d
   - cost bridge
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-06a
+  title: Default-model attribution for orders without last_non_direct credit
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: Fall back to gold last-touch, rows flagged model_used = last_touch_fallback; other models show an explicit no_model_data row
+    (never mixed).
+  options: last-touch fallback / unattributed / last-touch everywhere
+  evidence: 16,484 pre-June sale orders ₹2.87 Cr + 811 since ₹17.5L
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (gap_rows)
+  tests:
+  - ATTR-CREDIT
+  - ATTR-DEFAULT-FLAG
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-06b
+  title: Credited session without a campaign id
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: Fill from the order's same-platform last-touch (campaign_source = last_touch_fill); otherwise campaign unknown.
+  options: fill / campaign unknown
+  evidence: 792 Google ₹17.8L + 279 Meta ₹5.6L; 303 / 25 fillable
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (credit_rows.fill)
+  tests:
+  - ATTR-DEFAULT-FLAG
   change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
     <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
     entry + spec §0B row'
