@@ -319,6 +319,7 @@ PLACEMENT_COLS: dict[str, list[str]] = {
     "new_customers": ["new_customers"], "channel_new_customers": ["new_customers"], "product_new_customers": ["new_customers"],
     "aov": ["gross_sales", "orders"], "gross_roas": ["gross_sales", "ad_spend"],
     "channel_cac": ["ad_spend", "new_customers"], "cac": ["ad_spend", "new_customers"], "cost_per_order": ["ad_spend", "orders"],
+    "shipping_cost": ["forward_shipping_cost"], "product_shipping_cost": ["forward_shipping_cost"],   # v3: forward shipping only; reverse is rto_cost
     "packaging_cost": ["packaging_cost"], "product_packaging_cost": ["packaging_cost"],
     "payment_gateway_fees": ["payment_gateway_fee"], "product_payment_gateway_fees": ["payment_gateway_fee"],
     "gross_cogs": ["product_cogs"], "product_gross_cogs": ["product_cogs"],
@@ -332,10 +333,10 @@ PLACEMENT_OTHER = {"customers", "repeat_customers", "cod_orders", "prepaid_order
 SWITCHABLE = {
     "net_sales", "order_pnl_net_sales", "net_sales_deductions", "cancel_revenue", "order_pnl_cancel_revenue", "return_revenue",
     "order_pnl_return_revenue", "return_cancel_revenue", "cancelled_orders", "returned_orders", "returned_or_cancelled_orders",
-    "channel_returned_orders", "refund_amount", "net_cogs", "product_cost", "shipping_cost", "rto_cost", "operating_cost",
+    "channel_returned_orders", "refund_amount", "net_cogs", "product_cost", "rto_cost", "operating_cost",
     "taxes_on_net_sales", "contribution_margin", "net_profit", "units_sold", "returned_units",
     "product_order_net_sales", "product_order_cancel_revenue", "product_order_return_revenue", "product_order_returned_orders",
-    "product_order_net_cogs", "product_order_product_cost", "product_shipping_cost", "product_rto_cost", "product_operating_cost",
+    "product_order_net_cogs", "product_order_product_cost", "product_rto_cost", "product_operating_cost",
     "product_taxes_on_net_sales", "product_contribution_margin", "product_net_profit_before_ads",
     "product_cancel_revenue", "product_return_revenue", "product_net_revenue", "product_net_cogs", "product_line_cost",
     "product_gross_profit",
