@@ -595,7 +595,41 @@ shown to the user and never sent to the data tools.
 """
 
 
-def dashboard_analyst_prompt(module_label: str = "", brand_label: str = "") -> str:
+# Appended only when the loaded catalogue is semantic v3 (D-28, D-31, D-33, D-36): the date is a request parameter.
+DATE_AXIS_GUIDE_V3 = """\
+DATE AXIS (semantic v3)
+
+Every figure is on ONE date axis. Name it in the first line of the answer.
+- Default = order_date: the orders placed in the period, with cancels / RTO /
+  returns as of now ("orders placed in September, as of <data date>").
+- event_date = the same metrics with cancels / RTO / returns on the day they
+  were booked. Use it ONLY when the user's own words say so ("processed in",
+  "booked in", "happened in", "on the day", "P&L"). Pass date_axis="event_date"
+  to metrics_query; never pick a different metric id for it.
+- Ambiguous wording ("returns in September") is answered on order_date, then add
+  ONE line with the event_date figure and say which is which.
+- On event_date always show the Undated member returned beside the dated rows
+  (outcomes with no outcome date) and call the ranged total "dated only".
+  An RTO date is the day the cancel/return was booked, not a courier date.
+- Never mix the two axes in one table or one total. Ask two queries.
+- Cohort measures (return / cancel / RTO rate, repeat rate, LTV, net AOV, the
+  allocated product-ad metrics) are refused on event_date: say so and offer the
+  order_date figure. Ads, web and cash figures run on their own clock and ignore
+  date_axis: say that in one clause, never present them as event-dated.
+- Ratios on event_date (net ROAS, MER, margin %) are labelled; a NULL means event
+  net sales were not positive in that period, not zero.
+- Net profit means contribution after ads: operating expenses are not in the data.
+- Landing page views are the website's (a session with a tracked page view), not
+  the ad platform's; the platform figure is a diagnostic and never an ad metric.
+"""
+
+
+def with_date_axis_guide(text: str, semantic_version: int) -> str:
+    """The standing prompt plus the v3 date-axis rules (a v2 catalogue gets the prompt unchanged)."""
+    return text + "\n\n" + DATE_AXIS_GUIDE_V3 if semantic_version >= 3 else text
+
+
+def dashboard_analyst_prompt(module_label: str = "", brand_label: str = "", semantic_version: int = 2) -> str:
     """Full system prompt for the dashboard's in-page analyst chat: the standing
     no-hallucination guard + the conversational BI persona + the current scope
     header. ``module_label``/``brand_label`` are human-readable (the dashboard
@@ -605,4 +639,4 @@ def dashboard_analyst_prompt(module_label: str = "", brand_label: str = "") -> s
         scope = _SCOPE_HEADER.format(module_label=module_label, brand_label=brand)
     else:
         scope = _UNSCOPED_SCOPE_HEADER.format(brand_label=brand)
-    return "\n\n".join([NO_HALLUCINATION_GUARD, CONVERSATIONAL_BI_ANALYST, scope])
+    return with_date_axis_guide("\n\n".join([NO_HALLUCINATION_GUARD, CONVERSATIONAL_BI_ANALYST, scope]), semantic_version)

@@ -185,6 +185,11 @@ class DimensionDef(BaseModel):
     stable_key: str | None = None  # id of the dimension that identifies the entity
     # this label names (e.g. a title's product id). Labels can change or collide
     # across periods; comparisons across periods should join on the key.
+    # Semantic v3 (D-14): a platform-native dimension (Google device / network) exists for these ad_platform values
+    # only. A query that slices by it is scoped to them (disclosed); a filter outside them is refused.
+    valid_for: dict[str, list[str]] = Field(default_factory=dict)
+    # Semantic v3: a caveat shown whenever the dimension is used (e.g. Performance Max has no ad level, L-03).
+    coverage_note: str | None = None
 
 
 class GlossaryTerm(BaseModel):

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -10,7 +11,17 @@ from typing import Literal
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-DATASETS = ROOT / "catalogue_v2_src" / "datasets.yaml"
+
+
+def _datasets_path() -> Path:
+    """catalogue_<n>_src/datasets.yaml next to the catalogue in use (SELERIC_CATALOGUE_DIR=catalogue_v3 -> catalogue_v3_src);
+    catalogue_v2_src otherwise, so a v2 deployment (and the rollback) reads exactly what it always read."""
+    name = Path(os.environ.get("SELERIC_CATALOGUE_DIR", "") or "catalogue_v2").name
+    cand = ROOT / f"{name}_src" / "datasets.yaml"
+    return cand if cand.exists() else ROOT / "catalogue_v2_src" / "datasets.yaml"
+
+
+DATASETS = _datasets_path()
 
 
 @dataclass

@@ -62,6 +62,8 @@ dimensions:
     returns: returns.ad_format
     finance: finance.ad_format
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: ad_id
   display_name: Ad Id
   description: Ad id.
@@ -82,6 +84,8 @@ dimensions:
     returns: returns.ad_id
     finance: finance.ad_id
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: ad_key
   display_name: Ad Key
   description: Ad id, or the explicit member 'ad unknown' for paid sessions with a campaign but no ad id; NULL for
@@ -92,6 +96,8 @@ dimensions:
     paid_media_hourly: paid_media_hourly.ad_key
     web_sessions: web_sessions.ad_key
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: ad_name
   display_name: Ad Name
   description: Ad name (unnamed ads as "<platform> ad <ad_id>").
@@ -113,6 +119,8 @@ dimensions:
     finance: finance.ad_name
   aliases: []
   stable_key: ad_id
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: ad_platform
   display_name: Ad Platform
   description: 'Ad platform the traffic rolls up to: meta | google (NULL for other channels) — as on paid_media
@@ -161,6 +169,8 @@ dimensions:
     returns: returns.ad_status
     finance: finance.ad_status
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: adset_id
   display_name: Adset Id
   description: Ad set / ad group id.
@@ -180,6 +190,8 @@ dimensions:
     returns: returns.adset_id
     finance: finance.adset_id
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: adset_name
   display_name: Adset Name
   description: Ad set / ad group name.
@@ -200,6 +212,8 @@ dimensions:
     finance: finance.adset_name
   aliases: []
   stable_key: adset_id
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: adset_status
   display_name: Adset Status
   description: Current ad set status.
@@ -219,6 +233,8 @@ dimensions:
     returns: returns.adset_status
     finance: finance.adset_status
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: age
   display_name: Age
   description: Meta audience breakdown (breakdown_type age_and_gender); Meta delivery only — Google reports no audience
@@ -404,6 +420,8 @@ dimensions:
     paid_media_hourly: paid_media_hourly.campaign_key
     web_sessions: web_sessions.campaign_key
   aliases: []
+  coverage_note: Paid website sessions without a campaign id roll up as the explicit member 'campaign unknown' (Google
+    ~29 % of sessions, L-02).
 - id: campaign_name
   display_name: Campaign Name
   description: Campaign name.
@@ -575,6 +593,8 @@ dimensions:
     returns: returns.creative_type
     finance: finance.creative_type
   aliases: []
+  coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
+    at the campaign (device and network are available) and show no ad group or ad (L-03).'
 - id: days_since_prev_order
   display_name: Days Since Prev Order
   description: Days since the same person's previous sale order; NULL for a first order.
@@ -610,6 +630,9 @@ dimensions:
   views:
     paid_media: paid_media.device
   aliases: []
+  valid_for:
+    ad_platform:
+    - google
 - id: device_platform
   display_name: Device Platform
   description: Meta audience breakdown (breakdown_type platform_device); Meta delivery only — Google reports no
@@ -1074,6 +1097,9 @@ dimensions:
   views:
     paid_media: paid_media.network
   aliases: []
+  valid_for:
+    ad_platform:
+    - google
 - id: order_close_status
   display_name: Order Close Status
   description: open | restatable | reconstructed for the order-date month (D-12, D-12b).

@@ -662,12 +662,17 @@ decisions:
   evidence: F-32
 - id: D-18r
   title: '`net_profit` ids'
-  status: planned
+  status: implemented
   phase: 6
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (plan): ids kept; resolve to contribution after ads; description and Agent answer state opex is excluded.'
   options: keep relabelled / hard-cut
   evidence: ids exist today
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/finance.yml (net_profit description says opex is excluded)
+  tests:
+  - tests/test_semantic_v3.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue_v3 (scripts/build_catalogue_v3.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic_v3.py; owner OK for any serve apply; update this entry + spec §0B row'
 - id: D-19
   title: Product-level ad metrics
   status: superseded
@@ -1141,15 +1146,20 @@ decisions:
   change_how: 'to itemise instead, rebuild v2 event dating from gold.fct_ad_channel_pnl_daily and compare order by order; then update this entry + spec §0B row'
 - id: D-28
   title: 'Date axis switch (order_date / event_date) — one ledger, one parameter'
-  status: planned
-  phase: 5
+  status: implemented
+  phase: 6
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner): two switchable date axes, `order_date` (default) and `event_date`. Serve keeps ONE financial component ledger with both dates; Cube exposes both time dimensions and the same canonical measures; Core MCP resolves a request-level `date_axis` to the Cube time dimension (default order_date). The Agent never selects alternate metric ids for the same measure. No separate P&L formulas, no duplicate metric families: the pnl_* / product_pnl_* ids survive only as deprecated aliases (base metric + date_axis=event_date); the catalogue concept axis `date: finance` is an alias of event_date. Both axes reconcile to identical totals over the same complete population, as-of cutoff and financial policy, including Undated amounts. Axes are never mixed in one aggregation (same rule as D-06 for attribution models).'
   options: one view + date_axis parameter / keep twin views pnl + order_pnl / both
   evidence: 'v2 and v3 today: twin views (mart_period_profit, mart_pnl_event) with literally the same SQL on cohort_date vs event_date; 9 catalogue concepts / 57 resolve rows switch by metric id (date: order|finance); ~25 pnl_* + ~25 product_pnl_* ids duplicate the base ids'
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/finance.yml (both time dimensions, meta.date_axis on every measure)
+  - mage-ai:infra/cube/cube_v3.js (one date axis per query)
   tests:
   - AXIS-TOTAL
   - AXIS-NOMIX
+  - tests/test_semantic_v3.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue_v3 (scripts/build_catalogue_v3.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic_v3.py; owner OK for any serve apply; update this entry + spec §0B row'
 - id: D-29
   title: 'Event date of a cancel / RTO / return — precedence, source code, Undated'
   status: implemented
@@ -1185,14 +1195,20 @@ decisions:
     entry + spec §0B row'
 - id: D-31
   title: 'Ratio contracts on the event axis'
-  status: planned
-  phase: 5
+  status: implemented
+  phase: 6
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner, table approved): a ratio is allowed on an axis only when numerator and denominator share a clock. Identical on both axes (placement-only): gross ROAS, AOV, CAC, cost per order, new customers, orders. Event axis allowed with a mandatory label, NULL when event-axis net sales ≤ 0: net ROAS, MER, BE ROAS, gross / contribution / net margin %. Cohort-only, refused on the event axis with a pointer to order_date: return rate, cancel rate, RTO rate, repeat rate, LTV. Event counts (returned / cancelled / RTO orders) stay counts on the event axis. CONFIRMED 2026-10-15 (owner, Phase 4.5 checkpoint): the same principle applies to ratios not in the table — net AOV and LTV:CAC ratio are order_date only and refused on event_date; customer and repeat-customer counts are placement-only.'
   options: 'compute labelled / refuse the unsafe ones / define each (chosen: per-ratio table)'
   evidence: 'Sep 2026 brand 20: 433 returned orders on the event axis against 931 placed (46%) vs 20 on the cohort axis; net sales ₹4.21L event vs ₹15.7L cohort (₹9.43L returns processed vs ₹0.45L from the Sep cohort)'
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/finance.yml (ratio guard, cohort_only refusal text)
+  - mage-ai:infra/cube/gen_refusals_v3.py (refusals generated from model meta)
   tests:
   - AXIS-RATIO-CONTRACT
+  - v3_cube_refusals.py
+  - tests/test_semantic_v3.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue_v3 (scripts/build_catalogue_v3.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic_v3.py; owner OK for any serve apply; update this entry + spec §0B row'
 - id: D-32
   title: 'Undated visibility in event-axis answers'
   status: implemented
@@ -1220,14 +1236,19 @@ decisions:
   - AXIS-AGENT-DEFAULT
 - id: D-34
   title: 'Product grain and the allocated family on the event axis'
-  status: planned
-  phase: 5
+  status: implemented
+  phase: 6
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner): product / variant P&L (before ads) supports date_axis from the same ledger at line grain with the D-29 / D-30 rule. The allocated product-ad family (D-19o, D-27) is order_date only; event_date is refused with a pointer, because ad spend is not an event of an order.'
   options: 'product yes + allocated no / both / order_date only'
   evidence: '~25 product_pnl_* ids exist; allocated spend is allocated same-day on the cohort day (D-27)'
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/product_profit.yml (product P&L on both axes)
+  - mage-ai:infra/cube/model_v3/cubes/product_ads.yml (allocated family cohort-only)
   tests:
   - AXIS-PRODUCT-RECON
+  - tests/test_semantic_v3.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue_v3 (scripts/build_catalogue_v3.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic_v3.py; owner OK for any serve apply; update this entry + spec §0B row'
 - id: D-35
   title: 'Maturity and close on the event axis'
   status: implemented

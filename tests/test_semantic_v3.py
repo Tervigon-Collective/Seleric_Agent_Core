@@ -240,7 +240,8 @@ def test_drilldown_inherits_the_date_axis(planner, cube, result_store):
     out = run(planner, ["order_pnl_net_sales"], "event_date")
     out2 = asyncio.run(planner.drilldown(out["query_id"], ["finance_channel"], []))
     assert out2["date_axis"] == "event_date"
-    assert cube.queries[-2]["timeDimensions"][0]["dimension"] == "finance.event_date"
+    mains = [q for q in cube.queries if q.get("timeDimensions") and q["timeDimensions"][0]["dimension"].startswith("finance.")]
+    assert mains[-1]["timeDimensions"][0]["dimension"] == "finance.event_date"
 
 
 def test_hourly_granularity_keeps_working_on_the_default_axis(planner, cube):
@@ -260,3 +261,44 @@ def test_v2_planner_ignores_the_date_axis_parameter(cube, result_store):
     assert "date_axis" not in out
     assert len(cube.queries) == 1  # no Undated query on a v2 catalogue
     assert cube.queries[0]["timeDimensions"][0]["dimension"] == "commerce.order_date"
+
+
+def test_attribution_slice_carries_the_coverage_of_the_period(planner, cube):
+    """L-01: a channel / campaign slice also reports the share of orders credited under the default model."""
+    cube.by_prefix["finance"] = [{"finance.net_sales": "1", "finance.finance_channel": "meta"}]
+    cube.by_prefix["commerce"] = [{"commerce.attribution_model_used": "last_non_direct_v1", "commerce.orders": "90"},
+                                  {"commerce.attribution_model_used": "last_touch_fallback", "commerce.orders": "10"}]
+    out = run(planner, ["order_pnl_net_sales"], dimensions=["finance_channel"])
+    cov = out["attribution_coverage"]
+    assert cov["coverage_pct"] == 90.0 and cov["orders_by_model_used"]["last_touch_fallback"] == 10
+    assert cov["default_model"] == "last_non_direct"
+
+
+def test_no_coverage_block_without_an_attribution_slice(planner, cube):
+    cube.by_prefix["finance"] = [{"finance.net_sales": "1"}]
+    assert "attribution_coverage" not in run(planner, ["order_pnl_net_sales"])
+
+
+def test_google_only_dimension_scopes_the_query_and_refuses_meta(planner, cube):
+    """D-14: device / network are Google breakdowns; a slice by one is scoped to Google (disclosed)."""
+    cube.by_prefix["paid_media"] = [{"paid_media.ad_spend": "5", "paid_media.device": "MOBILE"}]
+    out = run(planner, ["ad_spend"], dimensions=["device"])
+    assert {"member": "paid_media.ad_platform", "operator": "equals", "values": ["google"]} in cube.queries[0]["filters"]
+    assert any("exists for ad_platform = google only" in w for w in out["warnings"])
+    with pytest.raises(PlanError, match="google only"):
+        run(planner, ["ad_spend"], dimensions=["device"],
+            filters=[{"dimension": "ad_platform", "operator": "equals", "values": ["meta"]}])
+
+
+def test_ad_level_slice_discloses_the_performance_max_gap(planner, cube):
+    """L-03: Google PMax has no ad group / ad level; the answer says so whenever the slice is used."""
+    cube.by_prefix["paid_media"] = [{"paid_media.ad_spend": "5", "paid_media.ad_name": "x"}]
+    out = run(planner, ["ad_spend"], dimensions=["ad_name"])
+    assert any("Performance Max" in w for w in out["warnings"])
+
+
+def test_audience_slice_of_website_lpv_points_at_the_platform_twin(planner):
+    """D-13r: no silent swap of a platform number under the website id; the refusal names the diagnostic twin."""
+    with pytest.raises(PlanError) as e:
+        run(planner, ["landing_page_views"], dimensions=["age"])
+    assert "platform_reported_landing_page_views" in str(e.value)

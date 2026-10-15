@@ -394,7 +394,8 @@ class AnalystService:
                 resolved = self._ctx.catalogue.resolve_brand(str(brand_id))
                 brand_label = getattr(resolved, "name", None) or str(brand_id)
         persona = prompt_templates.dashboard_analyst_prompt(
-            module_label=module_label, brand_label=brand_label
+            module_label=module_label, brand_label=brand_label,
+            semantic_version=self._ctx.catalogue.cat.semantic_version if self._ctx is not None else 2,
         )
         return persona + "\n\n" + prompt_templates.SCRATCHPAD_USAGE
 

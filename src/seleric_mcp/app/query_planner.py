@@ -38,6 +38,14 @@ IST = ZoneInfo("Asia/Kolkata")
 # every row to midnight.
 SUBDAILY_GRANULARITIES = {"hour"}
 
+# Semantic v3 (L-01): dimensions whose values come from order attribution. A slice by one of them is only as good as
+# the attribution coverage of the period, so the answer carries the coverage next to the numbers.
+ATTRIBUTION_DIMS = {
+    "platform", "channel", "sub_channel", "finance_channel", "campaign_id", "campaign_name", "adset_id", "adset_name",
+    "ad_id", "ad_name", "acquisition_platform", "acquisition_channel", "acquisition_campaign",
+}
+ATTRIBUTION_VIEWS = {"commerce", "finance", "product_profit", "product_ads"}
+
 # P&L-shaped measures must come from canonical_pnl (guard ported from server.js
 # validatePnlQuery): if a metric's id looks like P&L but maps elsewhere, the
 # catalogue is wrong — enforced at load; here we guard breakdown views.
@@ -315,6 +323,37 @@ class QueryPlanner:
                             "costs stay on the order date (D-37). Outcomes with no date are shown separately as Undated (D-32).")
         return out, request.model_copy(update={"date_axis": eff}), notes
 
+    # ---------- semantic v3: platform-native dimensions and coverage caveats ----------
+
+    def _apply_dimension_scope(
+        self, metrics: list[MetricDef], request: QueryRequest
+    ) -> tuple[dict[str, list[FilterSpec]], list[str]]:
+        """A Google-only breakdown (device, network) scopes the query to Google unless the caller already pinned
+        ad_platform (a conflicting pin is refused); dimensions with a coverage caveat (Performance Max has no ad
+        level, unknown campaign members) disclose it. Returns (forced filters per metric id, warnings)."""
+        forced: dict[str, list[FilterSpec]] = {}
+        warnings: list[str] = []
+        asked = [self.catalogue.resolve_dimension(d) for d in [*request.dimensions, *(f.dimension for f in request.filters)]]
+        for dim in {d.id: d for d in asked if d is not None}.values():
+            for m in metrics:
+                view = m.cube_mapping.view
+                if view not in dim.views:
+                    continue
+                for did, allowed in dim.valid_for.items():
+                    given = [f for f in request.filters if self.catalogue.resolve_dimension_id(f.dimension) == did]
+                    for f in given:
+                        bad = [v for v in f.values if str(v).lower() not in {a.lower() for a in allowed}]
+                        if bad and f.operator == "equals":
+                            raise PlanError(f"Dimension '{dim.id}' exists for {did} = {', '.join(allowed)} only "
+                                            f"(asked: {', '.join(map(str, bad))}). {dim.description}".strip())
+                    if not given and self.catalogue.cat.dimensions.get(did) is not None \
+                            and view in self.catalogue.cat.dimensions[did].views:
+                        forced.setdefault(m.id, []).append(FilterSpec(dimension=did, operator="equals", values=list(allowed)))
+                        warnings.append(f"'{dim.id}' exists for {did} = {', '.join(allowed)} only; '{m.id}' is scoped to it.")
+            if dim.coverage_note:
+                warnings.append(f"{dim.id}: {dim.coverage_note}")
+        return forced, list(dict.fromkeys(warnings))
+
     # ---------- semantic v2: unsupported values, valid_for, bindings ----------
 
     def _check_unsupported_values(self, filters: list[FilterSpec]) -> None:
@@ -505,6 +544,13 @@ class QueryPlanner:
                         if alts
                         else ""
                     )
+                    twin = self.catalogue.get_metric(f"platform_reported_{m.id}")
+                    if twin is not None and twin.hidden_by_default and canonical in twin.supported_dimensions:
+                        # D-13r: the website figure has no audience / placement slice; the platform twin does. Never
+                        # swapped in silently — name it so the answer says "as the ad platform reports it".
+                        hint += (f" The ad platform's own figure, '{twin.id}', can be sliced by '{canonical}' "
+                                 f"(diagnostic, not the website {m.id}).")
+                        alts = [twin.id, *alts]
                     raise PlanError(
                         f"Dimension '{did}' (→ {canonical}) is not supported by metric '{m.id}'. "
                         f"Supported: {', '.join(m.supported_dimensions) or '(none)'}.{hint}",
@@ -955,6 +1001,9 @@ class QueryPlanner:
         undated = None
         if self.catalogue.is_v3 and request.date_axis == "event_date":
             undated = await self._load_undated(view, metrics, qualified_dims, cube_filters)
+        coverage = None
+        if self.catalogue.is_v3:
+            coverage = await self._attribution_coverage(request, view, current_range)
         query_id = "q_" + uuid.uuid4().hex[:12]
         currencies = sorted({m.currency_default for m in metrics if m.currency_default})
         currency: str | list[str] | None
@@ -1029,7 +1078,53 @@ class QueryPlanner:
             result["date_axis_applied"] = {m.requested_as or m.id: self._axis_applied(m, request.date_axis) for m in metrics}
             if undated is not None:
                 result["undated"] = undated
+        if coverage is not None:
+            result["attribution_coverage"] = coverage
         return result
+
+    async def _attribution_coverage(self, request: QueryRequest, view: str, window: tuple[date, date]) -> dict | None:
+        """L-01: a slice by channel / campaign / ad leans on order attribution. Multi-touch credit exists only from
+        2026-06-01 and ~8 % of later orders lack it; the rest use the last-touch fallback (D-06a). Report, for the
+        same brand and period, the share of sale orders credited under the default model (last_non_direct)."""
+        if view not in ATTRIBUTION_VIEWS:
+            return None
+        asked = {self.catalogue.resolve_dimension_id(d) or d for d in [*request.dimensions, *(f.dimension for f in request.filters)]}
+        if not asked & ATTRIBUTION_DIMS:
+            return None
+        dim = self.catalogue.cat.dimensions.get("attribution_model_used")
+        brand = self.catalogue.cat.dimensions.get("brand_id")
+        if dim is None or "commerce" not in dim.views or brand is None or "commerce" not in brand.views:
+            return None
+        brands = next((f.values for f in request.filters if self.catalogue.resolve_dimension_id(f.dimension) == "brand_id"
+                       and f.operator == "equals"), None) or ([self.default_brand_id] if self.default_brand_id else None)
+        query: dict = {
+            "measures": ["commerce.orders"],
+            "dimensions": [dim.views["commerce"]],
+            "timezone": "Asia/Kolkata",
+            "timeDimensions": [{"dimension": "commerce.order_date", "dateRange": [window[0].isoformat(), window[1].isoformat()]}],
+        }
+        if brands:
+            query["filters"] = [{"member": brand.views["commerce"], "operator": "equals", "values": list(brands)}]
+        try:
+            res = await self.cube.load(query)
+        except Exception:  # coverage is a disclosure; it must never fail the answer
+            return None
+        by_model: dict[str, float] = {}
+        for row in res.data:
+            by_model[str(row.get(dim.views["commerce"]) or "no_model_data")] = float(row.get("commerce.orders") or 0)
+        total = sum(by_model.values())
+        if not total:
+            return None
+        # the default model is stored as last_non_direct_v1; last_touch_fallback / no_model_data are the gaps
+        credited = sum(v for k, v in by_model.items() if k.startswith("last_non_direct"))
+        return {
+            "default_model": "last_non_direct",
+            "coverage_pct": round(100 * credited / total, 1),
+            "orders_by_model_used": {k: int(v) for k, v in sorted(by_model.items())},
+            "scope": "sale orders of the brand placed in the same period (all channels)",
+            "note": ("Multi-touch attribution exists only from 2026-06-01 and ~8% of later orders lack it; orders without "
+                     "credit fall back to last touch (D-06a). Other models show no_model_data outside their coverage (L-01)."),
+        }
 
     @staticmethod
     def _axis_applied(m: MetricDef, axis: str) -> str:
@@ -1143,6 +1238,11 @@ class QueryPlanner:
             self._check_unsupported_values(request.filters)
             metrics, forced, v2_warnings = self._apply_v2_rules(metrics, request)
             alias_warnings = [*alias_warnings, *v2_warnings]
+            if self.catalogue.is_v3:
+                scoped, scope_warnings = self._apply_dimension_scope(metrics, request)
+                for mid, extra in scoped.items():
+                    forced.setdefault(mid, []).extend(f for f in extra if f not in forced.get(mid, []))
+                alias_warnings = [*alias_warnings, *scope_warnings]
 
         def _with_forced(req: QueryRequest, ms: list[MetricDef]) -> QueryRequest:
             extra = forced.get(ms[0].id, [])

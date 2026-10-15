@@ -332,6 +332,15 @@ EXPLICIT_NEW = {
     "product_order_returned_or_cancelled_orders": "product_profit.product_returned_or_cancelled_orders",
 }
 AXIS_VIEWS = {"finance", "commerce", "product_profit", "product_ads"}
+# Platform-native dimensions (D-14): exist for these ad_platform values only; a slice by one is scoped to them.
+DIM_VALID_FOR = {"device": {"ad_platform": ["google"]}, "network": {"ad_platform": ["google"]}}
+# Coverage caveats shown whenever the dimension is used (L-02, L-03).
+_PMAX = ("Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop at the campaign "
+         "(device and network are available) and show no ad group or ad (L-03).")
+DIM_NOTES = {
+    **{d: _PMAX for d in ("adset_id", "adset_name", "adset_status", "ad_id", "ad_name", "ad_status", "ad_format", "creative_type", "ad_key")},
+    "campaign_key": "Paid website sessions without a campaign id roll up as the explicit member 'campaign unknown' (Google ~29 % of sessions, L-02).",
+}
 # Names a new v3 measure may not take because a v2 id already means something else on another view.
 NEW_ID_PREFIX = {"finance": "order_pnl_", "product_profit": "product_order_"}
 
@@ -501,6 +510,10 @@ def main() -> int:
                 entry["allowed_values"] = old["allowed_values"]
         if did in ALLOWED:
             entry["allowed_values"] = ALLOWED[did]
+        if did in DIM_VALID_FOR:
+            entry["valid_for"] = DIM_VALID_FOR[did]
+        if did in DIM_NOTES:
+            entry["coverage_note"] = DIM_NOTES[did]
         family = next((f for f, members in FAMILIES.items() if did in members), None)
         if family:
             entry["family"] = family

@@ -108,6 +108,10 @@ services:
       - ./catalogue_v2:/app/catalogue_v2:ro
       # QueryPlanner.load_dataset_contracts() reads catalogue_v2_src/datasets.yaml
       - ./catalogue_v2_src:/app/catalogue_v2_src:ro
+      # Semantic v3 (Phase 8 cutover is an env flip, not a rebuild): shipped now, read only when
+      # SELERIC_CATALOGUE_DIR=catalogue_v3 and CUBE_API_URL=http://cube-v3:4000
+      - ./catalogue_v3:/app/catalogue_v3:ro
+      - ./catalogue_v3_src:/app/catalogue_v3_src:ro
       - ./config.yaml:/app/config.yaml:ro
       - mcp-data:/data
     ports:

@@ -1458,7 +1458,9 @@ def build_server(settings: Settings) -> FastMCP:
     @mcp.prompt()
     def no_hallucination_guard() -> str:
         """Standing instruction: resolve via catalogue, never invent numbers."""
-        return prompt_templates.NO_HALLUCINATION_GUARD
+        return prompt_templates.with_date_axis_guide(
+            prompt_templates.NO_HALLUCINATION_GUARD, ctx.catalogue.cat.semantic_version
+        )
 
     @mcp.prompt()
     def explain_metric_change(query_id: str) -> str:
@@ -1485,7 +1487,8 @@ def build_server(settings: Settings) -> FastMCP:
             # ResolvedBrand carries .name; ambiguous/unknown fall back to the id.
             brand_label = getattr(resolved, "name", None) or str(brand_id)
         return prompt_templates.dashboard_analyst_prompt(
-            module_label=module_label, brand_label=brand_label
+            module_label=module_label, brand_label=brand_label,
+            semantic_version=ctx.catalogue.cat.semantic_version,
         )
 
     # stash context for __main__ (drift check at startup, http app wiring)

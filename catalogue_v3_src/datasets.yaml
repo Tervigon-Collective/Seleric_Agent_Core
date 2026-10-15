@@ -1,0 +1,277 @@
+Ads.Delivery:
+  domain: advertising
+  role: primary_fact
+  description: Unified ad delivery (Meta ∪ Google), ad × day (with hourly binding)
+  physical_bindings:
+    daily: serve.ad_delivery_daily
+    hourly: serve.ad_delivery_hourly
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - ad_platform
+    - account_id
+    - campaign_id
+    - adset_id
+    - ad_id
+  date_policy:
+    default: report_date
+    meaning: ad_delivery_date
+  supported_platforms:
+  - meta
+  - google
+  certification:
+    status: pending_verification
+Meta.Breakdowns:
+  domain: advertising
+  role: primary_fact
+  description: Meta delivery breakdown slices (repeats full delivery per breakdown_type)
+  physical_bindings:
+    daily: serve.meta_ads_breakdown_daily
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - breakdown_type
+    - age
+    - gender
+    - publisher_platform
+    - platform_position
+    - device_platform
+    - region
+    - ad_account_id
+    - campaign_id
+    - adset_id
+    - ad_id
+  date_policy:
+    default: report_date
+    meaning: ad_delivery_date
+  supported_platforms:
+  - meta
+  slice_dimension: breakdown_type
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Commerce.Orders:
+  domain: commerce
+  role: primary_fact
+  description: Order fact on order date (serve.commerce_orders)
+  physical_bindings:
+    fact: serve.commerce_orders
+  grain:
+    declared_keys:
+    - brand_id
+    - order_id
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Commerce.OrderEvents:
+  domain: commerce
+  role: primary_fact
+  description: Order lifecycle events (cancel/return) by event date
+  physical_bindings:
+    fact: serve.commerce_order_events
+  grain:
+    declared_keys:
+    - brand_id
+    - order_id
+    - event_type
+    - event_date
+  date_policy:
+    default: event_date
+    meaning: event_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Web.Events:
+  domain: web_analytics
+  role: primary_fact
+  description: Web events with native event timestamp
+  physical_bindings:
+    fact: serve.web_events
+  grain:
+    declared_keys:
+    - brand_id
+    - event_id
+  date_policy:
+    default: event_timestamp
+    meaning: event_timestamp
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Web.EventsDaily:
+  domain: web_analytics
+  role: preaggregation
+  description: Web events daily rollup
+  physical_bindings:
+    fact: serve.web_events_daily
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - event_type
+    - channel
+  date_policy:
+    default: report_date
+    meaning: event_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Sessions:
+  domain: web_analytics
+  role: primary_fact
+  description: Session fact
+  physical_bindings:
+    fact: serve.session_funnel
+  grain:
+    declared_keys:
+    - brand_id
+    - session_id
+  date_policy:
+    default: session_start
+    meaning: session_start_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Touchpoints:
+  domain: attribution
+  role: primary_fact
+  description: Touchpoints evidence
+  physical_bindings:
+    fact: serve.touchpoints
+  grain:
+    declared_keys:
+    - brand_id
+    - order_id
+    - touch_id
+  date_policy:
+    default: touch_ts
+    meaning: touch_timestamp
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+OrderAttribution:
+  domain: attribution
+  role: primary_fact
+  description: Order × touch attribution
+  physical_bindings:
+    fact: serve.order_attribution
+  grain:
+    declared_keys:
+    - brand_id
+    - order_id
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Returns.RefundEvents:
+  domain: operations
+  role: primary_fact
+  description: Refund transactions (separate from return events)
+  physical_bindings:
+    fact: serve.refund_events
+  grain:
+    declared_keys:
+    - brand_id
+    - refund_id
+  date_policy:
+    default: refund_date
+    meaning: refund_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Payments:
+  domain: operations
+  role: primary_fact
+  description: Payment transactions
+  physical_bindings:
+    fact: serve.payments
+  grain:
+    declared_keys:
+    - brand_id
+    - transaction_id
+  date_policy:
+    default: transaction_date
+    meaning: transaction_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Pnl.Canonical:
+  domain: finance
+  role: primary_fact
+  description: Canonical P&L (event/date basis)
+  physical_bindings:
+    fact: serve.canonical_pnl
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - sub_channel
+  date_policy:
+    default: report_date
+    meaning: event_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Pnl.OrderDaily:
+  domain: finance
+  role: primary_fact
+  description: Order-cohort P&L (mixed basis by design)
+  physical_bindings:
+    fact: serve.order_pnl_daily
+  grain:
+    declared_keys:
+    - brand_id
+    - order_date
+    - finance_channel
+    - sub_channel
+    - is_new_customer
+    - shipping_region
+    - payment_bucket
+    - is_paid
+    - ad_platform
+    - campaign_id
+    - adset_id
+    - ad_id
+    - row_type
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  mixed_basis: true
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
+Product.Performance:
+  domain: product
+  role: primary_fact
+  description: Order-line product performance
+  physical_bindings:
+    fact: serve.product_performance
+  grain:
+    declared_keys:
+    - brand_id
+    - line_item_id
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-12'
+    evidence: doc/semantic_datasets/certification.json
