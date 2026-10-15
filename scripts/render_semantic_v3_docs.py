@@ -32,6 +32,7 @@ AREAS = [  # (title, ids)
     ("Costs", ["D-03", "D-03a", "D-05a", "D-05b", "D-08c", "D-11", "D-11a", "D-11c", "D-11d"]),
     ("Ads, website and attribution", ["D-00", "D-06", "D-06a", "D-06b", "D-13", "D-13r", "D-14", "D-17"]),
     ("Profit, periods and product ads", ["D-07", "D-12", "D-12a", "D-18", "D-18r", "D-19", "D-19o", "D-21"]),
+    ("Date axis (order_date / event_date)", ["D-28", "D-29", "D-30", "D-31", "D-32", "D-33", "D-34", "D-35", "D-36", "D-37"]),
     ("Scope and process", ["D-04", "D-23", "D-24", "D-26"]),
 ]
 

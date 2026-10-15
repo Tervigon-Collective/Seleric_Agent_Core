@@ -24,6 +24,7 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
   - These metrics are never used in default or overview answers.
   - The no-allocation period-match model (D-07) stays the default.
 - **D-21:** the event-date `pnl_*` family (25 ids) is **kept** as an explicit family (dashboard-style, "processed in period"). It is built on the same component ledger, so closed-period totals reconcile with the order-cohort figures. The order-date cohort remains the default.
+  - **Amended 2026-10-14 (D-28, Phase 4.5):** it stops being a family. One canonical metric with a `date_axis` parameter (`order_date` default / `event_date`); the `pnl_*` ids survive only as deprecated aliases. D-21a is superseded by D-30.
 - **D-18 refined:** the `net_profit` ids are **kept**. They resolve to contribution after ads, and the label and description say opex is excluded.
 - **D-13 relaxed for LPV only:** `landing_page_views` and `cost_per_landing_page_view` move to the website definition (D-17) with a major version bump. A hidden-by-default twin, `platform_reported_landing_page_views`, is kept for diagnostics. Other platform conversions stay hidden.
 - **fct_line_pnl drift:** superseded, not applied live; its line-GST and shipping-tax SQL is reused in the ledger; the file is removed in Phase 9.
@@ -38,11 +39,11 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 ## Status (see doc/semantic_v3/PROGRESS.md and CHECKLIST.md)
 - [x] Phase 0 baseline · [x] Phase 1 order classification · [x] Phase 2 component ledger · [x] Phase 3 ads / web / attribution · [x] Phase 4 marts (all applied 2026-10-14)
-- [ ] 5 Cube v3 (next) · [ ] 6 catalogue v3 + MCP · [ ] 7 certification · [ ] 8 cutover · [ ] 9 cleanup
+- [~] **4.5 date-axis switch (order_date / event_date): serve layer built and applied 2026-10-14 (contracts 65/65, reconcile PASS); capability metadata, ratio contract, ad / product bridges and owner review still open — gate before Cube v3** · [ ] 5 Cube v3 (next after 4.5) · [ ] 6 catalogue v3 + MCP · [ ] 7 certification · [ ] 8 cutover · [ ] 9 cleanup
 
 ## All decisions taken (planning + interviews during the build)
 <!-- BEGIN GENERATED: decisions -->
-68 decisions (62 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
+78 decisions (67 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
 
 #### Orders, outcomes and customers
 - [x] **D-01** Exchange treatment — Continuation + separate exchange lifecycle. Original order is the only commercial sale (keeps order date, customer, attribution). Replacement = linked fulfilment child: no order count, no sales revenue.… _(implemented, phase 1)_ · `01_core_order_class.sql`, `03_ledger_order_component.sql`, `fct_order.sql`
@@ -113,6 +114,18 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **D-19o** Product-level ad metrics vs no-capability-loss — kept as an explicit `allocated` family — allocation = attribution credit (default model) × line gross-sales share; `allocation_rule_version` on every row; Unallocated spend row so totals reconcile; never used in… _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`, `mart_product_ad_allocated.sql`
 - [x] **D-21** Event-date P&L family (`pnl_*`, 25 ids) — kept as explicit family, rebuilt on the same component ledger. Order-date cohort stays the default. Reconciliation: equal over all history; per period, event − cohort = itemised cross-period bridge with 0 unexplained ₹… _(implemented, phase 4)_ · `05_mart_profit_fact.sql`, `mart_pnl_event.sql`
 
+#### Date axis (order_date / event_date)
+- [ ] **D-28** Date axis switch (order_date / event_date) — one ledger, one parameter — two switchable date axes, `order_date` (default) and `event_date`. Serve keeps ONE financial component ledger with both dates; Cube exposes both time dimensions and the same canonical measures; Core MCP resolves a… _(planned, phase 5)_
+- [x] **D-29** Event date of a cancel / RTO / return — precedence, source code, Undated — event_date of cancelled / RTO / returned amounts (and every component derived from them) = the first non-null by precedence reversal_event_date → cancellation_date → return_event_date → returned_date → cancelled_date… _(implemented, phase 4.5)_ · `03_ledger_order_component.sql`
+- [x] **D-30** Restock credit and exchange credits follow their deduction (supersedes D-21a) — one date rule for every component. product_cogs_credit (D-03a) and the exchange credits are dated by the same event_date as the sales deduction they reverse, so event-axis gross profit is coherent. Supersedes D-21a… _(implemented, phase 4.5)_ · `03_ledger_order_component.sql`, `05_mart_profit_fact.sql`
+- [ ] **D-31** Ratio contracts on the event axis — a ratio is allowed on an axis only when numerator and denominator share a clock. Identical on both axes (placement-only): gross ROAS, AOV, CAC, cost per order, new customers, orders. Event axis allowed with a mandatory… _(planned, phase 5)_
+- [x] **D-32** Undated visibility in event-axis answers — every event_date query returns an `Undated` member with its ₹ alongside the dated periods, whatever the date range; a ranged total is labelled "dated only"; Σ of all members equals the order_date total of the same… _(implemented, phase 4.5)_ · `mart_profit.sql`
+- [ ] **D-33** Default axis and ambiguous wording in the Agent — order_date stays the default (AD-03). An outcome or P&L question with no explicit wording is answered on order_date, names the axis in the first line ("orders placed in September, as of <cutoff>") and offers the… _(planned, phase 6)_
+- [ ] **D-34** Product grain and the allocated family on the event axis — product / variant P&L (before ads) supports date_axis from the same ledger at line grain with the D-29 / D-30 rule. The allocated product-ad family (D-19o, D-27) is order_date only; event_date is refused with a… _(planned, phase 5)_
+- [x] **D-35** Maturity and close on the event axis — event-axis rows carry no `maturing` flag (an event is a fact, not a cohort waiting for outcomes). close_status (open / restatable / reconstructed / locked) is unchanged and comes from the same monthly snapshots, which… _(implemented, phase 4.5)_ · `mart_profit.sql`, `semantic_v3/close_month.py`
+- [x] **D-36** Native clocks never switch (cash, payments, ads, web); order-lifecycle events = event_date — cash and payment views (returns.refund_date, payments.transaction_date) keep their native posting clock, labelled "cash date", and ignore date_axis; no cash date is ever substituted for an event date. Ad delivery and… _(implemented, phase 4.5)_ · `mart_profit.sql`
+- [x] **D-37** Placement costs and outcome order counts on the event axis — placement costs (packaging, forward shipping, gateway, COD handling, checkout fee, weight discrepancy) stay on the order date on the event axis; cancelled / RTO / returned order counts land on the order's first event… _(implemented, phase 4.5)_ · `05_mart_profit_fact.sql`
+
 #### Scope and process
 - [x] **D-04** Amazon in overview roll-up — Out of scope for this rebuild. Brand overview is labelled D2C (Shopify) only; Amazon remains a documented gap; Amazon gold tables are untouched (not deleted) _(scope)_
 - [x] **D-23** Rebuild scope and consumers — `seleric_systems` web dashboard is not used — it and Cube v1 are excluded. Scope = Seleric Agent, Core MCP, Cube v3, new canonical serve. Migrate only `/opt/seleric/reports` scripts still in use. Reconcile new serve… _(process)_
@@ -121,7 +134,7 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 #### Other
 - [x] **D-12b** Monthly close: months before the first snapshot — reconstructed, flagged. Earlier months are rebuilt from today's state and carry close_status = reconstructed (never presented as locked); real closes carry locked. _(implemented, phase 4)_ · `mart_period_profit.sql`, `semantic_v3/close_month.py`
-- [x] **D-21a** Event-date family: date of the product-cost restock credit — order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order's placement date; every other component falls on its own event date. Scope note (implementation): only product_cogs_credit; the exchange… _(implemented, phase 4)_ · `05_mart_profit_fact.sql`
+- [x] **D-21a** Event-date family: date of the product-cost restock credit — order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order's placement date; every other component falls on its own event date. Scope note (implementation): only product_cogs_credit; the exchange… _(superseded, phase 4)_ · `05_mart_profit_fact.sql`
 - [x] **D-21b** Event-date family: month-by-month differences to v2 pnl_daily — accept v3 event dating. Every deduction is dated by its ledger event date, one rule for every component; v2 pnl_daily builds the event axis from a different gold fact plus an undated reconciliation plug row (brand 20… _(implemented, phase 4)_ · `evaluations/v3_reconcile_gold.py`
 - [x] **D-27** Allocated product-ad family: period rule — same day, default-model credit. A campaign-day's spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order… _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`
 - [x] **D-27b** Allocated product family: LPV source — website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today's Meta-reported product_landing_page_views. _(implemented, phase 4)_ · `06_mart_product_ad_allocated.sql`
@@ -129,7 +142,7 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 ## Known limits
 <!-- BEGIN GENERATED: limits -->
-28 known limits (5 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
+32 known limits (5 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
 
 - [x] **L-01** (Attribution, accepted) Multi-touch attribution (last_non_direct, first_touch, linear, journey last-touch) exists only from 2026-06-01; ~8 % of later orders lack it too. Impact: 16,484 pre-June sale orders (₹2.87 Cr gross) + 811 since (₹17.5L) use the last-touch fallback under the default model; other models show no_model_data. Handled by D-06a. Next: rows carry model_used; Agent shows coverage % with every model answer (Phase 6)
 - [x] **L-02** (Attribution, accepted) Google website sessions often lack campaign (29 %) and ad (88 %) ids; 45 % of credited Google touches have no campaign. Impact: 792 Google orders (₹17.8L) + 279 Meta (₹5.6L) credited to a session without campaign; 328 filled from last-touch, the rest sit in `campaign unknown`. Handled by D-06b, D-17. Next: tracking fix upstream (gclid → campaign mapping) would shrink `campaign unknown`
@@ -159,6 +172,10 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **L-26** (Allocated family, accepted) Spend is allocated only within a campaign-day that has a credited sale line with sales; the rest is an `Unallocated` row. Impact: Sep 2026 brand 20: ₹7.86L allocated, ₹4.08L unallocated of ₹11.93L. Free-gift lines (zero sales) get no share. Website LPV of sessions without a campaign id stays out of the allocation. Handled by D-19o, D-27, D-27b. Next: none — owner chose the same-day rule (D-27); never used in default answers
 - [ ] **L-27** (Monthly close, open) No month is locked yet; the close script exists but has not run, and there is no schedule. Impact: every past month is labelled `reconstructed` (rebuilt from today's state); `serve.mart_*_closed` is empty. Handled by D-12, D-12b. Next: owner decides when to lock the first month (Sep 2026 is still `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule
 - [x] **L-28** (Schema, accepted) apply_v3.py never ALTERs and tables are CREATE IF NOT EXISTS, so a column added to an applied v3 table does not land by itself. Impact: a new column in mart_profit_fact needs a reviewed manual ALTER of the table (and of snap_profit_monthly); close_month.py refuses on drift and inserts by explicit column list. Next: decide with the owner whether apply_v3 may run ADD COLUMN IF NOT EXISTS before the first Cube v3 column request
+- [x] **L-29** (Dates, accepted) No courier / shipment timestamp exists in gold, so there is no physical RTO or delivery date. Impact: an RTO is dated by Shopify's cancellation or return-event date (3,187 brand 20 RTO lines, ₹52.4L; 92 reversal, 2,880 cancellation, 169 return-event dates). The event axis dates the decision to cancel / book the return, not the day the parcel came back. Handled by D-29. Next: a courier / shipment event source would give a physical RTO date; until then event_date_source shows which Shopify column supplied the date
+- [x] **L-30** (Dates, accepted) Some cancelled / RTO / returned lines have no outcome timestamp at all. Impact: 50 brand 20 lines (₹77k: 44 RTO, 1 return, 5 cancel) plus 2 RTO lines (₹1.9k) that carry only a cash refunded_date are Undated on the event axis, together with their derived cost and credit rows; they stay in every reconciliation. Handled by D-29, D-32. Next: the Undated member is shown on every event_date answer; shrinks if gold / upstream backfills the outcome date
+- [x] **L-31** (Dates, accepted) Cohort-defined rates have no event-axis meaning. Impact: return rate, cancel rate, RTO rate, repeat rate and LTV are refused on event_date (pointer to order_date); net ROAS, MER, BE ROAS and margin % are allowed with a label and NULL when event-axis net sales ≤ 0 (Sep 2026: event net sales ₹4.21L vs cohort ₹15.7L). Handled by D-31. Next: none — by design
+- [x] **L-32** (Schema, accepted) event_date is a non-nullable Date inside the sort key of semantic.mart_profit_fact and semantic.snap_profit_monthly, and neither table has event_date_source. Impact: Resolved by the rebuild. Was: Undated (NULL event_date) and event_date_source cannot land by ALTER alone: the tables must be rebuilt (new table version) or carry an is_undated flag with a sentinel date; extends L-28. Every apply is an owner-confirmed production write. Handled by D-29, D-32. Next: Resolved 2026-10-14: owner chose rebuild (Q12); ledger_order_component_v2, mart_profit_fact_v2 and snap_profit_monthly_v2 applied with Nullable event_date + event_date_source. The old tables stay for rollback until Phase 9 (retire the _v2 names then).
 <!-- END GENERATED: limits -->
 
 ## Architecture choices (technical, from repo conventions)
@@ -247,17 +264,53 @@ Progress folder: `doc/semantic_v3/` holds `PLAN.md` (= this file), `PROGRESS.md`
 - [x] Owner rulings D-27, D-27b, D-12b, D-21a, D-21b.
 - [ ] No month is locked yet and there is no schedule (L-27): the owner chooses the first close and approves the schedule.
 
+### Phase 4.5 — Date-axis switch: `order_date` ⇄ `event_date` (planned 2026-10-14, serve layer applied 2026-10-14; decisions D-28 … D-37, spec §0C C8) — **gate before Cube v3**
+Goal: the event axis stops being a separate metric family and becomes a request parameter on the same canonical measures, across ledger, serve, Cube, MCP, catalogue and Agent. Interview batches 1–3 (owner, 2026-10-14) fixed the contract; the build below turns it into code. The serve-layer build was applied live on 2026-10-14 with the owner's OK (every DDL step is an owner-confirmed production write, L-28). Still open in this phase: the unticked items below.
+
+**Contract (owner-approved, details in spec §0C C8)**
+- `date_axis` ∈ {`order_date` (default), `event_date`}; `date: finance` is an alias of `event_date`. One axis per aggregation; mixing is refused (D-28).
+- `event_date` = placement components and placement costs on the order date (D-37); cancelled / RTO / returned amounts and everything derived from them (restock credit, reversed shipping revenue, reverse shipping, exchange credits) on the outcome date (D-29, D-30).
+- Outcome date = first non-null of `reversal_event_date → cancellation_date → return_event_date → returned_date → cancelled_date`. Never `order_date`, never cash `refunded_date`. None → `event_date` NULL, `event_date_source='undated'`, explicit `Undated` member (always shown, D-32).
+- Axis applicability: `switchable` (net sales, deductions, costs, contribution, profit, outcome counts, product / variant P&L) · `placement_only` (identical on both axes: gross sales, orders, new customers, AOV, gross ROAS, CAC, cost per order) · `native` (ignores the axis, labelled: ads, web, cash refunds, payments, D-36) · `cohort_only` (event axis refused with a pointer: return / cancel / RTO rate, repeat rate, LTV, the allocated product-ad family, D-31, D-34).
+- Ratios: same clock or refused; NULL when event-axis net sales ≤ 0 (D-31). No `maturing` flag on the event axis; `close_status` unchanged (D-35).
+
+**Evidence behind it (brand 20)**
+- Sep 2026 net sales ₹4.21L on the event axis vs ₹15.7L on the cohort axis: ₹9.43L of returns were processed in Sep, only ₹0.45L came from the Sep cohort.
+- 53 % of RTO ₹, 68 % of return ₹ and 22 % of cancel ₹ land in a different month from their order; lag median 19 days (RTO) / 25 days (returns), max 518.
+- No courier / shipment timestamp exists (L-29); 50 outcome lines (₹77k) have no outcome date and 2 RTO lines (₹1.9k) only a cash date: Undated (L-30).
+- The restock credit is ₹4.26L event-dated vs ₹0.66L order-dated in Sep: D-21a distorts event-axis gross profit by ₹3.60L (D-30).
+
+**Build**
+- [x] **One date rule, computed once, in the ledger** _(built 2026-10-14, not applied)_. `semantic.ledger_order_component` gains `event_date_source` and a strict `event_date` (D-29 precedence; NULL when undated; no `order_date` / `refunded_date` fallback). `product_cogs_credit` and the exchange credits follow their deduction (D-30). The `narrow` CTE in `05_mart_profit_fact.sql` stops re-dating (the D-21a override is removed). Every consumer reads the ledger date, so product grain, allocated and returns reconcile with the mart by construction.
+- [x] **Schema (L-32)** _(owner chose rebuild, Q12: built as new table versions `ledger_order_component_v2`, `mart_profit_fact_v2`, `snap_profit_monthly_v2` with `allow_nullable_key`; the old tables keep serving until the serve views are repointed by the apply, so cutover is one `CREATE OR REPLACE VIEW` step and rollback is the old views; apply still owner-confirmed; the `_v2` names are retired in Phase 9)_. `mart_profit_fact` and `snap_profit_monthly` have a non-nullable `event_date` in the sort key and no `event_date_source`. Options: rebuild both as new table versions (no month is locked yet, L-27, so nothing is lost) or keep a sentinel date plus `is_undated`. `close_month.py` column list and drift check updated either way.
+- [x] **One serve view for both axes** _(built, not applied; `serve.mart_profit`, `mart_period_profit` / `mart_pnl_event` and both `_closed` views are projections; `ledger_order_component` serve view gains `event_date_source`, `is_undated`)_. New `serve.mart_profit` exposes `order_date`, `event_date`, `event_date_source` / `is_undated` and every derived measure once (net sales, taxes, product / fulfilment / exchange cost, contribution before / after ads). `mart_period_profit` and `mart_pnl_event` become thin projections of it (no second formula), kept only for rollback and parity until Phase 9.
+- [x] **Product / variant P&L at line grain (D-34)** _(built, not applied; `serve/core/views/mart_product_profit.sql`; order-level postings carry product 0 so the totals tie)_. `serve.mart_product_profit` = ledger ⨝ `fct_order_line` (variant) ⨝ `bridge_order_attribution` (default model, `root_order_id`), with both dates and the same rule. It replaces the planned Phase 5 product build, so Cube does not compute the date rule itself.
+- [ ] **Allocated family:** unchanged table, plus capability metadata `axis: cohort_only` and a refusal message for `event_date` (D-34).
+- [ ] **Capability metadata.** Every measure in `CAPABILITY_MAP.yaml` gets `date_axis: switchable | placement_only | native | cohort_only`, and each `pnl_*` / `product_pnl_*` id maps to `{base_metric, date_axis: event_date}` as a deprecated alias (`catalogue/migrations/v3_id_map.yaml` in Phase 6).
+- [x] **Contracts (`v3_contracts.py`, each can fail)** _(65/65 pass in `--preview` against the rebuilt chain; live run is after the apply. Built: AXIS-TOTAL, AXIS-PLACEMENT, AXIS-NATIVE, AXIS-UNDATED (includes the source-code check), AXIS-NOMIX (view columns; the resolver half lands in Phase 6), AXIS-BRIDGE-CAMPAIGN + MART-EVENT-BRIDGE (brand × month, one rule), AXIS-PRODUCT-RECON, AXIS-CLOSE (schema half). Not yet: AXIS-BRIDGE at ad / product grain, AXIS-RATIO-CONTRACT (needs the capability metadata), restatement report of a locked month)_:
+  - `AXIS-TOTAL` — Σ event axis (incl. Undated) = Σ order axis per brand, and per channel / campaign / ad / product / variant, over all history and per as-of.
+  - `AXIS-BRIDGE` — `MART-EVENT-BRIDGE` extended from brand × month to channel, campaign, ad and product grains; 0 unexplained ₹.
+  - `AXIS-PLACEMENT` — placement-only measures identical per day on both axes; `AXIS-NATIVE` — spend, sessions, cash views identical on both axes.
+  - `AXIS-UNDATED` — Undated ₹ equals the bridge row; every outcome row has an `event_date_source`; no row dated by `order_date` / `refunded_date`.
+  - `AXIS-NOMIX` — one query cannot mix axes; `AXIS-RATIO-CONTRACT` — D-31 table, NULL when net sales ≤ 0, cohort-only ratios refused; `AXIS-PRODUCT-RECON` — `mart_product_profit` Σ = `mart_profit` per brand × day; `AXIS-CLOSE` — restatement of a locked month by a newly dated event is reported.
+- [x] **Reconciliation (`v3_reconcile_gold.py`)** _(D-30 leg and Undated block built; the live month-by-month run needs the apply)_: event-axis restock credit moves to the outcome date (Sep 2026: ₹3,60,032 of product cost). Add the D-30 leg to the v2 `pnl_daily` bridge and to the Phase 7 variance report; D-21b still applies to the rest.
+- [x] **Docs and registers** _(2026-10-15: D-29, D-30, D-32, D-35, D-36, D-37 implemented; D-21a superseded; D-28, D-31, D-34 stay planned until the Cube / catalogue metadata exists, moved to Phase 5; L-32 resolved)_: DECISIONS.yaml / KNOWN_LIMITS.yaml / spec §0B, §0C C8 updated; `python3 scripts/render_semantic_v3_docs.py` and `check_decisions_v3.py` pass; both plan copies identical.
+- [ ] **Interview checkpoint (end of 4.5):** owner reviews September and the last 6 months on both axes side by side, the Undated list (52 lines), and the rebuild-vs-sentinel schema choice before the apply.
+- Gate: all `AXIS-*` contracts pass live, `v3_contracts.py` and `v3_reconcile_gold.py` exit 0, 0 unexplained ₹ on both axes.
+
 ### Phase 5 — Cube v3 model (`mage-ai/infra/cube/model_v3`, copied from model_v2 then rebased)
 - [ ] Same conventions: one root fact per view, `public:false` cubes, `meta.v2` mapping (in place of `meta.v1`), composite pk, `nullIf` counts, fiscal_year.
+- [ ] **Date axis (Phase 4.5):** one finance view over `serve.mart_profit` with both time dimensions (`order_date`, `event_date`) and the same measures — no `pnl` / `order_pnl` twin views and no `pnl_*` prefixed measures. Every measure carries `meta.date_axis` (switchable / placement_only / native / cohort_only); the `Undated` member is exposed; product P&L reads `serve.mart_product_profit`; pre-aggregations exist per date dimension.
 - [ ] Platform-native drill hierarchies (Meta / Google per D-14), with a cross-platform common view.
 - [ ] Pre-aggregations on the hot grains: period profit by day, ad delivery by day, orders by day.
 - [ ] Move the inline business SQL now in Cube (`ltv_cac_daily`, `funnel_channel`) into serve.
-- [ ] Brand capability refusals: brand 28 profit / ROAS / AOV; hourly queries before coverage starts (L-04, L-16).
+- [ ] Brand capability refusals: brand 28 profit / ROAS / AOV; hourly queries before coverage starts (L-04, L-16); cohort-only ratios and the allocated family on `event_date` (D-31, D-34).
 - [ ] `cube-v3` service in `Seleric_Agent_Core/docker-compose.yml` on :4003 (image `cubejs/cube:v1.6.48`, `CUBEJS_SCHEMA_PATH=src/model_v3`, dev mode **off**). Runbook: after a model edit, `docker restart` the cube-v3 container, then regenerate the catalogue.
 
 ### Phase 6 — Catalogue v3 + MCP
 - [ ] `scripts/build_catalogue_v2.py` → parameterise it as `build_catalogue.py --version 3`; id map `catalogue/migrations/v3_id_map.yaml` from CAPABILITY_MAP; update `VIEW_INFO`.
-- [ ] Concepts default to the order-date cohort, `last_non_direct` and contribution after ads. The `allocated` and `pnl_*` families are reachable only on explicit request.
+- [ ] Concepts default to the order-date cohort, `last_non_direct` and contribution after ads. The `allocated` family is reachable only on explicit request.
+- [ ] **`date_axis` end to end (D-28, D-33, D-36):** request-level parameter in `query_planner.py` and the MCP tool schemas (default `order_date`); it resolves to the Cube time dimension, so the Agent never picks alternate ids. The concept axis `date: order|finance` is replaced by `date_axis` (the 57 resolve rows collapse to one metric per concept); `pnl_*` / `product_pnl_*` ids are deprecated aliases in `v3_id_map.yaml`. Answers name the axis in the first line, show the `Undated` member and `date_axis_applied` per measure (native measures say they ignored it). Prompts: ambiguous wording → `order_date` + one-line event figure.
 - [ ] Extend the `valid_for` rules: Google-only and Meta-only dims; PMax has no ad level. Coverage % is shown with every attribution-model answer (L-01).
 - [ ] `tests/test_semantic_v3.py`. Point `validate_catalogue.py`, `smoke_cube.py`, `v2_gates.py` and `verify_compositions.py` at :4003.
 
@@ -270,7 +323,8 @@ Progress folder: `doc/semantic_v3/` holds `PLAN.md` (= this file), `PROGRESS.md`
   - Includes the F0-1 / F0-2 capabilities (L-22).
 - [ ] `v3_baseline.py --compare` v2 vs v3, back to back; `cube_member_sweep_v3.py` on :4003.
 - [ ] Run the 40-question `certify_qa.py` and the golden questions (`serve/evaluations/*golden_questions.yml`).
-- [ ] Variance report for the owner, sorted by ₹, incl. the v2 cost-composition leg (L-17). **Interview checkpoint: the owner signs off the variances** (incl. Q11, brand 28 value → refusal).
+- [ ] **Date-axis certification:** every `pnl_*` / `product_pnl_*` id answers through its alias with the same number as the base metric on `event_date`; every `AXIS-*` contract passes through Cube v3; axis-refusals (cohort-only ratios, allocated on `event_date`, mixed axes) behave as specified; golden questions added for "processed in" / "happened in" wording.
+- [ ] Variance report for the owner, sorted by ₹, incl. the v2 cost-composition leg (L-17) and the D-30 restock-credit event-dating leg. **Interview checkpoint: the owner signs off the variances** (incl. Q11, brand 28 value → refusal).
 
 ### Phase 8 — Cutover
 - [ ] Migrate the Seleric_Agent registry / services / evals and the MCP guards / prompts to the v3 names. The `/opt/seleric/reports` scripts are inactive and are not migrated (D-23).
@@ -304,7 +358,7 @@ New script `mage-ai/serve/evaluations/v3_reconcile_gold.py`. It uses the same `_
 3. **Product / variant:** Σ lines = product totals.
 4. **Channel / campaign / ad:** Σ members + Unattributed = brand, for sales, contribution and spend. Spend = gold Meta + Google spend per day, exactly.
 5. **Business:** the brand period total = Σ order cohort.
-   - Event-date (`pnl_*`) and order-date totals are equal **over all history**.
+   - Event-date (`pnl_*`, i.e. `date_axis=event_date`) and order-date totals are equal **over all history**, including the `Undated` member (D-32); each pair is checked at brand, channel, campaign, ad and product grain (`AXIS-TOTAL`).
    - Per period: event − cohort = an itemised **cross-period bridge**: prior cohorts' cancels/RTO/returns/exchange adjustments landing in this period, minus this cohort's events landing later. The bridge must have 0 unexplained ₹. (They are *not* equal per closed month; spec §4.1.)
 6. **Bridge to today:** new vs `canonical_pnl` / `pnl_daily` / `order_pnl_daily`, split by cause (exchange, RTO, COGS layer, GST, shipping, back-fill). Unexplained ₹ ≠ 0 means stop and interview.
 The tolerance is 0 in paise for sums of the same Decimal source. Float sources (ads spend) use an explicit rounding row, never a widened tolerance.
@@ -321,6 +375,8 @@ The tolerance is 0 in paise for sums of the same Decimal source. Float sources (
 - [x] Q9 **Live v2 defects** → answered: D-26, leave them until v3.
 - [x] Q10 **Payments vs exchanges** → answered: D-01b exchange credits.
 - [ ] Q11 **Brand 28 value → refusal** (Phase 7): confirm the change in the variance sign-off.
+- [x] Q12 **Schema for Undated / `event_date_source`** (Phase 4.5, L-32): rebuild `mart_profit_fact` + `snap_profit_monthly` as new table versions, or sentinel date + `is_undated`? Owner confirms the apply (production write; also whether `apply_v3` may run `ADD COLUMN IF NOT EXISTS`, L-28).
+- [ ] Q13 **Event-axis variance sign-off** (Phase 4.5 / 7): D-30 restock-credit leg vs v2 `pnl_daily`, Undated list (52 lines, ₹79k), last 6 months on both axes.
 
 ## Session hand-off protocol
 - At the start of each session, read `doc/semantic_v3/PROGRESS.md` (current phase, last gate, open questions) and spec §0B.

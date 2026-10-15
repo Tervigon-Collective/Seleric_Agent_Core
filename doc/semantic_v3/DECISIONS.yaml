@@ -738,7 +738,8 @@ decisions:
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (plan): kept as explicit family, rebuilt on the same component ledger. Order-date cohort stays the default.
     Reconciliation: equal over all history; per period, event − cohort = itemised cross-period bridge with 0 unexplained ₹ (not equal
-    per month, see §4.1).'
+    per month, see §4.1). AMENDED 2026-10-14 by D-28: the pnl_* ids stop being a separate family — they become deprecated aliases of
+    the base metric with date_axis=event_date (Phase 4.5).'
   options: keep explicit / retire
   evidence: dashboard-style "processed in period"
   implemented_in:
@@ -1110,12 +1111,12 @@ decisions:
     entry + spec §0B row'
 - id: D-21a
   title: 'Event-date family: date of the product-cost restock credit'
-  status: implemented
+  status: superseded
   phase: 4
   decided: '2026-10-14'
   ruling: 'DECIDED 2026-10-14 (owner): order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order''s placement date;
     every other component falls on its own event date. Scope note (implementation): only product_cogs_credit; the exchange stock-return components (exchange_inventory_recovery,
-    exchange_replacement_cogs_credit) are new in v3, have no v2 timing to keep, and stay on their event date (brand 20 Aug-Oct 2026: 0.3L / 0.3L / 0.3L of them fall in a different month than the cohort).'
+    exchange_replacement_cogs_credit) are new in v3, have no v2 timing to keep, and stay on their event date (brand 20 Aug-Oct 2026: 0.3L / 0.3L / 0.3L of them fall in a different month than the cohort). RE-OPENED 2026-10-14: superseded by D-30 when Phase 4.5 lands (the credit follows its deduction); live until then.'
   options: order date (as v2) / event date
   evidence: 'Brand 20 Sep 2026 product cost differs by 3,60,032 (Aug 26,475); all-history totals identical; v2 event minus cohort product cost = 0 in every month'
   implemented_in:
@@ -1138,3 +1139,138 @@ decisions:
   tests:
   - 'reconcile: EVENT BRIDGE'
   change_how: 'to itemise instead, rebuild v2 event dating from gold.fct_ad_channel_pnl_daily and compare order by order; then update this entry + spec §0B row'
+- id: D-28
+  title: 'Date axis switch (order_date / event_date) — one ledger, one parameter'
+  status: planned
+  phase: 5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): two switchable date axes, `order_date` (default) and `event_date`. Serve keeps ONE financial component ledger with both dates; Cube exposes both time dimensions and the same canonical measures; Core MCP resolves a request-level `date_axis` to the Cube time dimension (default order_date). The Agent never selects alternate metric ids for the same measure. No separate P&L formulas, no duplicate metric families: the pnl_* / product_pnl_* ids survive only as deprecated aliases (base metric + date_axis=event_date); the catalogue concept axis `date: finance` is an alias of event_date. Both axes reconcile to identical totals over the same complete population, as-of cutoff and financial policy, including Undated amounts. Axes are never mixed in one aggregation (same rule as D-06 for attribution models).'
+  options: one view + date_axis parameter / keep twin views pnl + order_pnl / both
+  evidence: 'v2 and v3 today: twin views (mart_period_profit, mart_pnl_event) with literally the same SQL on cohort_date vs event_date; 9 catalogue concepts / 57 resolve rows switch by metric id (date: order|finance); ~25 pnl_* + ~25 product_pnl_* ids duplicate the base ids'
+  tests:
+  - AXIS-TOTAL
+  - AXIS-NOMIX
+- id: D-29
+  title: 'Event date of a cancel / RTO / return — precedence, source code, Undated'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): event_date of cancelled / RTO / returned amounts (and every component derived from them) = the first non-null by precedence reversal_event_date → cancellation_date → return_event_date → returned_date → cancelled_date (not the earliest of them). order_date and cash refunded_date are NEVER used as an assumed physical event date. No reliable timestamp → event_date = NULL and event_date_source = `undated`; the amount sits in an explicit `Undated` member and stays in every reconciliation. Every row carries `event_date_source` (which column supplied the date, or `placement` / `undated`).'
+  options: 'keep coalesce incl. order_date fallback + code / Undated bucket / refund date first'
+  evidence: 'brand 20 all history: 5,221 outcome lines (3,187 RTO, 1,259 return, 775 cancel); 50 lines (₹77k: 44 RTO, 1 return, 5 cancel) have no outcome date and fall back to order_date today; 2 RTO lines (₹1.9k) have only refunded_date; "earliest" vs "first by precedence" differs on 14 lines; refunded_date ≠ return_event_date on 21 return + 30 RTO lines'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (D-29 precedence + event_date_source)
+  tests:
+  - AXIS-UNDATED
+  - AXIS-SOURCE-CODE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-30
+  title: 'Restock credit and exchange credits follow their deduction (supersedes D-21a)'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): one date rule for every component. product_cogs_credit (D-03a) and the exchange credits are dated by the same event_date as the sales deduction they reverse, so event-axis gross profit is coherent. Supersedes D-21a (credit on the order date, v2 parity). The event-dating of this credit becomes a leg of the Phase 7 variance report vs v2 pnl_daily.'
+  options: 'follow its deduction / keep D-21a everywhere / pnl_* v2 parity + new rule, labelled'
+  evidence: 'brand 20 Sep 2026: restock credit ₹4,25,878 if event-dated vs ₹65,846 on the order date → event-axis product cost differs by ₹3,60,032; all-history totals identical either way; ledger holds 5,260 credit rows, 4,795 with event_date ≠ cohort_date (₹25.4L)'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (D-30 credits follow their deduction)
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (no re-dating)
+  tests:
+  - AXIS-TOTAL
+  - MART-EVENT-BRIDGE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-31
+  title: 'Ratio contracts on the event axis'
+  status: planned
+  phase: 5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner, table approved): a ratio is allowed on an axis only when numerator and denominator share a clock. Identical on both axes (placement-only): gross ROAS, AOV, CAC, cost per order, new customers, orders. Event axis allowed with a mandatory label, NULL when event-axis net sales ≤ 0: net ROAS, MER, BE ROAS, gross / contribution / net margin %. Cohort-only, refused on the event axis with a pointer to order_date: return rate, cancel rate, RTO rate, repeat rate, LTV. Event counts (returned / cancelled / RTO orders) stay counts on the event axis.'
+  options: 'compute labelled / refuse the unsafe ones / define each (chosen: per-ratio table)'
+  evidence: 'Sep 2026 brand 20: 433 returned orders on the event axis against 931 placed (46%) vs 20 on the cohort axis; net sales ₹4.21L event vs ₹15.7L cohort (₹9.43L returns processed vs ₹0.45L from the Sep cohort)'
+  tests:
+  - AXIS-RATIO-CONTRACT
+- id: D-32
+  title: 'Undated visibility in event-axis answers'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): every event_date query returns an `Undated` member with its ₹ alongside the dated periods, whatever the date range; a ranged total is labelled "dated only"; Σ of all members equals the order_date total of the same population.'
+  options: 'always an extra row / only when no range / only on request'
+  evidence: '50 lines, ₹77k outcome amount (+ their product cost credit and fulfilment effects) today'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_profit.sql (is_undated, Undated member)
+  tests:
+  - AXIS-UNDATED
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-33
+  title: 'Default axis and ambiguous wording in the Agent'
+  status: planned
+  phase: 6
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): order_date stays the default (AD-03). An outcome or P&L question with no explicit wording is answered on order_date, names the axis in the first line ("orders placed in September, as of <cutoff>") and offers the event_date figure in one line. Only explicit wording switches the axis ("processed in", "happened in", "dashboard-style", "by return date").'
+  options: 'order_date + state it / show both / ask first'
+  evidence: 'AD-03; §4 answer behaviour'
+  tests:
+  - AXIS-AGENT-DEFAULT
+- id: D-34
+  title: 'Product grain and the allocated family on the event axis'
+  status: planned
+  phase: 5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): product / variant P&L (before ads) supports date_axis from the same ledger at line grain with the D-29 / D-30 rule. The allocated product-ad family (D-19o, D-27) is order_date only; event_date is refused with a pointer, because ad spend is not an event of an order.'
+  options: 'product yes + allocated no / both / order_date only'
+  evidence: '~25 product_pnl_* ids exist; allocated spend is allocated same-day on the cohort day (D-27)'
+  tests:
+  - AXIS-PRODUCT-RECON
+- id: D-35
+  title: 'Maturity and close on the event axis'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): event-axis rows carry no `maturing` flag (an event is a fact, not a cohort waiting for outcomes). close_status (open / restatable / reconstructed / locked) is unchanged and comes from the same monthly snapshots, which already hold both axes. A locked month restated by a late-dated event or an Undated → dated change is reported in the close as a restatement.'
+  options: 'no maturing on event axis / keep 45-day flag / event-axis close at +45d'
+  evidence: '752 of 4,434 brand 20 outcome orders have an event within the last 45 days'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_profit.sql (no maturing on the event axis)
+  - mage-ai:serve/semantic_v3/close_month.py (snapshot holds both axes)
+  tests:
+  - AXIS-CLOSE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-36
+  title: 'Native clocks never switch (cash, payments, ads, web); order-lifecycle events = event_date'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): cash and payment views (returns.refund_date, payments.transaction_date) keep their native posting clock, labelled "cash date", and ignore date_axis; no cash date is ever substituted for an event date. Ad delivery and website sessions / events keep their native clock (AD-04) and ignore date_axis, and the answer says so. Commerce order-lifecycle events (cancel / return) are the same event_date as the ledger.'
+  options: 'native, never switched / add a cash_date axis / retire cash clocks'
+  evidence: 'v2 had three event-like clocks: commerce.event_date, returns.refund_date, payments.transaction_date'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_profit.sql (spend rows native clock)
+  tests:
+  - AXIS-NATIVE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-37
+  title: 'Placement costs and outcome order counts on the event axis'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): placement costs (packaging, forward shipping, gateway, COD handling, checkout fee, weight discrepancy) stay on the order date on the event axis; cancelled / RTO / returned order counts land on the order''s first event date (as today).'
+  options: 'confirm both / dispatch-date costs / count per event'
+  evidence: '2026 brand 20: dispatch dating would move ₹66k of ₹31.6L placement cost to another month; 525 lines have no dispatch date (₹20.5k cost on never-dispatched lines); 1 of 4,426 outcome orders has more than one event date'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-37)
+  tests:
+  - AXIS-PLACEMENT
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'

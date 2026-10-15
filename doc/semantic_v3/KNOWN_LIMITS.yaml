@@ -229,3 +229,35 @@ limits:
   handled_by: []
   status: accepted
   next_step: 'decide with the owner whether apply_v3 may run ADD COLUMN IF NOT EXISTS before the first Cube v3 column request'
+- id: L-29
+  area: 'Dates'
+  limit: 'No courier / shipment timestamp exists in gold, so there is no physical RTO or delivery date.'
+  impact: 'an RTO is dated by Shopify''s cancellation or return-event date (3,187 brand 20 RTO lines, ₹52.4L; 92 reversal, 2,880 cancellation, 169 return-event dates). The event axis dates the decision to cancel / book the return, not the day the parcel came back.'
+  affects: 'event_date of every RTO amount; RTO lag statistics (median 19 days, max 518)'
+  handled_by: [D-29]
+  status: accepted
+  next_step: 'a courier / shipment event source would give a physical RTO date; until then event_date_source shows which Shopify column supplied the date'
+- id: L-30
+  area: 'Dates'
+  limit: 'Some cancelled / RTO / returned lines have no outcome timestamp at all.'
+  impact: '50 brand 20 lines (₹77k: 44 RTO, 1 return, 5 cancel) plus 2 RTO lines (₹1.9k) that carry only a cash refunded_date are Undated on the event axis, together with their derived cost and credit rows; they stay in every reconciliation.'
+  affects: 'event-axis period totals (dated only); Undated member'
+  handled_by: [D-29, D-32]
+  status: accepted
+  next_step: 'the Undated member is shown on every event_date answer; shrinks if gold / upstream backfills the outcome date'
+- id: L-31
+  area: 'Dates'
+  limit: 'Cohort-defined rates have no event-axis meaning.'
+  impact: 'return rate, cancel rate, RTO rate, repeat rate and LTV are refused on event_date (pointer to order_date); net ROAS, MER, BE ROAS and margin % are allowed with a label and NULL when event-axis net sales ≤ 0 (Sep 2026: event net sales ₹4.21L vs cohort ₹15.7L).'
+  affects: 'event_date answers for ratios'
+  handled_by: [D-31]
+  status: accepted
+  next_step: 'none — by design'
+- id: L-32
+  area: 'Schema'
+  limit: 'event_date is a non-nullable Date inside the sort key of semantic.mart_profit_fact and semantic.snap_profit_monthly, and neither table has event_date_source.'
+  impact: 'Resolved by the rebuild. Was: Undated (NULL event_date) and event_date_source cannot land by ALTER alone: the tables must be rebuilt (new table version) or carry an is_undated flag with a sentinel date; extends L-28. Every apply is an owner-confirmed production write.'
+  affects: 'Phase 4.5 build of mart_profit_fact, snap_profit_monthly, close_month.py (explicit column list)'
+  handled_by: [D-29, D-32]
+  status: accepted
+  next_step: 'Resolved 2026-10-14: owner chose rebuild (Q12); ledger_order_component_v2, mart_profit_fact_v2 and snap_profit_monthly_v2 applied with Nullable event_date + event_date_source. The old tables stay for rollback until Phase 9 (retire the _v2 names then).'
