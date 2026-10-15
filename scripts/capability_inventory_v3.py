@@ -34,6 +34,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -301,6 +302,112 @@ def fetch_mcp_surface(url: str) -> dict:
 
 
 # --------------------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------------------
+# Date axis (Phase 4.5, D-28 … D-37, spec §0C C8): every metric is switchable / placement_only / native / cohort_only, or a
+# deprecated alias of a base metric on event_date. The class comes from what the metric sums in serve.mart_profit.
+# --------------------------------------------------------------------------------------------------------------
+AXIS_CLASSES = {"switchable", "placement_only", "native", "cohort_only", "alias"}
+POINTER = "use date_axis=order_date (the order-date cohort); this measure has no event-date meaning"
+# placement-only: identical on both axes. id -> the mart_profit columns it sums, which AXIS-PLACEMENT proves identical per brand × day.
+PLACEMENT_COLS: dict[str, list[str]] = {
+    "gross_sales": ["gross_sales"], "order_pnl_gross_sales": ["gross_sales"], "product_gross_sale": ["gross_sales"],
+    "product_order_gross_sales": ["gross_sales"],
+    "discounts": ["discounts"], "order_pnl_discounts": ["discounts"], "product_discounts": ["discounts"],
+    "product_order_discounts": ["discounts"],
+    "orders": ["orders"], "channel_orders": ["orders"], "product_orders": ["orders"], "product_order_orders": ["orders"],
+    "new_customers": ["new_customers"], "channel_new_customers": ["new_customers"], "product_new_customers": ["new_customers"],
+    "aov": ["gross_sales", "orders"], "gross_roas": ["gross_sales", "ad_spend"],
+    "channel_cac": ["ad_spend", "new_customers"], "cac": ["ad_spend", "new_customers"], "cost_per_order": ["ad_spend", "orders"],
+    "packaging_cost": ["packaging_cost"], "product_packaging_cost": ["packaging_cost"],
+    "payment_gateway_fees": ["payment_gateway_fee"], "product_payment_gateway_fees": ["payment_gateway_fee"],
+    "gross_cogs": ["product_cogs"], "product_gross_cogs": ["product_cogs"],
+    "gross_profit": ["gross_sales", "product_cogs", "ad_spend"],
+}
+# placement-only by what they count (order placement), proven by AXIS-PLACEMENT where the mart has the column; the rest are not mart columns
+PLACEMENT_OTHER = {"customers", "repeat_customers", "cod_orders", "prepaid_orders", "payment_orders", "paid_sales", "total_sales", "order_value_incl_tax", "discounts_incl_tax",
+                   "units_ordered", "units_per_order", "orders_with_touchpoints", "touches", "avg_touch_count",
+                   "funnel_order_purchases", "funnel_order_revenue"}
+# switchable additive (outcome-dated amounts, or sums that contain them)
+SWITCHABLE = {
+    "net_sales", "order_pnl_net_sales", "net_sales_deductions", "cancel_revenue", "order_pnl_cancel_revenue", "return_revenue",
+    "order_pnl_return_revenue", "return_cancel_revenue", "cancelled_orders", "returned_orders", "returned_or_cancelled_orders",
+    "channel_returned_orders", "refund_amount", "net_cogs", "product_cost", "shipping_cost", "rto_cost", "operating_cost",
+    "taxes_on_net_sales", "contribution_margin", "net_profit", "units_sold", "returned_units",
+    "product_order_net_sales", "product_order_cancel_revenue", "product_order_return_revenue", "product_order_returned_orders",
+    "product_order_net_cogs", "product_order_product_cost", "product_shipping_cost", "product_rto_cost", "product_operating_cost",
+    "product_taxes_on_net_sales", "product_contribution_margin", "product_net_profit_before_ads",
+    "product_cancel_revenue", "product_return_revenue", "product_net_revenue", "product_net_cogs", "product_line_cost",
+    "product_gross_profit",
+}
+# switchable ratios: allowed on the event axis with a mandatory label, NULL when event-axis net sales <= 0 (D-31)
+LABELLED_RATIOS = {"net_roas", "mer", "be_roas", "contribution_margin_pct", "net_margin_pct", "product_gross_margin_pct"}
+# cohort-only: a rate whose numerator and denominator are a cohort (D-31) — refused on the event axis
+COHORT_RATES = {"return_rate", "product_return_rate", "unit_return_rate", "repeat_rate", "ltv", "new_customer_ltv"}
+# not listed in D-31: the D-31 principle (a ratio needs one clock) gives the class; owner confirmed 2026-10-15 (Phase 4.5 checkpoint)
+PROPOSED_BY_RULE = {"net_aov": "net sales (outcome clock) over orders (placement clock)",
+                    "ltv_cac_ratio": "LTV is a cohort measure (D-31)",
+                    "product_ltv_cac_ratio": "LTV is a cohort measure and spend is allocated (D-31, D-34)"}
+# the allocated product-ad family: order_date only (D-34)
+ALLOCATED_IDS = PRODUCT_AD_IDS | PRODUCT_PNL_AD_IDS | {"product_pnl_ad_spend"}
+NATIVE_VIEWS = {"paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes", "web_events", "web_event_detail",
+                "web_sessions", "web_funnel", "returns", "payments"}      # ads, web, cash clocks (D-36)
+NATIVE_IDS = {"ad_spend", "order_pnl_ad_spend", "pnl_ad_spend"}
+# an event-date id with no mechanical order-date twin: the base metric is new in v3 (explicit, never silent)
+ALIAS_BASE_OVERRIDES = {
+    "pnl_cancelled_orders": "cancelled_orders", "pnl_returned_orders": "returned_orders",
+    "pnl_returned_or_cancelled_orders": "returned_or_cancelled_orders", "pnl_return_cancel_revenue": "return_cancel_revenue",
+}
+
+
+def alias_base(mid: str, view: str, known: set[str]) -> tuple[str | None, str]:
+    """For a deprecated event-date id: (base metric id, 'exists' | 'new' | '')."""
+    if view == "pnl":
+        stem = mid[len("pnl_"):]
+        cands = [ALIAS_BASE_OVERRIDES.get(mid), "order_pnl_" + stem, stem]
+    elif view == "product_pnl" and mid.startswith("product_pnl_"):
+        stem = mid[len("product_pnl_"):]
+        cands = ["product_order_" + stem, "product_" + stem, "product_pnl_order_" + stem]
+    else:
+        return None, ""
+    for c in cands:
+        if c and c in known and c != mid:
+            return c, "exists"
+    return (ALIAS_BASE_OVERRIDES.get(mid) or (("product_order_" + stem) if view == "product_pnl" else stem)), "new"
+
+
+def axis_class(mid: str, view: str) -> dict:
+    if mid in ALLOCATED_IDS or (view == "product" and mid in PRODUCT_AD_IDS):
+        return {"date_axis": "cohort_only", "refusal": "allocated product-ad family (D-19o, D-27, D-34): " + POINTER}
+    if mid in NATIVE_IDS or view in NATIVE_VIEWS:
+        return {"date_axis": "native", "note_axis": "ignores date_axis: native clock (D-36)"}
+    if mid in COHORT_RATES:
+        return {"date_axis": "cohort_only", "refusal": "cohort-defined rate (D-31): " + POINTER}
+    if mid in PROPOSED_BY_RULE:
+        return {"date_axis": "cohort_only", "refusal": f"mixed clocks, D-31 principle: {PROPOSED_BY_RULE[mid]}; " + POINTER,
+                "owner_confirmed": "2026-10-15 (Phase 4.5 checkpoint, D-31 principle)"}
+    if mid in PLACEMENT_COLS:
+        return {"date_axis": "placement_only", "serve_columns": PLACEMENT_COLS[mid]}
+    if mid in PLACEMENT_OTHER or view in ("attribution", "attribution_paths", "funnel_orders"):
+        return {"date_axis": "placement_only"}
+    if mid in LABELLED_RATIOS:
+        return {"date_axis": "switchable", "ratio_contract": "event axis: labelled; NULL when event-axis net sales <= 0 (D-31)"}
+    if mid in SWITCHABLE:
+        return {"date_axis": "switchable"}
+    return {"date_axis": "tbd"}
+
+
+def date_axis_fields(mid: str, view: str, known: set[str], classes: dict[str, dict]) -> dict:
+    base, state = alias_base(mid, view, known)
+    if base is None:
+        return axis_class(mid, view)
+    out = {"date_axis": "alias", "alias_of": {"metric": base, "date_axis": "event_date", "base": state}}
+    cls = classes.get(base) or axis_class(base, "order_pnl" if view == "pnl" else "product_pnl")
+    if cls["date_axis"] == "cohort_only":
+        out["alias_refused"] = f"{cls.get('refusal', '')}; the event-date id answered before v3 (D-34 / D-31)"
+    return out
+
+
 def entry(target: str, decision_ids=(), note: str = "", **extra) -> dict:
     e = {"target": target, "decision_ids": sorted(set(decision_ids))}
     if note:
@@ -315,6 +422,8 @@ def build(cat, meta: dict, mcp: dict) -> dict:
 
     # metrics
     metrics = {}
+    known = set(cat.metrics)
+    classes = {k: axis_class(k, v.cube_mapping.view) for k, v in cat.metrics.items() if alias_base(k, v.cube_mapping.view, known)[0] is None}
     for mid, m in sorted(cat.metrics.items()):
         target, ids, note = metric_rule(mid, m.cube_mapping.view)
         bindings = [{"name": b.name, "view": b.view, "measure": b.measure,
@@ -326,7 +435,8 @@ def build(cat, meta: dict, mcp: dict) -> dict:
                              supported_filters=sorted(m.supported_filters),
                              valid_for={k: sorted(v) for k, v in m.valid_for.items()},
                              excluded_dimensions=dict(m.excluded_dimensions),
-                             replaces=sorted(m.replaces), live_defect=LIVE_DEFECTS.get(mid))
+                             replaces=sorted(m.replaces), live_defect=LIVE_DEFECTS.get(mid),
+                             **date_axis_fields(mid, m.cube_mapping.view, known, classes))
         for mem in [m.cube_mapping.measure] + [b.measure for b in m.bindings] + list(m.companion_measures):
             member_targets.setdefault(mem, (target, ids))
     out["metrics"] = metrics
@@ -446,6 +556,52 @@ def gate(cat, meta: dict, mcp: dict, cmap: dict) -> list[str]:
             for k, v in node.items():
                 walk(v, f"{path}/{k}")
     walk(cmap, "")
+    errs += axis_gate(cmap)
+    return errs
+
+
+D31_TABLE = {   # D-31 (owner-approved table): metric id -> required class
+    **{k: "placement_only" for k in ("gross_roas", "aov", "channel_cac", "cost_per_order", "channel_orders", "channel_new_customers")},
+    **{k: "switchable" for k in ("net_roas", "mer", "be_roas", "contribution_margin_pct", "net_margin_pct")},
+    **{k: "cohort_only" for k in ("return_rate", "repeat_rate", "ltv")},
+}
+MAGE = Path(os.environ.get("SEMANTIC_V3_MAGE", "/home/tervigon/work/mage_v3"))
+
+
+def axis_gate(cmap: dict) -> list[str]:
+    """AXIS-RATIO-CONTRACT, metadata half: the D-31 table holds, every metric has an axis, every refusal points at order_date."""
+    errs = []
+    ms = cmap["metrics"]
+    for mid, e in ms.items():
+        ax = e.get("date_axis")
+        if ax not in AXIS_CLASSES:
+            errs.append(f"{mid}: date_axis {ax!r} — needs a class (an owner decision if the rules do not cover it)")
+        if ax == "cohort_only" and "order_date" not in e.get("refusal", ""):
+            errs.append(f"{mid}: cohort_only without a refusal that points at order_date")
+        if ax == "placement_only" and e.get("serve_columns") is None and mid not in PLACEMENT_OTHER and e["view"] not in ("attribution", "attribution_paths", "funnel_orders"):
+            errs.append(f"{mid}: placement_only without serve_columns or a stated reason")
+        if ax == "alias":
+            base = e["alias_of"]["metric"]
+            if e["alias_of"]["base"] == "exists" and base not in ms:
+                errs.append(f"{mid}: alias of unknown metric {base}")
+    for mid, want in D31_TABLE.items():
+        if mid in ms and ms[mid].get("date_axis") != want:
+            errs.append(f"{mid}: D-31 table says {want}, map says {ms[mid].get('date_axis')}")
+        if mid in ms and mid in {"net_roas", "mer", "be_roas", "contribution_margin_pct", "net_margin_pct"} and not ms[mid].get("ratio_contract"):
+            errs.append(f"{mid}: labelled event-axis ratio without ratio_contract")
+    for mid in ALLOCATED_IDS:
+        if mid in ms and ms[mid].get("date_axis") not in ("cohort_only", "alias"):
+            errs.append(f"{mid}: allocated family must be cohort_only (D-34)")
+    # every placement-only column is one AXIS-PLACEMENT proves identical per brand x day on both axes
+    contracts = MAGE / "serve" / "evaluations" / "v3_contracts.py"
+    if contracts.exists():
+        txt = contracts.read_text()
+        m = re.search(r"PLACEMENT_COLUMNS = \((.*?)\)", txt, re.S)
+        proven = set(re.findall(r'"(\w+)"', m.group(1))) if m else set()
+        for mid, e in ms.items():
+            for col in e.get("serve_columns", []):
+                if col != "ad_spend" and col not in proven:
+                    errs.append(f"{mid}: placement column {col} is not checked by AXIS-PLACEMENT")
     return errs
 
 

@@ -240,7 +240,7 @@ limits:
 - id: L-30
   area: 'Dates'
   limit: 'Some cancelled / RTO / returned lines have no outcome timestamp at all.'
-  impact: '50 brand 20 lines (₹77k: 44 RTO, 1 return, 5 cancel) plus 2 RTO lines (₹1.9k) that carry only a cash refunded_date are Undated on the event axis, together with their derived cost and credit rows; they stay in every reconciliation.'
+  impact: 'Live 2026-10-15, brand 20: 52 orders / 84 lines / 257 ledger rows, revenue deduction −₹81,680 (planning count 2026-10-14: 50 lines ₹77k + 2 refund-date-only lines ₹1.9k; the member grows when a new RTO tag arrives before Shopify dates it). 226 of the 257 rows (41 orders, −₹71.4k) are ACTIVE orders with an RTO tag and no cancel / return date (31 orders Aug–Oct 2026, 21 from 2025); 4 are returns with no evidence (−₹8.1k). They are Undated on the event axis, with their derived cost and credit rows; they stay in every reconciliation. Owner confirmed keeping them Undated (2026-10-15).'
   affects: 'event-axis period totals (dated only); Undated member'
   handled_by: [D-29, D-32]
   status: accepted
