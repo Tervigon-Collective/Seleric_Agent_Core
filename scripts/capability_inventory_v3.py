@@ -339,9 +339,12 @@ SWITCHABLE = {
     "product_taxes_on_net_sales", "product_contribution_margin", "product_net_profit_before_ads",
     "product_cancel_revenue", "product_return_revenue", "product_net_revenue", "product_net_cogs", "product_line_cost",
     "product_gross_profit",
+    "channel_cancelled_orders", "channel_returned_or_cancelled_orders", "order_pnl_return_cancel_revenue",     # new finance-view bases
+    "product_order_cancelled_orders", "product_order_return_cancel_revenue", "product_order_returned_or_cancelled_orders",
 }
 # switchable ratios: allowed on the event axis with a mandatory label, NULL when event-axis net sales <= 0 (D-31)
-LABELLED_RATIOS = {"net_roas", "mer", "be_roas", "contribution_margin_pct", "net_margin_pct", "product_gross_margin_pct"}
+LABELLED_RATIOS = {"net_roas", "mer", "be_roas", "contribution_margin_pct", "net_margin_pct", "product_gross_margin_pct",
+                   "product_contribution_margin_pct"}
 # cohort-only: a rate whose numerator and denominator are a cohort (D-31) — refused on the event axis
 COHORT_RATES = {"return_rate", "product_return_rate", "unit_return_rate", "repeat_rate", "ltv", "new_customer_ltv"}
 # not listed in D-31: the D-31 principle (a ratio needs one clock) gives the class; owner confirmed 2026-10-15 (Phase 4.5 checkpoint)
@@ -349,14 +352,15 @@ PROPOSED_BY_RULE = {"net_aov": "net sales (outcome clock) over orders (placement
                     "ltv_cac_ratio": "LTV is a cohort measure (D-31)",
                     "product_ltv_cac_ratio": "LTV is a cohort measure and spend is allocated (D-31, D-34)"}
 # the allocated product-ad family: order_date only (D-34)
-ALLOCATED_IDS = PRODUCT_AD_IDS | PRODUCT_PNL_AD_IDS | {"product_pnl_ad_spend"}
+# product_contribution_margin / _pct are net sales − net COGS, before ads (checked in the catalogue description): switchable, not allocated
+ALLOCATED_IDS = PRODUCT_AD_IDS | (PRODUCT_PNL_AD_IDS - {"product_contribution_margin", "product_contribution_margin_pct"}) | {"product_pnl_ad_spend"}
 NATIVE_VIEWS = {"paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes", "web_events", "web_event_detail",
                 "web_sessions", "web_funnel", "returns", "payments"}      # ads, web, cash clocks (D-36)
 NATIVE_IDS = {"ad_spend", "order_pnl_ad_spend", "pnl_ad_spend"}
 # an event-date id with no mechanical order-date twin: the base metric is new in v3 (explicit, never silent)
 ALIAS_BASE_OVERRIDES = {
-    "pnl_cancelled_orders": "cancelled_orders", "pnl_returned_orders": "returned_orders",
-    "pnl_returned_or_cancelled_orders": "returned_or_cancelled_orders", "pnl_return_cancel_revenue": "return_cancel_revenue",
+    "pnl_cancelled_orders": "channel_cancelled_orders", "pnl_returned_orders": "channel_returned_orders",
+    "pnl_returned_or_cancelled_orders": "channel_returned_or_cancelled_orders", "pnl_return_cancel_revenue": "order_pnl_return_cancel_revenue",
 }
 
 
@@ -370,6 +374,8 @@ def alias_base(mid: str, view: str, known: set[str]) -> tuple[str | None, str]:
         cands = ["product_order_" + stem, "product_" + stem, "product_pnl_order_" + stem]
     else:
         return None, ""
+    if mid in ALIAS_BASE_OVERRIDES:   # an explicit base: the finance-view id, never a lookalike in another view
+        return ALIAS_BASE_OVERRIDES[mid], ("exists" if ALIAS_BASE_OVERRIDES[mid] in known else "new")
     for c in cands:
         if c and c in known and c != mid:
             return c, "exists"
@@ -584,6 +590,14 @@ def axis_gate(cmap: dict) -> list[str]:
             base = e["alias_of"]["metric"]
             if e["alias_of"]["base"] == "exists" and base not in ms:
                 errs.append(f"{mid}: alias of unknown metric {base}")
+            elif e["alias_of"]["base"] == "exists":
+                # the alias's time dimension (report_date) is the axis itself; row_type is order_pnl_row_type on the order-date view (D-07)
+                norm = lambda dims: {"order_pnl_row_type" if d == "row_type" else d for d in dims} - {"report_date", "order_date"}
+                lost = sorted(norm(e.get("supported_dimensions", [])) - norm(ms[base].get("supported_dimensions", [])))
+                if lost and not e.get("alias_refused"):
+                    errs.append(f"{mid}: base {base} cannot slice by {lost} (capability loss on the alias)")
+            elif axis_class(base, "order_pnl" if e["view"] == "pnl" else "product_pnl")["date_axis"] == "tbd":
+                errs.append(f"{mid}: new base {base} has no date_axis class")
     for mid, want in D31_TABLE.items():
         if mid in ms and ms[mid].get("date_axis") != want:
             errs.append(f"{mid}: D-31 table says {want}, map says {ms[mid].get('date_axis')}")

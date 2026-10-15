@@ -248,7 +248,7 @@ limits:
 - id: L-31
   area: 'Dates'
   limit: 'Cohort-defined rates have no event-axis meaning.'
-  impact: 'return rate, cancel rate, RTO rate, repeat rate and LTV are refused on event_date (pointer to order_date); net ROAS, MER, BE ROAS and margin % are allowed with a label and NULL when event-axis net sales ≤ 0 (Sep 2026: event net sales ₹4.21L vs cohort ₹15.7L).'
+  impact: 'return rate, cancel rate, RTO rate, repeat rate, LTV, net AOV and LTV:CAC ratio (the last two owner-confirmed 2026-10-15 by the D-31 principle) are refused on event_date (pointer to order_date); net ROAS, MER, BE ROAS and margin % are allowed with a label and NULL when event-axis net sales ≤ 0 (Sep 2026: event net sales ₹4.21L vs cohort ₹15.7L).'
   affects: 'event_date answers for ratios'
   handled_by: [D-31]
   status: accepted
