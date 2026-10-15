@@ -38,7 +38,13 @@ async def validate_against_cube(service: CatalogueService, cube: CubeClient) -> 
         if m.cube_mapping.measure_pct:
             needed.append(m.cube_mapping.measure_pct)
         if m.ratio_components:
-            needed += [m.ratio_components.numerator, m.ratio_components.denominator]
+            # v2/v3 store components as catalogue metric ids; their Cube members on the home view are resolved at load
+            # time (v1 stored qualified members, which resolve to themselves).
+            comps = [m.ratio_components.numerator, m.ratio_components.denominator]
+            if all("." in c for c in comps):
+                needed += comps
+            else:
+                needed += m.ratio_component_members.get(m.cube_mapping.view, [])
         for dim_id in m.supported_dimensions:
             dim = service.cat.dimensions.get(dim_id)
             if dim and m.cube_mapping.view in dim.views:

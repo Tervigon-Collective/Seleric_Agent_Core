@@ -122,6 +122,6 @@ disambiguation: '"total operating cost" in v1 meant net COGS (component=total); 
   + packaging + gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment). scope=product
   (by product / variant / SKU, order date): total = product_net_cogs, product = product_line_cost, gross = product_gross_cogs;
   the shipping / packaging / gateway / RTO components by product are each order''s costs spread over its lines by
-  revenue share (product_shipping_cost …, P&L basis; product_pnl_* on the event date).
+  revenue share (product_shipping_cost …, P&L basis; date_axis=event_date for the event-date view).
 
   '

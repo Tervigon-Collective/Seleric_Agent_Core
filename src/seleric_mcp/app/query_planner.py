@@ -199,6 +199,18 @@ class QueryPlanner:
                 if retired_msg:
                     d = self.catalogue.retired_metric(mid)
                     raise PlanError(retired_msg, suggestions=[d.new] if d else [])
+            alias = self.catalogue.metric_alias(mid)
+            if alias is not None:
+                # Semantic v3: an alias id answers through its base metric (event-date family: on event_date).
+                if alias.refused:
+                    raise PlanError(alias.refused, suggestions=[alias.metric])
+                base = self.catalogue.get_metric(alias.metric)
+                if base is None or not base.is_queryable:
+                    raise PlanError(f"Metric '{mid}' cannot be answered: base metric '{alias.metric}' is not queryable.")
+                on = f" on date_axis={alias.date_axis}" if alias.date_axis else ""
+                warnings.append(f"'{mid}' is an id of '{alias.metric}'{on} (semantic v3: one metric, the date axis is a parameter).")
+                metrics.append(base.model_copy(update={"requested_date_axis": alias.date_axis, "requested_as": mid}))
+                continue
             resolved = self.catalogue.resolve_metric_id(mid)
             if resolved is None:
                 # Fall back to concept/glossary/alias resolution so natural names the
@@ -217,7 +229,10 @@ class QueryPlanner:
                     flt = dict(getattr(term, "filter", None) or {})
                     shown = f" with {', '.join(f'{k} = {v}' for k, v in flt.items())}" if flt else ""
                     warnings.append(f"'{mid}' resolved to metric '{target}'{shown} via {via}.")
-                    metrics.append(self.catalogue.get_metric(target))
+                    tm = self.catalogue.get_metric(target)
+                    if self.catalogue.is_v3 and getattr(term, "date_axis", None) == "event_date":
+                        tm = tm.model_copy(update={"requested_date_axis": "event_date"})
+                    metrics.append(tm)
                     term_filters.extend(
                         FilterSpec(dimension=k, operator="equals", values=[v]) for k, v in flt.items()
                     )
@@ -245,6 +260,60 @@ class QueryPlanner:
             assert m is not None  # resolve_metric_id only returns queryable ids
             metrics.append(m)
         return metrics, warnings, term_filters
+
+    # ---------- semantic v3: the date axis (D-28, D-31, D-34, D-36) ----------
+
+    def _apply_date_axis(
+        self, metrics: list[MetricDef], request: QueryRequest
+    ) -> tuple[list[MetricDef], QueryRequest, list[str]]:
+        """One date axis per query. order_date (default) leaves every metric on its view's order date; event_date
+        moves switchable / placement-only metrics to the view's event_date; cohort-only metrics REFUSE event_date
+        (with the catalogue's pointer); native metrics (ads, web, cash) ignore it and say so. An event-date alias
+        id (pnl_net_profit) asks for event_date by itself; mixing it with an explicit order_date, or with a plain
+        switchable metric and no explicit axis, is refused instead of silently answering two questions."""
+        asked = request.date_axis
+        alias_axes = {m.requested_date_axis for m in metrics if m.requested_date_axis}
+        for m in metrics:
+            if m.requested_date_axis and asked and m.requested_date_axis != asked:
+                raise PlanError(
+                    f"'{m.requested_as or m.id}' is the {m.requested_date_axis} id of '{m.id}', but date_axis={asked} "
+                    f"was requested. One date axis per query (D-28): ask the two questions separately.",
+                    suggestions=[m.id],
+                )
+        plain = [m for m in metrics if m.date_axis == "switchable" and not m.requested_date_axis]
+        if "event_date" in alias_axes and plain and asked is None:
+            raise PlanError(
+                f"'{plain[0].id}' (order-date by default) and the event-date id "
+                f"'{next(m.requested_as or m.id for m in metrics if m.requested_date_axis)}' are in one query. "
+                "One date axis per query (D-28): pass date_axis explicitly, or ask them separately.",
+                suggestions=["date_axis=order_date", "date_axis=event_date"],
+            )
+        eff = asked or ("event_date" if "event_date" in alias_axes else "order_date")
+        notes: list[str] = []
+        out: list[MetricDef] = []
+        for m in metrics:
+            if m.date_axis is None:
+                out.append(m)
+                continue
+            if m.date_axis == "cohort_only" and eff == "event_date":
+                raise PlanError(
+                    m.date_axis_refusal or f"'{m.id}' has no event-date meaning; use date_axis=order_date.",
+                    suggestions=["date_axis=order_date"],
+                )
+            if m.date_axis in ("switchable", "placement_only") and eff == "event_date" and m.date_axis_dimensions:
+                m = m.model_copy(update={"cube_mapping": m.cube_mapping.model_copy(
+                    update={"time_dimension": m.date_axis_dimensions["event_date"]})})
+            if m.date_axis == "native" and (asked or m.requested_date_axis):
+                notes.append(f"'{m.id}' is on its own clock (ads, web, cash): date_axis={eff} does not change it (D-36).")
+            if eff == "event_date" and m.ratio_contract:
+                notes.append(f"'{m.id}' on event_date: numerator and denominator share the event clock; "
+                             "NULL when event-axis net sales are not positive (D-31).")
+            out.append(m)
+        if eff == "event_date":
+            notes.insert(0, "date_axis=event_date: cancelled / RTO / returned amounts and what derives from them sit on the "
+                            "day they were booked (the decision date, not a courier date, D-29); placement amounts and "
+                            "costs stay on the order date (D-37). Outcomes with no date are shown separately as Undated (D-32).")
+        return out, request.model_copy(update={"date_axis": eff}), notes
 
     # ---------- semantic v2: unsupported values, valid_for, bindings ----------
 
@@ -688,6 +757,8 @@ class QueryPlanner:
             for m in metrics:
                 if m.cube_mapping.measure in row:
                     out[m.id] = row[m.cube_mapping.measure]
+                    if m.requested_as and m.requested_as != m.id:
+                        out[m.requested_as] = row[m.cube_mapping.measure]  # the id the caller asked for (alias)
                 if m.cube_mapping.measure_pct and m.cube_mapping.measure_pct in row:
                     out[f"{m.id}_pct"] = row[m.cube_mapping.measure_pct]
             aliased.append(out)
@@ -881,6 +952,9 @@ class QueryPlanner:
                 lineage.cancel()
             raise
 
+        undated = None
+        if self.catalogue.is_v3 and request.date_axis == "event_date":
+            undated = await self._load_undated(view, metrics, qualified_dims, cube_filters)
         query_id = "q_" + uuid.uuid4().hex[:12]
         currencies = sorted({m.currency_default for m in metrics if m.currency_default})
         currency: str | list[str] | None
@@ -942,13 +1016,63 @@ class QueryPlanner:
             self._present_rows(compare_rows, metrics, view) if compare_rows is not None else None
         )
         columns = sorted({k for row in out_rows for k in row})
-        return {
+        result = {
             "query_id": query_id,
             "columns": columns,
             "rows": out_rows,
             "compare_rows": out_compare,
             "warnings": filter_warnings,
             "provenance": provenance,
+        }
+        if self.catalogue.is_v3 and request.date_axis:
+            result["date_axis"] = request.date_axis
+            result["date_axis_applied"] = {m.requested_as or m.id: self._axis_applied(m, request.date_axis) for m in metrics}
+            if undated is not None:
+                result["undated"] = undated
+        return result
+
+    @staticmethod
+    def _axis_applied(m: MetricDef, axis: str) -> str:
+        if m.date_axis == "native":
+            return "native (own clock; date_axis ignored)"
+        if m.date_axis == "placement_only":
+            return f"{axis} (identical on both axes: booked at placement)"
+        return axis
+
+    async def _load_undated(
+        self, view: str, metrics: list[MetricDef], qualified_dims: list[str], cube_filters: list[dict]
+    ) -> dict | None:
+        """D-32: an event_date answer always shows the Undated member next to the dated periods — outcomes (cancel /
+        RTO / return) with no outcome date, over ALL history, never lost to the date range. The ranged rows are
+        'dated only'; dated + Undated reconcile to the order_date total of the same query."""
+        flag = f"{view}.is_undated"
+        dim = self.catalogue.cat.dimensions.get("is_undated")
+        if dim is None or view not in dim.views:
+            return None
+        switchable = [m for m in metrics if m.date_axis == "switchable"]
+        if not switchable:
+            return None
+        members: list[str] = []
+        for m in switchable:
+            members.append(m.cube_mapping.measure)
+            for member in self._resolve_ratio_component_members(m):
+                if member not in members:
+                    members.append(member)
+        query: dict = {
+            "measures": members,
+            "timezone": "Asia/Kolkata",
+            "filters": [*cube_filters, {"member": flag, "operator": "equals", "values": ["true"]}],
+        }
+        dims = [d for d in qualified_dims if d != flag]
+        if dims:
+            query["dimensions"] = dims
+        res = await self.cube.load(query)
+        rows = self._present_rows(self._alias_metric_ids(res.data, switchable), switchable, view) or []
+        return {
+            "label": "Undated",
+            "note": ("Outcomes (cancelled / RTO / returned) with no outcome date, over all history (D-32). The dated "
+                     "rows are 'dated only'; dated + Undated reconcile to the order_date total."),
+            "rows": rows,
         }
 
     async def _semantic_provenance(self, metrics: list[MetricDef], cube_query: dict) -> dict:
@@ -1012,6 +1136,9 @@ class QueryPlanner:
             }
         )
         forced: dict[str, list[FilterSpec]] = {}
+        if self.catalogue.is_v3:
+            metrics, request, axis_notes = self._apply_date_axis(metrics, request)
+            alias_warnings = [*alias_warnings, *axis_notes]
         if self.catalogue.is_v2:
             self._check_unsupported_values(request.filters)
             metrics, forced, v2_warnings = self._apply_v2_rules(metrics, request)
@@ -1195,5 +1322,6 @@ class QueryPlanner:
             compare_period=parent.compare_period,
             sort=parent.sort,
             limit=parent.limit,
+            date_axis=parent.date_axis,
         )
         return await self.run(child, parent_query_id=parent_query_id)

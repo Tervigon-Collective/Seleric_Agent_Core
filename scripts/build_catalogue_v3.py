@@ -101,7 +101,7 @@ BREAKDOWN_SLICES = {
     "region": ["region"], "country": [],
 }
 # breakdown_types Meta returns without a field (sum 0, checked live by scripts/v2_gates.py --live)
-SLICE_GAPS = {"landing_page_views": {"region"}}
+SLICE_GAPS = {"landing_page_views": {"region"}, "platform_reported_landing_page_views": {"region"}}
 UNAVAILABLE = {
     m: ("Not populated: Shopify's checkout_started pixel is server-side (no web-session id), so session "
         "checkout timestamps / step counts are always empty (dbt fct_session_funnel KNOWN GAP). "
@@ -692,7 +692,7 @@ def main() -> int:
     retired_ids = sorted((m["old"] for m in maps if m["old"] != m["new"] and m["old"] not in v2), key=len, reverse=True)
     id_re = re.compile(r"\b(" + "|".join(map(re.escape, retired_ids)) + r")\b")
 
-    from seleric_mcp.catalogue_service.service import _AXIS_KEYWORDS_V2  # noqa: E402
+    from seleric_mcp.catalogue_service.service import _AXIS_KEYWORDS_V3 as _AXIS_KEYWORDS_V2  # noqa: E402
 
     finance_phrases = [kw for kw, val in _AXIS_KEYWORDS_V2["date"] if val == "finance"]
     channel_words = _AXIS_KEYWORDS_V2["channel"]

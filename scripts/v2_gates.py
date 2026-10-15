@@ -28,6 +28,8 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+# the catalogue under test: catalogue_v2 (default) or catalogue_v3 (SELERIC_CATALOGUE_DIR=catalogue_v3 CUBE_V2_URL=:4003)
+CAT = os.environ.get("SELERIC_CATALOGUE_DIR", "catalogue_v2")
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -36,7 +38,7 @@ def load_surface(agent: str):
     """(CatalogueService on catalogue_v2, the agent's v2 registry entries)."""
     from seleric_mcp.catalogue_service.loader import load_catalogue
     from seleric_mcp.catalogue_service.service import CatalogueService
-    svc = CatalogueService(load_catalogue(ROOT / "catalogue_v2"))
+    svc = CatalogueService(load_catalogue(ROOT / CAT))
     reg = yaml.safe_load(Path(agent, "config", "metric_registry.yaml").read_text())["metrics"]
     return svc, reg
 
@@ -46,7 +48,7 @@ def compute(svc, reg, v1_reg, live: bool) -> dict:
     from probe_phrases import PROBE_PHRASES
     phrases = {p.lower() for p in PROBE_PHRASES}
     phrases |= {t["term"].lower() for t in yaml.safe_load((ROOT / "catalogue" / "glossary" / "terms.yaml").read_text())["terms"]}
-    for d in ("catalogue/concepts", "catalogue_v2/concepts"):
+    for d in ("catalogue/concepts", f"{CAT}/concepts"):
         for f in glob.glob(str(ROOT / d / "*.yaml")):
             phrases |= {a.lower() for a in yaml.safe_load(open(f)).get("aliases") or []}
     for r in (*reg, *v1_reg):
@@ -66,6 +68,9 @@ def compute(svc, reg, v1_reg, live: bool) -> dict:
         hits = svc.search(p).matches
         top = hits[0].id if hits else ""
         agent = reg_alias.get(p, "")
+        al = svc.cat.metric_aliases.get(agent)
+        if al is not None and al.date_axis is None:
+            agent = al.metric  # v3: a same-measure twin id (product_gross_sale) names the same number as its base
         named = {x for x in (term, conc, top, agent) if x}
         rows.append({"phrase": p, "resolve_term": term, "resolve_concept": conc, "search_top1": top,
                      "agent_registry": agent,
@@ -77,9 +82,10 @@ def compute(svc, reg, v1_reg, live: bool) -> dict:
         cm = r.get("catalogue_metric")
         if not cm:
             continue
-        m = svc.cat.metrics.get(cm)
+        al = svc.cat.metric_aliases.get(cm)  # v3: a registry id may be an alias; it answers through its base
+        m = svc.cat.metrics.get(al.metric if al else cm)
         if m is None:
-            drift.append(f"{r['id']}: catalogue_metric {cm} not in catalogue_v2")
+            drift.append(f"{r['id']}: catalogue_metric {cm} not in {CAT}")
             continue
         for did in r.get("catalogue_filters") or {}:
             d = svc.cat.dimensions.get(did)
@@ -88,7 +94,7 @@ def compute(svc, reg, v1_reg, live: bool) -> dict:
 
     v1_ids = {yaml.safe_load(open(f))["id"] for f in glob.glob(str(ROOT / "catalogue" / "metrics" / "*.yaml"))}
     deprecated = {d.old for d in svc.cat.deprecations}
-    uncovered = sorted(i for i in v1_ids if i not in svc.cat.metrics and i not in deprecated)
+    uncovered = sorted(i for i in v1_ids if i not in svc.cat.metrics and i not in svc.cat.metric_aliases and i not in deprecated)
 
     sliced = []
     for m in svc.cat.metrics.values():
@@ -102,6 +108,10 @@ def compute(svc, reg, v1_reg, live: bool) -> dict:
         filter_errors = live_filters(svc, reg)
         sliced += live_slices(svc)
         dups = live_duplicates(svc)
+        waived = ROOT / f"{CAT}_src" / "duplicate_number_waivers.yaml"
+        if waived.exists():  # reviewed on-purpose twins (each pair carries its reason)
+            ok = {frozenset(w["ids"]) for w in yaml.safe_load(waived.read_text())["waivers"]}
+            dups = [d for d in dups if frozenset(d[:2]) not in ok]
     gates = [("resolution conflicts", len(conflicts)), ("registry drift", len(drift)),
              ("hard-cut coverage gaps", len(uncovered)), ("sliced bindings", len(sliced))] + (
         [("live filters", len(filter_errors)), ("duplicate numbers", len(dups))] if live else [])
@@ -122,7 +132,7 @@ def main() -> int:
     r = compute(svc, reg, v1_reg, args.live)
     gates, rows, conflicts = r["gates"], r["rows"], r["conflicts"]
     drift, uncovered, sliced, filter_errors, dups = r["drift"], r["uncovered"], r["sliced"], r["filters"], r["duplicates"]
-    print(f"semantic v2 gates (catalogue_v2 {svc.version}, {len(rows)} phrases):")
+    print(f"semantic gates ({CAT} {svc.version}, {len(rows)} phrases):")
     for name, n in gates:
         print(f"  {'PASS' if n == 0 else 'FAIL'}  {name:26s} {n}")
     for r in conflicts:

@@ -4,9 +4,10 @@
 # (and the resolver refuses a filter the metric's view cannot take, instead of answering a sibling).
 #
 # Shared axes
-#   date:    order (ORDER date — DEFAULT for every domain) | finance (EVENT date, Finance only; pnl_* ids)
-#            Decision 2026-10-04 (user): performance, ads and all other domains read the order date; only
-#            Finance reads the event date. pnl_X = event date, X = its order-date twin.
+#   date:    order (ORDER date — DEFAULT) | finance (EVENT date: cancels / RTO / returns on the day they happen).
+#            Semantic v3 (D-28): the date is a REQUEST PARAMETER (date_axis = order_date | event_date), never a
+#            different metric. The axis only decides the resolved `date_axis`; no resolve row names it. The
+#            pnl_* / product_pnl_* ids are aliases of the base metric on event_date (metric_aliases.yaml).
 #   channel: finance_channel the traffic rolls up to — meta incl. Meta organic, google incl. Google organic
 #   paid:    all | paid (is_paid = true: paid Meta / Google clicks only)
 #   platform (ads): ad_platform meta | google
@@ -31,7 +32,7 @@ _ad_filters: &ad_filters
 concepts:
   - id: sales
     display_name: Sales
-    one_liner: Net sales of the orders placed in the period (order date) unless Finance / P&L is asked.
+    one_liner: Net sales of the orders placed in the period (order date, as of now). date_axis=event_date gives the same metric with cancels / RTO / returns on the day they happen.
     aliases: [sales, sale, revenue, topline, turnover, gross sale, net sale]
     axes: {basis: {values: [net, gross, total], default: net}, date: {values: [order, finance], default: order},
            scope: {values: [all, product], default: all}, channel: *channel, paid: *paid}
@@ -44,15 +45,15 @@ concepts:
       # 2-key product row tied with {basis: net, date: order} and lost, so "sales per product" got net_sales).
       - {when: {basis: net, scope: product}, metric: product_net_revenue}
       - {when: {basis: gross, scope: product}, metric: product_gross_sale}
-      # Finance (event-date) P&L net sales by product: serve.product_pnl spreads each P&L row over its order's lines
     unsupported:
       - when: {basis: total, scope: product}
         reason: >-
           Total sales (incl. GST) is order level only. By product use gross (product_gross_sale) or net
           (product_net_revenue) — both ex-GST.
     disambiguation: >
-      Default net sales = net_sales: the orders placed in the period (order date). date=finance (pnl_net_sales,
-      "P&L net sales") books returns / cancels on the day they happen — the Finance dashboard Net Sales card.
+      Default net sales = net_sales: the orders placed in the period (order date). date_axis=event_date ("P&L net sales", "processed in")
+      books returns / cancels on the day they happen — the Finance dashboard Net Sales card; the answer then also shows the
+      Undated member.
       Gross and total sales are booked at placement, so order and event date give the same number. A channel (meta / google / whatsapp / organic /
       unattributed) filters finance_channel — Meta includes Meta organic; add paid=paid for paid clicks only.
       scope=product (any breakdown / filter by product, variant, SKU or product type) is line level, ex-GST:
@@ -86,7 +87,7 @@ concepts:
       - {when: {status: new, scope: product}, metric: product_new_customers}
     disambiguation: >
       orders = dashboard Total Orders (placement cohort, order date). Cancelled / returned default to the orders
-      placed in the period (date=order); date=finance counts them on the day the cancel / return happened.
+      placed in the period (date_axis=order_date); date_axis=event_date counts them on the day the cancel / return happened.
 
   - id: profit
     display_name: Profit
@@ -152,7 +153,7 @@ concepts:
       ad-attributed lines ÷ the ad spend allocated to them (product_net_roas / product_gross_roas / product_mer — a
       model, see product_ad_spend); break-even ROAS by product is product_be_roas (P&L basis). Channel ROAS (channel=meta) includes Meta organic
       sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified. Default is
-      the order date (sales of the orders placed ÷ spend delivered in the period); date=finance is the P&L ROAS.
+      the order date (sales of the orders placed ÷ spend delivered in the period); date_axis=event_date is the P&L ROAS (NULL when event-axis net sales are not positive).
 
   - id: mer
     display_name: MER
@@ -281,11 +282,11 @@ concepts:
       gateway + RTO. gross COGS = placement cost of every unit placed (no return adjustment). scope=product (by
       product / variant / SKU, order date): total = product_net_cogs, product = product_line_cost, gross =
       product_gross_cogs; the shipping / packaging / gateway / RTO components by product are each order's costs spread over its
-      lines by revenue share (product_shipping_cost …, P&L basis; product_pnl_* on the event date).
+      lines by revenue share (product_shipping_cost …, P&L basis; date_axis=event_date for the event-date view).
 
   - id: returns_cancels
     display_name: Returns and cancellations
-    one_liner: Return + cancellation revenue of the orders placed in the period (order date) unless Finance is asked.
+    one_liner: Return + cancellation revenue of the orders placed in the period (order date); date_axis=event_date books them on the day they happen.
     aliases: [returns, cancels, returns and cancels, returns/cancels, cancellations, return revenue, cancel revenue]
     axes: {action: {values: [both, return, cancel], default: both}, measure: {values: [revenue, orders], default: revenue},
            date: {values: [order, finance], default: order}, scope: {values: [all, product], default: all},
@@ -302,7 +303,7 @@ concepts:
       - {when: {action: return, measure: orders}, metric: returned_orders}
       - {when: {action: cancel, measure: orders}, metric: cancelled_orders}
     disambiguation: >
-      date=finance counts a return / cancel on the day it happened (P&L); date=order counts the returns / cancels
+      date_axis=event_date counts a return / cancel on the day it happened (P&L); order_date counts the returns / cancels
       of the orders placed in the period (cohort). Refund amounts and lines are the refunds concept.
 
   - id: refunds

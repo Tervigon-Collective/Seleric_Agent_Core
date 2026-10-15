@@ -88,7 +88,7 @@ disambiguation: 'net ROAS = (net sales − net COGS) ÷ ad spend; gross ROAS = g
   ad-attributed lines ÷ the ad spend allocated to them (product_net_roas / product_gross_roas / product_mer — a
   model, see product_ad_spend); break-even ROAS by product is product_be_roas (P&L basis). Channel ROAS (channel=meta)
   includes Meta organic sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified.
-  Default is the order date (sales of the orders placed ÷ spend delivered in the period); date=finance is the P&L
-  ROAS.
+  Default is the order date (sales of the orders placed ÷ spend delivered in the period); date_axis=event_date is
+  the P&L ROAS (NULL when event-axis net sales are not positive).
 
   '

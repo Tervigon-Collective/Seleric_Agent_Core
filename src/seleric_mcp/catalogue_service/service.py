@@ -132,6 +132,9 @@ class ResolvedTerm(BaseModel):
     concept: str | None = None
     axes: dict[str, str] = Field(default_factory=dict)
     defaults_applied: list[str] = Field(default_factory=list)
+    # Semantic v3: the date axis the term's own words chose (event_date for "P&L" / "event date" wording), else
+    # None — the request default (order_date) applies. A parameter, never a different metric (D-28).
+    date_axis: str | None = None
 
 
 class RetiredTerm(BaseModel):
@@ -289,6 +292,9 @@ class ResolvedConcept(BaseModel):
     draft: bool = False  # resolved metric is uncertified — disclose the caveat
     note: str | None = None
     disambiguation: str | None = None
+    # Semantic v3 (D-28 / D-33): order_date | event_date, from the concept's `date` axis. The metric is the same
+    # either way; the caller passes this as the request's date_axis.
+    date_axis: str | None = None
 
 
 class UnsupportedConcept(BaseModel):
@@ -391,6 +397,21 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
 }
 
 
+# Semantic v3 (catalogue_v3): the same hints, plus the wording that asks for the EVENT date explicitly (D-33). The
+# `date` axis only selects the request's date_axis (finance -> event_date); it never selects another metric.
+# Ambiguous wording ("returns in September") is NOT here: it stays on the default, order_date, and the Agent adds
+# the one-line event figure. v2 keeps _AXIS_KEYWORDS_V2 untouched.
+_AXIS_KEYWORDS_V3: dict[str, list[tuple[str, str]]] = {
+    **_AXIS_KEYWORDS_V2,
+    "date": _AXIS_KEYWORDS_V2["date"] + [
+        ("processed in", "finance"), ("processed on", "finance"), ("booked in", "finance"),
+        ("happened in", "finance"), ("happened on", "finance"), ("on the day", "finance"),
+        ("by event date", "finance"), ("by the date of", "finance"), ("outcome date", "finance"),
+        ("by processing date", "finance"),
+    ],
+}
+
+
 def _log_scope(s: ScopeSummary) -> None:
     logger.warning(
         "serve-db scope '%s': %d views / %d metrics visible; hidden: %d views, "
@@ -485,6 +506,20 @@ class CatalogueService:
     def is_v2(self) -> bool:
         return self.cat.semantic_version >= 2
 
+    def _axis_keywords(self) -> dict[str, list[tuple[str, str]]]:
+        return _AXIS_KEYWORDS_V3 if self.is_v3 else _AXIS_KEYWORDS_V2
+
+    @property
+    def is_v3(self) -> bool:
+        return self.cat.semantic_version >= 3
+
+    # ---- Semantic v3 aliases ------------------------------------------------------
+    def metric_alias(self, ref: str):
+        """The v3 alias entry for *ref* (event-date family ``pnl_*`` / ``product_pnl_*``, same-measure twins), else None."""
+        if not self.is_v3:
+            return None
+        return self.cat.metric_aliases.get((ref or "").strip())
+
     # ---- Semantic v2 hard cut -----------------------------------------------------
     def retired_metric(self, ref: str):
         """The hard-cut entry for a retired v1 metric id (v2 catalogues only), else None."""
@@ -496,8 +531,11 @@ class CatalogueService:
     def retired_message(self, old: str) -> str | None:
         d = self.retired_metric(old)
         if d is None:
+            if (old or "").strip() in self.cat.metrics or (old or "").strip() in self.cat.metric_aliases:
+                return None  # a live id (kept, or a v3 alias): never "retired"
             for dep in self.cat.deprecations:  # retired without a replacement
-                if self.is_v2 and dep.old == (old or "").strip() and dep.new not in self.cat.metrics:
+                if self.is_v2 and dep.old == (old or "").strip() and dep.new not in self.cat.metrics \
+                        and dep.new not in self.cat.metric_aliases:
                     return f"Metric '{dep.old}' was retired in semantic v2 with no replacement: {dep.reason}"
             return None
         flt = ", ".join(f"{k} = {v}" for k, v in d.filters.items())
@@ -532,9 +570,11 @@ class CatalogueService:
                         concept=term.concept, metric_id=term.metric_id, axes=term.axes,
                         defaults_applied=term.defaults_applied, filter=term.filter,
                         note=term.deprecation_notice, disambiguation=term.definition,
+                        date_axis=term.date_axis,
                     )
                 return ResolvedConcept(concept="(metric)", metric_id=term.metric_id, axes={},
-                                       filter=term.filter, note=f"matched {term.matched_via}")
+                                       filter=term.filter, note=term.deprecation_notice or f"matched {term.matched_via}",
+                                       date_axis=term.date_axis)
             if isinstance(term, RetiredTerm):
                 return UnsupportedConcept(concept="(retired)", axes={}, reason=term.message,
                                           nearest_metrics=[term.replacement] if term.replacement else [])
@@ -560,6 +600,7 @@ class CatalogueService:
             )
             return UnknownConcept(text=text, suggestions=sugg)
         c = self.cat.concepts[cid]
+        asked_date = (axes or {}).get("date")  # a concept without a date axis still hears "date=finance" (v3 refusal)
         axes, unplaced = self._place_axes(c, axes)
         if unplaced:
             # Never default an axis the caller tried to set: "ad_platform=meta" was dropped
@@ -632,11 +673,21 @@ class CatalogueService:
                         nearest_metrics=self._concept_metrics(c),
                     )
                 flt[did] = val
+        date_axis = None
+        if self.is_v3 and ("date" in c.axes or asked_date):
+            on_event = (filled.get("date") if "date" in c.axes else asked_date) == "finance"
+            date_axis = "event_date" if on_event else "order_date"
+            if date_axis == "event_date" and resolved_m is not None and resolved_m.date_axis == "cohort_only":
+                return UnsupportedConcept(
+                    concept=cid, axes=filled,
+                    reason=resolved_m.date_axis_refusal or f"{metric} has no event-date meaning; use date_axis=order_date.",
+                    nearest_metrics=[metric],
+                )
         return ResolvedConcept(
             concept=cid, metric_id=metric, axes=filled,
             defaults_applied=defaults_applied, filter=flt,
             used_fallback=used_fallback, draft=draft, note=note,
-            disambiguation=c.disambiguation,
+            disambiguation=c.disambiguation, date_axis=date_axis,
         )
 
     def _match_concept(
@@ -677,7 +728,7 @@ class CatalogueService:
         # A hyphen and a space spell the same word ("break-even" / "break even", "add-to-cart" / "add to cart").
         t = f" {(text or '').strip().lower().replace('-', ' ')} "
         found: dict[str, str] = {}
-        for aname, hints in _AXIS_KEYWORDS_V2.items():
+        for aname, hints in self._axis_keywords().items():
             # Several values of one axis in a question are compared side by side, not a scope: "sales by Meta
             # campaign, Google sub-channel, organic, WhatsApp …" read channel=meta and filtered every sales query to
             # Meta (golden Q17, 2026-10-09). The axis is set only when the question names exactly one value of it.
@@ -727,7 +778,7 @@ class CatalogueService:
         # sale" (live 2026-10-08: it resolved to product_gross_roas and was labelled net ROAS).
         own: set[str] = set()
         for aname, axis in c.axes.items():
-            hints = (_AXIS_KEYWORDS_V2.get(aname, []) if v2 else []) + _AXIS_KEYWORDS.get(aname, [])
+            hints = (self._axis_keywords().get(aname, []) if v2 else []) + _AXIS_KEYWORDS.get(aname, [])
             for kw, val in hints:
                 if val in axis.values and kw.replace("-", " ") in t:
                     filled[aname] = val
@@ -762,7 +813,8 @@ class CatalogueService:
         return out
 
     def _searchable_metrics(self) -> list[MetricDef]:
-        return [m for m in self.cat.metrics.values() if m.is_queryable]
+        # a hidden-by-default diagnostic twin (platform_reported_landing_page_views, D-13r) is reachable by id only
+        return [m for m in self.cat.metrics.values() if m.is_queryable and not m.hidden_by_default]
 
     def _vocab_entries(self) -> list[tuple[str, str, str]]:
         """(normalized_form, metric_id, matched_via) for every resolvable name."""
@@ -875,7 +927,17 @@ class CatalogueService:
         extra: dict = {}
         if m.unit:
             extra["unit"] = m.unit
-        if m.id.startswith("pnl_") and m.id[4:] in self.cat.metrics:
+        if self.is_v3:
+            if m.date_axis:
+                extra["date_axis"] = m.date_axis
+            if m.date_axis_refusal:
+                extra["date_axis_refusal"] = m.date_axis_refusal
+            if m.ratio_contract:
+                extra["ratio_contract"] = m.ratio_contract
+            ids = sorted(a.id for a in self.cat.metric_aliases.values() if a.metric == m.id)
+            if ids:
+                extra["aliases"] = ids
+        elif m.id.startswith("pnl_") and m.id[4:] in self.cat.metrics:
             extra["date_basis"], extra["date_twin"] = "finance", m.id[4:]
         elif f"pnl_{m.id}" in self.cat.metrics:
             extra["date_basis"], extra["date_twin"] = "order", f"pnl_{m.id}"
@@ -1212,6 +1274,18 @@ class CatalogueService:
             suggestions=difflib.get_close_matches(norm, self._vocabulary(), n=5, cutoff=0.5),
         )
 
+    def _alias_term(self, text: str, al):
+        """A v3 alias id resolved as a term: the base metric plus the date axis the alias stands for (event_date for
+        the pnl_* / product_pnl_* family), or the reason it is refused (allocated family has no event-date meaning)."""
+        if al.refused:
+            return UnknownTerm(term=text, suggestions=[al.metric], reason=al.refused)
+        base = self.cat.metrics.get(al.metric)
+        if base is None or not base.is_queryable:
+            return UnknownTerm(term=text, suggestions=[], reason=f"{al.id}: base metric {al.metric} is not queryable")
+        on = f" on date_axis={al.date_axis}" if al.date_axis else ""
+        return ResolvedTerm(term=text, metric_id=al.metric, matched_via="metric_alias", date_axis=al.date_axis,
+                            deprecation_notice=f"'{al.id}' is an id of '{al.metric}'{on} (semantic v3).")
+
     def _resolve_term_v2(self, text: str):
         """Semantic v2: ONE resolution order shared by every entry point (resolve_term, search,
         the planner's fallback). Fuzzy matching only ever suggests.
@@ -1223,6 +1297,9 @@ class CatalogueService:
         retired = self.retired_term(raw)
         if retired is not None:
             return retired
+        al = self.metric_alias(raw) or self.metric_alias(t)
+        if al is not None:
+            return self._alias_term(text, al)
         m = self.cat.metrics.get(raw) or self.cat.metrics.get(t)
         if m is not None:
             if m.is_queryable:
@@ -1237,7 +1314,7 @@ class CatalogueService:
                     term=text, metric_id=rc.metric_id, matched_via=f"{via}:{rc.concept}",
                     filter=rc.filter, concept=rc.concept, axes=rc.axes,
                     defaults_applied=rc.defaults_applied, definition=rc.disambiguation,
-                    deprecation_notice=rc.note,
+                    deprecation_notice=rc.note, date_axis=rc.date_axis,
                 )
             if isinstance(rc, UnsupportedConcept):
                 return UnknownTerm(term=text, suggestions=rc.nearest_metrics, reason=rc.reason)
@@ -1255,6 +1332,11 @@ class CatalogueService:
         if entry is not None and entry.canonical_id in self.cat.metrics:
             return ResolvedTerm(term=text, metric_id=entry.canonical_id, matched_via=f"glossary:{t}",
                                 definition=entry.definition, filter=dict(entry.filter))
+        if entry is not None and entry.canonical_id and self.metric_alias(entry.canonical_id) is not None:
+            term = self._alias_term(text, self.metric_alias(entry.canonical_id))
+            if isinstance(term, ResolvedTerm):
+                term.matched_via, term.definition, term.filter = f"glossary:{t}", entry.definition, dict(entry.filter)
+            return term
         if entry is not None and entry.canonical_dimension_id:
             return DefinitionOnlyTerm(
                 term=text,
@@ -1589,6 +1671,10 @@ class CatalogueService:
         m = self.cat.metrics.get(raw)
         if m is not None and m.is_queryable:
             return raw, None
+        al = self.metric_alias(raw)
+        if al is not None and al.metric in self.cat.metrics and self.cat.metrics[al.metric].is_queryable:
+            on = f" on date_axis={al.date_axis}" if al.date_axis else ""
+            return al.metric, f"'{raw}' is an id of '{al.metric}'{on} (semantic v3: one metric, the date axis is a parameter)."
         # Deprecated aliases (may themselves be legacy Cube members).
         alias_target = self._alias_index.get(raw.lower())
         if alias_target and alias_target in self.cat.metrics and self.cat.metrics[alias_target].is_queryable:

@@ -25,7 +25,12 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_catalogue_v2 import CUBE_ENV, CUBE_V2_URL, OUT  # noqa: E402
+import os  # noqa: E402
+
+if os.environ.get("SELERIC_CATALOGUE_DIR", "catalogue_v2").rstrip("/").endswith("catalogue_v3"):
+    from build_catalogue_v3 import CUBE_ENV, CUBE_V3_URL as CUBE_V2_URL, OUT  # noqa: E402  (semantic v3: Cube :4003)
+else:
+    from build_catalogue_v2 import CUBE_ENV, CUBE_V2_URL, OUT  # noqa: E402
 
 _TOLERANCE = 0.05  # currency units per day: float sums of paise-level rows
 

@@ -137,6 +137,10 @@ class MetricDef(BaseModel):
     ratio_contract: str | None = None  # e.g. labelled_null_when_net_sales_nonpositive (D-31)
     hidden_by_default: bool = False  # diagnostic twin: reachable by id, never offered by search / bootstrap
     decision_ids: list[str] = Field(default_factory=list)
+    # Query-time only (never in the catalogue files): set by the planner when the metric was asked for through an
+    # alias id, so the answer keeps the asked id as a column and the alias's date axis is enforced (D-28).
+    requested_date_axis: Literal["order_date", "event_date"] | None = None
+    requested_as: str | None = None
 
 
 class MetricAlias(BaseModel):

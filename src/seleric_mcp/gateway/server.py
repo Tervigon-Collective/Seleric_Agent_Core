@@ -911,6 +911,7 @@ def build_server(settings: Settings) -> FastMCP:
         sort: list[dict] | None = None,
         limit: int | None = None,
         module: str | None = None,
+        date_axis: str | None = None,
     ) -> dict:
         """THE only path to numeric data. measures = catalogue metric ids
         (from catalogue_search_metrics), not raw cube members. Cube members
@@ -941,7 +942,16 @@ def build_server(settings: Settings) -> FastMCP:
         dimensions=[shipping_region], sort by total_sales_all_channels desc.
         Quote provenance freshness when presenting numbers. module=<id> (see
         modules_list) scopes this call to one dashboard module and refuses any
-        measure outside it; a pinned instance forces its module regardless."""
+        measure outside it; a pinned instance forces its module regardless.
+        date_axis (semantic v3 catalogue only): "order_date" (default — the
+        orders placed in the period, outcomes as of now) or "event_date" (the
+        same metric with cancels / RTO / returns on the day they happen, e.g.
+        "returns processed in September"; an Undated member is returned beside
+        the dated rows). One axis per query. Cohort-defined metrics (return /
+        cancel / RTO rate, repeat rate, LTV, net AOV, allocated product-ad
+        metrics) refuse event_date and say what to use. Ads, web and cash
+        metrics ignore it and say so. The answer names the axis applied
+        (`date_axis`, `date_axis_applied`); state it in the first line."""
         trace_id = _log_call("metrics_query", measures=measures, module=module)
         # `grain` is the natural word an agent reaches for; accept it as an alias so
         # it is never silently dropped (would return the default daily/none bucket).
@@ -981,6 +991,7 @@ def build_server(settings: Settings) -> FastMCP:
                 compare_period=compare_period,  # type: ignore[arg-type]
                 sort=[SortSpec.model_validate(s) for s in (sort or [])],
                 limit=limit,
+                date_axis=date_axis,  # type: ignore[arg-type]
             )
             result = await ctx.planner.run(request)
             await _flag_missing_filter_values(result, request)

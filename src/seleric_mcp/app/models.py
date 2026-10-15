@@ -12,6 +12,9 @@ TimePreset = Literal[
 ]
 Granularity = Literal["hour", "day", "week", "month", "none"]
 ComparePeriod = Literal["previous_period", "previous_year"]
+# Semantic v3 (D-28): ONE date-axis parameter. order_date (default) = the orders placed in the period; event_date =
+# cancels / RTO / returns on the day they happen (placement amounts and costs stay on the order date, D-37).
+DateAxis = Literal["order_date", "event_date"]
 FilterOperator = Literal[
     "equals", "notEquals", "contains", "notContains", "startsWith", "endsWith",
     "gt", "gte", "lt", "lte", "set", "notSet"
@@ -108,6 +111,9 @@ class QueryRequest(BaseModel):
     # when a time dimension with granularity is present, else unordered).
     # None = no row cap (full result set). Pass limit only for top/bottom-N.
     limit: int | None = Field(default=None, ge=1)
+    # Semantic v3 only (ignored by a v2 catalogue). None = the default axis (order_date) unless an event-date id
+    # (pnl_* / product_pnl_*) is asked, which means event_date. One axis per query: mixing is refused.
+    date_axis: DateAxis | None = None
 
 
 class PlanError(ValueError):
