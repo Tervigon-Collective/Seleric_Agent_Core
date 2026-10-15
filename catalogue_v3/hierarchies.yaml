@@ -42,6 +42,7 @@ hierarchies:
     views:
     - commerce
     - product_profit
+    - product_ads
     - funnel_orders
     - paid_media
     - paid_media_hourly
@@ -63,6 +64,7 @@ hierarchies:
     views:
     - commerce
     - product_profit
+    - product_ads
     - funnel_orders
     - paid_media
     - paid_media_hourly

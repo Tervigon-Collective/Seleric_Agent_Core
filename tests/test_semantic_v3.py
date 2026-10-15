@@ -302,3 +302,27 @@ def test_audience_slice_of_website_lpv_points_at_the_platform_twin(planner):
     with pytest.raises(PlanError) as e:
         run(planner, ["landing_page_views"], dimensions=["age"])
     assert "platform_reported_landing_page_views" in str(e.value)
+
+
+def test_v2_report_date_slice_reads_as_the_query_axis(planner, cube):
+    """No capability loss: pnl_* ids were sliced by report_date (the event clock); on v3 it is the axis of the query."""
+    cube.by_prefix["finance"] = [{"finance.net_profit": "5", "finance.event_date": "2026-09-01"}]
+    out = run(planner, ["pnl_net_profit"], dimensions=["report_date"])
+    assert "finance.event_date" in cube.queries[0]["dimensions"]
+    assert any("'report_date' read as event_date" in w for w in out["warnings"])
+
+
+def test_product_slices_of_the_v2_product_view_exist(v3):
+    for d in ("platform", "channel", "medium_group", "shipping_city", "shipping_state", "is_cod", "payment_method",
+              "payment_gateway", "is_cost_set", "price", "in_catalogue"):
+        assert "product_profit" in v3.cat.dimensions[d].views, d
+    for d in ("adset_name", "order_date", "platform", "is_cost_set"):
+        assert "product_ads" in v3.cat.dimensions[d].views, d
+
+
+def test_definition_lookup_answers_alias_and_retired_ids(v3):
+    """catalogue_get_metric on an event-date alias, a same-measure twin, and a v1 id whose replacement is an alias."""
+    for ref, base in (("pnl_net_profit", "net_profit"), ("product_gross_sale", "product_order_gross_sales"),
+                      ("cac", "channel_cac"), ("ad_channel_net_profit", "net_profit")):
+        m, notice = v3.lookup_metric(ref)
+        assert m.id == base and notice, ref

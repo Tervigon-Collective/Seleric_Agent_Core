@@ -939,6 +939,15 @@ class QueryPlanner:
                     raise PlanError(f"Metric '{m.id}' cannot be filtered by '{fid}': {m.excluded_dimensions[fid]}",
                                     suggestions=self.catalogue.grain_twins(m.id))
         dimension_warnings: list[str] = []
+        if self.catalogue.is_v3 and request.date_axis:
+            # v2 ids sliced by `report_date` on the P&L (Finance's event-date clock) or the unit-economics day: a v3
+            # P&L view has one time dimension per axis, so `report_date` reads as the axis this query runs on.
+            rd = self.catalogue.cat.dimensions.get("report_date")
+            if rd is not None and view not in rd.views and any(m.date_axis_dimensions for m in metrics) \
+                    and "report_date" in request.dimensions:
+                request = request.model_copy(update={"dimensions": [
+                    request.date_axis if d == "report_date" else d for d in request.dimensions]})
+                dimension_warnings.append(f"'report_date' read as {request.date_axis}, the date axis of this query.")
         qualified_dims = self._validate_dimensions(metrics, request.dimensions, dimension_warnings)
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)
         filter_warnings = [*dimension_warnings, *filter_warnings]

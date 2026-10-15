@@ -169,8 +169,10 @@ DIM_RENAME = {("commerce", "event_type"): "order_event_type",  # same member nam
               ("finance", "row_type"): "order_pnl_row_type",  # kept apart for stable ids (orders | ad_spend)
               ("product_ads", "row_type"): "allocation_row_type",  # allocated | unallocated
               ("paid_media", "row_type"): "paid_media_row_type",
-              ("paid_media_hourly", "row_type"): "paid_media_row_type",
-              ("web_event_detail", "event_date"): "web_event_date"}  # the web event's day; finance/commerce event_date = outcome date (D-29)
+              ("paid_media_hourly", "row_type"): "paid_media_row_type"}
+# One dimension id may mean a different clock per view (like order_date / report_date already do): say so.
+DIM_DESC = {"event_date": "Event date. Finance, commerce and product P&L views: the day a cancel / RTO / return is booked (D-29); NULL = "
+                          "the Undated member (D-32). Web event detail: the day of the web event (its own clock)."}
 # Conformed dimension families: members that carry the SAME value vocabulary on different views (checked live
 # 2026-10-08: ad_platform / finance_channel / platform agree on meta + google, acquisition_platform uses the traffic
 # platform labels, acquisition_campaign holds campaign names). A filter / breakdown on one member is answered on a
@@ -510,6 +512,8 @@ def main() -> int:
                 entry["allowed_values"] = old["allowed_values"]
         if did in ALLOWED:
             entry["allowed_values"] = ALLOWED[did]
+        if did in DIM_DESC:
+            entry["description"] = DIM_DESC[did]
         if did in DIM_VALID_FOR:
             entry["valid_for"] = DIM_VALID_FOR[did]
         if did in DIM_NOTES:

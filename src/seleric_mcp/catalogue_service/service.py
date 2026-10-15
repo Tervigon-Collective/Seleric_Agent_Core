@@ -1001,7 +1001,8 @@ class CatalogueService:
         """Queryable resolve, or exact id including draft/broken (for get_metric)."""
         retired = self.retired_metric(metric_id)
         if retired is not None:
-            return self.cat.metrics[retired.new], self.retired_message(metric_id)
+            al = self.cat.metric_aliases.get(retired.new)  # v3: the replacement may be an alias id (pnl_*)
+            return self.cat.metrics[al.metric if al else retired.new], self.retired_message(metric_id)
         resolved = self.resolve_metric_id(metric_id)
         if resolved is not None:
             mid, notice = resolved

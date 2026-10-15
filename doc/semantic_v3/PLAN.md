@@ -319,7 +319,9 @@ Rig: Cube v3 on :4003 (`seleric-cube-v3-test`), `SELERIC_CATALOGUE_DIR=catalogue
 - [x] **Prompts:** the v3 date-axis rules are appended to the standing prompts only when the loaded catalogue is v3 (`DATE_AXIS_GUIDE_V3`).
 - [x] **Gates:** `validate_catalogue.py` 213/213 (its ratio-component check now resolves ids to members; v2 passes too), `v2_gates.py --live` PASS ×6 on v3 (+ `catalogue_v3_src/duplicate_number_waivers.yaml`: 38 reviewed cross-view twins), `verify_compositions.py` 15/15, `smoke_cube.py` loads. `tests/test_semantic_v3.py` 38/38; the full non-live suite (`python -m pytest -m "not live"`) has 9 failures, the same 9 at the commit before this work (stale v2 counts, missing `cube/model` files); 478 pass.
 - [x] Compose: `catalogue_v3` and `catalogue_v3_src` are mounted in the `mcp` service; the cutover is an env flip.
-- [ ] Open with the owner (Phase 5 gaps found while mapping ids): (a) `is_cost_set` (v2 product dimension, "line has a unit cost") has no v3 home — `mart_product_profit` would need `cost_status` (a view change, owner OK); (b) **breakdown bindings of landing page views** (age / gender / placement slice) are not available as a website figure; today the refusal points at the platform twin.
+- [x] No-loss slicing diff (v2 supported dimensions of all 233 ids vs v3): product-grain slices restored (owner OK, `mart_product_profit` / `mart_product_ad_profit` extended and applied 2026-10-16, contract PRODUCT-DIMS-EXT), adset / order_date on the allocated family, `report_date` reads as the query axis.
+- [ ] Open with the owner: **audience-sliced landing page views** (age / gender / placement / device). The website cannot be sliced that way (only publisher level); investigation in PROGRESS (website +42 % vs Meta, daily correlation 0.975). Today: refusal naming `platform_reported_landing_page_views`.
+- [ ] `semantic-v3` is 4 commits behind `main` in Seleric_Agent_Core: merge before the cutover.
 - [ ] Dataset contracts in `catalogue_v3_src/datasets.yaml` are a copy of v2's, not yet re-certified (`certify_datasets.py` → Phase 7).
 
 ### Phase 7 — Capability and number certification (the cutover gate)

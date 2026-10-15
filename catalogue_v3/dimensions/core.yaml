@@ -178,6 +178,7 @@ dimensions:
   views:
     commerce: commerce.adset_id
     product_profit: product_profit.adset_id
+    product_ads: product_ads.adset_id
     funnel_orders: funnel_orders.adset_id
     paid_media: paid_media.adset_id
     paid_media_hourly: paid_media_hourly.adset_id
@@ -199,6 +200,7 @@ dimensions:
   views:
     commerce: commerce.adset_name
     product_profit: product_profit.adset_name
+    product_ads: product_ads.adset_name
     funnel_orders: funnel_orders.adset_name
     paid_media: paid_media.adset_name
     paid_media_hourly: paid_media_hourly.adset_name
@@ -221,6 +223,7 @@ dimensions:
   views:
     commerce: commerce.adset_status
     product_profit: product_profit.adset_status
+    product_ads: product_ads.adset_status
     funnel_orders: funnel_orders.adset_status
     paid_media: paid_media.adset_status
     paid_media_hourly: paid_media_hourly.adset_status
@@ -533,6 +536,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.channel
+    product_profit: product_profit.channel
+    product_ads: product_ads.channel
     funnel_orders: funnel_orders.channel
     web_sessions: web_sessions.channel
     web_funnel: web_funnel.channel
@@ -679,12 +684,13 @@ dimensions:
   aliases: []
 - id: event_date
   display_name: Event Date
-  description: 'Event date axis (IST): when the cancel / RTO / return happened; placements on the order date (D-29,
-    D-37). NULL = Undated (D-32). Use instead of order_date, never together.'
+  description: 'Event date. Finance, commerce and product P&L views: the day a cancel / RTO / return is booked (D-29);
+    NULL = the Undated member (D-32). Web event detail: the day of the web event (its own clock).'
   is_time: true
   views:
     commerce: commerce.event_date
     product_profit: product_profit.event_date
+    web_event_detail: web_event_detail.event_date
     finance: finance.event_date
   aliases: []
 - id: event_date_source
@@ -882,6 +888,7 @@ dimensions:
   is_time: false
   views:
     product_profit: product_profit.in_catalogue
+    product_ads: product_ads.in_catalogue
   aliases: []
 - id: is_bounce
   display_name: Is Bounce
@@ -903,6 +910,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.is_cod
+    product_profit: product_profit.is_cod
+    product_ads: product_ads.is_cod
     returns: returns.is_cod
     payments: payments.is_cod
   aliases: []
@@ -912,6 +921,15 @@ dimensions:
   is_time: false
   views:
     web_sessions: web_sessions.is_converted
+  aliases: []
+- id: is_cost_set
+  display_name: Is Cost Set
+  description: The order line has a unit cost (final or provisional); false = product cost missing (cost_status
+    missing, L-09).
+  is_time: false
+  views:
+    product_profit: product_profit.is_cost_set
+    product_ads: product_ads.is_cost_set
   aliases: []
 - id: is_first_order
   display_name: Is First Order
@@ -1075,6 +1093,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.medium_group
+    product_profit: product_profit.medium_group
+    product_ads: product_ads.medium_group
     funnel_orders: funnel_orders.medium_group
     web_sessions: web_sessions.medium_group
     web_funnel: web_funnel.medium_group
@@ -1121,6 +1141,7 @@ dimensions:
   views:
     commerce: commerce.order_date
     product_profit: product_profit.order_date
+    product_ads: product_ads.order_date
     funnel_orders: funnel_orders.order_date
     attribution: attribution.order_date
     attribution_paths: attribution_paths.order_date
@@ -1270,6 +1291,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.payment_gateway
+    product_profit: product_profit.payment_gateway
+    product_ads: product_ads.payment_gateway
     payments: payments.payment_gateway
   aliases: []
 - id: payment_method
@@ -1278,6 +1301,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.payment_method
+    product_profit: product_profit.payment_method
+    product_ads: product_ads.payment_method
     payments: payments.payment_method
   aliases: []
 - id: platform
@@ -1286,6 +1311,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.platform
+    product_profit: product_profit.platform
+    product_ads: product_ads.platform
     funnel_orders: funnel_orders.platform
     paid_media: paid_media.platform
     paid_media_hourly: paid_media_hourly.platform
@@ -1321,6 +1348,7 @@ dimensions:
   is_time: false
   views:
     product_profit: product_profit.price
+    product_ads: product_ads.price
   aliases: []
 - id: product_id
   display_name: Product Id
@@ -1460,6 +1488,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.shipping_city
+    product_profit: product_profit.shipping_city
+    product_ads: product_ads.shipping_city
   aliases:
   - city
   - ship city
@@ -1514,6 +1544,8 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.shipping_state
+    product_profit: product_profit.shipping_state
+    product_ads: product_ads.shipping_state
   aliases:
   - region
   - state
@@ -1687,10 +1719,3 @@ dimensions:
   aliases: []
   family: sku
   family_rank: 2
-- id: web_event_date
-  display_name: Event Date
-  description: Event date (IST).
-  is_time: true
-  views:
-    web_event_detail: web_event_detail.event_date
-  aliases: []

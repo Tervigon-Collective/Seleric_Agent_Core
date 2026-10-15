@@ -55,7 +55,7 @@ _GOVERNED_HINT = re.compile(
     r"\b(MEASURE\s*\(|commerce|orders|pnl_daily|channel_pnl|order_pnl|attribution|"
     r"paid_media|ad_delivery|ad_breakdowns|ad_changes|meta_|google_|amazon_|"
     r"customer|payments|product|refund|web|session|touchpoint|neurohack|traffic|"
-    r"finance|serve\.|gold\.)\b",
+    r"finance|product_profit|product_ads|returns|serve\.|gold\.)\b",
     re.IGNORECASE,
 )
 
