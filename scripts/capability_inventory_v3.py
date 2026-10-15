@@ -333,7 +333,7 @@ PLACEMENT_OTHER = {"customers", "repeat_customers", "cod_orders", "prepaid_order
 SWITCHABLE = {
     "net_sales", "order_pnl_net_sales", "net_sales_deductions", "cancel_revenue", "order_pnl_cancel_revenue", "return_revenue",
     "order_pnl_return_revenue", "return_cancel_revenue", "cancelled_orders", "returned_orders", "returned_or_cancelled_orders",
-    "channel_returned_orders", "refund_amount", "net_cogs", "product_cost", "rto_cost", "operating_cost",
+    "channel_returned_orders", "net_cogs", "product_cost", "rto_cost", "operating_cost",
     "taxes_on_net_sales", "contribution_margin", "net_profit", "units_sold", "returned_units",
     "product_order_net_sales", "product_order_cancel_revenue", "product_order_return_revenue", "product_order_returned_orders",
     "product_order_net_cogs", "product_order_product_cost", "product_rto_cost", "product_operating_cost",
@@ -347,7 +347,7 @@ SWITCHABLE = {
 LABELLED_RATIOS = {"net_roas", "mer", "be_roas", "contribution_margin_pct", "net_margin_pct", "product_gross_margin_pct",
                    "product_contribution_margin_pct"}
 # cohort-only: a rate whose numerator and denominator are a cohort (D-31) — refused on the event axis
-COHORT_RATES = {"return_rate", "product_return_rate", "unit_return_rate", "repeat_rate", "ltv", "new_customer_ltv"}
+COHORT_RATES = {"return_rate", "product_return_rate", "unit_return_rate", "repeat_rate", "ltv", "new_customer_ltv", "refund_amount"}   # refund_amount: gold refund booking of the cohort, no event date
 # not listed in D-31: the D-31 principle (a ratio needs one clock) gives the class; owner confirmed 2026-10-15 (Phase 4.5 checkpoint)
 PROPOSED_BY_RULE = {"net_aov": "net sales (outcome clock) over orders (placement clock)",
                     "ltv_cac_ratio": "LTV is a cohort measure (D-31)",
@@ -389,7 +389,7 @@ def axis_class(mid: str, view: str) -> dict:
     if mid in NATIVE_IDS or view in NATIVE_VIEWS:
         return {"date_axis": "native", "note_axis": "ignores date_axis: native clock (D-36)"}
     if mid in COHORT_RATES:
-        return {"date_axis": "cohort_only", "refusal": "cohort-defined rate (D-31): " + POINTER}
+        return {"date_axis": "cohort_only", "refusal": "cohort-defined measure (D-31): " + POINTER}
     if mid in PROPOSED_BY_RULE:
         return {"date_axis": "cohort_only", "refusal": f"mixed clocks, D-31 principle: {PROPOSED_BY_RULE[mid]}; " + POINTER,
                 "owner_confirmed": "2026-10-15 (Phase 4.5 checkpoint, D-31 principle)"}
