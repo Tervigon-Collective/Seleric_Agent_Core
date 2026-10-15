@@ -128,6 +128,26 @@ class MetricDef(BaseModel):
     valid_for_reason: str | None = None
     unavailable_reason: str | None = None  # why a broken metric cannot be answered
     replaces: list[str] = Field(default_factory=list)  # retired v1 ids that map here
+    # --- semantic v3 (catalogue_v3/, semantic_version >= 3): one metric, a date_axis request parameter (D-28) ---
+    # switchable: order_date | event_date change the number; placement_only: identical on both; native: its own
+    # clock, the parameter is ignored (and says so, D-36); cohort_only: event_date is refused (D-31 / D-34).
+    date_axis: Literal["switchable", "placement_only", "native", "cohort_only"] | None = None
+    date_axis_dimensions: dict[str, str] = Field(default_factory=dict)  # axis -> view time dimension
+    date_axis_refusal: str | None = None  # why / what to use instead, for a cohort_only metric on event_date
+    ratio_contract: str | None = None  # e.g. labelled_null_when_net_sales_nonpositive (D-31)
+    hidden_by_default: bool = False  # diagnostic twin: reachable by id, never offered by search / bootstrap
+    decision_ids: list[str] = Field(default_factory=list)
+
+
+class MetricAlias(BaseModel):
+    """Semantic v3: an id that answers through a base metric. ``date_axis`` set (event_date) = the event-date
+    family (``pnl_*`` / ``product_pnl_*``, D-28): the base metric on that axis, same number. ``date_axis`` unset =
+    a same-measure twin (the id is kept, nothing is removed). ``refused`` = answering is refused with this text."""
+    id: str
+    metric: str
+    date_axis: Literal["order_date", "event_date"] | None = None
+    refused: str | None = None
+    reason: str = ""
 
 
 class HierarchyDef(BaseModel):
@@ -414,6 +434,8 @@ class Catalogue(BaseModel):
     # v2 hard cut: retired metric id -> its replacement (from deprecations whose `new`
     # is a current metric id). Old ids are rejected, never silently mapped.
     retired: dict[str, Deprecation] = Field(default_factory=dict)
+    # Semantic v3: ids that answer through a base metric (event-date family, same-measure twins).
+    metric_aliases: dict[str, MetricAlias] = Field(default_factory=dict)
 
 
 def _read_yaml(path: Path) -> dict:
@@ -547,6 +569,13 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
             spec["id"] = hid
             hierarchies[hid] = HierarchyDef.model_validate(spec)
 
+    metric_aliases: dict[str, MetricAlias] = {}
+    metric_aliases_path = catalogue_dir / "metric_aliases.yaml"
+    if metric_aliases_path.exists():
+        for raw in _read_yaml(metric_aliases_path).get("metric_aliases") or []:
+            a = MetricAlias.model_validate(raw)
+            metric_aliases[a.id] = a
+
     channel_map: list[ChannelMapEntry] = []
     channel_map_path = catalogue_dir / "dimensions" / "channel_map.yaml"
     if channel_map_path.exists():
@@ -602,10 +631,12 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         hierarchies=hierarchies,
         retired=(
             # An id kept with a new meaning (e.g. return_revenue, now order-date) is a
-            # live metric, not a retired one.
-            {d.old: d for d in deprecations if d.new in metrics and d.old not in metrics}
+            # live metric, not a retired one. A v3 alias id is a live answer too (the replacement may be one).
+            {d.old: d for d in deprecations
+             if (d.new in metrics or d.new in metric_aliases) and d.old not in metrics and d.old not in metric_aliases}
             if semantic_version >= 2 else {}
         ),
+        metric_aliases=metric_aliases,
     )
     _check_integrity(cat)
     return cat
@@ -838,11 +869,13 @@ def _check_integrity(cat: Catalogue) -> None:
 
     if cat.semantic_version >= 2:
         problems.extend(_check_integrity_v2(cat))
+    if cat.semantic_version >= 3:
+        problems.extend(_check_integrity_v3(cat))
 
     # Glossary terms are indexed case-insensitively — conflicting targets confuse agents.
     gloss_by_norm: dict[str, tuple[str, str | None]] = {}
     for t in cat.glossary:
-        if t.canonical_id is not None and t.canonical_id not in cat.metrics:
+        if t.canonical_id is not None and t.canonical_id not in cat.metrics and t.canonical_id not in cat.metric_aliases:
             problems.append(f"glossary term '{t.term}': unknown canonical_id {t.canonical_id}")
         if t.canonical_dimension_id is not None and t.canonical_dimension_id not in cat.dimensions:
             problems.append(
@@ -1013,13 +1046,14 @@ def _check_integrity_v2(cat: Catalogue) -> list[str]:
             if old in cat.metrics and old != m.id:
                 problems.append(f"metric {m.id}: replaces {old}, which is still a live metric id")
     for old, d in cat.retired.items():
-        new = cat.metrics[d.new]
+        new = cat.metrics[cat.metric_aliases[d.new].metric if d.new in cat.metric_aliases else d.new]
         for did in d.filters:
             if not on_view(did, new.cube_mapping.view):
                 problems.append(f"retired {old}: filter {did} not on view {new.cube_mapping.view}")
     for t in cat.glossary:
-        if t.filter and t.canonical_id in cat.metrics:
-            view = cat.metrics[t.canonical_id].cube_mapping.view
+        if t.filter and (t.canonical_id in cat.metrics or t.canonical_id in cat.metric_aliases):
+            view = cat.metrics[cat.metric_aliases[t.canonical_id].metric if t.canonical_id in cat.metric_aliases
+                               else t.canonical_id].cube_mapping.view
             for did in t.filter:
                 if not on_view(did, view):
                     problems.append(f"glossary term '{t.term}': filter {did} not on view {view}")
@@ -1048,6 +1082,41 @@ def _check_integrity_v2(cat: Catalogue) -> list[str]:
             missing = [lvl for lvl in h.levels if not on_view(lvl, view)]
             if view not in cat.views or missing:
                 problems.append(f"hierarchy {h.id}: view {view} lacks levels {missing}")
+    return problems
+
+
+def _check_integrity_v3(cat: Catalogue) -> list[str]:
+    """Semantic v3: every metric declares its date axis, an alias points at a real metric that can carry the
+    axis it asks for, and nothing is both a metric and an alias."""
+    problems: list[str] = []
+    for m in cat.metrics.values():
+        view = m.cube_mapping.view
+        if m.date_axis is None:
+            problems.append(f"metric {m.id}: v3 metrics must declare date_axis")
+        elif m.date_axis in ("switchable", "placement_only") and m.date_axis_dimensions:
+            if set(m.date_axis_dimensions) != {"order_date", "event_date"}:
+                problems.append(f"metric {m.id}: date_axis_dimensions must be order_date + event_date")
+            for axis, td in m.date_axis_dimensions.items():
+                if not td.startswith(f"{view}."):
+                    problems.append(f"metric {m.id}: date axis {axis} dimension {td} not on view {view}")
+        elif m.date_axis == "switchable":
+            problems.append(f"metric {m.id}: switchable without date_axis_dimensions")
+        if m.date_axis == "cohort_only" and not m.date_axis_refusal:
+            problems.append(f"metric {m.id}: cohort_only without date_axis_refusal")
+    for a in cat.metric_aliases.values():
+        if a.id in cat.metrics:
+            problems.append(f"alias {a.id}: is also a metric id")
+        base = cat.metrics.get(a.metric)
+        if base is None:
+            problems.append(f"alias {a.id}: unknown base metric {a.metric}")
+            continue
+        # an event-date alias of a native metric (ad spend) answers on the native clock, labelled; a cohort-only base
+        # (the allocated product-ad family) has no event-date meaning and must say so
+        if a.date_axis == "event_date" and not a.refused and base.date_axis == "cohort_only":
+            problems.append(f"alias {a.id}: event_date alias of cohort-only {a.metric} must be refused")
+        if a.date_axis == "event_date" and not a.refused and base.date_axis in ("switchable", "placement_only") \
+                and not base.date_axis_dimensions:
+            problems.append(f"alias {a.id}: base {a.metric} has no event_date dimension")
     return problems
 
 
