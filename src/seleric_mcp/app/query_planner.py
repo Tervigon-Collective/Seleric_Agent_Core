@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 from ..catalogue_service.loader import CubeMapping, DimensionDef, MetricDef
 from ..catalogue_service.service import CatalogueService
 from ..dataset_contracts import load_dataset_contracts, get_contract_for_view, get_binding_grain
-from ..semantic_layer.cube_client import CubeClient
+from ..semantic_layer.cube_client import CubeClient, CubeRefused
 from .models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from .provenance import build_provenance
 from .result_store import ResultStore, StoredResult
@@ -939,15 +939,22 @@ class QueryPlanner:
                     raise PlanError(f"Metric '{m.id}' cannot be filtered by '{fid}': {m.excluded_dimensions[fid]}",
                                     suggestions=self.catalogue.grain_twins(m.id))
         dimension_warnings: list[str] = []
-        if self.catalogue.is_v3 and request.date_axis:
+        if self.catalogue.is_v3 and "report_date" in request.dimensions:
             # v2 ids sliced by `report_date` on the P&L (Finance's event-date clock) or the unit-economics day: a v3
-            # P&L view has one time dimension per axis, so `report_date` reads as the axis this query runs on.
+            # P&L view has one time dimension per axis, so `report_date` reads as the axis this query runs on. A
+            # cohort-only or native metric has no axis switch: it reads as the view's own day (order_date).
             rd = self.catalogue.cat.dimensions.get("report_date")
-            if rd is not None and view not in rd.views and any(m.date_axis_dimensions for m in metrics) \
-                    and "report_date" in request.dimensions:
-                request = request.model_copy(update={"dimensions": [
-                    request.date_axis if d == "report_date" else d for d in request.dimensions]})
-                dimension_warnings.append(f"'report_date' read as {request.date_axis}, the date axis of this query.")
+            if rd is not None and view not in rd.views:
+                day = None
+                if request.date_axis and any(m.date_axis_dimensions for m in metrics):
+                    day = request.date_axis
+                else:
+                    od = self.catalogue.cat.dimensions.get("order_date")
+                    day = "order_date" if od is not None and view in od.views else None
+                if day:
+                    request = request.model_copy(update={"dimensions": [
+                        day if d == "report_date" else d for d in request.dimensions]})
+                    dimension_warnings.append(f"'report_date' read as {day}, the date of this query.")
         qualified_dims = self._validate_dimensions(metrics, request.dimensions, dimension_warnings)
         cube_filters, filter_warnings = self._validate_filters(view, request.filters)
         filter_warnings = [*dimension_warnings, *filter_warnings]
@@ -1002,9 +1009,11 @@ class QueryPlanner:
             else:
                 current_res = await self.cube.load(cube_query)
                 compare_res = None
-        except BaseException:
+        except BaseException as exc:
             if lineage is not None:
                 lineage.cancel()
+            if isinstance(exc, CubeRefused):  # a deliberate Cube v3 refusal is an answer, not a failure
+                raise PlanError(exc.reason) from None
             raise
 
         undated = None

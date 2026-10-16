@@ -326,3 +326,36 @@ def test_definition_lookup_answers_alias_and_retired_ids(v3):
                       ("cac", "channel_cac"), ("ad_channel_net_profit", "net_profit")):
         m, notice = v3.lookup_metric(ref)
         assert m.id == base and notice, ref
+
+
+def test_cube_refusal_is_a_plan_error_not_a_crash(planner, cube):
+    """A Cube v3 `REFUSED:` (spend-only brand, axis mixing ...) reaches the caller as a PlanError with the user text."""
+    from seleric_mcp.semantic_layer.cube_client import CubeRefused, _refusal_reason
+
+    body = '{"error":"Error: REFUSED: finance.net_profit for a spend-only brand (brand 28). Ask for ad spend."}'
+    assert _refusal_reason("Cube load failed: 500 — " + body) == "finance.net_profit for a spend-only brand (brand 28). Ask for ad spend."
+    assert _refusal_reason("Cube load failed: 500 — plain failure") is None
+
+    async def refuse(query):
+        raise CubeRefused("finance.net_profit for a spend-only brand (brand 28). Ask for ad spend.")
+
+    cube.load = refuse
+    with pytest.raises(PlanError, match="spend-only brand"):
+        run(planner, ["net_profit"])
+
+
+def test_every_v2_dimension_id_resolves_to_itself(v3):
+    """No dimension changes meaning silently: each v2 dimension id resolves to the same id in v3 (the v2 P&L
+    `row_type` once resolved to `allocation_row_type` through the shared display name)."""
+    from seleric_mcp.catalogue_service.service import CatalogueService as S
+
+    v2 = S(load_catalogue(V2_DIR))
+    moved = {d: (v3.resolve_dimension(d).id if v3.resolve_dimension(d) else None) for d in v2.cat.dimensions}
+    assert {d: r for d, r in moved.items() if r != d} == {"row_type": "order_pnl_row_type"}
+
+
+def test_report_date_on_a_cohort_only_metric_reads_as_order_date(planner, cube):
+    cube.by_prefix["finance"] = [{"finance.ltv": "5", "finance.order_date": "2026-09-01"}]
+    out = run(planner, ["ltv"], dimensions=["report_date"])
+    assert "finance.order_date" in cube.queries[0]["dimensions"]
+    assert any("'report_date' read as order_date" in w for w in out["warnings"])

@@ -247,7 +247,7 @@ dimensions:
     paid_media_breakdowns: paid_media_breakdowns.age
   aliases: []
 - id: allocation_row_type
-  display_name: Row Type
+  display_name: Allocation row type
   description: allocated (a credited sale line) | unallocated (campaign-day spend with no credited line, D-19o).
   is_time: false
   views:
@@ -1182,12 +1182,13 @@ dimensions:
     payments: payments.order_outcome
   aliases: []
 - id: order_pnl_row_type
-  display_name: Row Type
+  display_name: P&L row type
   description: orders (the ledger's P&L rows) | ad_spend (delivery rows).
   is_time: false
   views:
     finance: finance.row_type
-  aliases: []
+  aliases:
+  - row_type
   allowed_values:
   - orders
   - ad_spend
@@ -1247,7 +1248,7 @@ dimensions:
     web_event_detail: web_event_detail.page_path
   aliases: []
 - id: paid_media_row_type
-  display_name: Row Type
+  display_name: Paid media row type
   description: delivery (platform delivery rows) | web_lpv (website landing-page-view rows, D-17).
   is_time: false
   views:

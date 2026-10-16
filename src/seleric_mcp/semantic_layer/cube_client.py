@@ -27,6 +27,24 @@ class CubeError(RuntimeError):
     pass
 
 
+class CubeRefused(CubeError):
+    """Cube v3 refused the query on purpose (axis mixing, cohort-only on event_date, spend-only brand, hourly
+    coverage). A business answer, not a failure: `reason` is the text meant for the user."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+def _refusal_reason(text: str) -> str | None:
+    """The text after `REFUSED:` in a Cube error body (a JSON {"error": "Error: REFUSED: ..."} or plain text)."""
+    i = text.find("REFUSED:")
+    if i < 0:
+        return None
+    reason = text[i + len("REFUSED:"):].strip()
+    return reason.split('"}')[0].strip() or None
+
+
 class CubeResult:
     def __init__(self, data: list[dict], raw: dict):
         self.data = data
@@ -72,6 +90,9 @@ class CubeClient:
                 headers=self._auth_headers(),
             )
             if resp.status_code != 200:
+                refused = _refusal_reason(resp.text)
+                if refused:
+                    raise CubeRefused(refused)
                 raise CubeError(f"Cube load failed: {resp.status_code} — {resp.text[:300]}")
             body = resp.json()
             # Cube returns {"error": "Continue wait"} while a query is still building.

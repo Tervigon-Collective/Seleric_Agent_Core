@@ -170,6 +170,11 @@ DIM_RENAME = {("commerce", "event_type"): "order_event_type",  # same member nam
               ("product_ads", "row_type"): "allocation_row_type",  # allocated | unallocated
               ("paid_media", "row_type"): "paid_media_row_type",
               ("paid_media_hourly", "row_type"): "paid_media_row_type"}
+# Three dimensions come from a Cube member called row_type; one shared display name made the v2 id `row_type` (the P&L
+# view's, orders | ad_spend) resolve to the allocation dimension (found by capability_check_v3.py, Phase 7).
+DIM_DISPLAY = {"order_pnl_row_type": "P&L row type", "allocation_row_type": "Allocation row type",
+               "paid_media_row_type": "Paid media row type"}
+DIM_V2_ALIAS = {"order_pnl_row_type": ["row_type"]}  # the v2 dimension id that now lives under another id
 # One dimension id may mean a different clock per view (like order_date / report_date already do): say so.
 DIM_DESC = {"event_date": "Event date. Finance, commerce and product P&L views: the day a cancel / RTO / return is booked (D-29); NULL = "
                           "the Undated member (D-32). Web event detail: the day of the web event (its own clock)."}
@@ -484,6 +489,12 @@ def main() -> int:
                                           "description": " ".join((d.get("description") or "").split()),
                                           "is_time": d["type"] == "time", "views": {}, "aliases": []})
             entry["views"][vname] = member
+    for did, label in DIM_DISPLAY.items():
+        if did in dims:
+            dims[did]["display_name"] = label
+    for did, names in DIM_V2_ALIAS.items():
+        if did in dims:
+            dims[did]["aliases"] = sorted({*dims[did]["aliases"], *names})
     for vname, vm in views_meta.items():
         by_source: dict[str, list[str]] = {}
         for d in vm["dimensions"]:
