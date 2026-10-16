@@ -347,6 +347,9 @@ _PMAX = ("Google Performance Max (about 74 % of Google spend) has no ad group / 
 DIM_NOTES = {
     **{d: _PMAX for d in ("adset_id", "adset_name", "adset_status", "ad_id", "ad_name", "ad_status", "ad_format", "creative_type", "ad_key")},
     "campaign_key": "Paid website sessions without a campaign id roll up as the explicit member 'campaign unknown' (Google ~29 % of sessions, L-02).",
+    "payment_bucket": ("Since Sep 2026 most orders carry the gateway / method literally 'manual' (brand 20 Sep 2026: 864 of 931 sale orders); "
+                       "only COD and named online gateways are classified, so the 'manual' member is unclassified, not a payment type, and "
+                       "cod vs online shares are understated for that period (L-35, D-41)."),
 }
 # Names a new v3 measure may not take because a v2 id already means something else on another view.
 NEW_ID_PREFIX = {"finance": "order_pnl_", "product_profit": "product_order_"}

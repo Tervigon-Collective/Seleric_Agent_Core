@@ -1337,3 +1337,41 @@ decisions:
   tests:
   - tests/test_semantic_v3.py
   - capability_check_v3.py dims layer
+- id: D-41
+  title: 'Payment bucket manual: label it, fix upstream'
+  status: implemented
+  phase: 6
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner): keep the classification rule as built; the `manual` payment-bucket member is labelled unclassified (not a payment type) with a coverage note on every payment_bucket slice; the checkout-app data issue is raised upstream. No ledger or serve change; COD vs prepaid shares for Sep 2026 are understated and say so.'
+  options: 'label it, fix upstream / infer prepaid / leave as is'
+  evidence: 'Brand 20 Sep 2026: 864 of 931 sale orders have gateway/method literally manual; 51 COD and 13 online are classified (v2 showed 122 prepaid, 108 of them exchange replacements).'
+  implemented_in:
+  - '(no code change in mage-ai: coverage note on payment_bucket in agent-core scripts/build_catalogue_v3.py DIM_NOTES, regenerated catalogue_v3/dimensions/core.yaml)'
+  tests:
+  - tests/test_semantic_v3.py
+- id: D-42
+  title: 'No Cube pre-aggregations (no write path)'
+  status: process
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner): stay without Cube pre-aggregations; no separate write login or schema in ClickHouse. Heavy queries run 0.3-3.4 s on brand 20 without them. Revisit only if latency or load grows after cutover.'
+  options: 'no, stay without / yes later if load requires / yes, set it up'
+  evidence: 'finance daily 12 months 3.4 s; campaign / product / commerce / paid-media slices 0.3-0.5 s; the first pre-aggregation attempt was refused by the read-only serving login.'
+- id: D-43
+  title: 'First monthly close: August 2026'
+  status: implemented
+  phase: 4
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner): lock August 2026 now. Applied 2026-10-16 with `close_month.py --month 2026-08 --apply` (5,460 rows: brand 20 4,967, brand 28 493; cohort contribution before ads 14,56,716.78, event 13,27,267.81; restatement check 0). The recurring schedule is NOT installed yet: close_month.py exists only on this branch (the production cron checkouts are /opt/seleric/mage-ai on main) and the lock timing for a maturing month is an open question (see L-27).'
+  options: 'lock Aug 2026 now / wait for Sep (mid-Nov) / decide at cutover'
+  evidence: 'Aug 2026 cohort is past the 45-day maturity window (D-12a) since 2026-10-15; dry run listed the rows; --restatements: 1 locked month, 0 restated brand-months.'
+  implemented_in:
+  - '(no code change: serve/semantic_v3/close_month.py run as built, D-12, D-12b)'
+  tests:
+  - AXIS-CLOSE
+- id: D-44
+  title: 'Certification scope is brand 20; no low-volume flag on brands 24-27'
+  status: process
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner: "no action on other brands, only brand 20 data"): brands 24-27 get no refusal and no low-volume flag; v3 is certified on brand 20 only. Brand 28 keeps its spend-only refusal (L-16).'
+  options: 'answer + low-volume caveat / refuse profit, ROAS, AOV / no change'
+  evidence: 'Brands 24-27 have 1-32 orders each; v2 gave them no caveat.'

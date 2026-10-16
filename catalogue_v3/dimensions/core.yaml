@@ -1283,6 +1283,9 @@ dimensions:
   - cod
   - paytm card machine
   - manual
+  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
+    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
+    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
 - id: payment_class
   display_name: Payment Class
   description: cash | exchange_credit (non-cash credit on an exchange replacement, D-01b) | void.

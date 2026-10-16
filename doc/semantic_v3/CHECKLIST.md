@@ -36,8 +36,8 @@ Where the work is:
 - [x] Owner reviewed outcome counts and samples (Q4) → D-22a–e. Later added D-22f/g.
 - [x] Before and after the apply, existing serve views are unchanged (fingerprints).
 - [x] **D-22f / D-22g** applied to production 2026-10-14: 52 orders cancelled (`refund_without_return_all_lines`), 15 lines cancelled, 2 lines returned. Contracts 15/15 live.
-- [ ] Attribution keys on `fct_order` (default model `last_non_direct`). Moved to Phase 3.
-- [ ] Cube login (`cube_serve`) read check of the new views. Not run: the owner declined the credential command. Covered in Phase 5.
+- [x] Attribution keys on `fct_order` (default model `last_non_direct`). Done in Phase 3 (`serve.bridge_order_attribution`, FIN-15).
+- [x] Cube login (`cube_serve`) read check of the new views. Covered in Phase 5: the :4003 rig runs as `cube_serve` on database `serve`; smoke 764/764 reads every measure and dimension through it.
 
 ## Phase 2 — Component ledger · DONE · applied to production · contracts 27/27 · reconciliation 0 unexplained ₹
 
@@ -72,7 +72,7 @@ Where the work is:
 - [x] Decision register `DECISIONS.yaml` (61 decisions) + `check_decisions_v3.py`: OK.
 - [ ] **Open for Phase 7 sign-off:** v2's cost total (`order_pnl_daily.net_cogs` ₹1.619 Cr all history) is ₹17–18L below gold's posted line costs. This is v2's own superseded composition (e.g. which credits / fees it nets) and is not decomposed by cause. The gold → v3 cost leg is fully proven.
 - [x] Event-date vs cohort cross-period bridge and the monthly close / `as_of` → Phase 4 (below).
-- [ ] Channel / campaign / ad roll-ups → Phases 3–4.
+- [x] Channel / campaign / ad roll-ups. Done in Phases 3–4 (FIN-07, AXIS-BRIDGE-CAMPAIGN / -AD).
 
 ### What changes for the business (brand 20, ex-GST)
 
@@ -137,8 +137,8 @@ Where the work is:
   - Meta website LPV 29,979 vs Meta-reported 21,067.
   - Google drill to ad group works for non-PMax campaigns.
   - Hourly = daily on overlapping days, except 3 days of partial data (₹164).
-- [ ] **Hourly coverage:** Meta hourly exists only from 2026-04-01; Google hourly from 2024-11-15. Older hours are not in gold, so hourly answers before then are unavailable, never zero.
-- [ ] Meta breakdowns (`meta_ads_breakdown_daily`), ad change log and dims (`dim_campaign` / `adset` / `ad`) are reused unchanged from v2. Cube v3 wires them in Phase 5.
+- [x] **Hourly coverage** (refused before coverage and for unbounded ranges in `cube_v3.js`, L-04, refusal check 18/18): Meta hourly exists only from 2026-04-01; Google hourly from 2024-11-15. Older hours are not in gold, so hourly answers before then are unavailable, never zero.
+- [x] Meta breakdowns (`meta_ads_breakdown_daily`), ad change log and dims (`dim_campaign` / `adset` / `ad`) are reused unchanged from v2. Wired into Cube v3 in Phase 5 (`paid_media_breakdowns`, `paid_media_changes`).
 
 ## Phase 4 — Marts · DONE · applied to production · contracts 57/57
 - [x] **`semantic.mart_profit_fact`** (refresh 5 min, depends on the ledger and bridge MVs): one row-level fact with `cohort_date` and `event_date`.
@@ -164,20 +164,20 @@ Where the work is:
   - The cohort leg is bridged with causes (Phase 2). The event-dating leg (Jul −1.50L, Aug +0.48L, Sep +0.92L, nets to 0 over all history) is not itemised: v2 builds its event axis from another gold fact plus an undated `reconciliation` plug row (Jul −0.84L, Aug −3.44L, Sep −1.96L contribution). **Owner accepted v3 dating (D-21b, L-24 accepted)**; the month-by-month differences go into the Phase 7 variance report.
 - [x] **Owner rulings:** D-27 (same-day default-model credit), D-27b (website LPV), D-12b (reconstructed and flagged), D-21a (restock credit on the order date in the event family; Sep event-date product cost moved by ₹3,60,032 before this ruling; scope: only `product_cogs_credit`, the new exchange stock-return components stay on their event date), D-21b (accept v3 event dating).
 - [x] Nothing existing changed: only the new `semantic.*` / `serve.*` objects have new DDL; v2 objects untouched.
-- [ ] **No month is locked yet** and there is no schedule (L-27). The owner chooses the first close (Sep 2026 is `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule.
+- [~] **First close done: August 2026 locked 2026-10-16 (D-43, owner).** No recurring schedule yet (L-27): close_month.py is on the branch only, and a run on the 1st would lock a month still `maturing` (D-12a) — owner to choose the timing; install at cutover.
 - [x] **Order counts in the marts** (`cancelled_orders`, `rto_orders`, `returned_orders`) count sale orders with ≥ 1 cancelled-or-Unknown / RTO / returned LINE (v2's meaning). Compared with the order outcome (brand 20, all history): cancelled 587 = 508 cancelled + 68 Unknown (booked as cancelled, D-22h) + 11 active orders with a refunded line (D-22f); returned 1,016 = 1,014 + 2 active with a returned quantity and no refund (D-22g); RTO 2,823 = 2,823. The contract MART-OUTCOME-ORDERS checks this against the line classification, not the ledger. `return_rate` and `pnl_returned_or_cancelled_orders` use these counts.
 - [x] **Contracts that compare a snapshot with live data are cut-aware** (same failure as COMPLETE-*): MART-SPEND-GOLD, ALLOC-SUM and ALLOC-LPV skip days or campaign-days gold re-loaded after the table's last refresh (−60 s); the live run first waits (up to 3 min) until the ledger and bridge are no newer than the marts built on them and otherwise fails with REFRESH-IN-FLIGHT.
 - [x] `close_month.py` inserts by an explicit column list and refuses when the snapshot table lacks a fact column (L-28); closed views compute `is_maturing` from the close time (D-12a).
-- [ ] Default model only in the marts (L-25).
-- [ ] **Phase 5 inputs from the capability check** (21 allocated `product_*` ids, 51 `product_pnl` ids):
+- [x] Default model only in the marts (L-25, accepted).
+- [x] **Phase 5 inputs from the capability check** (all built in Phase 5: `mart_product_profit`, `mart_product_ad_profit`) (21 allocated `product_*` ids, 51 `product_pnl` ids):
   - Allocated ids: product dims come from `variant_id` / `product_id` via `dim_product_variant`; campaign dims from `ad_platform` / `campaign_id` / `ad_id`. `adset_id`, `is_new_customer`, `payment_bucket`, `shipping_region` are not on the allocated mart: Cube joins `fct_order` on `order_id` for the order dims and `dim_adset` for the ad set.
   - `product_pnl` by channel / campaign / ad needs line grain plus attribution. `mart_profit_fact` has no line grain, so Cube v3 builds it from `ledger_order_component` ⨝ `fct_order_line` (variant) ⨝ `bridge_order_attribution` (default model, `root_order_id`).
   - `product_cac` / `product_new_customers`: `is_new_customer` from `fct_order` (root order).
-- [ ] Cube v3 wiring of these views → Phase 5.
+- [x] Cube v3 wiring of these views — done in Phase 5 (`product_profit`, `product_ads`).
 
-## Phase 5 — Cube v3 · NOT STARTED
-- [ ] `infra/cube/model_v3`; `cube-v3` service on :4003 (dev mode off); pre-aggregations; move the inline SQL (`ltv_cac_daily`, `funnel_channel`) into serve.
-- [ ] Deliver the F0-1 / F0-2 capabilities. Brand 28 profit / ROAS / AOV must be refused.
+## Phase 5 — Cube v3 · BUILT 2026-10-15
+- [x] `infra/cube/model_v3`; `cube-v3` service on :4003 (dev mode off); inline SQL (`ltv_cac_daily`, `funnel_channel`) moved into serve. Pre-aggregations: none, by owner decision D-42 (2026-10-16).
+- [x] Deliver the F0-1 / F0-2 capabilities (V2_ERROR rows now answer). Brand 28 profit / ROAS / AOV are refused (L-16, refusal checks 18/18); brands 24–27 get no flag (D-44).
 
 ## Phase 6 — Catalogue v3 + MCP · NOT STARTED
 ## Phase 7 — Certification (no-loss gate, variance sign-off) · NOT STARTED

@@ -128,11 +128,11 @@ limits:
 - id: L-16
   area: Scope
   limit: Brand 28 is spend-only (no commerce); brands 24–27 have 1–32 orders.
-  impact: profit / ROAS / AOV must be refused for brand 28 (v2 computes −spend today, F0-3); 24–27 flagged low-volume, not certified.
+  impact: profit / ROAS / AOV are refused for brand 28 (v2 computes −spend, F0-3; refusal built in Cube v3, 18/18 refusal checks). Brands 24–27 are answered like any brand with no flag; v3 is certified on brand 20 only.
   affects: those brands
-  handled_by: []
-  status: planned
-  next_step: refusal in Cube v3 / catalogue v3 (Phases 5–6); owner confirms the value → refusal change in Phase 7 (Q11)
+  handled_by: [D-44]
+  status: accepted
+  next_step: 'none — owner 2026-10-16: no action on other brands, only brand 20 data (D-44); Q11 (brand 28 value → refusal) is confirmed at the Phase 7 variance sign-off'
 - id: L-17
   area: Reconciliation
   limit: v2's cost total (order_pnl_daily.net_cogs) is ₹17–18L below gold's posted line costs; that v2-internal composition is not decomposed by cause.
@@ -215,12 +215,12 @@ limits:
   next_step: 'none — owner chose the same-day rule (D-27); never used in default answers'
 - id: L-27
   area: 'Monthly close'
-  limit: 'No month is locked yet; the close script exists but has not run, and there is no schedule.'
-  impact: 'every past month is labelled `reconstructed` (rebuilt from today''s state); `serve.mart_*_closed` is empty.'
+  limit: 'Only August 2026 is locked (2026-10-16, D-43); the close script has no schedule.'
+  impact: 'every month before and after August is labelled `reconstructed` or open; `serve.mart_*_closed` holds August only.'
   affects: 'closed-month reproducibility'
   handled_by: [D-12, D-12b]
   status: open
-  next_step: 'owner decides when to lock the first month (Sep 2026 is still `maturing` until mid-Nov, D-12a) and approves the cron / Mage schedule'
+  next_step: 'owner decides the recurring schedule: close_month.py is on the semantic-v3 branch only (cron checkouts run main), and a run on the 1st would lock the previous month while it is still `maturing` (45 days, D-12a) — decide close on the 1st (restatable) or after maturity; install at cutover'
 - id: L-28
   area: 'Schema'
   limit: 'apply_v3.py never ALTERs and tables are CREATE IF NOT EXISTS, so a column added to an applied v3 table does not land by itself.'
@@ -277,3 +277,11 @@ limits:
   handled_by: [D-00, D-13, D-01, D-06]
   status: open
   next_step: 'Checked 2026-10-16 from the stored per-row attribution_setting (Pipe Board / Ads Manager history not reachable): the setting mix did NOT change on 1 Sep (about 70 % of spend 1d_view_7d_click, 25 % 7d_click); days are loaded once at D+7. Meta purchases per 1,000 INR of spend fell 1.41 (Aug) -> 0.79 (Sep) while our Meta-credited orders per 1,000 INR stayed 0.69, so the drop is on the Meta side (measurement: pixel / Conversions API matching, modelled conversions), not our window. Owner: check Events Manager diagnostics for September.'
+- id: L-35
+  area: 'Orders'
+  limit: 'Payment method / gateway is the literal text `manual` on most orders since the Sep 2026 checkout change.'
+  impact: 'brand 20 Sep 2026: 864 of 931 sale orders are bucket `manual`; only 51 COD + 13 online are classified, so COD vs prepaid shares are understated for that period. The `manual` member is unclassified, not a payment type; payment_bucket slices say so.'
+  affects: 'payment-mix answers, cod_orders / prepaid_orders, payment_bucket slices from Sep 2026'
+  handled_by: [D-41]
+  status: accepted
+  next_step: 'upstream: checkout-app / dbt owner to emit the real gateway or method; v3 changes nothing until then'
