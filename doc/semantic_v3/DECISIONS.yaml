@@ -1342,11 +1342,11 @@ decisions:
   status: implemented
   phase: 6
   decided: '2026-10-16'
-  ruling: 'DECIDED 2026-10-16 (owner): keep the classification rule as built; the `manual` payment-bucket member is labelled unclassified (not a payment type) with a coverage note on every payment_bucket slice; the checkout-app data issue is raised upstream. No ledger or serve change; COD vs prepaid shares for Sep 2026 are understated and say so.'
+  ruling: 'DECIDED 2026-10-16 (owner): keep the classification rule as built; the `manual` payment-bucket member is labelled unclassified (not a payment type) with a coverage note whenever `payment_bucket`, `payment_method`, `payment_gateway` or `is_cod` is used (the `cod_orders` / `prepaid_orders` totals themselves carry no note: notes attach to dimensions); the checkout-app data issue is raised upstream. No ledger or serve change; COD vs prepaid shares for Sep 2026 are understated and say so.'
   options: 'label it, fix upstream / infer prepaid / leave as is'
   evidence: 'Brand 20 Sep 2026: 864 of 931 sale orders have gateway/method literally manual; 51 COD and 13 online are classified (v2 showed 122 prepaid, 108 of them exchange replacements).'
   implemented_in:
-  - '(no code change in mage-ai: coverage note on payment_bucket in agent-core scripts/build_catalogue_v3.py DIM_NOTES, regenerated catalogue_v3/dimensions/core.yaml)'
+  - '(no code change in mage-ai: coverage note on four payment dimensions in agent-core scripts/build_catalogue_v3.py DIM_NOTES, regenerated catalogue_v3/dimensions/core.yaml; shown as a planner warning, checked on the :4003 rig 2026-10-16)'
   tests:
   - tests/test_semantic_v3.py
 - id: D-42

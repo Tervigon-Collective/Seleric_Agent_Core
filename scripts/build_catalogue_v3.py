@@ -344,12 +344,13 @@ DIM_VALID_FOR = {"device": {"ad_platform": ["google"]}, "network": {"ad_platform
 # Coverage caveats shown whenever the dimension is used (L-02, L-03).
 _PMAX = ("Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop at the campaign "
          "(device and network are available) and show no ad group or ad (L-03).")
+_MANUAL_PAY = ("Since Sep 2026 most orders carry the gateway / method literally 'manual' (brand 20 Sep 2026: 864 of 931 sale orders); "
+               "only COD and named online gateways are classified, so the 'manual' member is unclassified, not a payment type, and "
+               "cod vs online shares are understated for that period (L-35, D-41).")
 DIM_NOTES = {
     **{d: _PMAX for d in ("adset_id", "adset_name", "adset_status", "ad_id", "ad_name", "ad_status", "ad_format", "creative_type", "ad_key")},
     "campaign_key": "Paid website sessions without a campaign id roll up as the explicit member 'campaign unknown' (Google ~29 % of sessions, L-02).",
-    "payment_bucket": ("Since Sep 2026 most orders carry the gateway / method literally 'manual' (brand 20 Sep 2026: 864 of 931 sale orders); "
-                       "only COD and named online gateways are classified, so the 'manual' member is unclassified, not a payment type, and "
-                       "cod vs online shares are understated for that period (L-35, D-41)."),
+    **{d: _MANUAL_PAY for d in ("payment_bucket", "payment_method", "payment_gateway", "is_cod")},
 }
 # Names a new v3 measure may not take because a v2 id already means something else on another view.
 NEW_ID_PREFIX = {"finance": "order_pnl_", "product_profit": "product_order_"}

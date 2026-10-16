@@ -919,6 +919,9 @@ dimensions:
     returns: returns.is_cod
     payments: payments.is_cod
   aliases: []
+  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
+    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
+    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
 - id: is_converted
   display_name: Is Converted
   description: Session purchased.
@@ -1303,6 +1306,9 @@ dimensions:
     product_ads: product_ads.payment_gateway
     payments: payments.payment_gateway
   aliases: []
+  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
+    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
+    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
 - id: payment_method
   display_name: Payment Method
   description: Payment method.
@@ -1313,6 +1319,9 @@ dimensions:
     product_ads: product_ads.payment_method
     payments: payments.payment_method
   aliases: []
+  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
+    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
+    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
 - id: platform
   display_name: Platform
   description: 'Traffic platform: meta, google, whatsapp, email, sms, organic, referral, ai, exchange, unattributed.'

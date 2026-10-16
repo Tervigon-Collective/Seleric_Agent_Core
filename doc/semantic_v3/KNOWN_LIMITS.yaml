@@ -280,7 +280,7 @@ limits:
 - id: L-35
   area: 'Orders'
   limit: 'Payment method / gateway is the literal text `manual` on most orders since the Sep 2026 checkout change.'
-  impact: 'brand 20 Sep 2026: 864 of 931 sale orders are bucket `manual`; only 51 COD + 13 online are classified, so COD vs prepaid shares are understated for that period. The `manual` member is unclassified, not a payment type; payment_bucket slices say so.'
+  impact: 'brand 20 Sep 2026: 864 of 931 sale orders are bucket `manual`; only 51 COD + 13 online are classified, so COD vs prepaid shares are understated for that period. The `manual` member is unclassified, not a payment type; slices by payment_bucket / payment_method / payment_gateway / is_cod say so (a planner warning). The cod_orders / prepaid_orders totals are not flagged.'
   affects: 'payment-mix answers, cod_orders / prepaid_orders, payment_bucket slices from Sep 2026'
   handled_by: [D-41]
   status: accepted
