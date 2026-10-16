@@ -229,7 +229,7 @@ V1_DIM_ALIASES = {"shipping_state": "shipping_region", "order_status": "order_st
                   "platform": "lt_platform", "channel": "lt_channel", "product_title": "product_title"}
 ALLOWED = {"finance_channel": ["meta", "google", "whatsapp", "organic", "unattributed"],
            "ad_platform": ["meta", "google"],
-           "order_pnl_row_type": ["orders", "ad_spend"], "allocation_row_type": ["allocated", "unallocated"],
+           "order_pnl_row_type": ["orders", "ad_spend"], "allocation_row_type": ["allocated", "unallocated", "organic", "order_level"],
            "medium_group": ["paid", "owned", "earned", "none", "unclassified"]}
 # v1 glossary ids that are live v2 ids again but whose v1 TERMS read best on another metric: "orders by channel" /
 # "meta orders" need the full traffic hierarchy (commerce.orders carries platform → channel → sub_channel; the

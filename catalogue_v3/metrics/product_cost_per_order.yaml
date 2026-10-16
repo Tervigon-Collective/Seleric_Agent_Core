@@ -3,11 +3,11 @@ id: product_cost_per_order
 display_name: Product cost per order (CPA) (allocated)
 category: product
 status: certified
-description: 'Allocated ad spend per order containing the product. Grain: campaign_day_line. Date axis: cohort only.
-  Order-date cohort only (refuses event_date). Redefined in semantic v3 (D-19o; D-27; D-01; D-02; D-02a; D-02b;
-  D-03; D-03a…): the id is kept, the number may change.'
+description: 'Allocated ad spend per order containing the product (paid-credited and organic lines, D-38). Grain:
+  campaign_day_line. Date axis: cohort only. Order-date cohort only (refuses event_date). Redefined in semantic
+  v3 (D-19o; D-27; D-01; D-02; D-02a; D-02b; D-03; D-03a…): the id is kept, the number may change.'
 formula:
-  human_readable: Allocated ad spend per order containing the product.
+  human_readable: Allocated ad spend per order containing the product (paid-credited and organic lines, D-38).
   authoritative_source: cube
   depends_on:
   - product_orders

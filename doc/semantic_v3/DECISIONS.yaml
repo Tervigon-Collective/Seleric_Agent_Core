@@ -1295,3 +1295,19 @@ decisions:
   change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
     <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
     entry + spec §0B row'
+- id: D-38
+  title: 'Product after-ads totals include organic and order-level rows (Σ over products = brand)'
+  status: implemented
+  phase: 7
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner, Phase 7 certification): the allocated product-ad family carries every ₹ of the order-date cohort exactly once. serve.mart_product_ad_profit gains two P&L-only row types besides allocated / unallocated: `organic` (a sale line with no allocated row — no paid credit, or credited to a campaign-day with no delivery) and `order_level` (the order''s own postings: shipping revenue, packaging, gateway ...; product 0). Σ attributed net sales and contribution over all row types = serve.mart_profit; Σ spend = delivery (unchanged); product_net_profit, MER, BE ROAS, CAC and cost per order at product level therefore tie to the brand figures as in v2. Organic and order-level rows carry no delivery (allocated_* = 0). Supersedes the paid-credited-only totals built in Phase 5.'
+  options: 'add organic rows (Σ = brand) / keep paid-only and label / refuse totals without a campaign or ad dimension'
+  evidence: 'Sep 2026 brand 20: product_net_profit −₹4.69L vs brand net_profit −₹2.83L (v2: both −₹2.11L); product_mer 0.98 vs brand 1.33. Gap ₹1.86L = contribution of orders with no paid credit (organic lines ₹1.59L, order-level postings ₹0.26L; net sales ₹3.83L + ₹0.26L)'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_product_ad_profit.sql (D-38)
+  - mage-ai:infra/cube/model_v3/cubes/product_ads.yml (D-38)
+  tests:
+  - ALLOC-PROFIT
+  - ALLOC-PROFIT-TOTAL
+  - 'v3_cube_parity.py product_ads = finance per brand x month (7 measures)'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: v3_contracts.py --preview; owner OK; apply_views.py --allow-new mart_product_ad_profit; restart the Cube rig; regenerate catalogue_v3; update this entry + spec §0B row'

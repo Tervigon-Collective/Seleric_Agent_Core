@@ -248,7 +248,9 @@ dimensions:
   aliases: []
 - id: allocation_row_type
   display_name: Allocation row type
-  description: allocated (a credited sale line) | unallocated (campaign-day spend with no credited line, D-19o).
+  description: allocated (a credited sale line) | unallocated (campaign-day spend with no credited line, D-19o)
+    | organic (a sale line with no allocated row, P&L only, D-38) | order_level (the order's own postings - shipping
+    revenue, packaging, gateway - P&L only, D-38).
   is_time: false
   views:
     product_ads: product_ads.row_type
@@ -256,6 +258,8 @@ dimensions:
   allowed_values:
   - allocated
   - unallocated
+  - organic
+  - order_level
 - id: allocation_rule_version
   display_name: Allocation Rule Version
   description: Version of the allocation rule on every row (d27_same_day_credit_v1).

@@ -207,7 +207,7 @@ limits:
   next_step: 'none — fractional credits would break the exact roll-up (FIN-07); no v2 capability did this'
 - id: L-26
   area: 'Allocated family'
-  limit: 'Spend is allocated only within a campaign-day that has a credited sale line with sales; the rest is an `Unallocated` row.'
+  limit: 'Spend is allocated only within a campaign-day that has a credited sale line with sales; the rest is an `Unallocated` row. Sale lines with no allocated row sit on `Organic` rows and the order''s own postings on `Order level` rows (P&L only, no delivery, D-38), so product totals tie to the brand.'
   impact: 'Sep 2026 brand 20: ₹7.86L allocated, ₹4.08L unallocated of ₹11.93L. Free-gift lines (zero sales) get no share. Website LPV of sessions without a campaign id stays out of the allocation.'
   affects: 'product_* spend, ROAS, MER, CAC, delivery metrics (explicit family only)'
   handled_by: [D-19o, D-27, D-27b]
