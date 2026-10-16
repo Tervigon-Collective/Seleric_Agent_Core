@@ -1311,3 +1311,29 @@ decisions:
   - ALLOC-PROFIT-TOTAL
   - 'v3_cube_parity.py product_ads = finance per brand x month (7 measures)'
   change_how: 'edit the rule in implemented_in (search for the decision id), then: v3_contracts.py --preview; owner OK; apply_views.py --allow-new mart_product_ad_profit; restart the Cube rig; regenerate catalogue_v3; update this entry + spec §0B row'
+- id: D-39
+  title: 'Gateway-type fee on COD orders is a real cost'
+  status: implemented
+  phase: 7
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner, Phase 7 variance sign-off): the gateway-type fee that gold posts on COD orders is a real cost and stays in v3 (as built: payment_gateway_fee = gold gateway_fee, D-05b). v2 charged nothing on COD orders. It does not overlap the COD-handling fee (no order carries both).'
+  options: 'real cost, keep (as built) / not a cost, drop / unsure, check with finance first'
+  evidence: 'Brand 20 all history: 9,349 COD orders (about ₹87 each) carry ₹5.08L of gold gateway fee that v2 charged as ₹0; posted through Aug 2026, none from Sep 2026 (Jul ₹63k, Aug ₹33k of contribution vs v2). 0 orders carry both gateway fee and COD handling.'
+  implemented_in:
+  - '(no code change: confirms the as-built rule of D-05b — payment_gateway_fee = gold gateway_fee on every order, COD included)'
+  tests:
+  - LINE gateway
+  - doc/semantic_v3/VARIANCE_REPORT.md section 4 (L-17)
+- id: D-40
+  title: 'Landing page views by audience: refuse and point to the platform twin'
+  status: implemented
+  phase: 7
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner, Phase 7): landing page views sliced by age, gender, breakdown type, device, impression device, platform position or publisher platform are refused; the refusal names `platform_reported_landing_page_views` (the Meta figure), which answers those slices. The website figure (D-17) has no audience slice. No labelled substitute is returned.'
+  options: 'refuse with a pointer / answer with the Meta figure, labelled'
+  evidence: 'capability_check_v3 dims layer: landing_page_views / cost_per_landing_page_view x 7 audience dimensions (brand 20, Sep 2026) are refused with a pointer; v2 answered them with the Meta number under the same name.'
+  implemented_in:
+  - '(no code change in mage-ai: confirms the planner refusal D-13r in agent-core src/seleric_mcp/app/query_planner.py)'
+  tests:
+  - tests/test_semantic_v3.py
+  - capability_check_v3.py dims layer
