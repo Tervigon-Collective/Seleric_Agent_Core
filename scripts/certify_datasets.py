@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -37,9 +38,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from seleric_mcp.semantic_inventory.sources import ch_query  # noqa: E402
 
-DATASETS = ROOT / "catalogue_v2_src" / "datasets.yaml"
-OUT_JSON = ROOT / "doc" / "semantic_datasets" / "certification.json"
-OUT_MD = ROOT / "doc" / "semantic_datasets" / "CERTIFICATION.md"
+# v2 by default; semantic v3 (Phase 7): CERTIFY_DATASETS=catalogue_v3_src CERTIFY_OUT=doc/semantic_v3/results/datasets
+_SRC = os.environ.get("CERTIFY_DATASETS", "catalogue_v2_src")
+_OUT = Path(os.environ.get("CERTIFY_OUT", "doc/semantic_datasets"))
+DATASETS = ROOT / _SRC / "datasets.yaml"
+OUT_JSON = ROOT / _OUT / "certification.json"
+OUT_MD = ROOT / _OUT / "CERTIFICATION.md"
 FRESHNESS_FAIL_DAYS = 14
 
 
@@ -251,7 +255,7 @@ def _apply(contracts: dict, report: dict) -> None:
             contracts[name]["certification"] = {
                 "status": "certified",
                 "certified_on": report["generated_on"],
-                "evidence": "doc/semantic_datasets/certification.json",
+                "evidence": str(OUT_JSON.relative_to(ROOT)),
             }
             popped.append(name)
     DATASETS.write_text(yaml.safe_dump(contracts, sort_keys=False, allow_unicode=True))

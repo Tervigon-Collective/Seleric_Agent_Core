@@ -1,0 +1,2304 @@
+[
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_ad_spend",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 2142087.07367,
+   "base": 2142087.07367,
+   "axis": {
+    "pnl_ad_spend": "native (own clock; date_axis ignored)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_ad_spend",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 1193322.057467,
+   "base": 1193322.057467,
+   "axis": {
+    "pnl_ad_spend": "native (own clock; date_axis ignored)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_ad_spend",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 2255290.963932,
+   "base": 2255290.963932,
+   "axis": {
+    "pnl_ad_spend": "native (own clock; date_axis ignored)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_be_roas",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 2.094635,
+   "base": 2.094635,
+   "axis": {
+    "pnl_be_roas": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_be_roas",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 1.618611,
+   "base": 1.618611,
+   "axis": {
+    "pnl_be_roas": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_be_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -147.382682,
+   "base": -147.382682,
+   "axis": {
+    "pnl_be_roas": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_cancel_revenue",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 148697.53,
+   "base": 148697.53,
+   "axis": {
+    "pnl_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_cancel_revenue",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 94557.7,
+   "base": 94557.7,
+   "axis": {
+    "pnl_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 70507.08,
+   "base": 70507.08,
+   "axis": {
+    "pnl_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_cancelled_orders",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 46.0,
+   "base": 46.0,
+   "axis": {
+    "pnl_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_cancelled_orders",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 52.0,
+   "base": 52.0,
+   "axis": {
+    "pnl_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 46.0,
+   "base": 46.0,
+   "axis": {
+    "pnl_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_contribution_margin",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 2790043.460374,
+   "base": 2790043.460374,
+   "axis": {
+    "pnl_contribution_margin": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_contribution_margin",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -2943.081064,
+   "base": -2943.081064,
+   "axis": {
+    "pnl_contribution_margin": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_contribution_margin",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 1327267.805972,
+   "base": 1327267.805972,
+   "axis": {
+    "pnl_contribution_margin": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_contribution_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -0.006785,
+   "base": -0.006785,
+   "axis": {
+    "pnl_contribution_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_contribution_margin_pct",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 0.617814,
+   "base": 0.617814,
+   "axis": {
+    "pnl_contribution_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_contribution_margin_pct",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 0.47741,
+   "base": 0.47741,
+   "axis": {
+    "pnl_contribution_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_discounts",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 104905.4059,
+   "base": 104905.4059,
+   "axis": {
+    "pnl_discounts": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_discounts",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 60847.5897,
+   "base": 60847.5897,
+   "axis": {
+    "pnl_discounts": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_discounts",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 76493.2814,
+   "base": 76493.2814,
+   "axis": {
+    "pnl_discounts": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_gross_sales",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 4988051.19,
+   "base": 4988051.19,
+   "axis": {
+    "pnl_gross_sales": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_gross_sales",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 3399587.05,
+   "base": 3399587.05,
+   "axis": {
+    "pnl_gross_sales": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_gross_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 1771623.22,
+   "base": 1771623.22,
+   "axis": {
+    "pnl_gross_sales": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_mer",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 2.108222,
+   "base": 2.108222,
+   "axis": {
+    "pnl_mer": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_mer",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 0.363489,
+   "base": 0.363489,
+   "axis": {
+    "pnl_mer": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_mer",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 1.23272,
+   "base": 1.23272,
+   "axis": {
+    "pnl_mer": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_cogs",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 436702.2605,
+   "base": 436702.2605,
+   "axis": {
+    "pnl_net_cogs": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_cogs",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 1725952.42,
+   "base": 1725952.42,
+   "axis": {
+    "pnl_net_cogs": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_cogs",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 1452874.12,
+   "base": 1452874.12,
+   "axis": {
+    "pnl_net_cogs": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -2.757902,
+   "base": -2.757902,
+   "axis": {
+    "pnl_net_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_margin_pct",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 0.14348,
+   "base": 0.14348,
+   "axis": {
+    "pnl_net_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_margin_pct",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": -0.333804,
+   "base": -0.333804,
+   "axis": {
+    "pnl_net_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_profit",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 647956.386704,
+   "base": 647956.386704,
+   "axis": {
+    "pnl_net_profit": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_profit",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": -928023.15796,
+   "base": -928023.15796,
+   "axis": {
+    "pnl_net_profit": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_profit",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -1196265.138531,
+   "base": -1196265.138531,
+   "axis": {
+    "pnl_net_profit": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_roas",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 0.588513,
+   "base": 0.588513,
+   "axis": {
+    "pnl_net_roas": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_roas",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 1.302488,
+   "base": 1.302488,
+   "axis": {
+    "pnl_net_roas": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -0.002466,
+   "base": -0.002466,
+   "axis": {
+    "pnl_net_roas": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_sales",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 4515995.880374,
+   "base": 4515995.880374,
+   "axis": {
+    "pnl_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 433759.179436,
+   "base": 433759.179436,
+   "axis": {
+    "pnl_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_net_sales",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 2780141.925972,
+   "base": 2780141.925972,
+   "axis": {
+    "pnl_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_operating_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 509679.59,
+   "base": 509679.59,
+   "axis": {
+    "pnl_operating_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_operating_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 570133.17,
+   "base": 570133.17,
+   "axis": {
+    "pnl_operating_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_operating_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 219715.2294,
+   "base": 219715.2294,
+   "axis": {
+    "pnl_operating_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_packaging_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 22670.0,
+   "base": 22670.0,
+   "axis": {
+    "pnl_packaging_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_packaging_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 15796.6667,
+   "base": 15796.6667,
+   "axis": {
+    "pnl_packaging_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_packaging_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 26500.0,
+   "base": 26500.0,
+   "axis": {
+    "pnl_packaging_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_payment_gateway_fees",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 12956.3469,
+   "base": 12956.3469,
+   "axis": {
+    "pnl_payment_gateway_fees": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_payment_gateway_fees",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 117141.59,
+   "base": 117141.59,
+   "axis": {
+    "pnl_payment_gateway_fees": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_payment_gateway_fees",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 166629.17,
+   "base": 166629.17,
+   "axis": {
+    "pnl_payment_gateway_fees": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_product_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 1150035.25,
+   "base": 1150035.25,
+   "axis": {
+    "pnl_product_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_product_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 159839.52,
+   "base": 159839.52,
+   "axis": {
+    "pnl_product_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_product_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 830853.27,
+   "base": 830853.27,
+   "axis": {
+    "pnl_product_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_return_cancel_revenue",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 473245.14,
+   "base": 473245.14,
+   "axis": {
+    "pnl_return_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_return_cancel_revenue",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 668486.6666,
+   "base": 668486.6666,
+   "axis": {
+    "pnl_return_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_return_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 1360276.295,
+   "base": 1360276.295,
+   "axis": {
+    "pnl_return_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_return_revenue",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 288503.1566,
+   "base": 288503.1566,
+   "axis": {
+    "pnl_return_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_return_revenue",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 188116.96,
+   "base": 188116.96,
+   "axis": {
+    "pnl_return_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_return_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 940948.675,
+   "base": 940948.675,
+   "axis": {
+    "pnl_return_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_returned_or_cancelled_orders",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 138.0,
+   "base": 138.0,
+   "axis": {
+    "pnl_returned_or_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_returned_or_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 478.0,
+   "base": 478.0,
+   "axis": {
+    "pnl_returned_or_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_returned_or_cancelled_orders",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 167.0,
+   "base": 167.0,
+   "axis": {
+    "pnl_returned_or_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_returned_orders",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 86.0,
+   "base": 86.0,
+   "axis": {
+    "pnl_returned_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_returned_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 432.0,
+   "base": 432.0,
+   "axis": {
+    "pnl_returned_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_returned_orders",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 121.0,
+   "base": 121.0,
+   "axis": {
+    "pnl_returned_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_rto_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 91490.675,
+   "base": 91490.675,
+   "axis": {
+    "pnl_rto_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_rto_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 51424.0,
+   "base": 51424.0,
+   "axis": {
+    "pnl_rto_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_rto_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 24395.0,
+   "base": 24395.0,
+   "axis": {
+    "pnl_rto_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_shipping_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 352609.0,
+   "base": 352609.0,
+   "axis": {
+    "pnl_shipping_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_shipping_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 318444.0,
+   "base": 318444.0,
+   "axis": {
+    "pnl_shipping_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_shipping_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 68377.11,
+   "base": 68377.11,
+   "axis": {
+    "pnl_shipping_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_taxes_on_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 80012.075564,
+   "base": 80012.075564,
+   "axis": {
+    "pnl_taxes_on_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_taxes_on_net_sales",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 496399.310773,
+   "base": 496399.310773,
+   "axis": {
+    "pnl_taxes_on_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "pnl_taxes_on_net_sales",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 812874.269626,
+   "base": 812874.269626,
+   "axis": {
+    "pnl_taxes_on_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_ad_spend",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_ad_spend",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_ad_spend",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_be_roas",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_be_roas",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_be_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 70507.08,
+   "base": 70507.08,
+   "axis": {
+    "product_pnl_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_cancel_revenue",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 94557.7,
+   "base": 94557.7,
+   "axis": {
+    "product_pnl_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_cancel_revenue",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 148697.53,
+   "base": 148697.53,
+   "axis": {
+    "product_pnl_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_cancelled_orders",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 52.0,
+   "base": 52.0,
+   "axis": {
+    "product_pnl_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 46.0,
+   "base": 46.0,
+   "axis": {
+    "product_pnl_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_cancelled_orders",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 46.0,
+   "base": 46.0,
+   "axis": {
+    "product_pnl_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_contribution_margin",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 1327267.805972,
+   "base": 1327267.805972,
+   "axis": {
+    "product_pnl_contribution_margin": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_contribution_margin",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 2790043.460374,
+   "base": 2790043.460374,
+   "axis": {
+    "product_pnl_contribution_margin": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_contribution_margin",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -2943.081064,
+   "base": -2943.081064,
+   "axis": {
+    "product_pnl_contribution_margin": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_contribution_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": -0.006785,
+   "base": -0.006785,
+   "axis": {
+    "product_pnl_contribution_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_contribution_margin_pct",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 0.617814,
+   "base": 0.617814,
+   "axis": {
+    "product_pnl_contribution_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_contribution_margin_pct",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 0.47741,
+   "base": 0.47741,
+   "axis": {
+    "product_pnl_contribution_margin_pct": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_discounts",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 76493.2814,
+   "base": 76493.2814,
+   "axis": {
+    "product_pnl_discounts": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_discounts",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 60847.5897,
+   "base": 60847.5897,
+   "axis": {
+    "product_pnl_discounts": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_discounts",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 104905.4059,
+   "base": 104905.4059,
+   "axis": {
+    "product_pnl_discounts": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_gross_sales",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 4988051.19,
+   "base": 4988051.19,
+   "axis": {
+    "product_pnl_gross_sales": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_mer",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_mer",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_mer",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_gross_sales",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 3399587.05,
+   "base": 3399587.05,
+   "axis": {
+    "product_pnl_gross_sales": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_gross_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 1771623.22,
+   "base": 1771623.22,
+   "axis": {
+    "product_pnl_gross_sales": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_cogs",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 1452874.12,
+   "base": 1452874.12,
+   "axis": {
+    "product_pnl_net_cogs": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_margin_pct",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_margin_pct",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_cogs",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 436702.2605,
+   "base": 436702.2605,
+   "axis": {
+    "product_pnl_net_cogs": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_cogs",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 1725952.42,
+   "base": 1725952.42,
+   "axis": {
+    "product_pnl_net_cogs": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_profit",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_profit",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_profit",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_roas",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_roas",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)",
+   "base": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 433759.179436,
+   "base": 433759.179436,
+   "axis": {
+    "product_pnl_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_sales",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 4515995.880374,
+   "base": 4515995.880374,
+   "axis": {
+    "product_pnl_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_net_sales",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 2780141.925972,
+   "base": 2780141.925972,
+   "axis": {
+    "product_pnl_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_operating_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 219715.2294,
+   "base": 219715.2294,
+   "axis": {
+    "product_pnl_operating_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_operating_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 570133.17,
+   "base": 570133.17,
+   "axis": {
+    "product_pnl_operating_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_operating_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 509679.59,
+   "base": 509679.59,
+   "axis": {
+    "product_pnl_operating_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_packaging_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 22670.0,
+   "base": 22670.0,
+   "axis": {
+    "product_pnl_packaging_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_packaging_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 26500.0,
+   "base": 26500.0,
+   "axis": {
+    "product_pnl_packaging_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_packaging_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 15796.6667,
+   "base": 15796.6667,
+   "axis": {
+    "product_pnl_packaging_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_payment_gateway_fees",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 117141.59,
+   "base": 117141.59,
+   "axis": {
+    "product_pnl_payment_gateway_fees": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_payment_gateway_fees",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 12956.3469,
+   "base": 12956.3469,
+   "axis": {
+    "product_pnl_payment_gateway_fees": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_payment_gateway_fees",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 166629.17,
+   "base": 166629.17,
+   "axis": {
+    "product_pnl_payment_gateway_fees": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_product_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 830853.27,
+   "base": 830853.27,
+   "axis": {
+    "product_pnl_product_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_product_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 159839.52,
+   "base": 159839.52,
+   "axis": {
+    "product_pnl_product_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_product_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 1150035.25,
+   "base": 1150035.25,
+   "axis": {
+    "product_pnl_product_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_return_cancel_revenue",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 473245.14,
+   "base": 473245.14,
+   "axis": {
+    "product_pnl_return_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_return_cancel_revenue",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 668486.6666,
+   "base": 668486.6666,
+   "axis": {
+    "product_pnl_return_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_return_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 1360276.295,
+   "base": 1360276.295,
+   "axis": {
+    "product_pnl_return_cancel_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_return_revenue",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 288503.1566,
+   "base": 288503.1566,
+   "axis": {
+    "product_pnl_return_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_return_revenue",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 188116.96,
+   "base": 188116.96,
+   "axis": {
+    "product_pnl_return_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_return_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 940948.675,
+   "base": 940948.675,
+   "axis": {
+    "product_pnl_return_revenue": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_returned_or_cancelled_orders",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 171.0,
+   "base": 171.0,
+   "axis": {
+    "product_pnl_returned_or_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_returned_or_cancelled_orders",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 138.0,
+   "base": 138.0,
+   "axis": {
+    "product_pnl_returned_or_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_returned_or_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 481.0,
+   "base": 481.0,
+   "axis": {
+    "product_pnl_returned_or_cancelled_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_returned_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 435.0,
+   "base": 435.0,
+   "axis": {
+    "product_pnl_returned_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_returned_orders",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 86.0,
+   "base": 86.0,
+   "axis": {
+    "product_pnl_returned_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_returned_orders",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 125.0,
+   "base": 125.0,
+   "axis": {
+    "product_pnl_returned_orders": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_rto_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 51424.0,
+   "base": 51424.0,
+   "axis": {
+    "product_pnl_rto_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_rto_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 24395.0,
+   "base": 24395.0,
+   "axis": {
+    "product_pnl_rto_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_rto_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 91490.675,
+   "base": 91490.675,
+   "axis": {
+    "product_pnl_rto_cost": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_shipping_cost",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 352609.0,
+   "base": 352609.0,
+   "axis": {
+    "product_pnl_shipping_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_shipping_cost",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 318444.0,
+   "base": 318444.0,
+   "axis": {
+    "product_pnl_shipping_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_shipping_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 68377.11,
+   "base": 68377.11,
+   "axis": {
+    "product_pnl_shipping_cost": "event_date (identical on both axes: booked at placement)"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_taxes_on_net_sales",
+  "month": "2026-07",
+  "ok": true,
+  "detail": {
+   "alias": 812874.269626,
+   "base": 812874.269626,
+   "axis": {
+    "product_pnl_taxes_on_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_ad_spend",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_ad_spend' is the event_date id of 'order_pnl_ad_spend', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_be_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_be_roas' is the event_date id of 'be_roas', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_taxes_on_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": {
+   "alias": 80012.075564,
+   "base": 80012.075564,
+   "axis": {
+    "product_pnl_taxes_on_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias=base@event_date",
+  "metric": "product_pnl_taxes_on_net_sales",
+  "month": "2026-08",
+  "ok": true,
+  "detail": {
+   "alias": 496399.310773,
+   "base": 496399.310773,
+   "axis": {
+    "product_pnl_taxes_on_net_sales": "event_date"
+   }
+  }
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_cancel_revenue' is the event_date id of 'order_pnl_cancel_revenue', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_cancelled_orders' is the event_date id of 'channel_cancelled_orders', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_contribution_margin",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_contribution_margin' is the event_date id of 'contribution_margin', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_contribution_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_contribution_margin_pct' is the event_date id of 'contribution_margin_pct', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_discounts",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_discounts' is the event_date id of 'order_pnl_discounts', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_gross_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_gross_sales' is the event_date id of 'order_pnl_gross_sales', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_mer",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_mer' is the event_date id of 'mer', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_net_cogs",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_net_cogs' is the event_date id of 'net_cogs', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_net_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_net_margin_pct' is the event_date id of 'net_margin_pct', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_net_profit",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_net_profit' is the event_date id of 'net_profit', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_net_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_net_roas' is the event_date id of 'net_roas', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_net_sales' is the event_date id of 'order_pnl_net_sales', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_operating_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_operating_cost' is the event_date id of 'operating_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_packaging_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_packaging_cost' is the event_date id of 'packaging_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_payment_gateway_fees",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_payment_gateway_fees' is the event_date id of 'payment_gateway_fees', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_product_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_product_cost' is the event_date id of 'product_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_return_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_return_cancel_revenue' is the event_date id of 'order_pnl_return_cancel_revenue', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_return_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_return_revenue' is the event_date id of 'order_pnl_return_revenue', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_returned_or_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_returned_or_cancelled_orders' is the event_date id of 'channel_returned_or_cancelled_orders', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_returned_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_returned_orders' is the event_date id of 'channel_returned_orders', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_rto_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_rto_cost' is the event_date id of 'rto_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_shipping_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_shipping_cost' is the event_date id of 'shipping_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "pnl_taxes_on_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'pnl_taxes_on_net_sales' is the event_date id of 'taxes_on_net_sales', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_ad_spend",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)"
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_be_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)"
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_cancel_revenue' is the event_date id of 'product_order_cancel_revenue', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_cancelled_orders' is the event_date id of 'product_order_cancelled_orders', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_contribution_margin",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_contribution_margin' is the event_date id of 'product_contribution_margin', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_contribution_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_contribution_margin_pct' is the event_date id of 'product_contribution_margin_pct', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_discounts",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_discounts' is the event_date id of 'product_order_discounts', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_gross_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_gross_sales' is the event_date id of 'product_order_gross_sales', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_mer",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)"
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_net_cogs",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_net_cogs' is the event_date id of 'product_order_net_cogs', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_net_margin_pct",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)"
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_net_profit",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)"
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_net_roas",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date (the order-date cohort); this measure has no event-date meaning; the event-date id answered before v3 (D-34 / D-31)"
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_net_sales' is the event_date id of 'product_order_net_sales', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_operating_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_operating_cost' is the event_date id of 'product_operating_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_packaging_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_packaging_cost' is the event_date id of 'product_packaging_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_payment_gateway_fees",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_payment_gateway_fees' is the event_date id of 'product_payment_gateway_fees', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_product_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_product_cost' is the event_date id of 'product_order_product_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_return_cancel_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_return_cancel_revenue' is the event_date id of 'product_order_return_cancel_revenue', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_return_revenue",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_return_revenue' is the event_date id of 'product_order_return_revenue', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_returned_or_cancelled_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_returned_or_cancelled_orders' is the event_date id of 'product_order_returned_or_cancelled_orders', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_returned_orders",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_returned_orders' is the event_date id of 'product_order_returned_orders', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_rto_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_rto_cost' is the event_date id of 'product_rto_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_shipping_cost",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_shipping_cost' is the event_date id of 'product_shipping_cost', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "alias@order_date refused",
+  "metric": "product_pnl_taxes_on_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'product_pnl_taxes_on_net_sales' is the event_date id of 'product_taxes_on_net_sales', but date_axis=order_date was requested. One date axis per query (D-28): ask the two questions separately."
+ },
+ {
+  "check": "cohort_only@event_date refused",
+  "metric": "ltv",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "cohort-defined rate (D-31): use date_axis=order_date; this measure has no event-date meaning"
+ },
+ {
+  "check": "cohort_only@event_date refused",
+  "metric": "ltv_cac_ratio",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "cohort-defined rate (D-31): use date_axis=order_date; this measure has no event-date meaning"
+ },
+ {
+  "check": "cohort_only@event_date refused",
+  "metric": "net_aov",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "cohort-defined measure (D-31): use date_axis=order_date; no event-date meaning"
+ },
+ {
+  "check": "cohort_only@event_date refused",
+  "metric": "new_customer_ltv",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "cohort-defined measure (D-31): use date_axis=order_date; no event-date meaning"
+ },
+ {
+  "check": "cohort_only@event_date refused",
+  "metric": "new_customer_net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "cohort-defined rate (D-31): use date_axis=order_date; this measure has no event-date meaning"
+ },
+ {
+  "check": "allocated@event_date refused",
+  "metric": "product_ad_spend",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+ },
+ {
+  "check": "allocated@event_date refused",
+  "metric": "product_net_profit",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an event of an order"
+ },
+ {
+  "check": "mixed axes refused",
+  "metric": "pnl_net_profit+net_sales",
+  "month": "2026-09",
+  "ok": true,
+  "detail": "'net_sales' (order-date by default) and the event-date id 'pnl_net_profit' are in one query. One date axis per query (D-28): pass date_axis explicitly, or ask them separately."
+ }
+]

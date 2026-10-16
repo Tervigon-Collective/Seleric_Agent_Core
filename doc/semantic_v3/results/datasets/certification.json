@@ -1,0 +1,1687 @@
+{
+  "generated_on": "2026-10-16",
+  "datasets": {
+    "Ads.Delivery": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "ad_platform",
+        "account_id",
+        "campaign_id",
+        "adset_id",
+        "ad_id",
+        "device",
+        "network"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.fct_ad_delivery",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "ad_platform",
+            "account_id",
+            "campaign_id",
+            "adset_id",
+            "ad_id",
+            "device",
+            "network"
+          ],
+          "missing_columns": [],
+          "row_count": 56364,
+          "distinct_keys": 56364,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Date"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "account_id": {
+              "null_or_empty_rows": 11842,
+              "null_or_empty_pct": 21.0099,
+              "type": "Nullable(String)"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 21041,
+              "null_or_empty_pct": 37.3306,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 21041,
+              "null_or_empty_pct": 37.3306,
+              "type": "Nullable(String)"
+            },
+            "device": {
+              "null_or_empty_rows": 24849,
+              "null_or_empty_pct": 44.0867,
+              "type": "Nullable(String)"
+            },
+            "network": {
+              "null_or_empty_rows": 24849,
+              "null_or_empty_pct": 44.0867,
+              "type": "Nullable(String)"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2024-11-02",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['account_id', 'adset_id', 'ad_id', 'device', 'network']"
+          ],
+          "binding": "daily"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "daily": true
+      }
+    },
+    "Ads.DeliveryHourly": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "hour_of_day",
+        "ad_platform",
+        "account_id",
+        "campaign_id",
+        "adset_id",
+        "ad_id",
+        "device",
+        "network"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.fct_ad_delivery_hourly",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "hour_of_day",
+            "ad_platform",
+            "account_id",
+            "campaign_id",
+            "adset_id",
+            "ad_id",
+            "device",
+            "network"
+          ],
+          "missing_columns": [],
+          "row_count": 316056,
+          "distinct_keys": 316056,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Date"
+            },
+            "hour_of_day": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int32"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "account_id": {
+              "null_or_empty_rows": 131463,
+              "null_or_empty_pct": 41.5948,
+              "type": "Nullable(String)"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 251801,
+              "null_or_empty_pct": 79.6697,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 251801,
+              "null_or_empty_pct": 79.6697,
+              "type": "Nullable(String)"
+            },
+            "device": {
+              "null_or_empty_rows": 64255,
+              "null_or_empty_pct": 20.3303,
+              "type": "Nullable(String)"
+            },
+            "network": {
+              "null_or_empty_rows": 64255,
+              "null_or_empty_pct": 20.3303,
+              "type": "Nullable(String)"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2024-11-15",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['account_id', 'adset_id', 'ad_id', 'device', 'network']"
+          ],
+          "binding": "hourly"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "hourly": true
+      }
+    },
+    "Meta.Breakdowns": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "breakdown_type",
+        "age",
+        "gender",
+        "publisher_platform",
+        "platform_position",
+        "device_platform",
+        "region",
+        "ad_account_id",
+        "campaign_id",
+        "adset_id",
+        "ad_id"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.meta_ads_breakdown_daily",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "breakdown_type",
+            "age",
+            "gender",
+            "publisher_platform",
+            "platform_position",
+            "device_platform",
+            "region",
+            "ad_account_id",
+            "campaign_id",
+            "adset_id",
+            "ad_id"
+          ],
+          "missing_columns": [],
+          "row_count": 336323,
+          "distinct_keys": 336323,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Date"
+            },
+            "breakdown_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            },
+            "age": {
+              "null_or_empty_rows": 237871,
+              "null_or_empty_pct": 70.7269,
+              "type": "Nullable(String)"
+            },
+            "gender": {
+              "null_or_empty_rows": 237871,
+              "null_or_empty_pct": 70.7269,
+              "type": "Nullable(String)"
+            },
+            "publisher_platform": {
+              "null_or_empty_rows": 222658,
+              "null_or_empty_pct": 66.2036,
+              "type": "Nullable(String)"
+            },
+            "platform_position": {
+              "null_or_empty_rows": 275613,
+              "null_or_empty_pct": 81.9489,
+              "type": "Nullable(String)"
+            },
+            "device_platform": {
+              "null_or_empty_rows": 300943,
+              "null_or_empty_pct": 89.4804,
+              "type": "Nullable(String)"
+            },
+            "region": {
+              "null_or_empty_rows": 212117,
+              "null_or_empty_pct": 63.0694,
+              "type": "Nullable(String)"
+            },
+            "ad_account_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(String)"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2025-12-31",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['age', 'gender', 'publisher_platform', 'platform_position', 'device_platform', 'region']"
+          ],
+          "binding": "daily"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "daily": true
+      }
+    },
+    "Commerce.Orders": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_id"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.commerce_orders",
+          "declared_keys": [
+            "brand_id",
+            "order_id"
+          ],
+          "missing_columns": [],
+          "row_count": 24246,
+          "distinct_keys": 24246,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Commerce.OrderEvents": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_id",
+        "event_type",
+        "event_date"
+      ],
+      "date_policy": "event_date",
+      "bindings": [
+        {
+          "table": "serve.commerce_order_events",
+          "declared_keys": [
+            "brand_id",
+            "order_id",
+            "event_type",
+            "event_date"
+          ],
+          "missing_columns": [],
+          "row_count": 4798,
+          "distinct_keys": 4798,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "event_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "event_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(Date)"
+            }
+          },
+          "temporal": {
+            "column": "event_date",
+            "min": "2024-11-15",
+            "max": "2026-10-15",
+            "freshness_days": 1
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Web.Events": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "event_id"
+      ],
+      "date_policy": "event_timestamp",
+      "bindings": [
+        {
+          "table": "serve.web_events",
+          "declared_keys": [
+            "brand_id",
+            "event_id"
+          ],
+          "missing_columns": [],
+          "row_count": 2915971,
+          "distinct_keys": 2915971,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "event_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            }
+          },
+          "temporal": {
+            "column": "event_timestamp",
+            "min": "2026-05-31 18:30:04.455000",
+            "max": "2026-10-16 09:04:51.120000",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Web.EventsDaily": {
+      "role": "preaggregation",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "event_type",
+        "channel"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.web_events_daily",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "event_type",
+            "channel"
+          ],
+          "missing_columns": [],
+          "row_count": 10365,
+          "distinct_keys": 10365,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Date"
+            },
+            "event_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            },
+            "channel": {
+              "null_or_empty_rows": 1012,
+              "null_or_empty_pct": 9.7636,
+              "type": "String"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2026-06-01",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['channel']"
+          ],
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Sessions": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "session_id"
+      ],
+      "date_policy": "session_start",
+      "bindings": [
+        {
+          "table": "serve.session_funnel",
+          "declared_keys": [
+            "brand_id",
+            "session_id"
+          ],
+          "missing_columns": [],
+          "row_count": 490463,
+          "distinct_keys": 490463,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "session_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            }
+          },
+          "temporal": {
+            "column": "session_start",
+            "min": "2026-05-31 18:30:04.455000",
+            "max": "2026-10-16 09:20:03.260000",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Touchpoints": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_id",
+        "touch_id"
+      ],
+      "date_policy": "touch_ts",
+      "bindings": [
+        {
+          "table": "serve.touchpoints",
+          "declared_keys": [
+            "brand_id",
+            "order_id",
+            "touch_id"
+          ],
+          "missing_columns": [],
+          "row_count": 10277,
+          "distinct_keys": 10277,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "touch_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            }
+          },
+          "temporal": {
+            "column": "touch_ts",
+            "min": "2026-05-31 18:30:04.455000",
+            "max": "2026-10-16 08:21:16.472000",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "OrderAttribution": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_id"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.order_attribution",
+          "declared_keys": [
+            "brand_id",
+            "order_id"
+          ],
+          "missing_columns": [],
+          "row_count": 24200,
+          "distinct_keys": 24200,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Returns.RefundEvents": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "refund_id"
+      ],
+      "date_policy": "refund_date",
+      "bindings": [
+        {
+          "table": "serve.refund_events",
+          "declared_keys": [
+            "brand_id",
+            "refund_id"
+          ],
+          "missing_columns": [],
+          "row_count": 3736,
+          "distinct_keys": 3736,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "refund_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "refund_date",
+            "min": "2025-01-18",
+            "max": "2026-10-15",
+            "freshness_days": 1
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Payments": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "transaction_id"
+      ],
+      "date_policy": "transaction_date",
+      "bindings": [
+        {
+          "table": "serve.payments",
+          "declared_keys": [
+            "brand_id",
+            "transaction_id"
+          ],
+          "missing_columns": [],
+          "row_count": 33953,
+          "distinct_keys": 33953,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "transaction_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "transaction_date",
+            "min": "2024-11-18",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Pnl.Canonical": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "sub_channel"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.canonical_pnl",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "sub_channel"
+          ],
+          "missing_columns": [],
+          "row_count": 1170,
+          "distinct_keys": 1170,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(Date)"
+            },
+            "sub_channel": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Pnl.OrderDaily": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_date",
+        "finance_channel",
+        "sub_channel",
+        "is_new_customer",
+        "shipping_region",
+        "payment_bucket",
+        "is_paid",
+        "ad_platform",
+        "campaign_id",
+        "adset_id",
+        "ad_id",
+        "row_type"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.order_pnl_daily",
+          "declared_keys": [
+            "brand_id",
+            "order_date",
+            "finance_channel",
+            "sub_channel",
+            "is_new_customer",
+            "shipping_region",
+            "payment_bucket",
+            "is_paid",
+            "ad_platform",
+            "campaign_id",
+            "adset_id",
+            "ad_id",
+            "row_type"
+          ],
+          "missing_columns": [],
+          "row_count": 56921,
+          "distinct_keys": 56921,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Date"
+            },
+            "finance_channel": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "sub_channel": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            },
+            "is_new_customer": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "shipping_region": {
+              "null_or_empty_rows": 37726,
+              "null_or_empty_pct": 66.2778,
+              "type": "String"
+            },
+            "payment_bucket": {
+              "null_or_empty_rows": 37707,
+              "null_or_empty_pct": 66.2444,
+              "type": "String"
+            },
+            "is_paid": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 6414,
+              "null_or_empty_pct": 11.2682,
+              "type": "Nullable(String)"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 8421,
+              "null_or_empty_pct": 14.7942,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 13504,
+              "null_or_empty_pct": 23.7241,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 13504,
+              "null_or_empty_pct": 23.7241,
+              "type": "Nullable(String)"
+            },
+            "row_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['shipping_region', 'payment_bucket', 'ad_platform', 'campaign_id', 'adset_id', 'ad_id']"
+          ],
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Product.Performance": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "line_item_id"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.product_performance",
+          "declared_keys": [
+            "brand_id",
+            "line_item_id"
+          ],
+          "missing_columns": [],
+          "row_count": 30510,
+          "distinct_keys": 30510,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "line_item_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Pnl.Profit": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_date",
+        "event_date",
+        "event_date_source",
+        "is_undated",
+        "row_type",
+        "finance_channel",
+        "sub_channel",
+        "is_paid",
+        "is_new_customer",
+        "shipping_region",
+        "payment_bucket",
+        "ad_platform",
+        "campaign_id",
+        "adset_id",
+        "ad_id",
+        "attribution_member"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.mart_profit",
+          "declared_keys": [
+            "brand_id",
+            "order_date",
+            "event_date",
+            "event_date_source",
+            "is_undated",
+            "row_type",
+            "finance_channel",
+            "sub_channel",
+            "is_paid",
+            "is_new_customer",
+            "shipping_region",
+            "payment_bucket",
+            "ad_platform",
+            "campaign_id",
+            "adset_id",
+            "ad_id",
+            "attribution_member"
+          ],
+          "missing_columns": [],
+          "row_count": 64714,
+          "distinct_keys": 64714,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Date"
+            },
+            "event_date": {
+              "null_or_empty_rows": 51,
+              "null_or_empty_pct": 0.0788,
+              "type": "Nullable(Date)"
+            },
+            "event_date_source": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "is_undated": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "row_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "finance_channel": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "sub_channel": {
+              "null_or_empty_rows": 18,
+              "null_or_empty_pct": 0.0278,
+              "type": "String"
+            },
+            "is_paid": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "is_new_customer": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "shipping_region": {
+              "null_or_empty_rows": 40826,
+              "null_or_empty_pct": 63.0868,
+              "type": "String"
+            },
+            "payment_bucket": {
+              "null_or_empty_rows": 40790,
+              "null_or_empty_pct": 63.0312,
+              "type": "LowCardinality(String)"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 8898,
+              "null_or_empty_pct": 13.7497,
+              "type": "LowCardinality(Nullable(String))"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 10355,
+              "null_or_empty_pct": 16.0012,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 14517,
+              "null_or_empty_pct": 22.4325,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 14517,
+              "null_or_empty_pct": 22.4325,
+              "type": "Nullable(String)"
+            },
+            "attribution_member": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['event_date', 'sub_channel', 'shipping_region', 'payment_bucket', 'ad_platform', 'campaign_id', 'adset_id', 'ad_id']"
+          ],
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Pnl.EventProfit": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "event_date_source",
+        "is_undated",
+        "row_type",
+        "finance_channel",
+        "sub_channel",
+        "is_paid",
+        "is_new_customer",
+        "shipping_region",
+        "payment_bucket",
+        "ad_platform",
+        "campaign_id",
+        "adset_id",
+        "ad_id",
+        "attribution_member"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.mart_pnl_event",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "event_date_source",
+            "is_undated",
+            "row_type",
+            "finance_channel",
+            "sub_channel",
+            "is_paid",
+            "is_new_customer",
+            "shipping_region",
+            "payment_bucket",
+            "ad_platform",
+            "campaign_id",
+            "adset_id",
+            "ad_id",
+            "attribution_member"
+          ],
+          "missing_columns": [],
+          "row_count": 63803,
+          "distinct_keys": 63803,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 44,
+              "null_or_empty_pct": 0.069,
+              "type": "Nullable(Date)"
+            },
+            "event_date_source": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "is_undated": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "row_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "finance_channel": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "sub_channel": {
+              "null_or_empty_rows": 18,
+              "null_or_empty_pct": 0.0282,
+              "type": "String"
+            },
+            "is_paid": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "is_new_customer": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "shipping_region": {
+              "null_or_empty_rows": 40823,
+              "null_or_empty_pct": 63.9829,
+              "type": "String"
+            },
+            "payment_bucket": {
+              "null_or_empty_rows": 40790,
+              "null_or_empty_pct": 63.9312,
+              "type": "LowCardinality(String)"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 8150,
+              "null_or_empty_pct": 12.7737,
+              "type": "LowCardinality(Nullable(String))"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 9591,
+              "null_or_empty_pct": 15.0322,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 13702,
+              "null_or_empty_pct": 21.4755,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 13702,
+              "null_or_empty_pct": 21.4755,
+              "type": "Nullable(String)"
+            },
+            "attribution_member": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['report_date', 'sub_channel', 'shipping_region', 'payment_bucket', 'ad_platform', 'campaign_id', 'adset_id', 'ad_id']"
+          ],
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Commerce.OrderFact": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_id"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.fct_order_commerce",
+          "declared_keys": [
+            "brand_id",
+            "order_id"
+          ],
+          "missing_columns": [],
+          "row_count": 24246,
+          "distinct_keys": 24246,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Product.LineProfit": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "order_id",
+        "line_item_id",
+        "event_date",
+        "event_date_source",
+        "is_undated",
+        "ad_platform",
+        "campaign_id",
+        "adset_id",
+        "ad_id"
+      ],
+      "date_policy": "order_date",
+      "bindings": [
+        {
+          "table": "serve.mart_product_profit",
+          "declared_keys": [
+            "brand_id",
+            "order_id",
+            "line_item_id",
+            "event_date",
+            "event_date_source",
+            "is_undated",
+            "ad_platform",
+            "campaign_id",
+            "adset_id",
+            "ad_id"
+          ],
+          "missing_columns": [],
+          "row_count": 39539,
+          "distinct_keys": 39539,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "line_item_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "event_date": {
+              "null_or_empty_rows": 85,
+              "null_or_empty_pct": 0.215,
+              "type": "Nullable(Date)"
+            },
+            "event_date_source": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "LowCardinality(String)"
+            },
+            "is_undated": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "UInt8"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 17983,
+              "null_or_empty_pct": 45.4817,
+              "type": "LowCardinality(Nullable(String))"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 20151,
+              "null_or_empty_pct": 50.9649,
+              "type": "Nullable(String)"
+            },
+            "adset_id": {
+              "null_or_empty_rows": 22615,
+              "null_or_empty_pct": 57.1967,
+              "type": "Nullable(String)"
+            },
+            "ad_id": {
+              "null_or_empty_rows": 22615,
+              "null_or_empty_pct": 57.1967,
+              "type": "Nullable(String)"
+            }
+          },
+          "temporal": {
+            "column": "order_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['event_date', 'ad_platform', 'campaign_id', 'adset_id', 'ad_id']"
+          ],
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    },
+    "Product.AdProfit": {
+      "role": "primary_fact",
+      "declared_keys": [
+        "brand_id",
+        "report_date",
+        "row_type",
+        "ad_platform",
+        "campaign_id",
+        "order_id",
+        "line_item_id"
+      ],
+      "date_policy": "report_date",
+      "bindings": [
+        {
+          "table": "serve.mart_product_ad_profit",
+          "declared_keys": [
+            "brand_id",
+            "report_date",
+            "row_type",
+            "ad_platform",
+            "campaign_id",
+            "order_id",
+            "line_item_id"
+          ],
+          "missing_columns": [],
+          "row_count": 48601,
+          "distinct_keys": 48601,
+          "duplicate_key_rows": 0,
+          "population": {
+            "brand_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "report_date": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Nullable(Date)"
+            },
+            "row_type": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "String"
+            },
+            "ad_platform": {
+              "null_or_empty_rows": 14656,
+              "null_or_empty_pct": 30.1558,
+              "type": "LowCardinality(String)"
+            },
+            "campaign_id": {
+              "null_or_empty_rows": 16474,
+              "null_or_empty_pct": 33.8964,
+              "type": "String"
+            },
+            "order_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            },
+            "line_item_id": {
+              "null_or_empty_rows": 0,
+              "null_or_empty_pct": 0.0,
+              "type": "Int64"
+            }
+          },
+          "temporal": {
+            "column": "report_date",
+            "min": "2024-10-23",
+            "max": "2026-10-16",
+            "freshness_days": 0
+          },
+          "gates": {
+            "U_uniqueness": "pass",
+            "C_cardinality": "pass",
+            "P_population": "pass",
+            "T_temporal": "pass"
+          },
+          "warnings": [
+            "declared keys with null/empty values (advisory): ['ad_platform', 'campaign_id']"
+          ],
+          "binding": "fact"
+        }
+      ],
+      "reconciliation": {
+        "applicable": false
+      },
+      "verdict": "certified",
+      "binding_verdicts": {
+        "fact": true
+      }
+    }
+  }
+}

@@ -779,6 +779,7 @@ QUESTIONS = [
 ]
 
 import asyncio
+import os
 import json
 import sys
 from datetime import datetime
@@ -826,20 +827,30 @@ async def _global_ratio_check():
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "src"))
 
-CUBE_API_URL = "http://127.0.0.1:4002"
-CATALOGUE_DIR = BASE_DIR / "catalogue_v2"
-REPORT_PATH = BASE_DIR / "doc" / "semantic_qa" / "CERTIFICATION.md"
-EVIDENCE_DIR = BASE_DIR / "doc" / "semantic_qa" / "evidence"
+# v2 defaults; Phase 7 of semantic v3 points the same questions at Cube v3:
+#   CERTIFY_CUBE_URL=http://127.0.0.1:4003 CERTIFY_CATALOGUE=catalogue_v3 CERTIFY_OUT=doc/semantic_v3/results/qa_v3 scripts/certify_qa.py
+CUBE_API_URL = os.environ.get("CERTIFY_CUBE_URL", "http://127.0.0.1:4002")
+CATALOGUE_DIR = BASE_DIR / os.environ.get("CERTIFY_CATALOGUE", "catalogue_v2")
+_OUT = os.environ.get("CERTIFY_OUT")
+REPORT_PATH = (BASE_DIR / _OUT / "CERTIFICATION.md") if _OUT else BASE_DIR / "doc" / "semantic_qa" / "CERTIFICATION.md"
+EVIDENCE_DIR = (BASE_DIR / _OUT / "evidence") if _OUT else BASE_DIR / "doc" / "semantic_qa" / "evidence"
 
 
 import dataclasses
+
+
+def _cube_secret() -> str:
+    sys.path.insert(0, str(BASE_DIR / "scripts"))
+    import v2_parity
+    return v2_parity.secret()
+
 
 def build_planner():
     settings = load_settings()
     settings = dataclasses.replace(
         settings,
         cube_api_url=CUBE_API_URL,
-        cubejs_api_secret="891b5fc5ffd34dd7ee3a0498c567cf0be904858a4dbb8059d52ac799b779f906",
+        cubejs_api_secret=_cube_secret(),
         write_enabled=False,
     )
     cat = CatalogueService(load_catalogue(CATALOGUE_DIR))

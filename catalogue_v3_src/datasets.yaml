@@ -1,10 +1,10 @@
 Ads.Delivery:
   domain: advertising
   role: primary_fact
-  description: Unified ad delivery (Meta ∪ Google), ad × day (with hourly binding)
+  description: Unified ad delivery (Meta ∪ Google), ad × day (the hourly grain is
+    Ads.DeliveryHourly)
   physical_bindings:
-    daily: serve.ad_delivery_daily
-    hourly: serve.ad_delivery_hourly
+    daily: serve.fct_ad_delivery
   grain:
     declared_keys:
     - brand_id
@@ -14,6 +14,8 @@ Ads.Delivery:
     - campaign_id
     - adset_id
     - ad_id
+    - device
+    - network
   date_policy:
     default: report_date
     meaning: ad_delivery_date
@@ -21,7 +23,38 @@ Ads.Delivery:
   - meta
   - google
   certification:
-    status: pending_verification
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
+Ads.DeliveryHourly:
+  domain: advertising
+  role: primary_fact
+  description: Unified ad delivery (Meta ∪ Google), ad × day × hour (split from Ads.Delivery
+    in v3 because the hourly grain has hour_of_day in its key)
+  physical_bindings:
+    hourly: serve.fct_ad_delivery_hourly
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - hour_of_day
+    - ad_platform
+    - account_id
+    - campaign_id
+    - adset_id
+    - ad_id
+    - device
+    - network
+  date_policy:
+    default: report_date
+    meaning: ad_delivery_date
+  supported_platforms:
+  - meta
+  - google
+  certification:
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Meta.Breakdowns:
   domain: advertising
   role: primary_fact
@@ -51,8 +84,8 @@ Meta.Breakdowns:
   slice_dimension: breakdown_type
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Commerce.Orders:
   domain: commerce
   role: primary_fact
@@ -68,8 +101,8 @@ Commerce.Orders:
     meaning: original_order_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Commerce.OrderEvents:
   domain: commerce
   role: primary_fact
@@ -87,8 +120,8 @@ Commerce.OrderEvents:
     meaning: event_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Web.Events:
   domain: web_analytics
   role: primary_fact
@@ -104,8 +137,8 @@ Web.Events:
     meaning: event_timestamp
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Web.EventsDaily:
   domain: web_analytics
   role: preaggregation
@@ -123,8 +156,8 @@ Web.EventsDaily:
     meaning: event_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Sessions:
   domain: web_analytics
   role: primary_fact
@@ -140,8 +173,8 @@ Sessions:
     meaning: session_start_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Touchpoints:
   domain: attribution
   role: primary_fact
@@ -158,8 +191,8 @@ Touchpoints:
     meaning: touch_timestamp
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 OrderAttribution:
   domain: attribution
   role: primary_fact
@@ -175,8 +208,8 @@ OrderAttribution:
     meaning: original_order_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Returns.RefundEvents:
   domain: operations
   role: primary_fact
@@ -192,8 +225,8 @@ Returns.RefundEvents:
     meaning: refund_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Payments:
   domain: operations
   role: primary_fact
@@ -209,11 +242,12 @@ Payments:
     meaning: transaction_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Pnl.Canonical:
   domain: finance
   role: primary_fact
+  superseded_by: Pnl.EventProfit
   description: Canonical P&L (event/date basis)
   physical_bindings:
     fact: serve.canonical_pnl
@@ -227,11 +261,12 @@ Pnl.Canonical:
     meaning: event_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Pnl.OrderDaily:
   domain: finance
   role: primary_fact
+  superseded_by: Pnl.Profit
   description: Order-cohort P&L (mixed basis by design)
   physical_bindings:
     fact: serve.order_pnl_daily
@@ -256,8 +291,8 @@ Pnl.OrderDaily:
   mixed_basis: true
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
 Product.Performance:
   domain: product
   role: primary_fact
@@ -273,5 +308,137 @@ Product.Performance:
     meaning: original_order_date
   certification:
     status: certified
-    certified_on: '2026-10-12'
-    evidence: doc/semantic_datasets/certification.json
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
+Pnl.Profit:
+  domain: finance
+  role: primary_fact
+  description: Semantic v3 profit mart — every order-date cohort rupee once, with
+    its event date alongside (D-21, D-28)
+  physical_bindings:
+    fact: serve.mart_profit
+  grain:
+    declared_keys:
+    - brand_id
+    - order_date
+    - event_date
+    - event_date_source
+    - is_undated
+    - row_type
+    - finance_channel
+    - sub_channel
+    - is_paid
+    - is_new_customer
+    - shipping_region
+    - payment_bucket
+    - ad_platform
+    - campaign_id
+    - adset_id
+    - ad_id
+    - attribution_member
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
+Pnl.EventProfit:
+  domain: finance
+  role: primary_fact
+  description: Semantic v3 event-date P&L — cancels / RTO / returns on the day booked,
+    Undated shown separately (D-21b, D-29, D-32)
+  physical_bindings:
+    fact: serve.mart_pnl_event
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - event_date_source
+    - is_undated
+    - row_type
+    - finance_channel
+    - sub_channel
+    - is_paid
+    - is_new_customer
+    - shipping_region
+    - payment_bucket
+    - ad_platform
+    - campaign_id
+    - adset_id
+    - ad_id
+    - attribution_member
+  date_policy:
+    default: report_date
+    meaning: event_date
+  certification:
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
+Commerce.OrderFact:
+  domain: commerce
+  role: primary_fact
+  description: Semantic v3 order fact — one row per order with type, sale flag, outcome
+    and customer sequence (D-01, D-08)
+  physical_bindings:
+    fact: serve.fct_order_commerce
+  grain:
+    declared_keys:
+    - brand_id
+    - order_id
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
+Product.LineProfit:
+  domain: product
+  role: primary_fact
+  description: Semantic v3 order-line P&L with its event date (credit-weighted by
+    the default attribution model)
+  physical_bindings:
+    fact: serve.mart_product_profit
+  grain:
+    declared_keys:
+    - brand_id
+    - order_id
+    - line_item_id
+    - event_date
+    - event_date_source
+    - is_undated
+    - ad_platform
+    - campaign_id
+    - adset_id
+    - ad_id
+  date_policy:
+    default: order_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
+Product.AdProfit:
+  domain: product
+  role: primary_fact
+  description: 'Allocated product-ad family: allocated, unallocated, organic and order-level
+    rows; every rupee of the cohort once (D-27, D-34, D-38)'
+  physical_bindings:
+    fact: serve.mart_product_ad_profit
+  grain:
+    declared_keys:
+    - brand_id
+    - report_date
+    - row_type
+    - ad_platform
+    - campaign_id
+    - order_id
+    - line_item_id
+  date_policy:
+    default: report_date
+    meaning: original_order_date
+  certification:
+    status: certified
+    certified_on: '2026-10-16'
+    evidence: doc/semantic_v3/results/datasets/certification.json
