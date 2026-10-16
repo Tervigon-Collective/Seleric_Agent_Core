@@ -264,11 +264,11 @@ limits:
 - id: L-33
   area: 'Web'
   limit: 'Snowplow add_to_cart fires twice per add (two events, different event_id, one client_event_id, within 2 s).'
-  impact: 'Sep 2026, Meta-tagged sessions, brand 20: 4,035 events but 2,148 distinct client_event_id (1,876 pairs, 1,847 within 2 s), 1,831 session x variant, 1,489 sessions. Event counts of add_to_cart are about 1.9x the real add actions; session counts are unaffected. Meta reports 769, so the double-firing does not explain the Meta gap. remove_from_cart events (502 in 164 sessions) carry no variant id and cannot be netted per item. client_event_id as the deduplication key is an inference.'
+  impact: 'Sep 2026, Meta-tagged sessions, brand 20: 4,035 events but 2,148 distinct client_event_id (1,876 pairs, 1,847 within 2 s), 1,831 session x variant, 1,489 sessions. Before the serve fix event counts of add_to_cart were about 1.9x the real add actions; session counts were never affected. Meta reports 769, so the double-firing does not explain the Meta gap. remove_from_cart events (502 in 164 sessions) carry no variant id and cannot be netted per item. client_event_id as the deduplication key is an inference.'
   affects: 'event_add_to_carts and any add-to-cart event count; add-to-cart rates built on events'
   handled_by: [D-13]
-  status: open
-  next_step: 'Owner OK to deduplicate add_to_cart by client_event_id in serve.fct_web_event (production view change), or fix the tracker upstream.'
+  status: accepted
+  next_step: 'Applied 2026-10-16 (owner OK): serve.fct_web_event drops the second add_to_cart of a pair (same session / variant / quantity within 2 s; Sep 2026 all traffic 3,977 kept vs 3,959 distinct client_event_id; Meta sessions 2,159 vs 2,148); contract WEB-ATC-DEDUP. The real fix is upstream (tracker fires twice; gold.fct_web_events should carry client_event_id): dbt / storefront owner.'
 - id: L-34
   area: 'Reconciliation'
   limit: 'Meta-reported purchases (679, Sep 2026) exceed Shopify sale orders credited to Meta paid (587).'
@@ -276,4 +276,4 @@ limits:
   affects: 'any platform-vs-first-party purchase comparison; Phase 7 variance report'
   handled_by: [D-00, D-13, D-01, D-06]
   status: open
-  next_step: 'Owner checks the Ads Manager attribution setting / change history around 2026-09-01; optional reconciliation view (replacement bridge + window cuts) needs owner OK.'
+  next_step: 'Checked 2026-10-16 from the stored per-row attribution_setting (Pipe Board / Ads Manager history not reachable): the setting mix did NOT change on 1 Sep (about 70 % of spend 1d_view_7d_click, 25 % 7d_click); days are loaded once at D+7. Meta purchases per 1,000 INR of spend fell 1.41 (Aug) -> 0.79 (Sep) while our Meta-credited orders per 1,000 INR stayed 0.69, so the drop is on the Meta side (measurement: pixel / Conversions API matching, modelled conversions), not our window. Owner: check Events Manager diagnostics for September.'
