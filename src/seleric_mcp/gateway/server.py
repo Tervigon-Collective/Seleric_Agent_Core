@@ -564,8 +564,8 @@ def build_server(settings: Settings) -> FastMCP:
         dimensions/filters, owner, access policy, freshness, caveats, plus an
         ``openmetadata`` block (data product, entity cluster, related metrics).
 
-        Pass a catalogue metric id (e.g. total_sales_all_channels). Cube
-        members from provenance (e.g. sales_all_channels.total_sales) are
+        Pass a catalogue metric id (e.g. net_sales). Cube
+        members from provenance (e.g. commerce.net_sales) are
         accepted and remapped, but NEVER pass cube_mapping.measure into
         metrics_query — always use the returned metric id / query_as.measures.
         """
@@ -721,9 +721,9 @@ def build_server(settings: Settings) -> FastMCP:
         'channel wise report') to catalogue dimension id(s). Returns resolved
         | ambiguous | unknown — never a metric. Ambiguous candidates include
         products, views, value spaces, and metrics whose supported_dimensions
-        include the dim. Bare 'channel' is ambiguous (channel vs lt_channel);
-        do not silently pick commerce_net_revenue_daily. Apply ontology
-        grain_defaults when no measure is named."""
+        include the dim. Bare 'channel' is ambiguous (channel vs
+        acquisition_channel vs finance_channel); do not silently pick one. Apply
+        ontology grain_defaults when no measure is named."""
         _log_call("catalogue_resolve_dimension", text=text)
         return ctx.catalogue.resolve_dimension_term(text).model_dump()
 
@@ -814,7 +814,7 @@ def build_server(settings: Settings) -> FastMCP:
     def catalogue_related_metrics(metric_id: str, module: str | None = None) -> dict:
         """Entity-cluster neighbors of a catalogue metric: other catalogue ids
         in the same business object, plus related glossary terms. Use this to
-        see which metrics share a grain/object (e.g. orders with active_orders)
+        see which metrics share a grain/object (e.g. orders with returned_orders)
         without treating glossary relatedness as causality.
         """
         _log_call("catalogue_related_metrics", metric_id=metric_id, module=module)
@@ -915,8 +915,13 @@ def build_server(settings: Settings) -> FastMCP:
     ) -> dict:
         """THE only path to numeric data. measures = catalogue metric ids
         (from catalogue_search_metrics), not raw cube members. Cube members
-        like sales_all_channels.total_sales are auto-mapped when possible, but
-        always prefer catalogue ids (total_sales_all_channels, total_orders).
+        like commerce.net_sales are auto-mapped when possible, but always
+        prefer catalogue ids (net_sales, orders). A retired id is rejected with
+        its replacement (and any filter to add) named: use that. One id per
+        number: a platform / channel / brand slice is a filter or dimension on
+        it (Meta ad spend = ad_spend filtered ad_platform equals meta), never a
+        separate id. Sales, orders, profit and ROAS are ORDER-date by default;
+        the pnl_* ids are the Finance P&L on event date (use only when asked).
         dimensions / filters.dimension / sort.field are also catalogue ids
         (e.g. shipping_region), not view.qualified members. time_range is
         {"preset": "last_30d"} (today|yesterday|last_7d|last_30d|last_90d|
@@ -937,9 +942,8 @@ def build_server(settings: Settings) -> FastMCP:
         different views are run as parallel single-view queries and returned
         with composed=true and a parts[] array — narrate each part separately
         (do not join across views). Same-view metrics return the usual rows +
-        provenance. For top sales by state with order count (all channels):
-        measures=[total_sales_all_channels, total_orders],
-        dimensions=[shipping_region], sort by total_sales_all_channels desc.
+        provenance. Top sales by state with order count: measures=[net_sales,
+        orders], dimensions=[shipping_region], sort by net_sales desc.
         Quote provenance freshness when presenting numbers. module=<id> (see
         modules_list) scopes this call to one dashboard module and refuses any
         measure outside it; a pinned instance forces its module regardless.

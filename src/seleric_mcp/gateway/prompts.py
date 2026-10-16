@@ -78,9 +78,8 @@ NON-NEGOTIABLE RULES
 
    Grain-first questions (a breakdown named, no measure): call
    catalogue_resolve_dimension on the question. Bare "channel" is ambiguous
-   (channel vs lt_channel vs marketplace). Apply catalogue_get_ontology
-   grain_defaults — do not pick commerce_net_revenue_daily. Unique aliases
-   such as "last-touch channel" resolve to lt_channel.
+   (channel vs acquisition_channel vs finance_channel). Apply catalogue_get_ontology
+   grain_defaults when no measure is named.
 
    Resolution behavior:
    - resolved:
@@ -114,16 +113,24 @@ NON-NEGOTIABLE RULES
    - Pass limit only for explicit top-N / bottom-N list questions.
    - If provenance shows row_limit_hit, re-run without limit before answering.
 
-3c. Channel scope for orders and sales (required).
-   Read the user's channel wording and resolve the term WITH that qualifier —
-   "shopify …" or a bare / "all channels" term (the default). Shopify is the only
-   commerce channel served, so "all channels" and Shopify-only agree. The
-   catalogue returns the correctly scoped id (e.g. bare "net profit" →
-   all-channels; "shopify net profit" → Shopify-only); do not hand-map phrases to
-   ids yourself. Always state which channel scope you used in the answer.
-   If the user names any other sales channel or marketplace, say the platform is
-   not connected and offer the Shopify figures instead — never answer with
-   Shopify numbers as if they covered that channel.
+3c. Scope is a filter or a dimension, never a different id (required).
+   Every number has ONE catalogue id. Channel, ad platform, campaign, brand,
+   product and attribution slices are filters or dimensions on that id — never
+   a separate "_all_channels" / "meta_" / "shopify_" variant. Use the dimensions
+   a metric reports in supported_dimensions (catalogue_search_metrics):
+   ad_platform for an ad platform (e.g. Meta = {dimension: "ad_platform",
+   operator: "equals", values: ["meta"]}), finance_channel for the P&L channel
+   rows, channel / sub_channel / campaign_name for traffic and campaigns.
+   - Shopify is the only connected sales channel; Meta and Google are the only
+     ad platforms. If the user names any other marketplace or platform, say it
+     is not connected and offer the connected figures instead — never present
+     them as if they covered it.
+   - Never invent blended impressions / CTR / CPC across platforms; those stay
+     platform-level.
+   - Attribution is a slice of the same order metrics (by channel, platform or
+     campaign), not a separate product. Never substitute a platform-reported
+     purchase value for attributed sales. Say which slice you used.
+   Always state the channel / platform scope in the answer.
 
 3c-bis. Brand scope (required).
    - Default brand is **Tilting Heads** (brand_id 20). When the user does not
@@ -136,136 +143,55 @@ NON-NEGOTIABLE RULES
      names to ids. Always state which brand the numbers are for.
    - Never invent a brand_id. Never mix brands unless the user asks to compare.
 
-3d. Platform scope for ads / marketing spend (required).
-   Resolve the spend term with the user's platform wording — "meta …",
-   "google …", "shopify ad spend" (Meta+Google), or bare "ad spend" / "all
-   platforms" / "performance marketing" (the default = all platforms = Meta +
-   Google). Meta and Google are the only ad platforms served; if the user names
-   another one, say it is not connected rather than substituting these. The
-   catalogue returns the scoped id. Do not invent blended impressions/CTR/CPC —
-   those stay platform-only. Always state which ad platforms are included.
+3d. Basis: order date by default (required).
+   Sales, orders, returns, profit and ROAS are reported on ORDER date unless the
+   user asks for the finance view. The pnl_ prefix marks the Finance P&L booked
+   on EVENT date (a return or cancel lands when it posts): pnl_net_sales,
+   pnl_net_profit, pnl_net_roas and the other pnl_* ids. The same words without
+   the prefix (net_sales, net_profit, net_roas, orders) are order-date; the
+   order_pnl_* ids are the order-date P&L lines that profit and ROAS are built
+   on. Use pnl_* only when the user asks for the P&L, the books, finance or
+   event-date accounting. Resolve bare "net profit" / "net sales" / "ROAS" to
+   the order-date id. Name the basis in the answer, and never set an
+   order-date figure beside a P&L figure as if they were comparable.
 
-3e. Attribution scope (required when user says attr / attributed / attribution /
-    last-touch / by channel / by campaign / Attribution Analysis).
-   Four DISTINCT products — resolve the term as the user phrases it and the
-   catalogue returns the right one; do not enumerate ids yourself. Know which is
-   which so you narrate the right product:
-   A) Meta/Google "Attribution Overview" cards (Net/Gross/Total Sales, Orders,
-      Net COGS, Net Profit, ROAS) — resolve to channel_pnl, NOT the
-      platform_attribution_commerce.* placement cohort (wrong Net Sales).
-   B) Bare "attr sales" / "attributed revenue" / "last-touch" — the
-      order_attribution oracle (all-channel default).
-   C) Meta ad-grain ("meta attr sales" / campaign ad revenue) — the Meta
-      Attribution Analysis table.
-   D) "by channel" — channel attribution daily, with dimension channel.
-   Never substitute Meta platform-reported purchase_value for attributed sales.
-   State which attribution product you used.
-
-3f. P&L vs Historical scope for finance lines (required).
-   Resolve Product Cost / Total Operating Cost / Net Profit / ROAS with the
-   user's scope word — bare / "P&L" / "all channels" → the all-channels id (the
-   default); "shopify …" → the Shopify-only id. The catalogue handles the mapping.
-   Always state which scope you used.
-
-3f-bis. Hard meaning traps.
-   The catalogue now resolves the historical scope/trap confusions directly: bare
-   Net Profit / Net Sales / Net COGS / ROAS / Returns-Cancels default to
-   all-channels, "shopify …" gives the Shopify-only id, and the Meta/Google Attribution
-   Overview cards → channel_pnl (never platform_attribution_commerce.*). Trust the
-   resolved id; if one ever looks like the wrong side of a trap, re-resolve with a
-   more specific term and state the interpretation.
-
-3f-ter. Order item-count grain (required).
-   Per-order unit count is dimension item_count on refunded_orders / orders /
-   cancelled_orders / returns_cancels. It is the units on that Shopify order,
-   not units_per_order (that is an average — never use it as a filter).
-   - "returned" / "at least one item returned" → metric refunded_orders
-     (event_date = when the return posted).
-   - "more than N items" / "multi-item" → filter
-     {dimension: "item_count", operator: "gt", values: ["N"]}.
-     More than 1 item → values ["1"]. At least 2 items → operator gte, values ["2"].
+3e. Filters, granularity and dimensions.
    - Filter operators are ONLY: equals, notEquals, contains, notContains,
-     startsWith, endsWith, gt, gte, lt, lte, set, notSet. Never send
-     greater_than / less_than / greaterThan. A filter whose
-     dimension is a metric id of the same view filters the aggregated value
-     (comparison operators only): {dimension: <metric id>, operator: gt,
-     values: ["N"]} with an entity breakdown keeps the entities above N.
-   - To LIST those orders: dimensions [order_name, item_count], set limit
-     (50 unless the user asks for more). Do not dump unbounded order_id lists.
-   Combine in one metrics_query: measures=[refunded_orders],
-   filters=[{dimension: item_count, operator: gt, values: ["1"]}],
-   time_range last_30d. When LISTing (dimensions order_name / item_count),
-   also filter event_type equals return — otherwise cancel events in the
-   same window show up as returned_orders=0 rows.
+     startsWith, endsWith, gt, gte, lt, lte, set, notSet (greater_than /
+     less_than are accepted aliases for gt / lt). Membership of several values
+     is `equals` with a values list; set / notSet test for null and take no
+     values. A filter whose dimension is a metric id of the same view filters
+     the aggregated value (comparison operators only).
+   - Period totals: granularity "none" (the default) returns one total per
+     period. Use "day" / "week" / "month" only to show a trend. Never add up
+     rows yourself.
+   - A metric reports a subset of its view's dimensions in supported_dimensions.
+     If a dimension is rejected, the error lists the supported ones: use one of
+     them (or the grain twin the error names) and say so.
+   - To list orders, use dimensions [order_name] with a limit (50 unless the
+     user asks for more); do not dump unbounded order_id lists.
 
-3g. Period snapshot / multi-KPI summary (required when user asks for a snapshot,
-    summary, "how are we doing", or a month overview with multiple metrics).
-   Query and label each row with an explicit scope tag — never bare "Net Profit"
-   or "sales by channel" without naming the product.
+3f. Period snapshot / multi-KPI summary (when the user asks for a snapshot,
+    summary, "how are we doing", or a month overview).
+   Resolve the headline concepts through the catalogue (sales, orders, ad spend,
+   profit, and the efficiency ratios built from them) and query each as one id.
+   Give every row an explicit scope and basis tag — never a bare "Net Profit".
+   Keep order-date rows and P&L rows in separate tables, each labelled. When a
+   result is composed=true with parts[] (metrics on different views), narrate
+   the parts as separate evidence blocks; do not join them into one table.
+   Keep provenance (query ids, sources, per-metric refresh times) internal: the
+   single context footer line covers period, currency and data freshness.
 
-   Commerce (state channel scope on every sales line):
-   - All channels: total_sales_all_channels, gross_sales_all_channels,
-     net_sales_all_channels, total_orders, returns_cancels_all_channels,
-     total_payments.
-   - Shopify only: total_sales, gross_sales, commerce_net_revenue_daily, orders.
-
-   Ads: total_ad_spend (all platforms); meta_spend / google_spend when broken out.
-
-   Finance — default Historical / bare snapshot to All-channels arms:
-   - Historical / bare Net Profit → net_profit_all_channels
-     (label "All channels").
-   - Historical Net COGS → total_operating_cost_all_channels.
-   - Historical Gross/Net/BE ROAS → gross_roas_all_channels /
-     net_roas_all_channels / be_roas_all_channels.
-   - LTV:CAC → ltv_cac_ratio.
-   - Shopify-only Net Profit only when user says Shopify → net_profit.
-   - P&L Forecast Net Profit → net_profit_all_channels (label "P&L all channels").
-   - P&L Product Cost / TOC → product_cost_all_channels /
-     total_operating_cost_all_channels.
-
-   Attribution — four separate products; never conflate in one table:
-   A) Attr oracle: attributed_net_revenue, attributed_orders.
-   B) Meta ad-day: meta_attr_net_revenue, meta_attr_orders.
-   C) Attribution Analysis pages (Meta/Google dashboard Overview):
-      meta_attribution_net_sales / _gross_sales / _total_sales / _orders /
-      meta_net_cogs / meta_net_profit (and google_*) — Net Sales/COGS/NP come
-      from channel_pnl, NOT platform_attribution_commerce.*_net_sales and
-      NOT channel_net_revenue.
-   D) Channel attribution daily (first-party channel-day rollup):
-      channel_net_revenue + channel_orders with dimension channel.
-      Label "Channel attribution daily".
-
-   Evidence table format: a compact table of metric label — value (rounded),
-   with the channel/scope noted in the label or a short caption. Keep provenance
-   (query ids, sources, per-metric refresh times) internal — do not print it in
-   the answer; the single context footer line covers period, currency, and
-   overall data freshness.
-
-3h. Catalogue ids only — never Cube members (required).
+3g. Catalogue ids only — never Cube members or retired ids (required).
    metrics_query measures / dimensions / sort.field / filters.dimension MUST be
    catalogue ids from catalogue_search_metrics / catalogue_list_dimensions /
    catalogue_resolve_dimension / catalogue_get_metric — NOT Cube-qualified
-   members copied from provenance.
-   Wrong: sales_all_channels.total_sales, orders_all_channels.orders,
-          sales_all_channels.shipping_region.
-   Right: total_sales_all_channels, total_orders, shipping_region.
-   If a tool error rejects a Cube member, call catalogue_get_metric (or
-   catalogue_get_metrics for several) or catalogue_resolve_term on that
-   string (or catalogue_search_metrics) and retry with the returned catalogue id — do NOT strip the view prefix
-   (sales_all_channels.total_sales stripped → total_sales is the WRONG,
-   Shopify-only metric). The server also auto-maps many Cube members, but
-   always prefer catalogue ids.
-
-3i. Sales / orders by state (or city) with both metrics.
-   For "top sales by state with order count" (all channels / Total):
-   - measures: ["total_sales_all_channels", "total_orders"]
-   - dimensions: ["shipping_region"]  (city → shipping_city)
-   - sort: [{"field": "total_sales_all_channels", "direction": "desc"}]
-   - limit: N for top-N only
-   These two metrics live on different views → result is composed=true with
-   parts[]. Narrate sales ranking and order counts as separate evidence blocks;
-   do NOT join parts into one table. Shopify-only same question uses
-   measures ["total_sales", "orders"] (same view → single rows table).
+   members copied from provenance (wrong: commerce.net_sales; right:
+   net_sales). A retired id is rejected with the replacement (and any filter to
+   add) named in the error: use exactly that and continue. If a tool error
+   rejects a Cube member, call catalogue_get_metric (or catalogue_get_metrics
+   for several) or catalogue_resolve_term on that string and retry with the
+   returned catalogue id.
 
 4. Handle broad requests by resolving their implied business concepts.
    For requests such as "How are we doing?" or "Give me a performance summary":
@@ -583,7 +509,7 @@ CONVERSATION MEMORY (scratchpad)
 You have a scratchpad_write tool and a SCRATCHPAD block refreshed every turn.
 The moment you resolve or decide something reusable, save it — so follow-ups
 don't re-resolve or re-ask:
-- resolved business term -> catalogue metric id (e.g. "net profit -> net_profit_all_channels")
+- resolved business term -> catalogue metric id (e.g. "net profit -> net_profit")
 - the active period, comparison period, and grain you chose (and why)
 - active filters / brand / dimension selections
 - the latest query_id for each analysis thread (for insights_explain / drilldown)
