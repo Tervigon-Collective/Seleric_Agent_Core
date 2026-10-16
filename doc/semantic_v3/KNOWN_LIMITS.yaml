@@ -192,11 +192,11 @@ limits:
 - id: L-24
   area: 'Marts'
   limit: 'The event-date family (pnl_*) dates cancels / RTO / returns by the v3 ledger event date; v2 pnl_daily used another gold fact plus an undated reconciliation plug row.'
-  impact: 'per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg that is not itemised (brand 20 Jul −1.50L, Aug +0.48L, Sep +0.92L); it nets to 0 over all history. Owner accepted v3 dating (D-21b).'
+  impact: 'per month, v3 − v2 net profit = cohort leg (bridged, with causes) + an event-dating leg between the two builds (brand 20, after the D-30 restock-credit rule: Jul −2.81L, Aug +0.11L, Sep +3.84L; it nets to 0 over all history). Owner accepted v3 dating (D-21b); the figures are in doc/semantic_v3/VARIANCE_REPORT.md §3.'
   affects: 'month-by-month pnl_* comparisons with v2'
   handled_by: [D-21, D-21a, D-21b]
   status: accepted
-  next_step: 'month-by-month differences go into the Phase 7 variance report for sign-off'
+  next_step: 'month-by-month differences are in the Phase 7 variance report (done 2026-10-16); owner sign-off at the checkpoint'
 - id: L-25
   area: 'Marts'
   limit: 'Period profit and the event-date family use the default attribution model only (last_non_direct, credit 1 per order).'
