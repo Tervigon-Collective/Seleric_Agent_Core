@@ -167,6 +167,7 @@ Machine-readable register (implementation location, evidence codes, tests, how t
 | D-42 | No Cube pre-aggregations | no, stay without / yes later / yes, set it up | Heavy queries 0.3-3.4 s without them; the serving login is read-only | **DECIDED 2026-10-16 (owner):** stay without; no write login or schema. |
 | D-43 | First monthly close: August 2026 | lock Aug now / wait for Sep / decide at cutover | Aug 2026 cohort past the 45-day window; dry run 5,460 rows | **DECIDED 2026-10-16 (owner), applied:** August 2026 locked (`close_month.py --month 2026-08 --apply`, 0 restatements). Recurring schedule not yet installed (L-27). |
 | D-44 | Certification scope is brand 20 | answer + low-volume caveat / refuse ratios / no change | Brands 24-27 have 1-32 orders; v2 gave no caveat | **DECIDED 2026-10-16 (owner):** no action on other brands; brand 20 is the certified scope. |
+| D-45 | Website landing page views by ad account: refuse and point to campaign slices | refuse with a pointer / populate account on website rows / defer | Website LPV has no account (100 % of Sep 2026, 50,380); QA AD01-AD08 passed with LPV 0 beside spend | **DECIDED 2026-10-17 (owner):** account filters and slices of `landing_page_views` / `cost_per_landing_page_view` are refused; the refusal points to campaign slices and `platform_reported_landing_page_views`. |
 
 ---
 

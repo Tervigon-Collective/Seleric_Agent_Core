@@ -96,7 +96,7 @@ GAPS = [
     ("Platform ROAS / platform-reported purchases and value", "Exposed", "Hidden", "D-13", "L-06"),
     ("Brand 28 (Commbitz) profit, ROAS, AOV, LTV", "Computed as -spend", "Refused; spend and delivery answered", "D-44", "v2 value was wrong (F0-3)"),
     ("Hourly delivery before platform coverage / unbounded ranges", "No coverage guard on record", "Refused with the coverage date (Meta from 2026-04-01, Google from 2024-11-15)", "L-04", "Data not in gold"),
-    ("Landing page views filtered or sliced by ad account (`account_id`)", "Meta figure per account (Sep 2026 brand 20: 21,067)", "Website LPV rows carry no account (100 % of Sep 2026 LPV, 50,380): a filter on one account returns 0 (QA AD01-AD08 all use it: LPV 0 beside spend, still PASS); sliced, everything sits in an account-less member and `cost_per_landing_page_view` by account reads 0.0. Other ad attributes follow the documented unknown members (ad 47 %, campaign 23 % of LPV)", "", "Not covered by D-17 (which only adds ad / campaign unknown members); found in the v2 vs v3 comparison"),
+    ("Landing page views filtered or sliced by ad account (`account_id`)", "Meta figure per account (Sep 2026 brand 20: 21,067)", "Refused: website LPV rows carry no account (100 % of Sep 2026 LPV, 50,380), so the figure would read 0; the refusal points to campaign slices and to `platform_reported_landing_page_views`. Other ad attributes follow the documented unknown members (ad 47 %, campaign 23 % of LPV)", "D-45", "Owner 2026-10-17; found in the v2 vs v3 comparison, QA AD01-AD08 had passed with LPV 0"),
     ("Hourly / breakdown website LPV by age, gender, placement", "Meta figure", "Platform twin only", "D-40", "Website cannot slice"),
     ("Checkout-timing metrics (seconds to checkout / purchase, checkout steps)", "Error", "Error (structurally empty)", "L-20", "Unchanged from v2; upstream fix"),
     ("Brands 24-27", "No caveat", "No caveat; not certified (1-32 orders)", "D-44", "Owner: brand 20 only"),
@@ -215,7 +215,7 @@ def main() -> int:
     qn = re.search(r"Total questions: (\d+)", qa)
     L += table(["other checks", "result", "source"], [
         ("Alias = base metric on event_date; axis refusals; mixed axes", f"{ok_axis}/{len(axis)}", "results/axis_certify_20261016.json"),
-        ("End-to-end QA questions (structure only)", f"{m.group(1) if m else '?'}/{qn.group(1) if qn else '?'}", "results/qa_v3/CERTIFICATION.md — the harness does not check values: AD01-AD08 pass with landing_page_views 0 (see gap in section 5)"),
+        ("End-to-end QA questions (structure only)", f"{m.group(1) if m else '?'}/{qn.group(1) if qn else '?'}", "results/qa_v3/CERTIFICATION.md — the harness does not check values; AD01-AD08 no longer filter by ad account (D-45), so their landing_page_views are real"),
         ("Dataset contracts", f"{sum(1 for d in ds.values() if d.get('verdict') == 'certified')}/{len(ds)}", "results/datasets/certification.json"),
         ("Catalogue vs live Cube v3 meta (as recorded)", f"{len(v3m)}/{len(v3m)}", "scripts/validate_catalogue.py, 2026-10-16"),
         ("Serve contracts / Cube parity / smoke / refusals (as recorded)", "78/78 · 341/341 · 764/764 · 18/18", "mage-ai commit 4b4ab49 (v3_contracts.py, v3_cube_*.py)"),

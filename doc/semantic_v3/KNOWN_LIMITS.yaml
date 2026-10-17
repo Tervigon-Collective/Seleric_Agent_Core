@@ -132,15 +132,15 @@ limits:
   affects: those brands
   handled_by: [D-44]
   status: accepted
-  next_step: 'none — owner 2026-10-16: no action on other brands, only brand 20 data (D-44); Q11 (brand 28 value → refusal) is confirmed at the Phase 7 variance sign-off'
+  next_step: 'none — owner 2026-10-16: no action on other brands, only brand 20 data (D-44); Q11 (brand 28 value → refusal) confirmed by the owner at the Phase 7 variance sign-off, 2026-10-17'
 - id: L-17
   area: Reconciliation
   limit: v2's cost total (order_pnl_daily.net_cogs) is ₹17–18L below gold's posted line costs; that v2-internal composition is not decomposed by cause.
   impact: the v2 → v3 contribution change (−₹16.9L all history) is only partly itemised (gold → v3 is fully proven).
   affects: variance sign-off
   handled_by: []
-  status: open
-  next_step: decompose v2 cost composition for the Phase 7 variance report
+  status: accepted
+  next_step: 'none: itemised by order outcome and component in VARIANCE_REPORT.md section 4 (all-history v3 − v2 cost +₹12.7L on the live ledger) and signed off by the owner 2026-10-17'
 - id: L-18
   area: Freshness
   limit: v3 semantic tables refresh every 5 minutes while gold reloads continuously (CDC).

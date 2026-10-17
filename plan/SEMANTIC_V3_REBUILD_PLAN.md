@@ -39,11 +39,11 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 ## Status (see doc/semantic_v3/PROGRESS.md and CHECKLIST.md)
 - [x] Phase 0 baseline · [x] Phase 1 order classification · [x] Phase 2 component ledger · [x] Phase 3 ads / web / attribution · [x] Phase 4 marts (all applied 2026-10-14)
-- [x] **4.5 date-axis switch (order_date / event_date)** (applied 2026-10-14, completed and signed off by the owner 2026-10-15; contracts 67/67, reconcile PASS) · [x] 5 Cube v3 (built 2026-10-15) · [x] 6 catalogue v3 + MCP (built 2026-10-16) · [ ] 7 certification · [ ] 8 cutover · [ ] 9 cleanup
+- [x] **4.5 date-axis switch (order_date / event_date)** (applied 2026-10-14, completed and signed off by the owner 2026-10-15; contracts 67/67, reconcile PASS) · [x] 5 Cube v3 (built 2026-10-15) · [x] 6 catalogue v3 + MCP (built 2026-10-16) · [x] 7 certification (2026-10-17) · [ ] 8 cutover · [ ] 9 cleanup
 
 ## All decisions taken (planning + interviews during the build)
 <!-- BEGIN GENERATED: decisions -->
-85 decisions (76 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
+86 decisions (77 implemented). `[x]` = implemented (or a scope / process rule), `[ ]` = decided, built in the named phase. Full table: `doc/semantic_v3/DECISIONS.md`; source: `doc/semantic_v3/DECISIONS.yaml`; business wording: spec §0B.
 
 #### Orders, outcomes and customers
 - [x] **D-01** Exchange treatment — Continuation + separate exchange lifecycle. Original order is the only commercial sale (keeps order date, customer, attribution). Replacement = linked fulfilment child: no order count, no sales revenue.… _(implemented, phase 1)_ · `01_core_order_class.sql`, `03_ledger_order_component.sql`, `fct_order.sql`
@@ -144,12 +144,13 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **D-41** Payment bucket manual: label it, fix upstream — keep the classification rule as built; the `manual` payment-bucket member is labelled unclassified (not a payment type) with a coverage note whenever `payment_bucket`, `payment_method`, `payment_gateway` or `is_cod` is… _(implemented, phase 6)_ · `(no code change in mage-ai: coverage note on four payment dimensions in agent-core scripts/build_catalogue_v3.py DIM_NOTES, regenerated catalogue_v3/dimensions/core.yaml; shown as a planner warning, checked on the :4003 rig 2026-10-16)`
 - [x] **D-42** No Cube pre-aggregations (no write path) — stay without Cube pre-aggregations; no separate write login or schema in ClickHouse. Heavy queries run 0.3-3.4 s on brand 20 without them. Revisit only if latency or load grows after cutover. _(process)_
 - [x] **D-43** First monthly close: August 2026 — lock August 2026 now. Applied 2026-10-16 with `close_month.py --month 2026-08 --apply` (5,460 rows: brand 20 4,967, brand 28 493; cohort contribution before ads 14,56,716.78, event 13,27,267.81; restatement check 0).… _(implemented, phase 4)_ · `(no code change: serve/semantic_v3/close_month.py run as built, D-12, D-12b)`
-- [x] **D-44** Certification scope is brand 20; no low-volume flag on brands 24-27 — "no action on other brands, only brand 20 data"): brands 24-27 get no refusal and no low-volume flag; v3 is certified on brand 20 only. Brand 28 keeps its spend-only refusal (L-16). _(process)_
+- [x] **D-44** Certification scope is brand 20; no low-volume flag on brands 24-27 — "no action on other brands, only brand 20 data"): brands 24-27 get no refusal and no low-volume flag; v3 is certified on brand 20 only. Brand 28 keeps its spend-only refusal (L-16). Q11 (brand 28 value -> refusal)… _(process)_
+- [x] **D-45** Website landing page views by ad account: refuse and point to campaign slices — a filter or slice of `landing_page_views` / `cost_per_landing_page_view` by `account_id` is refused. Website sessions are attributed to a campaign / ad, never to an ad account (D-17), so the figure would read 0 beside… _(implemented, phase 7)_ · `(no code change in mage-ai: agent-core scripts/build_catalogue_v3.py EXCLUDED_DIMS puts account_id into excluded_dimensions of landing_page_views and cost_per_landing_page_view in catalogue_v3; the planner refuses the filter and the slice)`
 <!-- END GENERATED: decisions -->
 
 ## Known limits
 <!-- BEGIN GENERATED: limits -->
-35 known limits (6 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
+35 known limits (5 open). `[x]` = accepted and shown to users, `[ ]` = open or planned. Full table: `doc/semantic_v3/KNOWN_LIMITS.md`; source: `doc/semantic_v3/KNOWN_LIMITS.yaml`.
 
 - [x] **L-01** (Attribution, accepted) Multi-touch attribution (last_non_direct, first_touch, linear, journey last-touch) exists only from 2026-06-01; ~8 % of later orders lack it too. Impact: 16,484 pre-June sale orders (₹2.87 Cr gross) + 811 since (₹17.5L) use the last-touch fallback under the default model; other models show no_model_data. Handled by D-06a. Next: rows carry model_used; Agent shows coverage % with every model answer (Phase 6)
 - [x] **L-02** (Attribution, accepted) Google website sessions often lack campaign (29 %) and ad (88 %) ids; 45 % of credited Google touches have no campaign. Impact: 792 Google orders (₹17.8L) + 279 Meta (₹5.6L) credited to a session without campaign; 328 filled from last-touch, the rest sit in `campaign unknown`. Handled by D-06b, D-17. Next: tracking fix upstream (gclid → campaign mapping) would shrink `campaign unknown`
@@ -166,8 +167,8 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 - [x] **L-13** (Revenue, accepted) Exchange price adjustment is a value difference; same-value exchanges show ₹134 average noise from discounts. Impact: small residual on same-value exchanges. Handled by D-01a. Next: none
 - [x] **L-14** (Revenue, accepted) No operating-expense source in the warehouse. Impact: top figure is contribution after ads; `net_profit` ids mean contribution after ads (opex excluded). Handled by D-18, D-18r. Next: add an opex source to enable true net profit
 - [x] **L-15** (Scope, accepted) Amazon (marketplace + Amazon Ads) is out of scope; brand overview = D2C Shopify only. Impact: brand 20 Amazon sales and spend are not in any total. Handled by D-04. Next: separate project
-- [x] **L-16** (Scope, accepted) Brand 28 is spend-only (no commerce); brands 24–27 have 1–32 orders. Impact: profit / ROAS / AOV are refused for brand 28 (v2 computes −spend, F0-3; refusal built in Cube v3, 18/18 refusal checks). Brands 24–27 are answered like any brand with no flag; v3 is certified on brand 20 only. Handled by D-44. Next: none — owner 2026-10-16: no action on other brands, only brand 20 data (D-44); Q11 (brand 28 value → refusal) is confirmed at the Phase 7 variance sign-off
-- [ ] **L-17** (Reconciliation, open) v2's cost total (order_pnl_daily.net_cogs) is ₹17–18L below gold's posted line costs; that v2-internal composition is not decomposed by cause. Impact: the v2 → v3 contribution change (−₹16.9L all history) is only partly itemised (gold → v3 is fully proven). Next: decompose v2 cost composition for the Phase 7 variance report
+- [x] **L-16** (Scope, accepted) Brand 28 is spend-only (no commerce); brands 24–27 have 1–32 orders. Impact: profit / ROAS / AOV are refused for brand 28 (v2 computes −spend, F0-3; refusal built in Cube v3, 18/18 refusal checks). Brands 24–27 are answered like any brand with no flag; v3 is certified on brand 20 only. Handled by D-44. Next: none — owner 2026-10-16: no action on other brands, only brand 20 data (D-44); Q11 (brand 28 value → refusal) confirmed by the owner at the Phase 7 variance sign-off, 2026-10-17
+- [x] **L-17** (Reconciliation, accepted) v2's cost total (order_pnl_daily.net_cogs) is ₹17–18L below gold's posted line costs; that v2-internal composition is not decomposed by cause. Impact: the v2 → v3 contribution change (−₹16.9L all history) is only partly itemised (gold → v3 is fully proven). Next: none: itemised by order outcome and component in VARIANCE_REPORT.md section 4 (all-history v3 − v2 cost +₹12.7L on the live ledger) and signed off by the owner 2026-10-17
 - [x] **L-18** (Freshness, accepted) v3 semantic tables refresh every 5 minutes while gold reloads continuously (CDC). Impact: up to ~5 min lag; live checks exclude orders gold changed after the last refresh and report them as pending. Next: none
 - [ ] **L-19** (Data quality, open) 12 gold payments belong to orders missing from gold.fct_orders. Impact: excluded from serve.fct_payment. Next: upstream (dbt) investigation
 - [ ] **L-20** (Web, open) Checkout-timing session metrics (seconds to checkout / purchase, checkout steps) are structurally empty — Shopify checkout events are server-side without a session id. Impact: those metrics stay unavailable (data-quality waiver). Next: dbt fix (plumb cart journey checkout time into sessions)
@@ -335,17 +336,17 @@ Rig: Cube v3 on :4003 (`seleric-cube-v3-test`), `SELERIC_CATALOGUE_DIR=catalogue
 - [x] Meta vs first-party funnel findings (2026-10-16, recorded): add-to-cart double-fire (L-33: serve de-duplication applied 2026-10-16, upstream fix open) and the purchase reconciliation (L-34: replacements explain 78 of the 92-order gap; the window does not; Meta's attribution setting did not change on 1 Sep, so the September drop is on Meta's side, owner to check Events Manager). Details in PROGRESS.
 - [x] Dataset contracts in `catalogue_v3_src/datasets.yaml` re-certified by the Phase 7 session: 20/20 certified (`results/datasets/CERTIFICATION.md`).
 
-### Phase 7 — Capability and number certification (the cutover gate)
-- [ ] **No-loss gate:** every CAPABILITY_MAP entry passes a live query on v3.
-  - Same metric id, same dims and drills: answers are equal, or the difference is explained by a decision ID.
-  - Every drill path in `hierarchies.yaml` still works.
-  - `semantic_sql` still works.
-  - Every previously refused combination is still refused or is now supported (never a crash).
-  - Includes the F0-1 / F0-2 capabilities (L-22).
-- [ ] `v3_baseline.py --compare` v2 vs v3, back to back; `cube_member_sweep_v3.py` on :4003.
-- [ ] Run the 40-question `certify_qa.py` and the golden questions (`serve/evaluations/*golden_questions.yml`).
-- [ ] **Date-axis certification:** every `pnl_*` / `product_pnl_*` id answers through its alias with the same number as the base metric on `event_date`; every `AXIS-*` contract passes through Cube v3; axis-refusals (cohort-only ratios, allocated on `event_date`, mixed axes) behave as specified; golden questions added for "processed in" / "happened in" wording.
-- [ ] Variance report for the owner, sorted by ₹, incl. the v2 cost-composition leg (L-17) and the D-30 restock-credit event-dating leg. **Interview checkpoint: the owner signs off the variances** (incl. Q11, brand 28 value → refusal).
+### Phase 7 — Capability and number certification (the cutover gate) · DONE 2026-10-17 · gate PASS · owner signed off the variances
+Checks run 2026-10-16/17 on the :4003 rig, brand 20 (the certified scope, D-44) plus brand 28 for the refusal.
+- [x] **No-loss gate:** every CAPABILITY_MAP entry answers on v3 (`capability_check_v3.py`: 0 v3 errors on metrics and dimensions; 0 differing ids without a decision id).
+  - 233 v2 ids all land (213 metrics + 61 aliases); the 120 ids that differ in `v3_baseline.py --compare` (Jul–Sep 2026) each cite a decision id.
+  - Drill paths: `drill_check_v3.py` 91/91. `semantic_sql`: `semantic_sql_check_v3.py` passes (governed views answer, ungoverned / unknown refused).
+  - Previously refused combinations stay refused (`v3_cube_refusals.py` 18/18); F0-1 / F0-2 delivered (L-22 closes at cutover).
+- [x] `v3_baseline.py --compare` v2 vs v3, back to back (2026-10-17): 1,494 v2 rows → 410 differ, 372 not in v3 under that key. Classified: 16 brand-28 metrics × 3 months become refusals (Q11); the 372 are the 61 alias ids (answered through their base metric, `axis_certify`) and the audience `breakdowns` binding of `landing_page_views` (refused, D-40); every other difference is brand 20 and cites a decision. `cube_member_sweep_v3.py` on :4003: 764 members, 0 failed.
+- [x] `certify_qa.py` 40/40 and golden questions: `golden_axis_v3.py` 14/14 (incl. "processed in" / "happened in" wording). QA AD01–AD08 and AD10 had passed with `landing_page_views` 0 because they filtered one ad account; they no longer do (D-45).
+- [x] **Date-axis certification:** `axis_certify` (alias = base metric on `event_date`, refusals, mixed axes), `v3_contracts.py` 78/78 live, `v3_cube_refusals.py` 18/18, `v3_reconcile_gold.py` PASS (0 unexplained ₹ on both axes, event bridge identity gap 0).
+- [x] Gates on catalogue_v3: `validate_catalogue.py` 213/213, `v2_gates.py --live` PASS ×6, `verify_compositions.py` 15/15, `tests/test_semantic_v3.py` 45/45; the full non-live suite has 11 failures, all in `test_canonical_model.py` (8) and `test_semantic_v2.py` (3), which assert v2 counts and `cube/model` files and do not touch v3; the same 11 fail at HEAD before this work (checked in a clean worktree; the earlier count of 9 predates the `main` merge).
+- [x] **Interview checkpoint (owner, 2026-10-17):** variance report `VARIANCE_REPORT.md` **signed off** (v2 cost leg L-17 itemised there, D-30 restock-credit leg included; Q7 closed); **Q11 confirmed** (brand 28 profit / ROAS / AOV / LTV → refusal, D-44, L-16); account-less website LPV: **refuse + caveat (D-45)**, implemented in `build_catalogue_v3.py` and regenerated.
 
 ### Phase 8 — Cutover
 - [ ] Migrate the Seleric_Agent registry / services / evals and the MCP guards / prompts to the v3 names. The `/opt/seleric/reports` scripts are inactive and are not migrated (D-23).
@@ -391,11 +392,11 @@ The tolerance is 0 in paise for sums of the same Decimal source. Float sources (
 - [x] Q4 **Unknown-outcome review** (Phase 1) → answered: D-22a–e (Unknown 2,372 → 68 orders).
 - [x] Q5 **D-16 hashing** (Phase 1) → answered: D-16a hashed person key.
 - [ ] Q6 **Stop the Cube v1 container?** (Phase 9).
-- [ ] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7). Phases 2–4: none unexplained. The event-dating leg of the monthly pnl_* comparison is not itemised; the owner accepted v3 dating (D-21b, L-24).
+- [x] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7): none; variance report signed off 2026-10-17. Phases 2–4: none unexplained. The event-dating leg of the monthly pnl_* comparison is not itemised; the owner accepted v3 dating (D-21b, L-24).
 - [ ] Q8 **query_log keeps 7 days** (Phase 9): longer TTL or two consecutive 7-day checks?
 - [x] Q9 **Live v2 defects** → answered: D-26, leave them until v3.
 - [x] Q10 **Payments vs exchanges** → answered: D-01b exchange credits.
-- [ ] Q11 **Brand 28 value → refusal** (Phase 7): confirm the change in the variance sign-off.
+- [x] Q11 **Brand 28 value → refusal** (Phase 7): confirmed by the owner 2026-10-17 (D-44).
 - [x] Q12 **Schema for Undated / `event_date_source`** (Phase 4.5, L-32): rebuild `mart_profit_fact` + `snap_profit_monthly` as new table versions, or sentinel date + `is_undated`? Owner confirms the apply (production write; also whether `apply_v3` may run `ADD COLUMN IF NOT EXISTS`, L-28).
 - [x] Q13 **Event-axis variance sign-off** (Phase 4.5): signed off 2026-10-15 — D-30 restock-credit leg, Undated list, both axes for Apr–Oct 2026. The figures still go into the Phase 7 variance report.
 

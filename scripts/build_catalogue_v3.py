@@ -115,6 +115,13 @@ _FANOUT = ("Refund-level amount: split by the refunded lines' product / restock 
            "on every line. Use the line-grain product_* twin.")
 EXCLUDED_DIMS = {m: {d: _FANOUT for d in ("product_type", "product_title", "variant_title", "sku", "restock_type")}
                  for m in ("refunded_amount_excl_tax", "returns_excl_tax")}
+# Website LPV (D-17) is counted from sessions, and a session carries no ad account (only campaign / ad ids), so an
+# account slice or filter reads 0 LPV against real spend (QA AD01). Refused with a pointer, never answered with 0
+# (owner 2026-10-17, Phase 7). The platform twin is account-aware; campaign-level slices work.
+_NO_ACCOUNT = ("Website landing page views carry no ad account (sessions are attributed to a campaign / ad, not an "
+               "account), so an account slice or filter would read 0. Slice by campaign_id / campaign_name instead, "
+               "or use platform_reported_landing_page_views (Meta's own figure, diagnostic) for an account view.")
+EXCLUDED_DIMS.update({m: {"account_id": _NO_ACCOUNT} for m in ("landing_page_views", "cost_per_landing_page_view")})
 NOT_CERTIFIED = {"link_clicks", "thruplays", "hook_rate", "hold_rate_15s", "cost_per_link_click"}  # approved
 # Every id the CAPABILITY_MAP marks ``refine`` keeps its id but its number (or label) changes for a named decision
 # (semantic v3): its major version is bumped and the decisions are written into the description.

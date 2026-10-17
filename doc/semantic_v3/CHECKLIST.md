@@ -180,7 +180,8 @@ Where the work is:
 - [x] Deliver the F0-1 / F0-2 capabilities (V2_ERROR rows now answer). Brand 28 profit / ROAS / AOV are refused (L-16, refusal checks 18/18); brands 24–27 get no flag (D-44).
 
 ## Phase 6 — Catalogue v3 + MCP · NOT STARTED
-## Phase 7 — Certification (no-loss gate, variance sign-off) · NOT STARTED
+## Phase 7 — Certification (no-loss gate, variance sign-off) · DONE 2026-10-17
+See the Phase 7 section of `PLAN.md` for the checks and results; owner sign-off of the variances, Q11 and D-45 recorded 2026-10-17.
 ## Phase 8 — Cutover · NOT STARTED
 ## Phase 9 — Cleanup · NOT STARTED
 

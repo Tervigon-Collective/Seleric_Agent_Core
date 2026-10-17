@@ -17,9 +17,9 @@ QUESTIONS = [
     {
         "id": "AD01",
         "domain": "ad_delivery",
-        "question": "What were Meta spend, impressions, link clicks and landing-page views from 1–11 October?",
+        "question": "What were Meta spend, impressions and link clicks for the main ad account from 1–11 October?",
         "query_request": {
-            "measures": ["ad_spend", "impressions", "link_clicks", "landing_page_views"],
+            "measures": ["ad_spend", "impressions", "link_clicks"],
             "dimensions": [],
             "time_range": {"start": "2026-10-01", "end": "2026-10-11"},
             "granularity": "none",
@@ -31,7 +31,7 @@ QUESTIONS = [
         },
         "expected_view": "paid_media",
         "time_basis": "report_date",
-        "declared_keys": {"ad_spend", "impressions", "link_clicks", "landing_page_views"},
+        "declared_keys": {"ad_spend", "impressions", "link_clicks"},
     },
     {
         "id": "AD02",
@@ -45,7 +45,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
             ],
         },
         "expected_view": "paid_media",
@@ -64,7 +63,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
             ],
             "limit": 10,
             "sort": [{"field": "ad_spend", "direction": "desc"}],
@@ -85,7 +83,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
             ],
             "limit": 10,
             "sort": [{"field": "landing_page_views", "direction": "desc"}],
@@ -106,7 +103,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
             ],
         },
         "expected_view": "paid_media",
@@ -125,7 +121,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
             ],
         },
         "expected_view": "paid_media",
@@ -144,7 +139,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
             ],
         },
         "expected_view": "paid_media",
@@ -163,7 +157,6 @@ QUESTIONS = [
             "filters": [
                 {"dimension": "brand_id", "operator": "equals", "values": ["20"]},
                 {"dimension": "ad_platform", "operator": "equals", "values": ["meta"]},
-                {"dimension": "account_id", "operator": "equals", "values": ["1685189008684458"]},
                 {"dimension": "campaign_name", "operator": "equals", "values": ["TH-383-SUSPENDER-29SEP", "TH-383-SUSPENDER-26SEP-ADV+"]},
             ],
         },
@@ -193,7 +186,7 @@ QUESTIONS = [
         "domain": "ad_delivery",
         "question": "What were September spend, impressions and clicks by platform and account?",
         "query_request": {
-            "measures": ["ad_spend", "impressions", "link_clicks", "landing_page_views"],
+            "measures": ["ad_spend", "impressions", "link_clicks"],
             "dimensions": ["ad_platform", "account_id"],
             "time_range": {"start": "2026-09-01", "end": "2026-09-30"},
             "granularity": "none",
@@ -203,7 +196,7 @@ QUESTIONS = [
         },
         "expected_view": "paid_media",
         "time_basis": "report_date",
-        "declared_keys": {"ad_spend", "impressions", "link_clicks", "landing_page_views"},
+        "declared_keys": {"ad_spend", "impressions", "link_clicks"},
     },
     # PN: pnl (10 questions)
     {

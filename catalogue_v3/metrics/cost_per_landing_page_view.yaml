@@ -38,6 +38,10 @@ date_axis: native
 decision_ids:
 - D-13r
 - D-17
+excluded_dimensions:
+  account_id: Website landing page views carry no ad account (sessions are attributed to a campaign / ad, not an
+    account), so an account slice or filter would read 0. Slice by campaign_id / campaign_name instead, or use platform_reported_landing_page_views
+    (Meta's own figure, diagnostic) for an account view.
 bindings:
 - name: hourly
   view: paid_media_hourly

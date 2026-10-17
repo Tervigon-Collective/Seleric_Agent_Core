@@ -1372,6 +1372,20 @@ decisions:
   title: 'Certification scope is brand 20; no low-volume flag on brands 24-27'
   status: process
   decided: '2026-10-16'
-  ruling: 'DECIDED 2026-10-16 (owner: "no action on other brands, only brand 20 data"): brands 24-27 get no refusal and no low-volume flag; v3 is certified on brand 20 only. Brand 28 keeps its spend-only refusal (L-16).'
+  ruling: 'DECIDED 2026-10-16 (owner: "no action on other brands, only brand 20 data"): brands 24-27 get no refusal and no low-volume flag; v3 is certified on brand 20 only. Brand 28 keeps its spend-only refusal (L-16). Q11 (brand 28 value -> refusal) confirmed by the owner at the Phase 7 variance sign-off, 2026-10-17.'
   options: 'answer + low-volume caveat / refuse profit, ROAS, AOV / no change'
   evidence: 'Brands 24-27 have 1-32 orders each; v2 gave them no caveat.'
+- id: D-45
+  title: 'Website landing page views by ad account: refuse and point to campaign slices'
+  status: implemented
+  phase: 7
+  decided: '2026-10-17'
+  ruling: 'DECIDED 2026-10-17 (owner, Phase 7): a filter or slice of `landing_page_views` / `cost_per_landing_page_view` by `account_id` is refused. Website sessions are attributed to a campaign / ad, never to an ad account (D-17), so the figure would read 0 beside real spend. The refusal points to campaign slices and to `platform_reported_landing_page_views` (Meta account view, diagnostic). No data-model change.'
+  options: 'refuse with a pointer / populate account_id on website rows from the credited campaign / defer'
+  evidence: 'Sep 2026 brand 20: 100 % of website LPV (50,380) has no account; QA AD01-AD08 filtered one Meta account and passed with LPV 0 beside spend of Rs 4,97,667 (1-11 Oct). Brand 20 has one Meta account (1685189008684458), so dropping the filter gives the same spend and the real LPV.'
+  implemented_in:
+  - '(no code change in mage-ai: agent-core scripts/build_catalogue_v3.py EXCLUDED_DIMS puts account_id into excluded_dimensions of landing_page_views and cost_per_landing_page_view in catalogue_v3; the planner refuses the filter and the slice)'
+  tests:
+  - tests/test_semantic_v3.py::test_account_slice_or_filter_of_website_lpv_is_refused
+  - scripts/certify_qa.py AD01-AD10
+  change_how: 'To populate the account instead: add account_id to website LPV rows in serve.fct_paid_media_daily / _hourly from the credited campaign (owner OK, serve view change), remove the EXCLUDED_DIMS entry, regenerate catalogue_v3, then change this decision.'

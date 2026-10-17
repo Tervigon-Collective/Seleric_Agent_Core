@@ -304,6 +304,18 @@ def test_audience_slice_of_website_lpv_points_at_the_platform_twin(planner):
     assert "platform_reported_landing_page_views" in str(e.value)
 
 
+def test_account_slice_or_filter_of_website_lpv_is_refused(planner):
+    """Phase 7 (owner 2026-10-17): website sessions carry no ad account, so an account slice or filter would read 0
+    LPV against real spend. Refused with a pointer, not answered with 0."""
+    for mid in ("landing_page_views", "cost_per_landing_page_view"):
+        with pytest.raises(PlanError) as e:
+            run(planner, [mid], dimensions=["account_id"])
+        assert "campaign" in str(e.value)
+        with pytest.raises(PlanError) as e:
+            run(planner, [mid], filters=[{"dimension": "account_id", "operator": "equals", "values": ["1"]}])
+        assert "no ad account" in str(e.value)
+
+
 def test_v2_report_date_slice_reads_as_the_query_axis(planner, cube):
     """No capability loss: pnl_* ids were sliced by report_date (the event clock); on v3 it is the axis of the query."""
     cube.by_prefix["finance"] = [{"finance.net_profit": "5", "finance.event_date": "2026-09-01"}]
