@@ -537,6 +537,12 @@ class QueryPlanner:
                     dim = sib
             canonical = dim.id
             for m in metrics:
+                if canonical in m.excluded_dimensions:
+                    # Same reasoned refusal as the filter path (D-45), not the generic "not supported" message.
+                    twin = self.catalogue.get_metric(f"platform_reported_{m.id}")
+                    raise PlanError(f"Metric '{m.id}' cannot be sliced by '{canonical}': {m.excluded_dimensions[canonical]}",
+                                    suggestions=[twin.id] if twin is not None and canonical in twin.supported_dimensions
+                                    else self.catalogue.grain_twins(m.id))
                 if canonical not in m.supported_dimensions:
                     alts = self._metrics_supporting_dimension(canonical, exclude=m.id)
                     hint = (

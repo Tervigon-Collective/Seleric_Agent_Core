@@ -110,8 +110,8 @@ GAPS = [
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--metrics", default=str(RES / "capability_metrics_20261016b.json"))
-    ap.add_argument("--dims", default=str(RES / "capability_dims_20261016.json"))
+    ap.add_argument("--metrics", default=str(RES / "capability_metrics_20261017.json"))
+    ap.add_argument("--dims", default=str(RES / "capability_dims_20261017.json"))
     ap.add_argument("--out", default=str(ROOT / "doc/semantic_v3/V2_V3_COMPARISON.md"))
     ap.add_argument("--check", action="store_true", help="exit 1 when a gap row has no decision id or a cited id does not exist")
     a = ap.parse_args()
@@ -193,7 +193,7 @@ def main() -> int:
           f"`capability_check_v3.py` asks every v2 metric id of the v2 stack (Cube :4002, catalogue_v2) and of the v3 stack (:4003, catalogue_v3) in the same task: "
           f"{n(sum(met['counts']['metrics'].values()))} cells (233 ids x brands 20 / 28 x Jul-Sep 2026) and {n(sum(dim['counts']['dims'].values()))} id x dimension cells (every dimension v2 supported, brand 20, Sep 2026).", ""]
     L += table(["layer", "outcome", "cells", "meaning"], (
-        [("metrics", k, n(v), {"EQUAL": "same number", "DIFF": "number changes; the metric cites decision ids (rule-based attribution / UNEXPLAINED is Phase 7 work)", "V3_REFUSED": "v3 refuses with a reason (section 5)", "V2_ERROR": "v2 errors, v3 answers (F0-1 / F0-2)", "BOTH_ERROR": "unavailable in both (L-20)"}.get(k, "")) for k, v in sorted(met["counts"]["metrics"].items(), key=lambda kv: -kv[1])]
+        [("metrics", k, n(v), {"EQUAL": "same number", "DIFF": "number changes; every differing id cites a decision id in CAPABILITY_MAP and the ₹ are bridged in VARIANCE_REPORT.md (owner signed off 2026-10-17)", "V3_REFUSED": "v3 refuses with a reason (section 5)", "V2_ERROR": "v2 errors, v3 answers (F0-1 / F0-2)", "BOTH_ERROR": "unavailable in both (L-20)"}.get(k, "")) for k, v in sorted(met["counts"]["metrics"].items(), key=lambda kv: -kv[1])]
         + [("dimensions", k, n(v), {"ANSWERED": "v3 answers the slice; totals may differ by decision (see below)", "V3_REFUSED": "v3 refuses with a reason", "V2_ERROR": "v2 errors, v3 answers or refuses", "BOTH_ERROR": "unavailable in both"}.get(k, "")) for k, v in sorted(dim["counts"]["dims"].items(), key=lambda kv: -kv[1])]))
     def same(x, y):
         return x == y if x is None or y is None else abs(x - y) <= max(0.01, 1e-6 * max(abs(x), abs(y)))

@@ -310,7 +310,7 @@ def test_account_slice_or_filter_of_website_lpv_is_refused(planner):
     for mid in ("landing_page_views", "cost_per_landing_page_view"):
         with pytest.raises(PlanError) as e:
             run(planner, [mid], dimensions=["account_id"])
-        assert "campaign" in str(e.value)
+        assert "no ad account" in str(e.value)
         with pytest.raises(PlanError) as e:
             run(planner, [mid], filters=[{"dimension": "account_id", "operator": "equals", "values": ["1"]}])
         assert "no ad account" in str(e.value)

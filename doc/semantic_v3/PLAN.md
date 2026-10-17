@@ -338,7 +338,8 @@ Rig: Cube v3 on :4003 (`seleric-cube-v3-test`), `SELERIC_CATALOGUE_DIR=catalogue
 
 ### Phase 7 — Capability and number certification (the cutover gate) · DONE 2026-10-17 · gate PASS · owner signed off the variances
 Checks run 2026-10-16/17 on the :4003 rig, brand 20 (the certified scope, D-44) plus brand 28 for the refusal.
-- [x] **No-loss gate:** every CAPABILITY_MAP entry answers on v3 (`capability_check_v3.py`: 0 v3 errors on metrics and dimensions; 0 differing ids without a decision id).
+- [x] **No-loss gate:** every CAPABILITY_MAP entry answers on v3 (`capability_check_v3.py`, re-run 2026-10-17: 0 v3 errors on metrics; dimensions re-asked for everything refused plus the two LPV × `account_id` cells, now refused with the D-45 reason).
+  - How differences are closed: every differing id cites a decision id in CAPABILITY_MAP (a presence check; the rule-based `--attribute` pass in the script was not run), and the ₹ are closed by the reconcile bridges (0 unexplained ₹, `v3_reconcile_gold.py`) plus the owner's sign-off of `VARIANCE_REPORT.md`.
   - 233 v2 ids all land (213 metrics + 61 aliases); the 120 ids that differ in `v3_baseline.py --compare` (Jul–Sep 2026) each cite a decision id.
   - Drill paths: `drill_check_v3.py` 91/91. `semantic_sql`: `semantic_sql_check_v3.py` passes (governed views answer, ungoverned / unknown refused).
   - Previously refused combinations stay refused (`v3_cube_refusals.py` 18/18); F0-1 / F0-2 delivered (L-22 closes at cutover).
