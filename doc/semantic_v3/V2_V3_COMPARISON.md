@@ -132,5 +132,5 @@ Unavailable in both stacks: `avg_seconds_to_checkout`, `avg_seconds_to_purchase`
 - **L-27** (Monthly close): Only August 2026 is locked (2026-10-16, D-43); the close script has no schedule.
 - **L-34** (Reconciliation): Meta-reported purchases (679, Sep 2026) exceed Shopify sale orders credited to Meta paid (587).
 
-Phase 7 items still to run or sign: owner sign-off of the variance report; Q11; `cube_member_sweep_v3.py`; `v3_baseline.py --compare`; Phase 8 (Seleric_Agent migration, env flip, 48 h watch); Phase 9 (cleanup after 2 stable weeks).
+Phase 7 is closed (2026-10-17): variance report signed off, Q11 confirmed, member sweep 764/764, baseline compare classified. Still ahead: Phase 8 (Seleric_Agent migration, env flip, 48 h watch; owner items L-27, L-21 / Q8, Q6) and Phase 9 (cleanup after 2 stable weeks).
 

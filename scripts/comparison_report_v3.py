@@ -245,7 +245,7 @@ def main() -> int:
 
     L += ["## 6. Still open before cutover (not Phase 7 certification)", ""]
     L += [f"- **{i}** ({x['area']}): {x['limit']}" for i, x in sorted(lim.items()) if x["status"] in ("open", "planned")]
-    L += ["", "Phase 7 items still to run or sign: owner sign-off of the variance report; Q11; `cube_member_sweep_v3.py`; `v3_baseline.py --compare`; Phase 8 (Seleric_Agent migration, env flip, 48 h watch); Phase 9 (cleanup after 2 stable weeks).", ""]
+    L += ["", "Phase 7 is closed (2026-10-17): variance report signed off, Q11 confirmed, member sweep 764/764, baseline compare classified. Still ahead: Phase 8 (Seleric_Agent migration, env flip, 48 h watch; owner items L-27, L-21 / Q8, Q6) and Phase 9 (cleanup after 2 stable weeks).", ""]
 
     Path(a.out).write_text("\n".join(L) + "\n")
     print(f"wrote {a.out}")
