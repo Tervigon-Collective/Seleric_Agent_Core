@@ -1389,3 +1389,21 @@ decisions:
   - tests/test_semantic_v3.py::test_account_slice_or_filter_of_website_lpv_is_refused
   - scripts/certify_qa.py AD01-AD10
   change_how: 'To populate the account instead: add account_id to website LPV rows in serve.fct_paid_media_daily / _hourly from the credited campaign (owner OK, serve view change), remove the EXCLUDED_DIMS entry, regenerate catalogue_v3, then change this decision.'
+- id: D-46
+  title: 'Payment method resolved from the order tags where gold says manual (amends D-41)'
+  status: implemented
+  phase: 7
+  decided: '2026-10-17'
+  ruling: 'DECIDED 2026-10-17 (owner: serve v3 now, gold untouched): the Pragma 1Checkout app (tag pragma_1checkout, first order 2026-08-26) records every payment with gateway / method `manual`; the real method is on the order tags. Where gold says manual or blank and the tags name exactly one of `phonepe` (prepaid) or `cod` (cash on delivery), serve resolves payment_gateway / payment_method / is_cod / payment_bucket from the tag (payment_source tag_phonepe | tag_cod). Gold''s explicit value always wins (payment_source gold); an order with both tags or neither stays manual. Orders tagged phonepe that are partially paid (advance online, balance on delivery, from Oct 2026) count as online (owner 2026-10-17: stable and simple; residual in L-35). The ledger (costs, outcome rules) and serve.fct_payment keep gold''s raw values, so no rupee total moves; only cod / online / manual shares and COD flags.'
+  options: 'serve v3 now / upstream in gold dbt / both; partial-advance orders as online / cod while partially paid / new partial_cod bucket'
+  evidence: 'Brand 20 sale orders: Aug 226 of 245 manual recoverable (120 phonepe, 106 cod), Sep 846 of 862 (623 / 223), Oct 600 of 602 (415 / 185). Tags are mutually exclusive; phonepe tags carry a PhonePe order id (pg_id), gold posts a gateway fee on 704 of 973 phonepe-tagged paid orders and a COD handling fee on 233 of 271 cod-tagged ones. Exchange replacements carry no payment tags. 3 orders where gold says COD and the tag says PhonePe keep gold.'
+  implemented_in:
+  - 'mage-ai:serve/core/views/fct_order.sql'
+  - 'mage-ai:serve/core/views/fct_order_commerce.sql'
+  - 'mage-ai:serve/core/views/mart_product_profit.sql'
+  - 'mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql'
+  - 'mage-ai:infra/cube/model_v3/cubes/commerce.yml'
+  tests:
+  - v3_contracts.py PAYMENT-RESOLVE
+  change_how: 'To drop the override once gold records the real method: remove the pay_* resolver in the four SQL files (each carries the D-46 id), re-apply fct_order / fct_order_commerce / mart_product_profit (apply_views.py, explicit names) and the 05 mart MV (apply_v3.py), and leave payment_source = gold.'
+

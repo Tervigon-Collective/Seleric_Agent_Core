@@ -279,9 +279,9 @@ limits:
   next_step: 'Checked 2026-10-16 from the stored per-row attribution_setting (Pipe Board / Ads Manager history not reachable): the setting mix did NOT change on 1 Sep (about 70 % of spend 1d_view_7d_click, 25 % 7d_click); days are loaded once at D+7. Meta purchases per 1,000 INR of spend fell 1.41 (Aug) -> 0.79 (Sep) while our Meta-credited orders per 1,000 INR stayed 0.69, so the drop is on the Meta side (measurement: pixel / Conversions API matching, modelled conversions), not our window. Owner: check Events Manager diagnostics for September.'
 - id: L-35
   area: 'Orders'
-  limit: 'Payment method / gateway is the literal text `manual` on most orders since the Sep 2026 checkout change.'
-  impact: 'brand 20 Sep 2026: 864 of 931 sale orders are bucket `manual`; only 51 COD + 13 online are classified, so COD vs prepaid shares are understated for that period. The `manual` member is unclassified, not a payment type; slices by payment_bucket / payment_method / payment_gateway / is_cod say so (a planner warning). The cod_orders / prepaid_orders totals are not flagged.'
-  affects: 'payment-mix answers, cod_orders / prepaid_orders, payment_bucket slices from Sep 2026'
-  handled_by: [D-41]
+  limit: 'Gold records the payment method / gateway as the literal text `manual` on orders from the Pragma 1Checkout app (since 2026-08-26; most orders since the Sep 2026 checkout change).'
+  impact: 'Resolved in serve from the order tags (D-46), so brand 20 Sep 2026 reads about 633 online, 274 COD and 24 manual of 931 sale orders (was 13 online, 51 COD, 867 manual). Residuals: (1) untagged manual orders (drafts, POS, some exchanges) stay `manual` = unclassified; (2) about 38 "advance online, balance on delivery" orders (tag phonepe, partially paid, 36 of them in Oct 2026, gross about Rs 0.9L) count as online although the balance is cash on delivery; (3) gold itself, fct_payment and the ledger still carry `manual`: the payments view shows the transaction record (gateway manual), and the 143 phonepe-tagged orders that were first placed as COD and then paid online still carry a COD handling fee in gold (about Rs 5.4k, a gold cost rule to check upstream).'
+  affects: 'payment-mix answers, cod_orders / prepaid_orders, payment_bucket slices from 2026-08-26; fct_payment slices'
+  handled_by: [D-41, D-46]
   status: accepted
-  next_step: 'upstream: checkout-app / dbt owner to emit the real gateway or method; v3 changes nothing until then'
+  next_step: 'upstream: checkout-app / dbt owner to emit the real gateway or method in gold (then the D-46 override can be dropped) and to check the COD fee on prepaid-converted orders; v3 resolves from tags meanwhile'
