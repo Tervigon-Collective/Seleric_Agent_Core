@@ -39,11 +39,11 @@ Goal: rebuild serve, then Cube and the catalogue, on one component ledger, then 
 
 ## Status (see doc/semantic_v3/PROGRESS.md and CHECKLIST.md)
 - [x] Phase 0 baseline · [x] Phase 1 order classification · [x] Phase 2 component ledger · [x] Phase 3 ads / web / attribution · [x] Phase 4 marts (all applied 2026-10-14)
-- [x] **4.5 date-axis switch (order_date / event_date)** (applied 2026-10-14, completed and signed off by the owner 2026-10-15; contracts 67/67, reconcile PASS) · [x] 5 Cube v3 (built 2026-10-15) · [x] 6 catalogue v3 + MCP (built 2026-10-16) · [x] 7 certification (2026-10-17) · [ ] 8 cutover · [ ] 9 cleanup
+- [x] **4.5 date-axis switch (order_date / event_date)** (applied 2026-10-14, completed and signed off by the owner 2026-10-15; contracts 67/67, reconcile PASS) · [x] 5 Cube v3 (built 2026-10-15) · [x] 6 catalogue v3 + MCP (built 2026-10-16) · [x] 7 certification (2026-10-17) · [~] 8 cutover (flipped 2026-10-19 13:40, 48 h watch running) · [ ] 9 cleanup
 - **As of 2026-10-19:** Phase 7 gate stays PASS (owner sign-off 2026-10-17); Phase 8 not started; the service is still on v2 and nothing is pushed. Registers: 87 decisions (78 implemented), D-46 newest.
 - **Post-Phase-7 change (D-46, amends D-41; applied live 2026-10-19, owner OK):** payment method / gateway / `is_cod` / `payment_bucket` are resolved from the order tags where gold says `manual` (brand 20 Sep 2026: 633 online, 274 COD, 24 manual of 931 sale orders; was 13 / 51 / 867). Serve v3 only: gold, `fct_payment` and the ledger keep the raw value, so no ₹ total moves. Applied: `fct_order`, `fct_order_commerce`, `mart_product_profit`, `mart_profit_fact_v2`. Re-certified on the :4003 rig: contracts 79/79, parity 341/341, smoke 765/765, refusals 18/18, member sweep 765/0 failed, reconcile bridges 0 unexplained, QA 40/40, golden axis 14/14, drill 91/91, `v2_gates --live` 6/6, compositions OK, tests/test_semantic_v3.py 45/45. The sweep caught a SQL slip (a comment swallowed three columns of `fct_order_commerce`), fixed and re-applied. `close_month --restatements`: August 2026 brand 20 order axis -131.70, all in exchange replacement COGS and exchange handling cost (late-posted exchange costs; no payment-dependent column moved); the lock stays append-only.
 - **Phase 8 interview (owner, 2026-10-19):** D-46 applied before cutover; a new production `cube-v3` service in the seleric-mcp compose (the only v3 Cube so far is the test rig on :4003); the whole sequence authorised (commit, merge to main, apply, flip, start the watch; nothing pushed); query_log TTL raised now (Q8). Close schedule (L-27) not installed; rollback = env flip back to cube-v2 / catalogue_v2.
-- **Next (Phase 8):** merge `main` (0 commits behind at last check), migrate the Seleric_Agent registry / services / evals and MCP guards / prompts to the v3 names, env flip (`CUBE_API_URL`, `SELERIC_CATALOGUE_DIR`), 48 h watch. Owner items still open: L-27 close schedule, Q6 (stop Cube v1), Q8 / L-21 (query_log TTL); upstream: L-33, L-34, L-35.
+- **Phase 8 state (2026-10-19):** the MCP runs on `cube-v3` + `catalogue_v3` (flipped by commit `d724ddd` pushed to `main`, Jenkins deploy 13:40 IST; drift check 213 checked, 0 broken; QA 40/40; golden 14/14; production `cube-v3` gates: sweep 765/0, parity 341/341, smoke 765/765, refusals 18/18, drill 91/91, `semantic_sql` check pass). Seleric_Agent: all 93 `metric_registry.yaml` ids resolve in `catalogue_v3` (metric, alias or deprecation), so nothing there had to change for the flip; the repo (branch `gaurav`, other sessions' uncommitted work) was not touched. **48 h watch runs to 2026-10-21 13:40 IST; rollback = revert `d724ddd` (or set the three env values back) and `docker compose up -d mcp`.** Open: owner items L-27 (close schedule), Q6 (stop Cube v1); upstream L-33, L-34, L-35.
 
 ## All decisions taken (planning + interviews during the build)
 <!-- BEGIN GENERATED: decisions -->
@@ -355,10 +355,10 @@ Checks run 2026-10-16/17 on the :4003 rig, brand 20 (the certified scope, D-44) 
 - [x] **Interview checkpoint (owner, 2026-10-17):** variance report `VARIANCE_REPORT.md` **signed off** (v2 cost leg L-17 itemised there, D-30 restock-credit leg included; Q7 closed); **Q11 confirmed** (brand 28 profit / ROAS / AOV / LTV → refusal, D-44, L-16); account-less website LPV: **refuse + caveat (D-45)**, implemented in `build_catalogue_v3.py` and regenerated.
 
 ### Phase 8 — Cutover
-- [ ] Migrate the Seleric_Agent registry / services / evals and the MCP guards / prompts to the v3 names. The `/opt/seleric/reports` scripts are inactive and are not migrated (D-23).
-- [ ] MCP env → `CUBE_API_URL=http://cube-v3:4000`, `SELERIC_CATALOGUE_DIR=catalogue_v3`.
-- [ ] Run the Seleric_Agent registry check.
-- [ ] Watch 48h. Rollback = env flip.
+- [x] Migrate the Seleric_Agent registry / services / evals and the MCP guards / prompts to the v3 names (2026-10-19: Core already on v3 names; registry 93/93 resolves via aliases, Agent repo untouched; renaming registry ids to v3 names is optional cleanup). The `/opt/seleric/reports` scripts are inactive and are not migrated (D-23).
+- [x] MCP env → `CUBE_API_URL=http://cube-v3:4000`, `SELERIC_CATALOGUE_DIR=catalogue_v3` (+ `CUBE_SQL_DSN` to cube-v3:15432); production `cube-v3` service + `cubestore-v3` added to the compose, reading the pinned worktree `/opt/seleric/mage-ai-v3`.
+- [x] Run the Seleric_Agent registry check (93/93, see above).
+- [ ] Watch 48h (from 2026-10-19 13:40 IST). Rollback = env flip.
 
 ### Phase 9 — Cleanup of old versions (only after 2 weeks stable and a zero-consumer check)
 - [ ] Drop the old serve views that CAPABILITY_MAP marks as replaced:
@@ -399,7 +399,7 @@ The tolerance is 0 in paise for sums of the same Decimal source. Float sources (
 - [x] Q5 **D-16 hashing** (Phase 1) → answered: D-16a hashed person key.
 - [ ] Q6 **Stop the Cube v1 container?** (Phase 9).
 - [x] Q7 Any unexplained ₹ in reconciliation (Phases 2–4, 7): none; variance report signed off 2026-10-17. Phases 2–4: none unexplained. The event-dating leg of the monthly pnl_* comparison is not itemised; the owner accepted v3 dating (D-21b, L-24).
-- [ ] Q8 **query_log keeps 7 days** (Phase 9): longer TTL or two consecutive 7-day checks?
+- [x] Q8 **query_log keeps 7 days** (Phase 9) → answered: TTL raised to 30 days on 2026-10-19 (`ALTER TABLE system.query_log MODIFY TTL event_date + INTERVAL 30 DAY`); rows before 2026-10-13 are already gone, so the zero-read clock starts then; rollback `... INTERVAL 7 DAY`.
 - [x] Q9 **Live v2 defects** → answered: D-26, leave them until v3.
 - [x] Q10 **Payments vs exchanges** → answered: D-01b exchange credits.
 - [x] Q11 **Brand 28 value → refusal** (Phase 7): confirmed by the owner 2026-10-17 (D-44).

@@ -182,7 +182,7 @@ Where the work is:
 ## Phase 6 — Catalogue v3 + MCP · NOT STARTED
 ## Phase 7 — Certification (no-loss gate, variance sign-off) · DONE 2026-10-17
 See the Phase 7 section of `PLAN.md` for the checks and results; owner sign-off of the variances, Q11 and D-45 recorded 2026-10-17.
-## Phase 8 — Cutover · NOT STARTED
+## Phase 8 — Cutover · FLIPPED 2026-10-19 13:40 IST, 48 h watch running (see PLAN.md Phase 8)
 ## Phase 9 — Cleanup · NOT STARTED
 
 ---
