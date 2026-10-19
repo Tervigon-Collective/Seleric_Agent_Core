@@ -317,3 +317,8 @@ Next: Phase 2 — the component ledger (D-11a historical rate card is needed fir
 - **Q8:** `system.query_log` TTL 7 -> 30 days (owner approved). Oldest row is 2026-10-13, so a 14-day zero-read window is available from 2026-10-27.
 - **Watch (to 2026-10-21 13:40 IST):** MCP and cube-v3 restart counts 0 at the flip; check container health, `catalogue_drift_check` and MCP error logs; rollback = revert `d724ddd` (or the three env values) and `docker compose up -d mcp`.
 - **Not done:** the 48 h watch itself; Phase 9; L-27 close schedule; Q6.
+
+### 2026-10-19 (14:07) — semantic-v3 merged into mage-ai main
+- `mage-ai` `semantic-v3` had never been pushed (41 commits ahead, 7 behind `origin/main`). Merged `origin/main` (clean, no conflicts) as `8040291` and pushed it to `main` (owner instruction). Gates run in a clean worktree first (ruff, dbt guards, pytest 765 passed / 1 skipped, pipeline sanity, dbt parse): all pass. Note: in the `mage_v3` worktree, `.env` is a symlink to the production env file and makes `test_gold_sync_priority.py::test_export_full_yields_when_orchestrator_running` fail in the full suite; it passes in a clean checkout (as in Jenkins), so run the gates from a clean worktree.
+- Jenkins `Mage-AI` build #262 (SUCCESS, health 200 on attempt 4) rsynced the repo to `/opt/seleric/mage-ai` and recreated `mageai-local`. Serve views and semantic tables are applied by scripts, not by Jenkins, so nothing changed in ClickHouse. `cube-v3` keeps reading its pinned worktree `/opt/seleric/mage-ai-v3` (`8439f6c`); repoint it to a `main` commit when the model next changes.
+- Both repos now have the v3 work on `main` (Agent_Core `d724ddd`, mage-ai `8040291`); the Agent_Core records commits after `d724ddd` are still local.
