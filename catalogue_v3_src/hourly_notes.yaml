@@ -1,0 +1,11 @@
+# view -> caveat shown under `limitations` of a build_dataset_query with grain=hour that reads the view.
+# Hand-maintained; add an entry when a source's hourly timestamps are known to be off, remove it when the source is fixed.
+# (commerce / returns: serve.fct_order_commerce.order_created_at and serve.refund_events.refund_created_at are true UTC from gold.)
+product_cost_changes: >-
+  Most legacy cost/price versions were recorded per day and carry a midnight UTC stamp (has_time_of_day = 0), so their IST hour
+  (05:00) says nothing about when the change happened; only versions with a real time of day (all pg_order_cogs rows) are hour-accurate.
+  Read this view by day unless you filter has_time_of_day to true.
+web_funnel_hourly: >-
+  Hourly funnel: sessions exist from 2026-06-01 (before that only purchases and revenue, with no sessions, so bounce_rate has no meaning).
+  Purchases and revenue sit on the hour the order was created and its last-touch channel; sessions on the hour the session started and
+  its own channel, so one channel-hour can show purchases without sessions. Σ over a day's hours = web_funnel.

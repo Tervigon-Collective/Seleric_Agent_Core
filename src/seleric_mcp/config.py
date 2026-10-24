@@ -149,6 +149,11 @@ class Settings:
     # Dev default matches CUBEJS_DEV_MODE=true; override with CUBE_SQL_DSN in prod.
     cube_sql_dsn: str = "postgresql://user:password@127.0.0.1:15432/cube"
     result_ttl_minutes: int = 60
+    # build_dataset_query: persisted datasets live until deleted; both caps refuse with a structured error.
+    dataset_max_rows: int = 50_000
+    dataset_max_bytes_per_brand: int = 200_000_000
+    # Cube caps a load at CUBEJS_DB_QUERY_LIMIT (50,000) without saying so: a part that returns this many rows may be cut off.
+    dataset_part_row_cap: int = 50_000
     idempotency_window_hours: int = 24
     top_movers_limit: int = 10
     anomaly_sigma: float = 3.0
@@ -426,6 +431,11 @@ def load_settings(config_path: Path | None = None) -> Settings:
             )
         ),
         result_ttl_minutes=_tunable_int("SELERIC_RESULT_TTL_MINUTES", "result_ttl_minutes"),
+        dataset_max_rows=_tunable_int("SELERIC_DATASET_MAX_ROWS", "dataset_max_rows"),
+        dataset_part_row_cap=_tunable_int("SELERIC_DATASET_PART_ROW_CAP", "dataset_part_row_cap"),
+        dataset_max_bytes_per_brand=_tunable_int(
+            "SELERIC_DATASET_MAX_BYTES_PER_BRAND", "dataset_max_bytes_per_brand"
+        ),
         idempotency_window_hours=_tunable_int(
             "SELERIC_IDEMPOTENCY_WINDOW_HOURS", "idempotency_window_hours"
         ),

@@ -92,6 +92,23 @@ CREATE TABLE IF NOT EXISTS ads_operations (
 );
 CREATE INDEX IF NOT EXISTS idx_ads_operations_tool ON ads_operations(tool_name, created_at);
 
+-- Persisted datasets (build_dataset_query): aligned tables kept until deleted. Rows are a
+-- JSON array of objects; (brand_key, module_key) scopes every read, list and delete.
+CREATE TABLE IF NOT EXISTS datasets (
+    handle TEXT PRIMARY KEY,
+    name TEXT,
+    brand_key TEXT NOT NULL,
+    module_key TEXT NOT NULL,
+    request_json TEXT NOT NULL,
+    schema_json TEXT NOT NULL,
+    rows_json TEXT NOT NULL,
+    provenance_json TEXT NOT NULL,
+    row_count INTEGER NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_datasets_scope ON datasets(brand_key, module_key, created_at);
+
 -- Last built value index per brand (catalogue_service/value_index.py), so a
 -- restarted server resolves values on its first question instead of rebuilding
 -- from Cube first. brand_key '' = no brand scope.

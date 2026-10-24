@@ -117,6 +117,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "catalogue_resolve_values",
         "modules_list",
         "metrics_query",
+        "build_dataset_query",
         "metrics_drilldown",
         "semantic_sql",
         "insights_explain",

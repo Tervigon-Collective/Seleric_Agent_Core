@@ -59,10 +59,12 @@ VIEW_INFO = {
     "finance": ("finance", "brand_day_channel_ad", "canonical_pnl", None, "Finance", "order_date"),
     "product_profit": ("product", "order_line_event", "product_performance", None, "Finance", "order_date"),
     "product_ads": ("product", "campaign_day_line", "product_performance", None, "Growth / Paid Media", "report_date"),
+    "product_cost_changes": ("product", "sku_cost_version", None, "changed_at", "Finance", "changed_at"),
     "paid_media": ("paid_media", "ad_day", "meta_ad_performance", None, "Growth / Paid Media", "report_date"),
     "paid_media_hourly": ("paid_media", "ad_hour", "meta_ad_performance_hourly", "report_hour", "Growth / Paid Media", "report_date"),
     "paid_media_breakdowns": ("paid_media", "ad_day_breakdown", "meta_ad_breakdown_performance", None, "Growth / Paid Media", "report_date"),
-    "paid_media_changes": ("paid_media", "change_event", "meta_ads_status_history", None, "Growth / Paid Media", "changed_at"),
+    "web_funnel_hourly": ("web_analytics", "brand_day_hour_channel", "funnel_daily", "report_hour", "Growth / Web Analytics", "report_date"),
+    "paid_media_changes": ("paid_media", "change_event", "meta_ads_status_history", "changed_at", "Growth / Paid Media", "changed_at"),
     "web_sessions": ("web_analytics", "session", "session_funnel", "session_start", "Growth / Web Analytics", "session_date"),
     "web_funnel": ("web_analytics", "brand_day", "funnel_daily", None, "Growth / Web Analytics", "report_date"),
     "web_events": ("web_analytics", "day_event_type", "web_events_daily", None, "Growth / Web Analytics", "report_date"),
@@ -70,7 +72,7 @@ VIEW_INFO = {
     "attribution": ("attribution", "order_touch", "touchpoints", "touch_ts", "Growth / Attribution", "order_date"),
     "attribution_paths": ("attribution", "order_model", "attribution_paths", None, "Growth / Attribution", "order_date"),
     "customers": ("customer", "customer", "customer_ltv", None, "Growth / CRM", "last_order_at"),
-    "returns": ("operations", "refund", "refund_events", None, "Commerce Ops", "refund_date"),
+    "returns": ("operations", "refund", "refund_events", "refund_created_at", "Commerce Ops", "refund_date"),
     "payments": ("operations", "transaction", "payments", None, "Finance", "transaction_date"),
     "funnel_orders": ("web_analytics", "order", "funnel_daily", None, "Growth / Web Analytics", "order_date"),
     "stock_movements": ("operations", "stock_movement", None, None, "Supply Chain Ops", "movement_date"),
@@ -84,9 +86,9 @@ VIEW_INFO = {
     "procurement_sampling": ("operations", "sampling_variant", None, None, "Supply Chain Ops", "variant_created_date"),
 }
 MODULES = {  # v1 module id -> v3 views (no ontology in v3; extra_views is the scope)
-    "webanalytics": ["web_sessions", "web_funnel", "web_events", "web_event_detail", "funnel_orders"],
+    "webanalytics": ["web_sessions", "web_funnel", "web_funnel_hourly", "web_events", "web_event_detail", "funnel_orders"],
     "commerce": ["commerce", "returns", "payments"],
-    "product": ["product_profit", "product_ads"],
+    "product": ["product_profit", "product_ads", "product_cost_changes"],
     "paidmedia": ["paid_media", "paid_media_hourly", "paid_media_breakdowns", "paid_media_changes", "finance"],
     "attribution": ["attribution", "attribution_paths", "commerce"],
     "customer": ["customers", "commerce", "finance"],
@@ -95,6 +97,8 @@ MODULES = {  # v1 module id -> v3 views (no ontology in v3; extra_views is the s
 }
 # Website LPV (D-13r) exists for Meta AND Google: landing_page_views / cost_per_landing_page_view are no longer
 # Meta-only. The Meta-only creative-video measures stay.
+# Hourly twin views: each binds, measure by measure, to the same-named metric of its daily home view as the "hourly" binding.
+HOURLY_HOMES = {"paid_media_hourly": "paid_media", "web_funnel_hourly": "web_funnel"}
 META_ONLY = {"video_completion_rate", "thruplays", "hook_rate", "hold_rate_15s"}
 HOURLY = ["ad_spend", "impressions", "clicks", "link_clicks", "landing_page_views", "cost_per_landing_page_view",
           "ctr", "cpc", "cpm"]
@@ -180,6 +184,7 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "net_margin_pct": ["net_profit", "order_pnl_net_sales"],
     "mer": ["order_pnl_net_sales", "ad_spend"], "gross_roas": ["gross_sales", "ad_spend"],
     "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["order_pnl_net_sales", "contribution_margin"],
+    # ops-app stock / receiving (semantic v3 cubes po_headers, po_lines, qc_checks)
     "po_fill_rate": ["po_received_units", "po_ordered_units"], "line_fill_rate": ["line_received_units", "line_ordered_units"],
     "qc_damage_rate": ["qc_damage_units", "qc_actual_units"], "qc_shortfall_rate": ["qc_shortfall_units", "qc_invoice_units"],
 }
@@ -434,9 +439,10 @@ def resolve_ids(measures: dict, v2: dict, cap: dict):
         if member in used:
             continue
         view, name = member.split(".", 1)
-        if view in ("paid_media_hourly", "paid_media_breakdowns"):
-            # a binding of the paid_media metric of the same name (hourly / breakdown home of the same number)
-            assert f"paid_media.{name}" in measures, f"{member}: no paid_media measure to bind to"
+        if view in ("paid_media_breakdowns", *HOURLY_HOMES):
+            # a binding of the home metric of the same name (hourly / breakdown home of the same number)
+            home = HOURLY_HOMES.get(view, "paid_media")
+            assert f"{home}.{name}" in measures, f"{member}: no {home} measure to bind to"
             continue
         cand = name
         if cand in taken:
@@ -470,7 +476,7 @@ def main() -> int:
     real, aliases, new = resolve_ids(measures, v2, cap)
     member_of = {**real, **new}  # every v3 metric id -> view.measure
     unbound = set(measures) - set(member_of.values())
-    assert all(m.split(".")[0] in ("paid_media_hourly", "paid_media_breakdowns") for m in unbound), unbound
+    assert all(m.split(".")[0] in ("paid_media_breakdowns", *HOURLY_HOMES) for m in unbound), unbound
 
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -488,6 +494,8 @@ def main() -> int:
         cadence = ((old.get("freshness") or {}).get("expected_cadence")) or "hourly after gold sync, IST"
         if name == "paid_media_changes":
             cadence = "event-driven (rows only when an ad entity changes)"
+        if name == "web_funnel_hourly":
+            cadence = "hourly after the orchestrator's dw/mart stage (about 1 h behind; paused UTC 19-21 = 00:30-03:30 IST), IST"
         if name in ("finance", "product_profit", "commerce", "product_ads", "returns", "payments", "customers"):
             cadence = "every 5 minutes after gold (semantic v3 tables), IST"
         views_doc.append({
@@ -701,18 +709,17 @@ def main() -> int:
             doc["valid_for"] = valid_for
             doc["valid_for_reason"] = " ".join(reasons)
         bindings = []
-        if view == "paid_media" and (f"paid_media_hourly.{mname}" in measures or f"paid_media_breakdowns.{mname}" in measures):
-            if f"paid_media_hourly.{mname}" in measures:
-                bindings.append({"name": "hourly", "view": "paid_media_hourly", "measure": f"paid_media_hourly.{mname}",
-                                 "granularities": ["hour"]})
-            if f"paid_media_breakdowns.{mname}" in measures:
-                bindings.append({"name": "breakdowns", "view": "paid_media_breakdowns",
-                                 "measure": f"paid_media_breakdowns.{mname}", "dimensions": BREAKDOWN_DIMS,
-                                 "slice_dimension": "breakdown_type",
-                                 "slices": {d: [x for x in v if x not in SLICE_GAPS.get(mname, ())]
-                                            for d, v in BREAKDOWN_SLICES.items()},
-                                 "note": "Meta only: Google reports no audience breakdowns, so Google delivery "
-                                         "is not in these rows."})
+        twin = next((h for h, home in HOURLY_HOMES.items() if home == view and f"{h}.{mname}" in measures), None)
+        if twin:
+            bindings.append({"name": "hourly", "view": twin, "measure": f"{twin}.{mname}", "granularities": ["hour"]})
+        if view == "paid_media" and f"paid_media_breakdowns.{mname}" in measures:
+            bindings.append({"name": "breakdowns", "view": "paid_media_breakdowns",
+                             "measure": f"paid_media_breakdowns.{mname}", "dimensions": BREAKDOWN_DIMS,
+                             "slice_dimension": "breakdown_type",
+                             "slices": {d: [x for x in v if x not in SLICE_GAPS.get(mname, ())]
+                                        for d, v in BREAKDOWN_SLICES.items()},
+                             "note": "Meta only: Google reports no audience breakdowns, so Google delivery "
+                                     "is not in these rows."})
         if bindings:
             doc["bindings"] = bindings
         wy(OUT / "metrics" / f"{mid}.yaml", doc, hdr)

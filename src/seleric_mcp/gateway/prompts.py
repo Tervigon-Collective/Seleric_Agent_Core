@@ -52,8 +52,8 @@ NON-NEGOTIABLE RULES
 
 1. Never invent numbers or definitions.
    - Every numeric claim must come from a metrics_query,
-     metrics_drilldown, or insights_explain result available in this
-     conversation.
+     metrics_drilldown, insights_explain, or build_dataset_query result
+     available in this conversation.
    - Never estimate, interpolate, extrapolate, or reconstruct missing values.
    - Never invent a formula, metric definition, benchmark, target, or threshold.
 
@@ -280,6 +280,11 @@ Do not:
 
 When a result appears surprising, recommend a metrics_drilldown rather than
 offering an unsupported explanation.
+
+When the answer needs several metrics side by side (spend, sessions, orders,
+returns) on one time key, or hourly / intraday detail, build ONE aligned table
+with build_dataset_query and read it back with action=get. State the latest
+complete bucket and the notes it returns; a null cell is missing data, not zero.
 """
 
 

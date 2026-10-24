@@ -48,7 +48,7 @@ def run(planner: QueryPlanner, measures: list[str], axis: str | None = None, **k
 def test_catalogue_v3_loads_as_semantic_v3(v3):
     assert v3.is_v2 and v3.is_v3
     assert v3.cat.semantic_version == 3
-    assert len(v3.cat.views) == 18
+    assert len(v3.cat.views) == 29   # 18 + 9 ops views (stock / purchasing / quality / vendors) + product_cost_changes + web_funnel_hourly
     assert {"finance", "product_profit", "product_ads"} <= set(v3.cat.views)
     assert "pnl" not in v3.cat.views and "order_pnl" not in v3.cat.views and "product_pnl" not in v3.cat.views
 
@@ -371,3 +371,20 @@ def test_report_date_on_a_cohort_only_metric_reads_as_order_date(planner, cube):
     out = run(planner, ["ltv"], dimensions=["report_date"])
     assert "finance.order_date" in cube.queries[0]["dimensions"]
     assert any("'report_date' read as order_date" in w for w in out["warnings"])
+
+
+# ---------------------------------------------------------------- hourly twins
+
+def test_hour_granularity_routes_the_funnel_metrics_to_the_hourly_funnel(planner, cube):
+    """last-touch funnel figures by hour: each web_funnel metric has an hourly binding on web_funnel_hourly (report_hour)."""
+    out = asyncio.run(planner.run(QueryRequest(measures=["funnel_purchases", "funnel_revenue", "bounce_rate"], time_range=SEP, granularity="hour")))
+    q = cube.queries[-1]
+    assert sorted(q["measures"]) == sorted(f"web_funnel_hourly.{m}" for m in ("funnel_purchases", "funnel_revenue", "bounce_rate"))
+    assert q["timeDimensions"][0]["dimension"] == "web_funnel_hourly.report_hour"
+    assert any("hourly" in w for w in out["warnings"])
+
+
+def test_day_granularity_stays_on_the_daily_funnel(planner, cube):
+    asyncio.run(planner.run(QueryRequest(measures=["funnel_purchases"], time_range=SEP, granularity="day")))
+    assert cube.queries[-1]["measures"] == ["web_funnel.funnel_purchases"]
+

@@ -30,6 +30,8 @@ from ..ads.idempotency import AdsIdempotencyStore, OperationLog
 from ..ads.meta.client import MetaAdsClient
 from ..ads.meta.credentials import MetaCredentialStore
 from ..ads.meta.tools import register_meta_ads_tools
+from ..app.dataset_builder import DatasetBuilder, DatasetSpec, get_page, slice_rows, summary as dataset_summary
+from ..app.dataset_store import DatasetError, DatasetStore
 from ..app.insight_engine import explain as insight_explain
 from ..app.models import FilterSpec, PlanError, QueryRequest, SortSpec, TimeRange
 from ..app.query_planner import QueryPlanner
@@ -91,6 +93,18 @@ class AppContext:
             self.cube,
             self.result_store,
             default_brand_id=settings.default_brand_id or None,
+        )
+        self.datasets = DatasetStore(
+            self.db,
+            max_rows=settings.dataset_max_rows,
+            max_bytes_per_brand=settings.dataset_max_bytes_per_brand,
+        )
+        self.dataset_builder = DatasetBuilder(
+            self.planner,
+            self.datasets,
+            default_brand_id=settings.default_brand_id or None,
+            latest_date=self.view_latest_date,
+            part_row_cap=settings.dataset_part_row_cap,
         )
         self.values = ValueIndex(
             self.catalogue,
@@ -213,6 +227,11 @@ class AppContext:
                 entry["values"] = values
             out.append(entry)
         return out
+
+    async def view_latest_date(self, view_name: str, brand_key: str) -> str | None:
+        """Newest date a view holds for one brand (the stale-data probe), for dataset watermarks."""
+        probe = [{"dimension": "brand_id", "operator": "equals", "values": [brand_key]}] if brand_key else None
+        return await self._latest_data_date(view_name, self._translate_probe_filters(view_name, probe))
 
     async def _latest_data_date(
         self, view_name: str, filters: list[dict] | None = None
@@ -1008,6 +1027,127 @@ def build_server(settings: Settings) -> FastMCP:
             # and log the traceback (not just str) for diagnosis.
             logger.error("metrics_query_failed", trace_id=trace_id, error=repr(e), exc_info=True)
             return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
+
+    @mcp.tool()
+    async def build_dataset_query(
+        action: str = "build",
+        measures: list[str] | None = None,
+        time_range: dict | None = None,
+        dimensions: list[str] | None = None,
+        filters: list[dict] | None = None,
+        grain: str = "day",
+        date_axis: str | None = None,
+        include_partial_hour: bool = False,
+        name: str | None = None,
+        handle: str | None = None,
+        columns: list[str] | None = None,
+        offset: int = 0,
+        limit: int | None = None,
+        window: dict | None = None,
+        where: list[dict] | None = None,
+        save: bool = False,
+        module: str | None = None,
+    ) -> dict:
+        """Build ONE aligned table from several catalogue metrics (ads, sessions, orders,
+        returns ...) on a shared time key and shared dimensions, keep it on the server until
+        deleted, and page it back for analysis. Use it when an answer needs metrics from
+        different sources side by side (spend vs sessions vs orders by hour or day, a diagnosis
+        cohort, intraday questions); use metrics_query for a single figure or one-view
+        breakdown. action:
+        - build (default): measures = catalogue metric ids, time_range as in metrics_query,
+          dimensions / filters = catalogue dimension ids, grain = hour | day (IST), optional
+          date_axis, include_partial_hour (the current hour is left out by default), name.
+          Returns handle, column schema (role, source view, date axis, unit), preview, stats,
+          per-source latest complete bucket and freshness, notes and limitations. Dimensions
+          must be available on every metric's view, else the build is refused (code
+          unalignable). A null cell is missing data (after the source's last bucket, or a
+          non-additive measure with no rows); 0 is a real zero. Too many rows is refused (code
+          dataset_too_large): narrow the range, use grain day, drop a dimension.
+        - get: handle, optional columns, offset, limit (default 1000, max 5000) -> rows, next_offset.
+        - slice: handle plus columns / window {"start","end"} on the bucket / where
+          [{"column": <dimension>, "values": [...]}]; save=true keeps the result as a new handle.
+        - list: your datasets (this brand and module). delete: handle.
+        Errors carry a stable code: invalid_spec, unalignable, unknown_handle,
+        dataset_too_large, dataset_store_full. Quote the notes, the latest complete bucket and
+        the limitations when presenting numbers."""
+        trace_id = _log_call("build_dataset_query", action=action, measures=measures, module=module)
+        effective_module, mod_refusal = _resolve_module(module)
+        if mod_refusal:
+            return mod_refusal
+        if effective_module is not None:
+            unknown = _unknown_module(effective_module)
+            if unknown:
+                return unknown
+        module_key = effective_module or ""
+        builder = ctx.dataset_builder
+        try:
+            if action == "build":
+                if not measures or time_range is None:
+                    raise DatasetError("invalid_spec", "build needs measures (catalogue metric ids) and time_range.")
+                denial = _check_metric_scopes(measures)
+                if denial:
+                    return denial
+                if effective_module is not None:
+                    mod_denial = _check_metric_module(measures, effective_module)
+                    if mod_denial:
+                        return mod_denial
+                stale = await ctx.stale_views(measures, filters or [])
+                if stale:
+                    return _stale_refusal(stale)
+                spec = DatasetSpec(
+                    measures=measures,
+                    dimensions=dimensions or [],
+                    filters=[FilterSpec.model_validate(f) for f in (filters or [])],
+                    time_range=TimeRange.model_validate(time_range),
+                    grain=grain,
+                    date_axis=date_axis,
+                    include_partial_hour=include_partial_hour,
+                )
+                return await builder.build(spec, module_key=module_key, name=name)
+            if action == "list":
+                # like metrics_query: no brand filter means the default brand
+                return {"datasets": ctx.datasets.list(brand_key=builder.brand_key(filters), module_key=module_key)}
+            # a handle is an unguessable id; a brand filter, when given, must match the brand it was built under
+            brand_key = builder.brand_key(filters) if filters else None
+            if not handle:
+                raise DatasetError("invalid_spec", f"{action} needs a handle (action=list shows them).")
+            if action == "delete":
+                ctx.datasets.delete(handle, brand_key=brand_key, module_key=module_key)
+                return {"deleted": handle}
+            ds = ctx.datasets.get(handle, brand_key=brand_key, module_key=module_key)
+            if action == "get":
+                return get_page(ds, columns=columns, offset=offset, limit=limit)
+            if action == "slice":
+                rows, schema = slice_rows(ds, columns=columns, window=window, where=where)
+                if save:
+                    derived = ctx.datasets.save(
+                        name=name or (f"{ds.name} (slice)" if ds.name else None),
+                        brand_key=ds.brand_key,
+                        module_key=ds.module_key,
+                        request={**ds.request, "sliced_from": ds.handle, "window": window, "where": where},
+                        schema=schema,
+                        rows=rows,
+                        provenance={**ds.provenance, "sliced_from": ds.handle},
+                    )
+                    return {**dataset_summary(derived), "query_id": derived.handle, "sliced_from": ds.handle}
+                lim = min(max(limit or 1000, 1), 5000)
+                return {
+                    "query_id": ds.handle,
+                    "handle": ds.handle,
+                    "row_count": len(rows),
+                    "returned": min(len(rows), lim),
+                    "columns": schema,
+                    "rows": rows[:lim],
+                    "provenance": ds.provenance,
+                }
+            raise DatasetError("invalid_spec", f"Unknown action {action!r}; use build | get | slice | list | delete.")
+        except DatasetError as e:
+            return e.to_payload()
+        except PlanError as e:
+            return {**e.to_payload(), "code": "invalid_spec"}
+        except Exception as e:
+            logger.error("build_dataset_query_failed", trace_id=trace_id, error=repr(e), exc_info=True)
+            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}", "code": "internal_error"}
 
     @mcp.tool()
     async def semantic_sql(

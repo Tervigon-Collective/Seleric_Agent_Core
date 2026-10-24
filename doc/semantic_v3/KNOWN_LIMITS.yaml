@@ -31,7 +31,7 @@ limits:
   next_step: none — platform limitation
 - id: L-04
   area: Ads
-  limit: Hourly delivery exists only from 2026-04-01 for Meta and 2024-11-15 for Google; Google hourly has no ad group / ad level.
+  limit: Hourly delivery exists only from 2025-09-22 for Meta (hourly spend = daily spend in every month since; was 2026-04-01 until 2026-10-23) and 2024-11-15 for Google; Google hourly has no ad group / ad level.
   impact: hourly answers before those dates are unavailable (not zero).
   affects: hour-of-day analysis
   handled_by: []
