@@ -5,8 +5,8 @@ category: commerce
 status: certified
 description: 'Sale orders with a recognised payment bucket (cod / online / manual / paytm card machine), as v2.
   Grain: order. Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date
-  (outcomes on the day they happen). Redefined in semantic v3 (D-01; D-08; D-08a): the id is kept, the number may
-  change.'
+  (outcomes on the day they happen). Redefined in semantic v3 (D-01; D-08; D-08a; D-46): the id is kept, the number
+  may change.'
 formula:
   human_readable: Sale orders with a recognised payment bucket (cod / online / manual / paytm card machine), as
     v2.
@@ -38,3 +38,4 @@ decision_ids:
 - D-01
 - D-08
 - D-08a
+- D-46

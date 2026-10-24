@@ -154,3 +154,72 @@ views:
     expected_cadence: daily after dw/mart run; 26h SLA
   description: 'Funnel purchases and revenue per order (order date): the funnel mart''s purchases sliced by the
     order''s traffic, campaign and products (basket_*: orders containing the product).'
+- name: stock_movements
+  title: Stock Movements
+  date_dimension: movement_date
+  freshness:
+    source: Cube v3 view stock_movements (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Stock ledger: units in / out / net by movement date (IST), by movement type, reference, SKU and
+    warehouse. Native clock; no order-date axis.'
+- name: stock_levels
+  title: Stock Levels
+  date_dimension: last_movement_date
+  freshness:
+    source: Cube v3 view stock_levels (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Current stock now: on hand, reserved, available, FIFO stock value, out-of-stock and slow-mover items.
+    A snapshot as of the last sync; history by day comes from stock_movements (closing quantities are in the gold
+    fct_inventory_item_daily).'
+- name: stock_layers
+  title: Stock Layers
+  date_dimension: receipt_date
+  freshness:
+    source: Cube v3 view stock_layers (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'FIFO receipt layers: received vs remaining units and landed value by receipt date, vendor and age.'
+- name: stock_sync_errors
+  title: Stock Sync Errors
+  date_dimension: error_date
+  freshness:
+    source: Cube v3 view stock_sync_errors (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: Inventory posting failures from Shopify / Amazon (open vs resolved, hours to resolve).
+- name: purchase_orders
+  title: Purchase Orders
+  date_dimension: order_date
+  freshness:
+    source: Cube v3 view purchase_orders (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Purchase requests / POs: counts, value, open and overdue, fill rate and lead times by vendor and
+    status.'
+- name: purchase_order_lines
+  title: Purchase Order Lines
+  date_dimension: order_date
+  freshness:
+    source: Cube v3 view purchase_order_lines (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Purchase request lines: ordered vs received units and value by product, vendor and QC status.'
+- name: quality_checks
+  title: Quality Checks
+  date_dimension: inspection_date
+  freshness:
+    source: Cube v3 view quality_checks (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Inbound quality checks: damage, shortfall and rejection rates by vendor, product and inspection
+    date.'
+- name: vendors
+  title: Vendors
+  date_dimension: vendor_created_date
+  freshness:
+    source: Cube v3 view vendors (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: Vendor directory (name, GSTIN, status).
+- name: procurement_sampling
+  title: Procurement Sampling
+  date_dimension: variant_created_date
+  freshness:
+    source: Cube v3 view procurement_sampling (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Procurement sampling pipeline: variants, MRP / COGS / margin, MOQ and sample quantities by product
+    status.'

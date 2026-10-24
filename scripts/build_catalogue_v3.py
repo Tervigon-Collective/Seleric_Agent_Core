@@ -73,6 +73,15 @@ VIEW_INFO = {
     "returns": ("operations", "refund", "refund_events", None, "Commerce Ops", "refund_date"),
     "payments": ("operations", "transaction", "payments", None, "Finance", "transaction_date"),
     "funnel_orders": ("web_analytics", "order", "funnel_daily", None, "Growth / Web Analytics", "order_date"),
+    "stock_movements": ("operations", "stock_movement", None, None, "Supply Chain Ops", "movement_date"),
+    "stock_levels": ("operations", "stocked_item", None, None, "Supply Chain Ops", "last_movement_date"),
+    "stock_layers": ("operations", "receipt_layer", None, None, "Supply Chain Ops", "receipt_date"),
+    "stock_sync_errors": ("operations", "sync_error", None, None, "Supply Chain Ops", "error_date"),
+    "purchase_orders": ("operations", "purchase_request", None, None, "Supply Chain Ops", "order_date"),
+    "purchase_order_lines": ("operations", "purchase_request_line", None, None, "Supply Chain Ops", "order_date"),
+    "quality_checks": ("operations", "quality_check", None, None, "Supply Chain Ops", "inspection_date"),
+    "vendors": ("operations", "vendor", None, None, "Supply Chain Ops", "vendor_created_date"),
+    "procurement_sampling": ("operations", "sampling_variant", None, None, "Supply Chain Ops", "variant_created_date"),
 }
 MODULES = {  # v1 module id -> v3 views (no ontology in v3; extra_views is the scope)
     "webanalytics": ["web_sessions", "web_funnel", "web_events", "web_event_detail", "funnel_orders"],
@@ -82,7 +91,7 @@ MODULES = {  # v1 module id -> v3 views (no ontology in v3; extra_views is the s
     "attribution": ["attribution", "attribution_paths", "commerce"],
     "customer": ["customers", "commerce", "finance"],
     "finance": ["finance", "product_profit"],
-    "operations": ["returns", "payments"],
+    "operations": ["returns", "payments", "stock_movements", "stock_levels", "stock_layers", "stock_sync_errors", "purchase_orders", "purchase_order_lines", "quality_checks", "vendors", "procurement_sampling"],
 }
 # Website LPV (D-13r) exists for Meta AND Google: landing_page_views / cost_per_landing_page_view are no longer
 # Meta-only. The Meta-only creative-video measures stay.
@@ -171,6 +180,8 @@ RATIO_PARTS = {  # ratio -> component metrics (Cube recomputes every ratio from 
     "net_margin_pct": ["net_profit", "order_pnl_net_sales"],
     "mer": ["order_pnl_net_sales", "ad_spend"], "gross_roas": ["gross_sales", "ad_spend"],
     "net_roas": ["contribution_margin", "ad_spend"], "be_roas": ["order_pnl_net_sales", "contribution_margin"],
+    "po_fill_rate": ["po_received_units", "po_ordered_units"], "line_fill_rate": ["line_received_units", "line_ordered_units"],
+    "qc_damage_rate": ["qc_damage_units", "qc_actual_units"], "qc_shortfall_rate": ["qc_shortfall_units", "qc_invoice_units"],
 }
 DIM_RENAME = {("commerce", "event_type"): "order_event_type",  # same member name, different meaning
               ("finance", "row_type"): "order_pnl_row_type",  # kept apart for stable ids (orders | ad_spend)

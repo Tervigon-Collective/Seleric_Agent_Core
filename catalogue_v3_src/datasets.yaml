@@ -442,3 +442,104 @@ Product.AdProfit:
     status: certified
     certified_on: '2026-10-16'
     evidence: doc/semantic_v3/results/datasets/certification.json
+Stock.Movements:
+  domain: operations
+  role: primary_fact
+  description: Stock ledger (receipts, sales, returns, exchanges, adjustments), signed quantities, PeerDB CDC from the ops app
+  physical_bindings:
+    fact: serve.inventory_movements
+  grain:
+    declared_keys:
+    - brand_id
+    - movement_id
+  date_policy:
+    default: movement_date
+    meaning: stock_movement_date
+Stock.Levels:
+  domain: operations
+  role: snapshot
+  description: Current stock balance per stocked item with FIFO value (snapshot as of last sync, not history)
+  physical_bindings:
+    fact: serve.inventory_stock_current
+  grain:
+    declared_keys:
+    - brand_id
+    - inventory_item_id
+Stock.ReceiptLayers:
+  domain: operations
+  role: primary_fact
+  description: FIFO receipt layers (received vs remaining units, landed cost)
+  physical_bindings:
+    fact: serve.inventory_receipt_layers
+  grain:
+    declared_keys:
+    - brand_id
+    - receipt_layer_id
+  date_policy:
+    default: receipt_date
+    meaning: stock_receipt_date
+Stock.SyncErrors:
+  domain: operations
+  role: primary_fact
+  description: Failed Shopify / Amazon postings into inventory (ops health)
+  physical_bindings:
+    fact: serve.inventory_sync_errors
+  grain:
+    declared_keys:
+    - brand_id
+    - error_id
+  date_policy:
+    default: error_date
+    meaning: inventory_sync_error_date
+Receiving.PurchaseOrders:
+  domain: operations
+  role: primary_fact
+  description: Purchase requests / POs with status, value, fill rate and lead times
+  physical_bindings:
+    fact: serve.purchase_requests
+  grain:
+    declared_keys:
+    - brand_id
+    - request_id
+  date_policy:
+    default: order_date
+    meaning: purchase_order_date
+Receiving.PurchaseOrderLines:
+  domain: operations
+  role: primary_fact
+  description: Purchase request lines, ordered vs received (QC) units
+  physical_bindings:
+    fact: serve.purchase_request_items
+  grain:
+    declared_keys:
+    - brand_id
+    - item_id
+  date_policy:
+    default: order_date
+    meaning: purchase_order_date
+Receiving.QualityChecks:
+  domain: operations
+  role: primary_fact
+  description: Inbound quality checks (damage, shortfall, rejection)
+  physical_bindings:
+    fact: serve.quality_checks
+  grain:
+    declared_keys:
+    - brand_id
+    - quality_check_id
+  date_policy:
+    default: inspection_date
+    meaning: qc_inspection_date
+Procurement.Sampling:
+  domain: operations
+  role: primary_fact
+  description: Procurement sampling variants (MRP, COGS, MOQ, sample quantities)
+  physical_bindings:
+    fact: serve.procurement_sampling
+  grain:
+    declared_keys:
+    - brand_id
+    - variant_id
+  date_policy:
+    default: variant_created_date
+    meaning: sampling_variant_created_date

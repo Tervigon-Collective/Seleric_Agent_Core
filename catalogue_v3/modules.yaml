@@ -60,3 +60,12 @@ modules:
     extra_views:
     - returns
     - payments
+    - stock_movements
+    - stock_levels
+    - stock_layers
+    - stock_sync_errors
+    - purchase_orders
+    - purchase_order_lines
+    - quality_checks
+    - vendors
+    - procurement_sampling

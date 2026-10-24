@@ -516,6 +516,64 @@ concepts:
       - {when: {measure: orders}, metric: orders_with_touchpoints}
       - {when: {measure: per_path}, metric: avg_touch_count}
 
+  - id: stock_on_hand
+    display_name: Stock on hand
+    one_liner: Units and FIFO value in stock now (snapshot, not historical).
+    aliases: [stock, stock on hand, inventory, inventory on hand, current stock, units in stock, inventory value, stock value]
+    axes: {measure: {values: [units, available, reserved, value, items], default: units}}
+    resolves:
+      - {when: {measure: units}, metric: on_hand_units}
+      - {when: {measure: available}, metric: available_units}
+      - {when: {measure: reserved}, metric: reserved_units}
+      - {when: {measure: value}, metric: stock_value_fifo}
+      - {when: {measure: items}, metric: stocked_items}
+    disambiguation: >
+      A snapshot as of the last sync; it cannot be asked for a past date. Value is FIFO landed cost ex-GST of the open layers
+      (items whose balance disagrees with their layers are counted by items_with_layer_gap).
+
+  - id: stock_movement
+    display_name: Stock movement
+    one_liner: Units in / out / net on the stock ledger by movement date.
+    aliases: [stock movement, units received into stock, units issued, stock in, stock out, net stock change, inventory movement]
+    axes: {direction: {values: [in, out, net, count, value], default: net}}
+    resolves:
+      - {when: {direction: in}, metric: units_in}
+      - {when: {direction: out}, metric: units_out}
+      - {when: {direction: net}, metric: net_stock_change}
+      - {when: {direction: count}, metric: stock_movements}
+      - {when: {direction: value}, metric: movement_value}
+    disambiguation: Movement date (IST) is the only clock; sales out and returns in here are inventory postings, not Shopify order or refund metrics.
+
+  - id: purchase_orders
+    display_name: Purchase orders
+    one_liner: Purchase requests / POs by order date.
+    aliases: [purchase orders, purchase requests, pos, open pos, overdue pos, po value, pending deliveries]
+    axes: {measure: {values: [count, open, overdue, value, fill_rate, planned_lead, actual_lead], default: count}}
+    resolves:
+      - {when: {measure: count}, metric: po_count}
+      - {when: {measure: open}, metric: open_purchase_orders}
+      - {when: {measure: overdue}, metric: overdue_purchase_orders}
+      - {when: {measure: value}, metric: po_value}
+      - {when: {measure: fill_rate}, metric: po_fill_rate}
+      - {when: {measure: planned_lead}, metric: avg_planned_lead_days}
+      - {when: {measure: actual_lead}, metric: avg_actual_lead_days}
+    disambiguation: Value includes GST and header freight. Fill rate = QC-received / ordered units.
+
+  - id: quality_check_outcomes
+    display_name: Quality check outcomes
+    one_liner: Damage, shortfall and rejection on inbound goods by inspection date.
+    aliases: [quality checks, qc, damage rate, shortfall rate, rejected qc, vendor quality, damaged units, short units]
+    axes: {measure: {values: [count, rejected, damage_units, shortfall_units, damage_rate, shortfall_rate, damage_value], default: damage_rate}}
+    resolves:
+      - {when: {measure: count}, metric: qc_count}
+      - {when: {measure: rejected}, metric: rejected_quality_checks}
+      - {when: {measure: damage_units}, metric: qc_damage_units}
+      - {when: {measure: shortfall_units}, metric: qc_shortfall_units}
+      - {when: {measure: damage_rate}, metric: qc_damage_rate}
+      - {when: {measure: shortfall_rate}, metric: qc_shortfall_rate}
+      - {when: {measure: damage_value}, metric: qc_damage_value}
+    disambiguation: Damage rate = damaged / actual received; shortfall rate = short / invoiced. Slice by vendor_name for vendor comparisons.
+
 aliases:
   # spelled-out forms of the ad ratios (the planner's slot reader expands abbreviations): without them "cost per
   # click" fell to the concept default (CTR) and the planner deduped CPC / CPM away (live 2026-10-08)

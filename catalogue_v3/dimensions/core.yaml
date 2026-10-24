@@ -246,6 +246,13 @@ dimensions:
   views:
     paid_media_breakdowns: paid_media_breakdowns.age
   aliases: []
+- id: age_days
+  display_name: Age Days
+  description: Days since receipt.
+  is_time: false
+  views:
+    stock_layers: stock_layers.age_days
+  aliases: []
 - id: allocation_row_type
   display_name: Allocation row type
   description: allocated (a credited sale line) | unallocated (campaign-day spend with no credited line, D-19o)
@@ -367,6 +374,15 @@ dimensions:
     returns: returns.brand_id
     payments: payments.brand_id
     finance: finance.brand_id
+    stock_movements: stock_movements.brand_id
+    stock_levels: stock_levels.brand_id
+    stock_layers: stock_layers.brand_id
+    stock_sync_errors: stock_sync_errors.brand_id
+    purchase_orders: purchase_orders.brand_id
+    purchase_order_lines: purchase_order_lines.brand_id
+    quality_checks: quality_checks.brand_id
+    vendors: vendors.brand_id
+    procurement_sampling: procurement_sampling.brand_id
   aliases: []
 - id: brand_name
   display_name: Brand Name
@@ -604,6 +620,13 @@ dimensions:
   aliases: []
   coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
     at the campaign (device and network are available) and show no ad group or ad (L-03).'
+- id: days_since_last_movement
+  display_name: Days Since Last Movement
+  description: Days since the item last moved (IST); a slow-mover indicator.
+  is_time: false
+  views:
+    stock_levels: stock_levels.days_since_last_movement
+  aliases: []
 - id: days_since_prev_order
   display_name: Days Since Prev Order
   description: Days since the same person's previous sale order; NULL for a first order.
@@ -631,6 +654,13 @@ dimensions:
   is_time: false
   views:
     customers: customers.default_province
+  aliases: []
+- id: delivery_date
+  display_name: Delivery Date
+  description: Expected delivery date.
+  is_time: true
+  views:
+    purchase_orders: purchase_orders.delivery_date
   aliases: []
 - id: device
   display_name: Device
@@ -678,6 +708,20 @@ dimensions:
   is_time: false
   views:
     paid_media_changes: paid_media_changes.entity_type
+  aliases: []
+- id: error_code
+  display_name: Error Code
+  description: Error Code
+  is_time: false
+  views:
+    stock_sync_errors: stock_sync_errors.error_code
+  aliases: []
+- id: error_date
+  display_name: Error Date
+  description: Date the posting failed (IST).
+  is_time: true
+  views:
+    stock_sync_errors: stock_sync_errors.error_date
   aliases: []
 - id: event_close_status
   display_name: Event Close Status
@@ -871,6 +915,13 @@ dimensions:
   views:
     returns: returns.has_money_refund
   aliases: []
+- id: has_remaining
+  display_name: Has Remaining
+  description: The layer still holds stock.
+  is_time: false
+  views:
+    stock_layers: stock_layers.has_remaining
+  aliases: []
 - id: hour_of_day
   display_name: Hour of Day
   description: Hour of day, IST (ad platforms' account-local hour; website sessions converted from UTC to IST).
@@ -893,6 +944,13 @@ dimensions:
   views:
     product_profit: product_profit.in_catalogue
     product_ads: product_ads.in_catalogue
+  aliases: []
+- id: inspection_date
+  display_name: Inspection Date
+  description: QC inspection date.
+  is_time: true
+  views:
+    quality_checks: quality_checks.inspection_date
   aliases: []
 - id: is_bounce
   display_name: Is Bounce
@@ -919,9 +977,11 @@ dimensions:
     returns: returns.is_cod
     payments: payments.is_cod
   aliases: []
-  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
-    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
-    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
+  coverage_note: 'Since 2026-08-26 the checkout app records every payment with the gateway / method literally ''manual''.
+    Where gold says manual and the order tags name exactly one method, v3 resolves it (tag phonepe = online, tag
+    cod = COD; gold''s explicit value always wins; D-46). What is still ''manual'' is unclassified, not a payment
+    type: untagged orders (drafts, POS, some exchanges). ''Advance online, balance on delivery'' orders (tag phonepe,
+    partially paid, from Oct 2026) count as online (L-35).'
 - id: is_converted
   display_name: Is Converted
   description: Session purchased.
@@ -944,6 +1004,13 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.is_first_order
+  aliases: []
+- id: is_inbound
+  display_name: Is Inbound
+  description: Movement added stock.
+  is_time: false
+  views:
+    stock_movements: stock_movements.is_inbound
   aliases: []
 - id: is_lpv
   display_name: Is Lpv
@@ -977,12 +1044,26 @@ dimensions:
   - new customer
   - first order customer
   - new vs repeat
+- id: is_open
+  display_name: Is Open
+  description: Not yet fulfilled.
+  is_time: false
+  views:
+    purchase_orders: purchase_orders.is_open
+  aliases: []
 - id: is_order_level
   display_name: Is Order Level
   description: 'Order-level posting (no product): kept so product sums tie to the brand total.'
   is_time: false
   views:
     product_profit: product_profit.is_order_level
+  aliases: []
+- id: is_overdue
+  display_name: Is Overdue
+  description: Not fulfilled and past the expected delivery date (IST).
+  is_time: false
+  views:
+    purchase_orders: purchase_orders.is_overdue
   aliases: []
 - id: is_paid
   display_name: Is Paid
@@ -1041,6 +1122,13 @@ dimensions:
   views:
     customers: customers.is_repeat_customer
   aliases: []
+- id: is_resolved
+  display_name: Is Resolved
+  description: Is Resolved
+  is_time: false
+  views:
+    stock_sync_errors: stock_sync_errors.is_resolved
+  aliases: []
 - id: is_successful
   display_name: Is Successful
   description: Successful transaction.
@@ -1064,6 +1152,13 @@ dimensions:
   views:
     web_sessions: web_sessions.landing_page_path
     web_event_detail: web_event_detail.landing_page_path
+  aliases: []
+- id: last_movement_date
+  display_name: Last Movement Date
+  description: When the item last had a stock movement (latest value; the view is a current snapshot).
+  is_time: true
+  views:
+    stock_levels: stock_levels.last_movement_date
   aliases: []
 - id: last_order_at
   display_name: Last Order at
@@ -1117,6 +1212,21 @@ dimensions:
   - earned
   - none
   - unclassified
+- id: movement_date
+  display_name: Movement Date
+  description: Date of the stock movement (IST). Native clock, no order-date axis.
+  is_time: true
+  views:
+    stock_movements: stock_movements.movement_date
+  aliases: []
+- id: movement_type
+  display_name: Movement Type
+  description: receiving_in | sale_out | return_in | exchange_out | adjustment_in | adjustment_out.
+  is_time: false
+  views:
+    stock_movements: stock_movements.movement_type
+    stock_sync_errors: stock_sync_errors.movement_type
+  aliases: []
 - id: network
   display_name: Network
   description: Google network (Google-only breakdown, D-14); NULL for Meta and website rows.
@@ -1127,6 +1237,13 @@ dimensions:
   valid_for:
     ad_platform:
     - google
+- id: oldest_stock_age_days
+  display_name: Oldest Stock Age Days
+  description: Age in days of the oldest open receipt layer.
+  is_time: false
+  views:
+    stock_levels: stock_levels.oldest_stock_age_days
+  aliases: []
 - id: order_close_status
   display_name: Order Close Status
   description: open | restatable | reconstructed for the order-date month (D-12, D-12b).
@@ -1154,6 +1271,8 @@ dimensions:
     attribution_paths: attribution_paths.order_date
     returns: returns.order_date
     finance: finance.order_date
+    purchase_orders: purchase_orders.order_date
+    purchase_order_lines: purchase_order_lines.order_date
   aliases: []
 - id: order_event_type
   display_name: Event Type
@@ -1286,9 +1405,11 @@ dimensions:
   - cod
   - paytm card machine
   - manual
-  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
-    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
-    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
+  coverage_note: 'Since 2026-08-26 the checkout app records every payment with the gateway / method literally ''manual''.
+    Where gold says manual and the order tags name exactly one method, v3 resolves it (tag phonepe = online, tag
+    cod = COD; gold''s explicit value always wins; D-46). What is still ''manual'' is unclassified, not a payment
+    type: untagged orders (drafts, POS, some exchanges). ''Advance online, balance on delivery'' orders (tag phonepe,
+    partially paid, from Oct 2026) count as online (L-35).'
 - id: payment_class
   display_name: Payment Class
   description: cash | exchange_credit (non-cash credit on an exchange replacement, D-01b) | void.
@@ -1306,9 +1427,11 @@ dimensions:
     product_ads: product_ads.payment_gateway
     payments: payments.payment_gateway
   aliases: []
-  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
-    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
-    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
+  coverage_note: 'Since 2026-08-26 the checkout app records every payment with the gateway / method literally ''manual''.
+    Where gold says manual and the order tags name exactly one method, v3 resolves it (tag phonepe = online, tag
+    cod = COD; gold''s explicit value always wins; D-46). What is still ''manual'' is unclassified, not a payment
+    type: untagged orders (drafts, POS, some exchanges). ''Advance online, balance on delivery'' orders (tag phonepe,
+    partially paid, from Oct 2026) count as online (L-35).'
 - id: payment_method
   display_name: Payment Method
   description: Payment method.
@@ -1319,9 +1442,34 @@ dimensions:
     product_ads: product_ads.payment_method
     payments: payments.payment_method
   aliases: []
-  coverage_note: 'Since Sep 2026 most orders carry the gateway / method literally ''manual'' (brand 20 Sep 2026:
-    864 of 931 sale orders); only COD and named online gateways are classified, so the ''manual'' member is unclassified,
-    not a payment type, and cod vs online shares are understated for that period (L-35, D-41).'
+  coverage_note: 'Since 2026-08-26 the checkout app records every payment with the gateway / method literally ''manual''.
+    Where gold says manual and the order tags name exactly one method, v3 resolves it (tag phonepe = online, tag
+    cod = COD; gold''s explicit value always wins; D-46). What is still ''manual'' is unclassified, not a payment
+    type: untagged orders (drafts, POS, some exchanges). ''Advance online, balance on delivery'' orders (tag phonepe,
+    partially paid, from Oct 2026) count as online (L-35).'
+- id: payment_source
+  display_name: Payment Source
+  description: Where the payment method comes from (D-46) - gold (gold's own value), tag_phonepe or tag_cod (resolved
+    from the order tags where gold says manual).
+  is_time: false
+  views:
+    commerce: commerce.payment_source
+  aliases: []
+- id: pk
+  display_name: Pk
+  description: Pk
+  is_time: false
+  views:
+    stock_movements: stock_movements.pk
+    stock_levels: stock_levels.pk
+    stock_layers: stock_layers.pk
+    stock_sync_errors: stock_sync_errors.pk
+    purchase_orders: purchase_orders.pk
+    purchase_order_lines: purchase_order_lines.pk
+    quality_checks: quality_checks.pk
+    vendors: vendors.pk
+    procurement_sampling: procurement_sampling.pk
+  aliases: []
 - id: platform
   display_name: Platform
   description: 'Traffic platform: meta, google, whatsapp, email, sms, organic, referral, ai, exchange, unattributed.'
@@ -1352,6 +1500,16 @@ dimensions:
   views:
     paid_media_breakdowns: paid_media_breakdowns.platform_position
   aliases: []
+- id: pr_number
+  display_name: Pr Number
+  description: Pr Number
+  is_time: false
+  views:
+    stock_layers: stock_layers.pr_number
+    purchase_orders: purchase_orders.pr_number
+    purchase_order_lines: purchase_order_lines.pr_number
+    quality_checks: quality_checks.pr_number
+  aliases: []
 - id: prev_status
   display_name: Prev Status
   description: Status before the change.
@@ -1367,6 +1525,21 @@ dimensions:
     product_profit: product_profit.price
     product_ads: product_ads.price
   aliases: []
+- id: price_category
+  display_name: Price Category
+  description: Price Category
+  is_time: false
+  views:
+    procurement_sampling: procurement_sampling.price_category
+  aliases: []
+- id: product_category
+  display_name: Product Category
+  description: Product Category
+  is_time: false
+  views:
+    purchase_order_lines: purchase_order_lines.product_category
+    procurement_sampling: procurement_sampling.product_category
+  aliases: []
 - id: product_id
   display_name: Product Id
   description: Shopify product id.
@@ -1374,6 +1547,31 @@ dimensions:
   views:
     product_profit: product_profit.product_id
     product_ads: product_ads.product_id
+  aliases: []
+- id: product_name
+  display_name: Product Name
+  description: Product Name
+  is_time: false
+  views:
+    stock_movements: stock_movements.product_name
+    stock_levels: stock_levels.product_name
+    purchase_order_lines: purchase_order_lines.product_name
+    quality_checks: quality_checks.product_name
+    procurement_sampling: procurement_sampling.product_name
+  aliases: []
+- id: product_source_type
+  display_name: Product Source Type
+  description: Product Source Type
+  is_time: false
+  views:
+    stock_levels: stock_levels.product_source_type
+  aliases: []
+- id: product_status
+  display_name: Product Status
+  description: Product Status
+  is_time: false
+  views:
+    procurement_sampling: procurement_sampling.product_status
   aliases: []
 - id: product_title
   display_name: Product Title
@@ -1408,6 +1606,28 @@ dimensions:
   is_time: false
   views:
     paid_media_breakdowns: paid_media_breakdowns.publisher_platform
+  aliases: []
+- id: qc_status
+  display_name: Qc Status
+  description: Qc Status
+  is_time: false
+  views:
+    purchase_order_lines: purchase_order_lines.qc_status
+  aliases: []
+- id: receipt_date
+  display_name: Receipt Date
+  description: Date the stock was received (IST).
+  is_time: true
+  views:
+    stock_layers: stock_layers.receipt_date
+  aliases: []
+- id: reference_type
+  display_name: Reference Type
+  description: What caused the movement (purchase_request, shopify_order, amazon_order, shopify_return, manual_adjustment
+    …).
+  is_time: false
+  views:
+    stock_movements: stock_movements.reference_type
   aliases: []
 - id: refund_class
   display_name: Refund Class
@@ -1454,6 +1674,13 @@ dimensions:
   views:
     paid_media_hourly: paid_media_hourly.report_hour
   aliases: []
+- id: request_status
+  display_name: Request Status
+  description: Request Status
+  is_time: false
+  views:
+    purchase_order_lines: purchase_order_lines.request_status
+  aliases: []
 - id: restock_type
   display_name: Restock Type
   description: Restock type.
@@ -1476,6 +1703,13 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.root_order_id
+  aliases: []
+- id: sample_moved_to_inventory
+  display_name: Sample Moved to Inventory
+  description: Sample Moved to Inventory
+  is_time: false
+  views:
+    procurement_sampling: procurement_sampling.sample_moved_to_inventory
   aliases: []
 - id: session_date
   display_name: Session Date
@@ -1581,6 +1815,10 @@ dimensions:
     product_ads: product_ads.sku
     web_event_detail: web_event_detail.sku
     returns: returns.sku
+    stock_movements: stock_movements.sku
+    stock_levels: stock_levels.sku
+    stock_sync_errors: stock_sync_errors.sku
+    procurement_sampling: procurement_sampling.sku
   aliases:
   - SKU
   - product sku
@@ -1613,12 +1851,21 @@ dimensions:
   aliases: []
   family: sku
   family_rank: 4
+- id: source_channel
+  display_name: Source Channel
+  description: Source Channel
+  is_time: false
+  views:
+    stock_sync_errors: stock_sync_errors.source_channel
+  aliases: []
 - id: status
   display_name: Status
   description: Status after the change.
   is_time: false
   views:
     paid_media_changes: paid_media_changes.status
+    purchase_orders: purchase_orders.status
+    quality_checks: quality_checks.status
   aliases: []
 - id: sub_channel
   display_name: Sub Channel
@@ -1686,6 +1933,13 @@ dimensions:
   views:
     payments: payments.transaction_status
   aliases: []
+- id: variant_created_date
+  display_name: Variant Created Date
+  description: When the sampling variant was created.
+  is_time: true
+  views:
+    procurement_sampling: procurement_sampling.variant_created_date
+  aliases: []
 - id: variant_id
   display_name: Variant Id
   description: Shopify variant id.
@@ -1693,6 +1947,14 @@ dimensions:
   views:
     product_profit: product_profit.variant_id
     product_ads: product_ads.variant_id
+  aliases: []
+- id: variant_name
+  display_name: Variant Name
+  description: Variant Name
+  is_time: false
+  views:
+    stock_movements: stock_movements.variant_name
+    stock_levels: stock_levels.variant_name
   aliases: []
 - id: variant_title
   display_name: Variant Title
@@ -1718,6 +1980,38 @@ dimensions:
   - brand vendor
   - supplier
   - vendor name
+- id: vendor_created_date
+  display_name: Vendor Created Date
+  description: When the vendor was added.
+  is_time: true
+  views:
+    vendors: vendors.vendor_created_date
+  aliases: []
+- id: vendor_gst_number
+  display_name: Vendor Gst Number
+  description: Vendor Gst Number
+  is_time: false
+  views:
+    vendors: vendors.vendor_gst_number
+  aliases: []
+- id: vendor_name
+  display_name: Vendor Name
+  description: Vendor Name
+  is_time: false
+  views:
+    stock_layers: stock_layers.vendor_name
+    purchase_orders: purchase_orders.vendor_name
+    purchase_order_lines: purchase_order_lines.vendor_name
+    quality_checks: quality_checks.vendor_name
+    vendors: vendors.vendor_name
+  aliases: []
+- id: vendor_status
+  display_name: Vendor Status
+  description: Vendor Status
+  is_time: false
+  views:
+    vendors: vendors.vendor_status
+  aliases: []
 - id: viewed_product_title
   display_name: Viewed Product Title
   description: Product (product events).
@@ -1736,3 +2030,11 @@ dimensions:
   aliases: []
   family: sku
   family_rank: 2
+- id: warehouse_id
+  display_name: Warehouse Id
+  description: Warehouse Id
+  is_time: false
+  views:
+    stock_movements: stock_movements.warehouse_id
+    stock_levels: stock_levels.warehouse_id
+  aliases: []

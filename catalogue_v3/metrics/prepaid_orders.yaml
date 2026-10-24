@@ -5,7 +5,7 @@ category: commerce
 status: certified
 description: 'Prepaid (online) sale orders. Grain: order. Date axis: placement only. date_axis=order_date (default,
   orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-01;
-  D-08; D-08a): the id is kept, the number may change.'
+  D-08; D-08a; D-46): the id is kept, the number may change.'
 formula:
   human_readable: Prepaid (online) sale orders.
   authoritative_source: cube
@@ -36,3 +36,4 @@ decision_ids:
 - D-01
 - D-08
 - D-08a
+- D-46

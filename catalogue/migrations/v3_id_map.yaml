@@ -533,6 +533,20 @@ metrics:
   product_return_revenue:
     alias_of: product_order_return_revenue
 new:
+  available_units:
+    member: stock_levels.available_units
+  avg_actual_lead_days:
+    member: purchase_orders.avg_actual_lead_days
+  avg_hours_to_resolve:
+    member: stock_sync_errors.avg_hours_to_resolve
+  avg_planned_lead_days:
+    member: purchase_orders.avg_planned_lead_days
+  avg_sampling_cogs:
+    member: procurement_sampling.avg_sampling_cogs
+  avg_sampling_margin_pct:
+    member: procurement_sampling.avg_sampling_margin_pct
+  avg_sampling_mrp:
+    member: procurement_sampling.avg_sampling_mrp
   channel_cancelled_orders:
     member: finance.channel_cancelled_orders
   channel_returned_or_cancelled_orders:
@@ -553,14 +567,54 @@ new:
     member: finance.exchange_price_adjustment
   exchange_refund_count:
     member: returns.exchange_refund_count
+  inventory_sync_errors:
+    member: stock_sync_errors.inventory_sync_errors
+  items_with_layer_gap:
+    member: stock_levels.items_with_layer_gap
+  layered_units:
+    member: stock_levels.layered_units
+  line_fill_rate:
+    member: purchase_order_lines.line_fill_rate
+  line_ordered_units:
+    member: purchase_order_lines.line_ordered_units
+  line_received_units:
+    member: purchase_order_lines.line_received_units
+  line_value:
+    member: purchase_order_lines.line_value
+  movement_value:
+    member: stock_movements.movement_value
+  net_stock_change:
+    member: stock_movements.net_stock_change
   new_customer_net_sales:
     member: finance.new_customer_net_sales
+  on_hand_units:
+    member: stock_levels.on_hand_units
+  open_inventory_sync_errors:
+    member: stock_sync_errors.open_inventory_sync_errors
+  open_purchase_orders:
+    member: purchase_orders.open_purchase_orders
   order_pnl_return_cancel_revenue:
     member: finance.return_cancel_revenue
   order_pnl_rto_revenue:
     member: finance.rto_revenue
+  out_of_stock_items:
+    member: stock_levels.out_of_stock_items
+  overdue_purchase_orders:
+    member: purchase_orders.overdue_purchase_orders
   platform_reported_landing_page_views:
     member: paid_media.platform_reported_landing_page_views
+  po_count:
+    member: purchase_orders.po_count
+  po_fill_rate:
+    member: purchase_orders.po_fill_rate
+  po_lines:
+    member: purchase_order_lines.po_lines
+  po_ordered_units:
+    member: purchase_orders.po_ordered_units
+  po_received_units:
+    member: purchase_orders.po_received_units
+  po_value:
+    member: purchase_orders.po_value
   product_attributed_contribution:
     member: product_ads.product_attributed_contribution
   product_attributed_net_sales:
@@ -599,19 +653,69 @@ new:
     member: product_profit.product_rto_orders
   provisional_ops_cost:
     member: finance.provisional_ops_cost
+  qc_actual_units:
+    member: quality_checks.qc_actual_units
+  qc_count:
+    member: quality_checks.qc_count
+  qc_damage_rate:
+    member: quality_checks.qc_damage_rate
+  qc_damage_units:
+    member: quality_checks.qc_damage_units
+  qc_damage_value:
+    member: quality_checks.qc_damage_value
+  qc_invoice_units:
+    member: quality_checks.qc_invoice_units
+  qc_shortfall_rate:
+    member: quality_checks.qc_shortfall_rate
+  qc_shortfall_units:
+    member: quality_checks.qc_shortfall_units
+  receipt_layers:
+    member: stock_layers.receipt_layers
+  received_units:
+    member: stock_layers.received_units
+  received_value:
+    member: stock_layers.received_value
+  rejected_quality_checks:
+    member: quality_checks.rejected_quality_checks
+  remaining_units:
+    member: stock_layers.remaining_units
+  remaining_value:
+    member: stock_layers.remaining_value
+  reserved_units:
+    member: stock_levels.reserved_units
   rto_orders:
     member: commerce.rto_orders
   rto_revenue:
     member: commerce.rto_revenue
+  sample_units:
+    member: procurement_sampling.sample_units
+  sample_units_in_inventory:
+    member: procurement_sampling.sample_units_in_inventory
+  sampling_products:
+    member: procurement_sampling.sampling_products
+  sampling_variant_count:
+    member: procurement_sampling.sampling_variant_count
   shipping_revenue:
     member: finance.shipping_revenue
   shipping_revenue_reversal:
     member: finance.shipping_revenue_reversal
+  stock_movements:
+    member: stock_movements.stock_movements
+  stock_value_fifo:
+    member: stock_levels.stock_value_fifo
+  stocked_items:
+    member: stock_levels.stocked_items
   transactions:
     member: payments.transactions
   units_cancelled:
     member: product_profit.units_cancelled
+  units_in:
+    member: stock_movements.units_in
+  units_out:
+    member: stock_movements.units_out
   units_rto:
     member: product_profit.units_rto
+  vendor_count:
+    member: vendors.vendor_count
   weight_discrepancy_cost:
     member: finance.weight_discrepancy_cost
