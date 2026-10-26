@@ -231,14 +231,14 @@ def load_cube_surface(model_dir: Path) -> CubeSurface:
     )
 
 
-def cube_model_v2_dir() -> Path:
-    env = os.environ.get("SELERIC_CUBE_MODEL_V2_DIR", "").strip()
+def cube_model_dir() -> Path:
+    env = os.environ.get("SELERIC_CUBE_MODEL_DIR", "").strip()
     if env:
         return Path(env)
-    for cand in (_REPO.parent / "mage-ai" / "infra" / "cube" / "model_v2", _REPO / "cube" / "model_v2"):
+    for cand in (_REPO.parent / "mage-ai" / "infra" / "cube" / "model_v3", _REPO / "cube" / "model_v3"):
         if cand.is_dir():
             return cand
-    return _REPO / "cube" / "model_v2"
+    return _REPO / "cube" / "model_v3"
 
 
 # ---------------------------------------------------------------- Catalogue
@@ -282,7 +282,7 @@ def load_metric_records(catalogue_dir: Path) -> tuple[str, list[MetricRecord]]:
 
 
 def catalogue_dir() -> Path:
-    return Path(os.environ.get("SELERIC_CATALOGUE_DIR", str(_REPO / "catalogue_v2")))
+    return Path(os.environ.get("SELERIC_CATALOGUE_DIR", str(_REPO / "catalogue_v3")))
 
 
 # ---------------------------------------------------------------- Agent surface
@@ -320,7 +320,7 @@ def load_agent_metric_surface(agent_dir: Path) -> dict:
 
 def snapshot_from_live(agent_dir: Path | None = None, conn: dict[str, str] | None = None) -> dict:
     version, metrics = load_metric_records(catalogue_dir())
-    cube = load_cube_surface(cube_model_v2_dir())
+    cube = load_cube_surface(cube_model_dir())
     return {
         "serve": load_serve_objects(conn),
         "catalogue": {"version": version, "metrics": [_metric_to_dict(m) for m in metrics]},

@@ -1,62 +1,16 @@
 # THE Cube + MCP stack for this host.
-# Cube YAML lives in /opt/seleric/mage-ai/infra/cube (not this repo).
-# Do not start mage-ai/infra/cube/docker-compose.yml or mcp_stack Cube here —
-# both would fight :4001 / duplicate the semantic layer.
+# Cube YAML lives in mage-ai infra/cube (not this repo). Only Cube v3 runs here; v1 and v2 were retired in Phase 9.
 #
 #   docker compose up -d
 #   uv run python scripts/smoke_cube.py
 #
 # Public:
-#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core, on cube-v3 + catalogue_v3; cube-v2 kept for rollback until Phase 9)
-#   https://mcp.seleric.com/cube/ → 127.0.0.1:4001  (v1 cube service; seleric_systems daily_pnl.*)
+#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core, on cube-v3 + catalogue_v3)
 name: seleric-mcp
 
 services:
-  cube:
-    image: cubejs/cube:latest
-    container_name: seleric-mcp-cube-1
-    restart: unless-stopped
-    volumes:
-      - ../mage-ai/infra/cube/model:/cube/conf/model:ro
-      - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
-    env_file:
-      - ../mage-ai/infra/cube/.env
-    ports:
-      - "127.0.0.1:${CUBE_HOST_PORT:-4001}:4000"
-    extra_hosts:
-      - "clickhouse.seleric.com:72.61.228.168"
-      - "host.docker.internal:host-gateway"
-
-  # Semantic v2 Cube (doc/semantic_v2): conformed model in mage-ai/infra/cube/model_v2, serve-only
-  # ClickHouse login (cube_serve via .env.v2), pinned image. The agent moves here at the Phase 5 cutover;
-  # v1 `cube` stays for seleric_systems (daily_pnl.* via nginx /cube/).
-  cube-v2:
-    image: cubejs/cube:v1.6.48
-    container_name: seleric-mcp-cube-v2-1
-    restart: unless-stopped
-    # Mount the stable parent (tracked on every branch) and select model_v2 inside it: a
-    # directory bind mount of model_v2 itself goes stale when git deletes and recreates
-    # that folder on a branch switch (Cube then serves an empty model, 2026-10-04).
-    volumes:
-      - ../mage-ai/infra/cube:/cube/conf/src:ro
-      - ../mage-ai/infra/cube/cube.js:/cube/conf/cube.js:ro
-    env_file:
-      - ../mage-ai/infra/cube/.env
-      - ../mage-ai/infra/cube/.env.v2
-    environment:
-      CUBEJS_SCHEMA_PATH: src/model_v2
-      # Semantic SQL (Postgres-protocol). Agent talks via /cubejs-api/v1/cubesql REST;
-      # psql/BI clients use this port. See doc/semantic_v2/PHASE6.md.
-      CUBEJS_PG_SQL_PORT: "15432"
-      CUBEJS_CUBESTORE_URL: ws://cubestore:3030
-    ports:
-      - "127.0.0.1:${CUBE_V2_HOST_PORT:-4002}:4000"
-      - "127.0.0.1:${CUBE_V2_SQL_PORT:-15432}:15432"
-    extra_hosts:
-      - "clickhouse.seleric.com:72.61.228.168"
-
   # Semantic v3 Cube (doc/semantic_v3, Phase 5): model_v3 + cube_v3.js (brand scope plus the capability refusals of refusals_v3.json), dev mode OFF,
-  # same serve-only login as cube-v2 (SELECT only; no pre-aggregations are defined because Cube's ClickHouse driver would CREATE TABLE in the source DB).
+  # serve-only login (cube_serve via .env.v2; SELECT only; no pre-aggregations are defined because Cube's ClickHouse driver would CREATE TABLE in the source DB).
   # Runbook: after a model edit, `docker restart seleric-mcp-cube-v3-1`, then regenerate the catalogue. The MCP moves here at the Phase 8 cutover
   # (rollback = env flip). Live since the Phase 8 cutover (2026-10-19).
   cube-v3:
@@ -98,8 +52,7 @@ services:
       - .env
     environment:
       # Semantic v3 (doc/semantic_v3, Phase 8 cutover 2026-10-19): catalogue_v3 on Cube v3.
-      # Rollback (env flip, then `docker compose up -d mcp`): CUBE_API_URL http://cube-v2:4000, CUBE_SQL_DSN ...@cube-v2:15432/cube,
-      # SELERIC_CATALOGUE_DIR catalogue_v2 (cube-v2 and catalogue_v2 stay in place until Phase 9). v2 history: cutover 2026-10-04.
+      # Cube v1 / v2 and catalogue_v2 were retired in Phase 9 (2026-10-26); rollback is git history.
       CUBE_API_URL: http://cube-v3:4000
       # Semantic SQL: Postgres-protocol SQL API on cube-v3:15432 (checkSqlAuth in cube_v3.js; user brand_<id> scopes the brand).
       CUBE_SQL_DSN: postgresql://user:password@cube-v3:15432/cube
@@ -112,9 +65,6 @@ services:
       MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*
     volumes:
       - ./catalogue:/app/catalogue:ro
-      - ./catalogue_v2:/app/catalogue_v2:ro
-      # QueryPlanner.load_dataset_contracts() reads catalogue_v2_src/datasets.yaml
-      - ./catalogue_v2_src:/app/catalogue_v2_src:ro
       # Semantic v3 (live since the Phase 8 cutover): read when SELERIC_CATALOGUE_DIR=catalogue_v3 and CUBE_API_URL=http://cube-v3:4000
       - ./catalogue_v3:/app/catalogue_v3:ro
       - ./catalogue_v3_src:/app/catalogue_v3_src:ro
@@ -130,17 +80,6 @@ services:
     volumes:
       - cubestore-v3-data:/cube/conf/.cubestore
 
-  # Cube Store: pre-aggregation cache for model_v2 (Phase 6).
-  cubestore:
-    image: cubejs/cubestore
-    container_name: seleric-mcp-cubestore-1
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:3030:3030"
-    volumes:
-      - cubestore-data:/cube/conf/.cubestore
-
 volumes:
   mcp-data:
-  cubestore-data:
   cubestore-v3-data:
