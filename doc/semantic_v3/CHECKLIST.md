@@ -175,15 +175,19 @@ Where the work is:
   - `product_cac` / `product_new_customers`: `is_new_customer` from `fct_order` (root order).
 - [x] Cube v3 wiring of these views — done in Phase 5 (`product_profit`, `product_ads`).
 
-## Phase 5 — Cube v3 · BUILT 2026-10-15
+## Phase 5 — Cube v3 · DONE 2026-10-15
 - [x] `infra/cube/model_v3`; `cube-v3` service on :4003 (dev mode off); inline SQL (`ltv_cac_daily`, `funnel_channel`) moved into serve. Pre-aggregations: none, by owner decision D-42 (2026-10-16).
 - [x] Deliver the F0-1 / F0-2 capabilities (V2_ERROR rows now answer). Brand 28 profit / ROAS / AOV are refused (L-16, refusal checks 18/18); brands 24–27 get no flag (D-44).
 
-## Phase 6 — Catalogue v3 + MCP · NOT STARTED
+## Phase 6 — Catalogue v3 + MCP · DONE 2026-10-16
 ## Phase 7 — Certification (no-loss gate, variance sign-off) · DONE 2026-10-17
 See the Phase 7 section of `PLAN.md` for the checks and results; owner sign-off of the variances, Q11 and D-45 recorded 2026-10-17.
-## Phase 8 — Cutover · FLIPPED 2026-10-19 13:40 IST, 48 h watch running (see PLAN.md Phase 8)
-## Phase 9 — Cleanup · NOT STARTED
+## Phase 8 — Cutover · DONE 2026-10-19 13:40 IST (watch ended 2026-10-21)
+## Phase 9 — Cleanup · DONE 2026-10-26 (see PROGRESS.md)
+- [x] Old serve P&L views dropped (13) and the `semantic.mv_fct_*` / old ledger MVs dropped (5); data tables archived in `serve_archive_20261026`
+- [x] Cube v1 and Cube v2 stopped and removed; `catalogue_v2` mounts removed from the MCP
+- [~] `catalogue_v2` / `catalogue_v2_src` files kept (input to the dependency-graph and comparison tooling)
+- [ ] Real drop of `serve_archive_20261026`; OpenMetadata contracts / SLOs for the dropped views; nginx `/cube/` route
 
 ---
 
@@ -285,8 +289,8 @@ To change a decision:
 |---|---|---|
 | Q2 | Allocated-family period rule → D-27 same day, default-model credit; LPV → D-27b website sessions | Phase 4 · answered |
 | Q3 | Monthly-close history before the first snapshot → D-12b reconstructed and flagged | Phase 4 · answered |
-| Q6 | Stop the Cube v1 container? | Phase 9 |
+| Q6 | Stop the Cube v1 container? | Phase 9 · answered 2026-10-26: stopped and removed |
 | Q7 | Any unexplained ₹ in reconciliation | Phases 2–4, 7 |
-| Q8 | query_log retention: longer TTL or two 7-day checks | Phase 9 |
+| Q8 | query_log retention: longer TTL or two 7-day checks | Phase 9 · answered 2026-10-19: TTL 30 days |
 | Q11 | Brand 28 value → refusal change | Phase 7 |
 
