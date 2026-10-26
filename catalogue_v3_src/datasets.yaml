@@ -244,55 +244,6 @@ Payments:
     status: certified
     certified_on: '2026-10-16'
     evidence: doc/semantic_v3/results/datasets/certification.json
-Pnl.Canonical:
-  domain: finance
-  role: primary_fact
-  superseded_by: Pnl.EventProfit
-  description: Canonical P&L (event/date basis)
-  physical_bindings:
-    fact: serve.canonical_pnl
-  grain:
-    declared_keys:
-    - brand_id
-    - report_date
-    - sub_channel
-  date_policy:
-    default: report_date
-    meaning: event_date
-  certification:
-    status: certified
-    certified_on: '2026-10-16'
-    evidence: doc/semantic_v3/results/datasets/certification.json
-Pnl.OrderDaily:
-  domain: finance
-  role: primary_fact
-  superseded_by: Pnl.Profit
-  description: Order-cohort P&L (mixed basis by design)
-  physical_bindings:
-    fact: serve.order_pnl_daily
-  grain:
-    declared_keys:
-    - brand_id
-    - order_date
-    - finance_channel
-    - sub_channel
-    - is_new_customer
-    - shipping_region
-    - payment_bucket
-    - is_paid
-    - ad_platform
-    - campaign_id
-    - adset_id
-    - ad_id
-    - row_type
-  date_policy:
-    default: order_date
-    meaning: original_order_date
-  mixed_basis: true
-  certification:
-    status: certified
-    certified_on: '2026-10-16'
-    evidence: doc/semantic_v3/results/datasets/certification.json
 Product.Performance:
   domain: product
   role: primary_fact
