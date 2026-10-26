@@ -41,3 +41,5 @@ date_axis_dimensions:
 decision_ids:
 - D-09
 - D-31
+direction_bad: down
+agent_domain: performance

@@ -46,3 +46,4 @@ bindings:
   measure: paid_media_hourly.landing_page_views
   granularities:
   - hour
+direction_bad: down

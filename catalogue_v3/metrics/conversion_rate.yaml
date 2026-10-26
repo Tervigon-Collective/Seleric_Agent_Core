@@ -30,3 +30,4 @@ replaces:
 - funnel_conversion_rate
 - session_conversion_rate
 date_axis: native
+direction_bad: down

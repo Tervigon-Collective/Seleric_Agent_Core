@@ -43,3 +43,5 @@ ratio_contract: labelled_null_when_net_sales_nonpositive
 decision_ids:
 - D-31
 - D-09
+direction_bad: down
+agent_domain: performance

@@ -29,3 +29,4 @@ version: 1.0.0
 replaces:
 - session_avg_seconds_to_add_to_cart
 date_axis: native
+direction_bad: up

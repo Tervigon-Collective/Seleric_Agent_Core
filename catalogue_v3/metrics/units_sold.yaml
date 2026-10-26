@@ -46,3 +46,4 @@ date_axis_dimensions:
   event_date: product_profit.event_date
 decision_ids:
 - D-22
+direction_bad: down

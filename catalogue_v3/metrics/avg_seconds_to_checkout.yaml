@@ -32,3 +32,4 @@ date_axis: native
 unavailable_reason: 'Not populated: Shopify''s checkout_started pixel is server-side (no web-session id), so session
   checkout timestamps / step counts are always empty (dbt fct_session_funnel KNOWN GAP). Use checkout_rate / add_to_cart_to_checkout_rate
   instead.'
+direction_bad: up

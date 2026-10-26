@@ -44,3 +44,4 @@ date_axis_dimensions:
 decision_ids:
 - D-03
 - D-07
+direction_bad: down

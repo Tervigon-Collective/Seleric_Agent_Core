@@ -70,3 +70,4 @@ bindings:
     - region
     country: []
   note: 'Meta only: Google reports no audience breakdowns, so Google delivery is not in these rows.'
+direction_bad: down

@@ -27,3 +27,4 @@ version: 1.0.0
 replaces:
 - web_sessions
 date_axis: native
+direction_bad: down

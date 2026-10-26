@@ -960,6 +960,10 @@ class CatalogueService:
                 extra["ratio_component_members"] = {
                     k: list(v) for k, v in sorted(m.ratio_component_members.items())
                 }
+        if m.direction_bad:
+            extra["direction_bad"] = m.direction_bad
+        if m.agent_domain:
+            extra["agent_domain"] = m.agent_domain
         if m.valid_for:
             extra["valid_for"] = {k: list(v) for k, v in m.valid_for.items()}
             if m.valid_for_reason:

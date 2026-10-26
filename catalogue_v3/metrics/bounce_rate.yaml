@@ -28,3 +28,4 @@ access_policy:
 version: 1.0.0
 replaces: []
 date_axis: native
+direction_bad: up

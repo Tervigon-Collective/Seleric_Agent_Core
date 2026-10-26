@@ -29,3 +29,4 @@ version: 1.0.0
 replaces:
 - session_atc_to_checkout_rate
 date_axis: native
+direction_bad: down

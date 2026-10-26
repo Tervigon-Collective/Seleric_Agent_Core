@@ -33,3 +33,4 @@ valid_for:
   ad_platform:
   - meta
 valid_for_reason: Meta-only measure (Google reports no such field).
+direction_bad: down

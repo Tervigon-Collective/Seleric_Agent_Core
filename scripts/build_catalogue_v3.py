@@ -49,6 +49,7 @@ SRC = ROOT / "catalogue_v3_src"
 ID_MAP_V2 = V1 / "migrations" / "v2_id_map.yaml"
 ID_MAP_V3 = V1 / "migrations" / "v3_id_map.yaml"
 CAPABILITY_MAP = ROOT / "doc" / "semantic_v3" / "CAPABILITY_MAP.yaml"
+AGENT_POLICY = yaml.safe_load((SRC / "agent_policy.yaml").read_text(encoding="utf-8"))["metrics"]  # direction_bad, domain
 CUBE_V3_URL = os.environ.get("CUBE_V3_URL", "http://127.0.0.1:4003")
 CUBE_ENV = Path(os.environ.get("SELERIC_CUBE_ENV", "/opt/seleric/mage-ai/infra/cube/.env"))
 
@@ -602,6 +603,7 @@ def main() -> int:
     view_dims = {v: {dim_id(v, d["name"]) for d in vm["dimensions"]} for v, vm in views_meta.items()}
     id_of_member = {member: mid for mid, member in member_of.items()}
     v3_family: dict[str, str] = {}
+    used_policy: set[str] = set()
     for mid in sorted(member_of):
         member = member_of[mid]
         view, mname = member.split(".", 1)
@@ -691,6 +693,12 @@ def main() -> int:
             doc["ratio_contract"] = mmeta["ratio_contract"]
         if mmeta.get("hidden_by_default"):
             doc["hidden_by_default"] = True
+        if policy := AGENT_POLICY.get(mid):
+            if "direction_bad" in policy:
+                doc["direction_bad"] = policy["direction_bad"]
+            if "domain" in policy:
+                doc["agent_domain"] = policy["domain"]
+            used_policy.add(mid)
         if mmeta.get("decisions"):
             doc["decision_ids"] = list(mmeta["decisions"])
         if mid in UNAVAILABLE:
@@ -723,6 +731,8 @@ def main() -> int:
         if bindings:
             doc["bindings"] = bindings
         wy(OUT / "metrics" / f"{mid}.yaml", doc, hdr)
+
+    assert set(AGENT_POLICY) == used_policy, f"agent_policy.yaml names ids that are not metrics: {sorted(set(AGENT_POLICY) - used_policy)}"
 
     # ---- aliases: ids that answer through a base metric (event-date family, same-measure twins)
     alias_rows = []

@@ -30,3 +30,4 @@ date_axis: native
 decision_ids:
 - D-15
 - D-16a
+direction_bad: down

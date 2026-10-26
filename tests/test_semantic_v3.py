@@ -388,3 +388,17 @@ def test_day_granularity_stays_on_the_daily_funnel(planner, cube):
     asyncio.run(planner.run(QueryRequest(measures=["funnel_purchases"], time_range=SEP, granularity="day")))
     assert cube.queries[-1]["measures"] == ["web_funnel.funnel_purchases"]
 
+
+
+def test_agent_policy_is_in_the_catalogue_and_the_bootstrap(v3):
+    """catalogue_v3_src/agent_policy.yaml is the only place the agent's direction_bad / domain live: every entry is on its
+    metric, and the MCP bootstrap (what the agent reads) carries them."""
+    policy = yaml.safe_load((PROJECT_ROOT / "catalogue_v3_src" / "agent_policy.yaml").read_text())["metrics"]
+    for mid, p in policy.items():
+        assert v3.cat.metrics[mid].direction_bad == p.get("direction_bad"), mid
+        assert v3.cat.metrics[mid].agent_domain == p.get("domain"), mid
+    rows = {r["id"]: r for r in v3.bootstrap()["metrics"]}
+    with_direction = next(m for m, p in policy.items() if "direction_bad" in p)
+    assert rows[with_direction]["direction_bad"] == policy[with_direction]["direction_bad"]
+    assert rows["net_roas"]["agent_domain"] == "performance"
+    assert not any(m.direction_bad for mid, m in v3.cat.metrics.items() if mid not in policy)

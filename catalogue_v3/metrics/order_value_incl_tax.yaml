@@ -36,3 +36,5 @@ date_axis_dimensions:
   event_date: commerce.event_date
 decision_ids:
 - D-02b
+direction_bad: down
+agent_domain: attribution

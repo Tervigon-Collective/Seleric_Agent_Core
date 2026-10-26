@@ -35,3 +35,4 @@ date_axis_refusal: 'cohort-defined measure (D-31): use date_axis=order_date; no 
 decision_ids:
 - D-01b
 - D-02b
+agent_domain: attribution

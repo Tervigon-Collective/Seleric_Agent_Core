@@ -36,3 +36,4 @@ date_axis_refusal: 'cohort-defined rate (D-31): use date_axis=order_date; no eve
 decision_ids:
 - D-31
 - D-16a
+direction_bad: down
