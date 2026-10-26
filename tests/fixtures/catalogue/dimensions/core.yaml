@@ -1,0 +1,1069 @@
+# Logical dimensions and their qualified Cube member per view.
+dimensions:
+  - id: brand_id
+    display_name: Brand
+    description: >
+      Tenant brand. Default Tilting Heads (20). Pass brand_id or a brand name
+      (Sniff Theory, Urthend, Mannmore, The Billy Company); the planner resolves
+      names via catalogue/brands.yaml.
+    aliases: [brand, store, shop]
+    views:
+      commerce_orders: commerce_orders.brand_id
+      commerce_performance: commerce_performance.brand_id
+      canonical_pnl: canonical_pnl.brand_id
+      orders_all_channels: orders_all_channels.brand_id
+      sales_all_channels: sales_all_channels.brand_id
+      order_attribution: order_attribution.brand_id
+      meta_ad_attribution: meta_ad_attribution.brand_id
+      customer_ltv: customer_ltv.brand_id
+      purchase_sequence: purchase_sequence.brand_id
+      product_performance: product_performance.brand_id
+      meta_ad_performance: meta_ad_performance.brand_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.brand_id
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.brand_id
+      google_ad_performance: google_ad_performance.brand_id
+      google_ad_performance_hourly: google_ad_performance_hourly.brand_id
+      channel_pnl: channel_pnl.brand_id
+      returns_cancels_all_channels: returns_cancels_all_channels.brand_id
+      ltv_cac: ltv_cac.brand_id
+      channel_attribution: channel_attribution.brand_id
+      customer_data: customer_data.brand_id
+      platform_attribution_commerce: platform_attribution_commerce.brand_id
+      session_funnel: session_funnel.brand_id
+      funnel_daily: funnel_daily.brand_id
+      web_events: web_events.brand_id
+      web_events_daily: web_events_daily.brand_id
+      refund_events: refund_events.brand_id
+      return_lifecycle: return_lifecycle.brand_id
+      ad_channel_pnl: ad_channel_pnl.brand_id
+      attribution_paths: attribution_paths.brand_id
+      finance_waterfall: finance_waterfall.brand_id
+      google_ads_status_history: google_ads_status_history.brand_id
+      meta_ads_status_history: meta_ads_status_history.brand_id
+      payments: payments.brand_id
+      touchpoints: touchpoints.brand_id
+  - id: order_date
+    display_name: Order Date
+    description: IST order placement day.
+    is_time: true
+    views:
+      commerce_orders: commerce_orders.order_date
+      order_attribution: order_attribution.order_date
+      purchase_sequence: purchase_sequence.order_date
+      product_performance: product_performance.order_date
+      refund_events: refund_events.order_date
+      return_lifecycle: return_lifecycle.order_date
+      attribution_paths: attribution_paths.order_date
+      touchpoints: touchpoints.order_date
+  - id: order_created_at_ist
+    display_name: Order Created At (IST)
+    description: >
+      Order creation timestamp/day in Asia/Kolkata. Prefer this axis for
+      payment-mix splits (COD vs prepaid) when matching dashboard SQL.
+    is_time: true
+    views:
+      commerce_orders: commerce_orders.order_created_at_ist
+      purchase_sequence: purchase_sequence.order_created_at_ist
+  - id: item_count
+    display_name: Items on Order
+    description: >
+      Units on the Shopify order (sum of line quantities from gold.fct_orders).
+      Numeric. Use operator gt/gte/lt/lte/equals — never greater_than.
+      "more than 1 item" / "multi-item" → operator gt, values ["1"].
+      Not units_per_order (that is an average across orders).
+    aliases:
+      - items in order
+      - items on order
+      - line items
+      - item count
+      - units on order
+      - multi-item
+      - more than 1 item
+    views:
+      commerce_orders: commerce_orders.item_count
+  - id: order_name
+    display_name: Order Name
+    description: >
+      Shopify order name (e.g. #1234). Use as a breakdown with limit to list
+      individual orders — not for KPI totals.
+    aliases:
+      - order number
+      - order #
+    views:
+      commerce_orders: commerce_orders.order_name
+  - id: commerce_order_id
+    display_name: Order ID
+    description: >
+      Shopify order id. High cardinality — only use as a breakdown with a
+      limit when listing orders. Prefer order_name for operator-facing lists.
+    aliases: [order id]
+    views:
+      commerce_orders: commerce_orders.order_id
+  # ---- Attribution (2026-07-16): Attribution.MarketingAttribution ----
+  - id: lt_platform
+    display_name: Last-touch Platform
+    description: >
+      Last-touch attributed platform (meta/google/organic/unattributed/...).
+      organic = true organic search only; unattributed = empty UTM / tracking failure
+      (do not treat unattributed as organic).
+    views:
+      order_attribution: order_attribution.lt_platform
+      touchpoints: touchpoints.lt_platform
+  - id: lt_channel
+    display_name: Last-touch Channel
+    description: Last-touch attributed channel (ig_feed/fb_feed/google_pmax/...). Resolved, not raw UTM.
+    aliases:
+      - last-touch channel
+      - last touch channel
+      - last-touch
+      - lt channel
+      - fine channel
+    views:
+      order_attribution: order_attribution.lt_channel
+  - id: lt_utm_source
+    display_name: Last-touch UTM Source
+    description: Attribution-resolved UTM source. Distinct from utm_source (raw/unresolved).
+    views:
+      order_attribution: order_attribution.lt_utm_source
+  - id: lt_utm_medium
+    display_name: Last-touch UTM Medium
+    description: >
+      Lt Utm Medium: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      order_attribution: order_attribution.lt_utm_medium
+  - id: lt_utm_campaign
+    display_name: Last-touch UTM Campaign
+    description: Attribution-resolved UTM campaign string. Distinct from utm_campaign (raw/unresolved) and lt_campaign_name (ad-platform campaign name).
+    views:
+      order_attribution: order_attribution.lt_utm_campaign
+  - id: lt_campaign_id
+    display_name: Last-touch Campaign ID
+    description: Attribution-resolved campaign ID. Distinct from utm_campaign (raw/unresolved).
+    views:
+      order_attribution: order_attribution.lt_campaign_id
+  - id: lt_campaign_name
+    display_name: Last-touch Campaign Name
+    description: >
+      Lt Campaign Name: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      order_attribution: order_attribution.lt_campaign_name
+  - id: lt_adset_name
+    display_name: Last-touch Adset Name
+    description: >
+      Lt Adset Name: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      order_attribution: order_attribution.lt_adset_name
+  - id: lt_ad_name
+    display_name: Last-touch Ad Name
+    description: >
+      Lt Ad Name: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      order_attribution: order_attribution.lt_ad_name
+  - id: attribution_method
+    display_name: Attribution Method
+    description: How the order's touchpoint was resolved (or 'unattributed').
+    views:
+      order_attribution: order_attribution.attribution_method
+  - id: attribution_model
+    display_name: Attribution Model
+    description: Explicit attribution model applied (e.g. last-touch).
+    views:
+      order_attribution: order_attribution.attribution_model
+      meta_ad_attribution: meta_ad_attribution.attribution_model
+      attribution_paths: attribution_paths.attribution_model
+  - id: identity_resolution_method
+    display_name: Identity Resolution Method
+    description: >
+      Identity Resolution Method: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
+    views:
+      session_funnel: session_funnel.identity_resolution_method
+      order_attribution: order_attribution.identity_resolution_method
+  - id: is_cod
+    display_name: Is COD
+    description: True when the order is cash-on-delivery (boolean flag). For COD vs online/prepaid mix breakdowns prefer payment_bucket.
+    aliases: [cash on delivery, is_cod, cod flag]
+    views:
+      commerce_orders: commerce_orders.is_cod
+      order_attribution: order_attribution.is_cod
+      purchase_sequence: purchase_sequence.is_cod
+      product_performance: product_performance.is_cod
+      orders_all_channels: orders_all_channels.is_cod
+      sales_all_channels: sales_all_channels.is_cod
+      refund_events: refund_events.is_cod
+      return_lifecycle: return_lifecycle.is_cod
+  - id: is_prepaid
+    display_name: Is Prepaid
+    description: True when the order is prepaid/online (non-COD bucket). For mix breakdowns prefer payment_bucket.
+    aliases: [is_prepaid, prepaid flag]
+    views:
+      commerce_orders: commerce_orders.is_prepaid
+      order_attribution: order_attribution.is_prepaid
+      purchase_sequence: purchase_sequence.is_prepaid
+      product_performance: product_performance.is_prepaid
+      orders_all_channels: orders_all_channels.is_prepaid
+      sales_all_channels: sales_all_channels.is_prepaid
+      refund_events: refund_events.is_prepaid
+  - id: source_name
+    display_name: Order Source Name
+    description: Shopify order source_name (web, pos, shopify_draft_order, …).
+    aliases: [source, order source, source_name]
+    views:
+      commerce_orders: commerce_orders.source_name
+      order_attribution: order_attribution.source_name
+      product_performance: product_performance.source_name
+  # ---- Customer LTV (2026-07-16): Customer.CustomerIntelligence ----
+  - id: acquisition_platform
+    display_name: Acquisition Platform
+    description: Platform that acquired the customer on their first order.
+    views:
+      customer_ltv: customer_ltv.acquisition_platform
+      customer_data: customer_data.acquisition_platform
+  - id: acquisition_channel
+    display_name: Acquisition Channel
+    description: >
+      Channel credited with customer acquisition on the profile. Not the last-touch platform
+      on order_attribution.
+    views:
+      customer_ltv: customer_ltv.acquisition_channel
+      customer_data: customer_data.acquisition_channel
+  - id: acquisition_campaign
+    display_name: Acquisition Campaign
+    description: >
+      Campaign credited with first purchase (hashed/profile). CustomerData / LTV only — not
+      last-touch order attribution.
+    views:
+      customer_ltv: customer_ltv.acquisition_campaign
+  - id: is_repeat_customer
+    display_name: Is Repeat Customer
+    description: >
+      Is Repeat Customer: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      customer_ltv: customer_ltv.is_repeat_customer
+  - id: lifetime_order_count_band
+    display_name: Lifetime Order Count Band
+    description: >
+      Lifetime Order Count Band: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
+    allowed_values: ["1", "2", "3-5", "6+"]
+    views:
+      customer_ltv: customer_ltv.lifetime_order_count_band
+  - id: customer_default_city
+    display_name: Customer Default City
+    description: Customer's default address city (distinct from shipping_city, which is per-order).
+    views:
+      customer_ltv: customer_ltv.default_city
+  - id: customer_default_province
+    display_name: Customer Default Province
+    description: Customer's default address province/state (distinct from shipping_region, which is per-order).
+    views:
+      customer_ltv: customer_ltv.default_province
+  # ---- Purchase Sequence (2026-07-16): Customer.CustomerIntelligence port #2 ----
+  - id: order_status
+    display_name: Order Status
+    description: Lifecycle status on the order (active, cancelled, voided, …).
+    aliases: [status, order status]
+    views:
+      commerce_orders: commerce_orders.order_status
+      product_performance: product_performance.order_status
+      purchase_sequence: purchase_sequence.order_status
+      refund_events: refund_events.order_status
+  - id: return_status
+    display_name: Return Status
+    description: Return lifecycle status on the order / line.
+    aliases: [return status]
+    views:
+      commerce_orders: commerce_orders.return_status
+      product_performance: product_performance.return_status
+      refund_events: refund_events.return_status
+      return_lifecycle: return_lifecycle.return_status
+  - id: fulfillment_status
+    display_name: Fulfillment Status
+    description: Shopify fulfillment_status (fulfilled, partial, unfulfilled, …).
+    aliases: [fulfillment, fulfilment, fulfilled, unfulfilled]
+    views:
+      commerce_orders: commerce_orders.fulfillment_status
+  - id: financial_status
+    display_name: Financial Status
+    description: Shopify financial_status (paid, pending, refunded, …).
+    aliases: [payment status, financial status]
+    views:
+      commerce_orders: commerce_orders.financial_status
+  - id: order_seq
+    display_name: Order Sequence Number
+    description: This order's 1-indexed position in the customer's purchase history.
+    views:
+      purchase_sequence: purchase_sequence.order_seq
+  - id: order_seq_band
+    display_name: Order Sequence Band
+    description: >
+      Order Seq Band: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    allowed_values: ["1st", "2nd", "3rd", "4th+"]
+    views:
+      purchase_sequence: purchase_sequence.order_seq_band
+  - id: is_first_order
+    display_name: Is First Order
+    description: >
+      Is First Order: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      purchase_sequence: purchase_sequence.is_first_order
+  - id: event_date
+    display_name: Event Date
+    description: >
+      IST calendar day of commerce order events (cancel/return) on
+      commerce_orders — use as the time axis for cancelled_orders and
+      refunded_orders, not order_date. On web_events: the IST day the website
+      event fired.
+    is_time: true
+    views:
+      commerce_orders: commerce_orders.event_date
+      web_events: web_events.event_date
+  - id: payment_method
+    display_name: Payment Method
+    description: Payment method on the order (COD, prepaid gateways, upi, razorpay, …).
+    aliases: [payment, payment method, gateway method, payment type, payment mode, by payment, payment-wise, payment wise]
+    views:
+      commerce_orders: commerce_orders.payment_method
+      order_attribution: order_attribution.payment_method
+      purchase_sequence: purchase_sequence.payment_method
+      product_performance: product_performance.payment_method
+      orders_all_channels: orders_all_channels.payment_method
+      sales_all_channels: sales_all_channels.payment_method
+      refund_events: refund_events.payment_method
+  - id: payment_gateway
+    display_name: Payment Gateway
+    description: Raw payment gateway string on the order.
+    aliases: [gateway, payment gateway]
+    views:
+      commerce_orders: commerce_orders.payment_gateway
+      order_attribution: order_attribution.payment_gateway
+      purchase_sequence: purchase_sequence.payment_gateway
+      product_performance: product_performance.payment_gateway
+      orders_all_channels: orders_all_channels.payment_gateway
+      sales_all_channels: sales_all_channels.payment_gateway
+      refund_events: refund_events.payment_gateway
+  - id: payment_bucket
+    display_name: Payment Bucket
+    description: >
+      Coarse payment mix bucket used by the Commerce dashboard
+      (cod, online/prepaid, paytm card machine, manual). Shopify-only.
+    aliases: [cod vs prepaid, payment mix, prepaid vs cod, cod, online, prepaid, paytm, manual payment]
+    allowed_values: [online, cod, paytm card machine, manual]
+    views:
+      commerce_orders: commerce_orders.payment_bucket
+      order_attribution: order_attribution.payment_bucket
+      purchase_sequence: purchase_sequence.payment_bucket
+      product_performance: product_performance.payment_bucket
+      orders_all_channels: orders_all_channels.payment_bucket
+      sales_all_channels: sales_all_channels.payment_bucket
+      refund_events: refund_events.payment_bucket
+  - id: utm_source
+    display_name: UTM Source
+    description: Landing UTM source (order or session funnel).
+    aliases: [utm source, source utm]
+    views:
+      commerce_orders: commerce_orders.utm_source
+      session_funnel: session_funnel.utm_source
+      web_events: web_events.utm_source
+  - id: utm_medium
+    display_name: UTM Medium
+    description: Landing UTM medium on the order.
+    aliases: [utm medium, medium]
+    views:
+      commerce_orders: commerce_orders.utm_medium
+      session_funnel: session_funnel.utm_medium
+      web_events: web_events.utm_medium
+  - id: utm_campaign
+    display_name: UTM Campaign
+    description: >
+      Raw landing UTM campaign string recorded on the order (distinct from
+      lt_campaign_name, which is the last-touch-resolved campaign from
+      attribution — UTM is unresolved/free-text, may not match ad platform
+      metadata 1:1).
+    aliases: [utm campaign, campaign utm]
+    views:
+      commerce_orders: commerce_orders.utm_campaign
+      session_funnel: session_funnel.utm_campaign
+      web_events: web_events.utm_campaign
+  - id: shipping_country
+    display_name: Shipping Country
+    description: Destination country on the order shipping address.
+    aliases: [country, ship country, shipping country]
+    views:
+      commerce_orders: commerce_orders.shipping_country
+      product_performance: product_performance.shipping_country
+      sales_all_channels: sales_all_channels.shipping_country
+      orders_all_channels: orders_all_channels.shipping_country
+      order_attribution: order_attribution.shipping_country
+      purchase_sequence: purchase_sequence.shipping_country
+      refund_events: refund_events.shipping_country
+  - id: shipping_region
+    display_name: Shipping Region / State / Province
+    description: >
+      Destination province/state/region on the order shipping address.
+      Shopify = shipping_address.province (as shipping_region). Values are stored uppercased (e.g. MAHARASHTRA). Use this
+      for "sales by state", "by province", or "by region".
+    aliases:
+      - region
+      - state
+      - province
+      - shipping state
+      - shipping province
+      - ship state
+      - ship province
+      - ship_to_state
+    views:
+      commerce_orders: commerce_orders.shipping_region
+      product_performance: product_performance.shipping_region
+      sales_all_channels: sales_all_channels.shipping_region
+      orders_all_channels: orders_all_channels.shipping_region
+      order_attribution: order_attribution.shipping_region
+      purchase_sequence: purchase_sequence.shipping_region
+      refund_events: refund_events.shipping_region
+  - id: shipping_city
+    display_name: Shipping City
+    description: Destination city on the order shipping address.
+    aliases: [city, ship city, shipping city, ship_to_city, by city, city-wise, city wise]
+    views:
+      commerce_orders: commerce_orders.shipping_city
+      product_performance: product_performance.shipping_city
+      sales_all_channels: sales_all_channels.shipping_city
+      orders_all_channels: orders_all_channels.shipping_city
+      order_attribution: order_attribution.shipping_city
+      purchase_sequence: purchase_sequence.shipping_city
+      refund_events: refund_events.shipping_city
+  - id: shipping_state_code
+    display_name: Shipping State Code
+    description: ISO/Shopify province code (MH, KA, DL, …) on Shopify shipping address.
+    aliases: [state code, province code, shipping_province_code]
+    views:
+      commerce_orders: commerce_orders.shipping_state_code
+      orders_all_channels: orders_all_channels.shipping_state_code
+      order_attribution: order_attribution.shipping_state_code
+      purchase_sequence: purchase_sequence.shipping_state_code
+      refund_events: refund_events.shipping_state_code
+  - id: shipping_pincode
+    display_name: Shipping Pincode
+    description: Destination postal / PIN code on the order shipping address.
+    aliases: [pincode, pin code, postal code, zip, zipcode, shipping zip]
+    views:
+      commerce_orders: commerce_orders.shipping_pincode
+      orders_all_channels: orders_all_channels.shipping_pincode
+      order_attribution: order_attribution.shipping_pincode
+      purchase_sequence: purchase_sequence.shipping_pincode
+      refund_events: refund_events.shipping_pincode
+  - id: is_new_customer
+    display_name: New Customer Flag
+    description: Whether this was the customer's first order.
+    aliases: [new customer, first order customer, new vs repeat, is_new_customer]
+    views:
+      commerce_orders: commerce_orders.is_new_customer
+      order_attribution: order_attribution.is_new_customer
+      product_performance: product_performance.is_new_customer
+  - id: sku
+    display_name: SKU
+    description: >
+      Sku: shared catalogue dimension for grouping and filters. Not a measure; empty/null
+      means unknown, never a separate bucket unless documented.
+    aliases: [SKU, product sku]
+    views:
+      product_performance: product_performance.sku
+      return_lifecycle: return_lifecycle.sku
+      web_events: web_events.sku
+  - id: product_id
+    display_name: Product ID
+    description: >
+      Shopify product identifier (stable key). Prefer over product_title for accurate
+      per-product aggregation: product_title can differ across renamed listings for the
+      same product, so grouping by title fragments the count.
+    views:
+      product_performance: product_performance.product_id
+      return_lifecycle: return_lifecycle.product_id
+      web_events: web_events.product_id
+  - id: variant_id
+    display_name: Variant ID
+    description: >
+      Shopify variant identifier (stable key). Prefer over variant_title when a variant
+      may have been renamed.
+    views:
+      product_performance: product_performance.variant_id
+      return_lifecycle: return_lifecycle.variant_id
+  - id: product_title
+    display_name: Product Title
+    description: >
+      Product Title: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented. Caveat: a
+      product's title can change over time (renamed listings), so the same product may
+      appear under two titles and grouping by title fragments its count — for an accurate
+      per-product total, group by product_id instead.
+    aliases: [product, product name]
+    views:
+      product_performance: product_performance.product_title
+      return_lifecycle: return_lifecycle.product_title
+  - id: variant_title
+    display_name: Variant Title
+    description: >
+      Variant Title: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    aliases: [variant]
+    views:
+      product_performance: product_performance.variant_title
+      return_lifecycle: return_lifecycle.variant_title
+  - id: product_type
+    display_name: Product Type / Category
+    description: >
+      Product Type: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    aliases: [category, product category, product type]
+    views:
+      product_performance: product_performance.product_type
+  - id: vendor
+    display_name: Vendor
+    description: >
+      Vendor: shared catalogue dimension for grouping and filters. Not a measure; empty/null
+      means unknown, never a separate bucket unless documented.
+    aliases: [brand vendor, supplier, vendor name]
+    views:
+      product_performance: product_performance.vendor
+  # ---- Paid media (2026-07-15): PaidMedia.{Meta,Google}AdsPerformance ----
+  - id: report_date
+    display_name: Report Date
+    description: >
+      Daily reporting day (platform account day for paid media; IST calendar day for commerce).
+      Paid-media views (meta_ad_performance, google_ad_performance, meta_ad_attribution,
+      channel_pnl, ad_channel_pnl) use platform account day; commerce views (commerce_performance,
+      canonical_pnl, orders_all_channels, sales_all_channels, returns_cancels_all_channels) use
+      IST calendar day. Hourly axes exist on meta_ad_performance_hourly and
+      google_ad_performance_hourly via report_hour_ts; other views have no hourly axis.
+    is_time: true
+    views:
+      commerce_performance: commerce_performance.report_date
+      canonical_pnl: canonical_pnl.report_date
+      orders_all_channels: orders_all_channels.report_date
+      sales_all_channels: sales_all_channels.report_date
+      meta_ad_attribution: meta_ad_attribution.report_date
+      meta_ad_performance: meta_ad_performance.report_date
+      meta_ad_performance_hourly: meta_ad_performance_hourly.report_date
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.report_date
+      google_ad_performance: google_ad_performance.report_date
+      google_ad_performance_hourly: google_ad_performance_hourly.report_date
+      channel_pnl: channel_pnl.report_date
+      returns_cancels_all_channels: returns_cancels_all_channels.report_date
+      ltv_cac: ltv_cac.report_date
+      channel_attribution: channel_attribution.report_date
+      funnel_daily: funnel_daily.report_date
+      web_events_daily: web_events_daily.report_date
+      platform_attribution_commerce: platform_attribution_commerce.report_date
+      ad_channel_pnl: ad_channel_pnl.report_date
+  - id: campaign_id
+    display_name: Campaign ID
+    description: Platform campaign identifier.
+    views:
+      session_funnel: session_funnel.campaign_id
+      meta_ad_performance: meta_ad_performance.campaign_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_id
+      meta_ad_attribution: meta_ad_attribution.campaign_id
+      google_ad_performance: google_ad_performance.campaign_id
+      google_ad_performance_hourly: google_ad_performance_hourly.campaign_id
+      ad_channel_pnl: ad_channel_pnl.campaign_id
+  - id: campaign_name
+    display_name: Campaign Name
+    description: >
+      Platform campaign name on paid-media views; UTM/campaign name on
+      session_funnel (distinct semantics — ad platform vs session landing).
+    aliases: [by campaign, campaign-wise, campaign wise, campaign name]
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_name
+      meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_name
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.campaign_name
+      meta_ad_attribution: meta_ad_attribution.campaign_name
+      google_ad_performance: google_ad_performance.campaign_name
+      google_ad_performance_hourly: google_ad_performance_hourly.campaign_name
+      session_funnel: session_funnel.campaign_name
+      ad_channel_pnl: ad_channel_pnl.campaign_name
+  - id: campaign_status
+    display_name: Campaign Status
+    description: Platform campaign status (ACTIVE/PAUSED/... per platform).
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_status
+  - id: campaign_objective
+    display_name: Campaign Objective (Meta)
+    description: >
+      Campaign objective as reported by the ads platform (e.g. OUTCOME_SALES). Not the
+      last-touch attribution objective.
+    allowed_values: [OUTCOME_SALES, LINK_CLICKS, OUTCOME_LEADS, OUTCOME_ENGAGEMENT, OUTCOME_AWARENESS]
+    views:
+      meta_ad_performance: meta_ad_performance.campaign_objective
+      meta_ad_performance_hourly: meta_ad_performance_hourly.campaign_objective
+  - id: campaign_type
+    display_name: Campaign Type
+    description: >
+      Google channel (SEARCH/PERFORMANCE_MAX/DEMAND_GEN/SHOPPING/DISPLAY).
+    views:
+      google_ad_performance: google_ad_performance.campaign_type
+      google_ad_performance_hourly: google_ad_performance_hourly.campaign_type
+  - id: adset_id
+    display_name: Adset ID (Meta)
+    description: >
+      Meta ad set / Google ad group id. Opaque key; use adset_name for labels.
+    views:
+      session_funnel: session_funnel.adset_id
+      meta_ad_performance: meta_ad_performance.adset_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.adset_id
+      meta_ad_attribution: meta_ad_attribution.adset_id
+      ad_channel_pnl: ad_channel_pnl.adset_id
+  - id: adset_name
+    display_name: Adset Name (Meta)
+    description: >
+      Meta ad set / Google ad group name at extract time.
+    views:
+      session_funnel: session_funnel.adset_name
+      meta_ad_performance: meta_ad_performance.adset_name
+      meta_ad_performance_hourly: meta_ad_performance_hourly.adset_name
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.adset_name
+      meta_ad_attribution: meta_ad_attribution.adset_name
+      ad_channel_pnl: ad_channel_pnl.adset_name
+  - id: ad_id
+    display_name: Ad ID (Meta)
+    description: >
+      Platform ad id. Opaque key — prefer ad_name when grouping for humans. May be empty when
+      the loader dropped creative/ad grain.
+    views:
+      session_funnel: session_funnel.ad_id
+      meta_ad_performance: meta_ad_performance.ad_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.ad_id
+      meta_ad_attribution: meta_ad_attribution.ad_id
+      ad_channel_pnl: ad_channel_pnl.ad_id
+  - id: ad_name
+    display_name: Ad Name (Meta)
+    description: >
+      Platform ad name at extract time. May lag live Ads Manager renames.
+    views:
+      session_funnel: session_funnel.ad_name
+      meta_ad_performance: meta_ad_performance.ad_name
+      meta_ad_performance_hourly: meta_ad_performance_hourly.ad_name
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.ad_name
+      meta_ad_attribution: meta_ad_attribution.ad_name
+      ad_channel_pnl: ad_channel_pnl.ad_name
+  - id: creative_id
+    display_name: Creative ID (Meta)
+    description: >
+      Meta creative id on the ad-day row. Coverage collapsed from Aug 2026 — null means
+      unknown, not absent spend.
+    views:
+      meta_ad_performance: meta_ad_performance.creative_id
+  - id: creative_type
+    display_name: Creative Type (Meta)
+    description: >
+      Meta creative type (image/video/carousel). Same coverage warning as creative_id.
+    views:
+      meta_ad_performance: meta_ad_performance.creative_type
+      meta_ad_performance_hourly: meta_ad_performance_hourly.creative_type
+  - id: ad_account_id
+    display_name: Ad Account (Meta)
+    description: >
+      Paid-media ad account id (Meta/Google). Tenant-scoped with brand_id.
+    views:
+      meta_ad_performance: meta_ad_performance.ad_account_id
+      meta_ad_performance_hourly: meta_ad_performance_hourly.ad_account_id
+  - id: customer_account_id
+    display_name: Customer Account (Google)
+    description: >
+      Google Ads customer id (account). Not a Shopify customer_id.
+    views:
+      google_ad_performance: google_ad_performance.customer_account_id
+  - id: is_final
+    display_name: Is Final
+    description: 1 when the report day is outside the mutable restatement window.
+    views:
+      meta_ad_performance: meta_ad_performance.is_final
+      meta_ad_performance_hourly: meta_ad_performance_hourly.is_final
+      google_ad_performance: google_ad_performance.is_final
+      google_ad_performance_hourly: google_ad_performance_hourly.is_final
+  # ---- Meta breakdown port (2026-07-15): serve.meta_ads_breakdown_daily ----
+  - id: breakdown_type
+    display_name: Breakdown Type (Meta)
+    description: >
+      Which re-slice of the same Meta delivery to use. Queries MUST filter to
+      exactly one value or spend/impressions count 5x.
+    allowed_values: [age_and_gender, placement, platform_device, publisher_platform, region]
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.breakdown_type
+  - id: age
+    display_name: Age Band (Meta)
+    description: Populated only when breakdown_type = age_and_gender.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.age
+  - id: gender
+    display_name: Gender (Meta)
+    description: Populated only when breakdown_type = age_and_gender.
+    allowed_values: [female, male, unknown]
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.gender
+  - id: publisher_platform
+    display_name: Publisher Platform (Meta)
+    description: facebook/instagram/etc. Populated for placement + publisher_platform types.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.publisher_platform
+  - id: platform_position
+    display_name: Placement Position (Meta)
+    description: feed/reels/stories/etc. Populated only when breakdown_type = placement.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.platform_position
+  - id: region
+    display_name: Region (Meta delivery)
+    description: Delivery region. Populated only when breakdown_type = region.
+    views:
+      meta_ad_breakdown_performance: meta_ad_breakdown_performance.region
+  # ---- 2026-07-16: ChannelAttribution / CustomerData / SessionFunnel ----
+  - id: channel
+    display_name: Channel
+    description: >
+      Value space differs by view: channel_attribution uses closed set (meta/google/organic_shopify/unattributed); channel_pnl and ad_channel_pnl use P&L set (meta/google/organic/unattributed); funnel_daily, session_funnel, web_events, web_events_daily use FINE last-touch channels (ig_feed, google_search, organic, ...); orders_all_channels, sales_all_channels, returns_cancels_all_channels use marketplace (shopify). Distinct from lt_channel (last-touch FINE on order_attribution). Unspecified "by channel" defaults to ChannelAttribution closed set — see ontology grain_defaults; do not slice Shopify commerce totals by this dim.
+    aliases:
+      - marketplace
+      - marketplace channel
+      - by channel
+      - channel-wise
+      - channel wise
+      - channelwise
+      - channel report
+    views:
+      channel_attribution: channel_attribution.channel
+      channel_pnl: channel_pnl.channel
+      returns_cancels_all_channels: returns_cancels_all_channels.channel
+      funnel_daily: funnel_daily.channel
+      session_funnel: session_funnel.channel
+      web_events: web_events.channel
+      web_events_daily: web_events_daily.channel
+      orders_all_channels: orders_all_channels.channel
+      sales_all_channels: sales_all_channels.channel
+      ad_channel_pnl: ad_channel_pnl.channel
+  - id: source_platform
+    display_name: Source Platform
+    description: Originating platform of the attribution row (shopify).
+    views:
+      channel_attribution: channel_attribution.source_platform
+  - id: revenue_basis
+    display_name: Revenue Basis
+    description: >
+      Revenue basis of the row (shopify_first_party_ex_gst).
+    views:
+      channel_attribution: channel_attribution.revenue_basis
+  - id: customer_id
+    display_name: Customer ID
+    description: Shopify customer identifier (business key, not PII).
+    views:
+      customer_data: customer_data.customer_id
+      customer_ltv: customer_ltv.customer_id
+  - id: accepts_marketing
+    display_name: Accepts Marketing
+    description: Shopify marketing consent flag on the customer profile.
+    views:
+      customer_data: customer_data.accepts_marketing
+  - id: default_city
+    display_name: Default City
+    description: >
+      Customer default city from the Shopify profile (CustomerData). Not shipping city on the
+      order.
+    views:
+      customer_data: customer_data.default_city
+  - id: default_province
+    display_name: Default Province
+    description: >
+      Customer default province/state from the Shopify profile.
+    views:
+      customer_data: customer_data.default_province
+  - id: default_country
+    display_name: Default Country
+    description: >
+      Customer default country from the Shopify profile. Not shipping country on the order.
+    views:
+      customer_data: customer_data.default_country
+  - id: session_date
+    display_name: Session Date
+    description: IST day the website session started.
+    is_time: true
+    views:
+      session_funnel: session_funnel.session_date
+  - id: funnel_stage
+    display_name: Funnel Stage
+    description: >
+      Deepest stage the session reached (browse / product_view / add_to_cart /
+      reached_checkout / purchased).
+    views:
+      session_funnel: session_funnel.funnel_stage
+  # ---- 2026-07-17: EventStream (web events) ----
+  # (event_date mapping for web_events lives on the shared event_date dim above)
+  - id: event_type
+    display_name: Event Type
+    description: >
+      Commerce cancel/return event type (cancellation / return) on commerce_orders,
+      or Snowplow tracker event type (page_view / product_view / …) on web_events.
+    aliases: [cancel vs return, commerce event type]
+    views:
+      commerce_orders: commerce_orders.event_type
+      web_events: web_events.event_type
+      web_events_daily: web_events_daily.event_type
+  # ---- Operations: Returns / Refunds ----
+  - id: refund_date
+    display_name: Refund Date
+    description: IST day the refund/return event was recorded (event axis for refund metrics).
+    is_time: true
+    aliases: [return date, refund event date]
+    views:
+      refund_events: refund_events.refund_date
+      return_lifecycle: return_lifecycle.refund_date
+  - id: pnl_refund_class
+    display_name: P&L Refund Class
+    description: Finance refund classification (PLACEMENT / CANCELLATION / RETURN).
+    allowed_values: [PLACEMENT, CANCELLATION, RETURN]
+    views:
+      refund_events: refund_events.pnl_refund_class
+      return_lifecycle: return_lifecycle.pnl_refund_class
+      product_performance: product_performance.pnl_refund_class
+  - id: payment_status
+    display_name: Payment Status
+    description: Payment status on the refunded order.
+    views:
+      refund_events: refund_events.payment_status
+  - id: primary_return_status
+    display_name: Primary Return Status
+    description: >
+      Primary Return Status: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
+    views:
+      refund_events: refund_events.primary_return_status
+  - id: shopify_return_status
+    display_name: Shopify Return Status
+    description: >
+      Shopify Return Status: shared catalogue dimension for grouping and filters. Not a
+      measure; empty/null means unknown, never a separate bucket unless documented.
+    views:
+      refund_events: refund_events.shopify_return_status
+  - id: restock_type
+    display_name: Restock Type
+    description: >
+      Restock Type: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      return_lifecycle: return_lifecycle.restock_type
+  - id: restock
+    display_name: Restock Flag
+    description: >
+      Restock: shared catalogue dimension for grouping and filters. Not a measure; empty/null
+      means unknown, never a separate bucket unless documented.
+    views:
+      refund_events: refund_events.restock
+  - id: is_unprocessed
+    display_name: Is Unprocessed Refund
+    description: >
+      Is Unprocessed: shared catalogue dimension for grouping and filters. Not a measure;
+      empty/null means unknown, never a separate bucket unless documented.
+    views:
+      refund_events: refund_events.is_unprocessed
+  # ---- Web session / geo (Snowplow) ----
+  - id: geo_city
+    display_name: Geo City (Session)
+    description: Visitor geo city from Snowplow session (not shipping address).
+    aliases: [session city, visitor city, geo city]
+    views:
+      session_funnel: session_funnel.geo_city
+      web_events: web_events.geo_city
+  - id: geo_region
+    display_name: Geo Region (Session)
+    description: >
+      Session geo region (Snowplow). Sparse; empty is unknown.
+    aliases: [session region, visitor region, geo region]
+    views:
+      session_funnel: session_funnel.geo_region
+      web_events: web_events.geo_region
+  - id: geo_country
+    display_name: Geo Country (Session)
+    description: >
+      Session geo country (Snowplow). Sparse; empty is unknown.
+    aliases: [session country, visitor country, geo country]
+    views:
+      session_funnel: session_funnel.geo_country
+      web_events: web_events.geo_country
+  - id: device_type
+    display_name: Device Type
+    description: >
+      Session device type (Snowplow). Currently unpopulated on session_funnel — do not use for
+      conversion-by-device until coverage returns.
+    views:
+      session_funnel: session_funnel.device_type
+  - id: browser_family
+    display_name: Browser Family
+    description: >
+      Snowplow browser family on the session. Currently sparse/unpopulated on session_funnel —
+      treat empty as unknown, not 'other'.
+    views:
+      session_funnel: session_funnel.browser_family
+  - id: os_family
+    display_name: OS Family
+    description: >
+      Snowplow OS family. Currently unpopulated on session_funnel.
+    views:
+      session_funnel: session_funnel.os_family
+  - id: landing_page_path
+    display_name: Landing Page Path
+    description: >
+      First page path of the session. Prefer landing_page_resolved for labelled landings.
+    views:
+      session_funnel: session_funnel.landing_page_path
+  - id: exit_page_path
+    display_name: Exit Page Path
+    description: >
+      Path of the last page in the Snowplow session. May be empty.
+    views:
+      session_funnel: session_funnel.exit_page_path
+  - id: page_path
+    display_name: Page Path
+    description: >
+      Event page path on EventStream. Not a session landing page.
+    views:
+      web_events: web_events.page_path
+  - id: page_title
+    display_name: Page Title
+    description: >
+      Event page title on EventStream.
+    views:
+      web_events: web_events.page_title
+  - id: collection
+    display_name: Collection
+    description: >
+      Shopify collection path/title on the web event. EventStream only.
+    views:
+      web_events: web_events.collection
+  - id: session_platform
+    display_name: Session Platform
+    description: >
+      Snowplow platform on the event (web/app). Distinct from ads publisher_platform.
+    views:
+      web_events: web_events.session_platform
+  - id: funnel_web_platform
+    display_name: Web Platform (Session)
+    description: Snowplow platform on session_funnel (web/mobile).
+    views:
+      session_funnel: session_funnel.platform
+  - id: hour_of_day
+    display_name: Hour of Day (IST, 0-23)
+    description: Intraday hour bucket in IST for hourly paid-media views.
+    views:
+      meta_ad_performance_hourly: meta_ad_performance_hourly.hour_of_day
+      google_ad_performance_hourly: google_ad_performance_hourly.hour_of_day
+  - id: report_hour_ts
+    display_name: Report Hour (IST timestamp)
+    description: IST hour timestamp axis (granularity hour) for hourly paid-media views.
+    views:
+      meta_ad_performance_hourly: meta_ad_performance_hourly.report_hour_ts
+      google_ad_performance_hourly: google_ad_performance_hourly.report_hour_ts
+  - id: utm_content
+    display_name: UTM Content
+    description: Ad-level UTM content (creative/link tag).
+    views:
+      session_funnel: session_funnel.utm_content
+  - id: utm_term
+    display_name: UTM Term
+    description: UTM term (keyword/audience tag).
+    views:
+      session_funnel: session_funnel.utm_term
+  - id: session_hour
+    display_name: Session Hour (IST 0-23)
+    description: Hour the session started, IST.
+    views:
+      session_funnel: session_funnel.session_hour
+  - id: session_day_of_week
+    display_name: Session Day of Week (1=Mon)
+    description: ISO day of week the session started.
+    views:
+      session_funnel: session_funnel.session_day_of_week
+  - id: landing_page_resolved
+    display_name: Landing Page (resolved)
+    description: Resolved landing page label for the session.
+    views:
+      session_funnel: session_funnel.landing_page_resolved
+  - id: furthest_stage_bucket
+    display_name: Furthest Funnel Stage
+    description: Exclusive furthest funnel stage the session reached.
+    views:
+      session_funnel: session_funnel.furthest_stage_bucket
+  - id: converted
+    display_name: Converted (session)
+    description: 1 if the session ended in a purchase.
+    views:
+      session_funnel: session_funnel.converted
+  - id: shopify_order_id
+    display_name: Linked Shopify Order
+    description: Order id linked to a converted session.
+    views:
+      session_funnel: session_funnel.shopify_order_id
+  - id: creative_name
+    display_name: Creative Name
+    description: >
+      Meta creative name (gold.dim_creative, ~90% populated). The natural key for creative-level
+      performance comparison; creative_id is the stable id. Null means the creative is not in the
+      dimension yet, not that the ad has no creative.
+    aliases: [creative, ad creative, creative title]
+    views:
+      meta_ad_performance: meta_ad_performance.creative_name
+  - id: creative_cta_type
+    display_name: Creative CTA
+    description: >
+      Call-to-action button on the Meta creative (SHOP_NOW, LEARN_MORE, ...). Group by this to
+      compare CTA performance. Delivery only - it says nothing about attributed revenue.
+    aliases: [cta, call to action, button]
+    views:
+      meta_ad_performance: meta_ad_performance.creative_cta_type
+  - id: ad_format
+    display_name: Ad Format
+    description: >
+      Meta ad format from gold.dim_ad (single image, video, carousel). Delivery efficiency is only
+      comparable within the same format - video and static have different natural CPM.
+    aliases: [format, creative format]
+    views:
+      meta_ad_performance: meta_ad_performance.ad_format
+  - id: adset_optimization_goal
+    display_name: Ad Set Optimization Goal
+    description: >
+      What Meta optimised delivery for on the ad set (PURCHASE, LINK_CLICKS, ...). CPC and CPM are
+      only comparable within the same optimization goal; comparing across goals is misleading.
+    aliases: [optimization goal, optimisation goal, delivery goal]
+    views:
+      meta_ad_performance: meta_ad_performance.adset_optimization_goal
+  - id: neurohack_tag_codes
+    display_name: Neurohack Tags
+    description: >
+      Comma-joined neurohack creative tags for the ad (gold.dim_ad_neurohack_map, ~60% populated).
+      An ad can carry SEVERAL tags, so this is a joined list, not one value per row - filter with
+      contains, and never group by it expecting one tag per ad.
+    aliases: [neurohack, neurotag, creative tag, hack]
+    views:
+      meta_ad_performance: meta_ad_performance.neurohack_tag_codes
+  # ---- Ad / Channel P&L query controls (ad_channel_pnl) ----
+  - id: row_type
+    display_name: Row Type (Ad/Channel P&L)
+    description: >
+      'detail' = campaign/adset/ad rows; 'reconciliation' = the per-(brand,day,channel)
+      residual that makes SUM(all rows) tie to channel_pnl. For channel/period TOTALS sum
+      ALL rows (do not filter). For a campaign/adset/ad BREAKDOWN filter row_type='detail'
+      so the residual bucket does not appear as a phantom campaign.
+    allowed_values: [detail, reconciliation]
+    views:
+      ad_channel_pnl: ad_channel_pnl.row_type
+  - id: is_unattributed
+    display_name: Paid but Campaign-Unresolved
+    description: >
+      1 = spend that is real but not placeable at campaign grain (Google PMax / click-ID
+      etc.). Group by this to separate placeable ad spend from the unresolved bucket; it is
+      not organic and not an error.
+    views:
+      ad_channel_pnl: ad_channel_pnl.is_unattributed

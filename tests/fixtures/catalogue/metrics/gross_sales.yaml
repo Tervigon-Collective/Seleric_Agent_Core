@@ -1,0 +1,92 @@
+id: gross_sales
+display_name: Gross Sales (Shopify-only, ex-GST)
+category: commerce
+status: certified
+description: >-
+  Shopify gross sales: order value before discounts, ex-GST, on the order date, from
+  serve.commerce_orders — includes orders later cancelled or voided (dashboard Gross Sales card).
+  Sliceable by geo, payment, UTM, customer type. Same total as gross_sales_all_channels. Incl.-GST
+  equivalent → total_sales.
+formula:
+  human_readable: 'Sum of (gross_excl_tax_derived + discount_excl_tax) per eligible order (is_test = 0,
+    is_revenue_adjustment = 0); proportional GST strip per policy v1
+
+    '
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.gross_sales_excl_tax
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order
+supported_dimensions:
+- brand_id
+- order_date
+- order_created_at_ist
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- financial_status
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- financial_status
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Gross sales this month
+  request:
+    measures:
+    - gross_sales
+    time_range:
+      preset: this_month
+validation_tests:
+- reconciles to dashboard Gross Sales card for closed periods
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalQueryHelpers.js:28-29,57-58

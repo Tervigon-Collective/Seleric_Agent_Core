@@ -1,61 +1,37 @@
 id: return_recovered_cogs
-display_name: Recovered COGS (Returns)
+display_name: Return recovered cogs
 category: operations
 status: certified
-description: >-
-  Cost recovered or reversed on returned lines (product + packaging + shipping + gateway + RTO
-  components), on the refund date, from serve.return_lifecycle (INR).
+description: 'COGS recovered on refunds (product, packaging, shipping, gateway, RTO). Refunds of exchanged items
+  are excluded: exchanges never enter return metrics (D-01); the refund date is a native cash clock and ignores
+  date_axis (D-36). Grain: refund. Date axis: native. Ignores date_axis (its own clock, D-36). Redefined in semantic
+  v3 (D-01; D-20; D-36; D-02b; D-03a; D-22): the id is kept, the number may change.'
 formula:
-  human_readable: SUM(recovered_cogs)
+  human_readable: 'COGS recovered on refunds (product, packaging, shipping, gateway, RTO). Refunds of exchanged
+    items are excluded: exchanges never enter return metrics (D-01); the refund date is a native cash clock and
+    ignores date_axis (D-36).'
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: return_lifecycle
-  measure: return_lifecycle.recovered_cogs
-  time_dimension: return_lifecycle.refund_date
+  view: returns
+  measure: returns.return_recovered_cogs
 aggregation: additive
-unit: currency
+unit: INR
 currency_default: INR
-grain: refund line
-supported_dimensions:
-- brand_id
-- refund_date
-- order_date
-- pnl_refund_class
-- return_status
-- restock_type
-- sku
-- product_title
-- variant_title
-- is_cod
-supported_filters:
-- date_range
-- brand_id
-- pnl_refund_class
-- return_status
-- sku
-- is_cod
+grain: refund
 data_owner: Finance
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Recovered COGS (Returns) last 30 days
-  request:
-    measures:
-    - return_recovered_cogs
-    time_range:
-      preset: last_30d
-validation_tests:
-- return_recovered_cogs >= 0 for any slice
-deprecated_aliases: []
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: lineItemHistoricalSql.js:335-361 vs 364-393,617-646
-  note: 'Matching CTE is dead code; live logic adds return cost to COGS — the opposite operation — see cross-cutting #8.'
+version: 2.0.0
+replaces: []
+date_axis: native
+decision_ids:
+- D-01
+- D-20
+- D-36

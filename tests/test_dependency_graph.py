@@ -25,7 +25,7 @@ def test_builds_without_errors(built):
 
 def test_every_metric_is_a_node(built):
     _, g, _ = built
-    assert len(g.nodes) == len(list((ROOT / "catalogue_v2" / "metrics").glob("*.yaml")))
+    assert len(g.nodes) == len(list((ROOT / "catalogue" / "metrics").glob("*.yaml")))
 
 
 def test_compositions_join_additive_metrics(built):

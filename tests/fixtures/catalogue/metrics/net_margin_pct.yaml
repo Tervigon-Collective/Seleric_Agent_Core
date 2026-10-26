@@ -1,0 +1,51 @@
+id: net_margin_pct
+display_name: Net Margin % (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Net margin %: net profit ÷ net sales for the period, recomputed from sums on serve.canonical_pnl
+  (0–1 ratio; negative when the business loses money after ads).
+formula:
+  human_readable: 100 x SUM(net_profit_shopify) / SUM(net_sales)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.net_margin_pct
+aggregation: ratio
+unit: percent
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: Net Margin % for June 2026
+  request:
+    measures:
+    - net_margin_pct
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- period value equals 100 x sum(net_profit_shopify)/sum(net_sales) for the same slice
+deprecated_aliases: []
+ratio_components:
+  numerator: canonical_pnl.net_profit_shopify
+  denominator: canonical_pnl.net_sales
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/services/pnlService.js:137
+  note: >
+    Dashboard summary may use blended inputs. This metric is aligned to
+    canonical Cube semantic execution (`canonical_pnl.net_margin_pct`).

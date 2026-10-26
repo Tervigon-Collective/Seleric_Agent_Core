@@ -1,0 +1,48 @@
+id: payment_gateway_fees
+display_name: Payment Gateway Fees (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Payment-gateway fee component of Net COGS for prepaid (online) orders, per brand-day on
+  serve.canonical_pnl (INR); COD orders carry no gateway fee. Cancel/return gateway costs land on the
+  event date. Part of net_cogs — do not add it again.
+formula:
+  human_readable: SUM(payment_gateway_fees)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.payment_gateway_fees
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: Payment Gateway Fees for June 2026
+  request:
+    measures:
+    - payment_gateway_fees
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- payment_gateway_fees >= 0 for any slice
+- June 2026 brand 20 ≈ ₹1,31,068.55
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:618-620

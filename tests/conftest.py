@@ -16,7 +16,7 @@ from seleric_mcp.observability.audit import AuditLog
 from seleric_mcp.semantic_layer.cube_client import CubeResult
 from seleric_mcp.storage.db import Database
 
-CATALOGUE_DIR = PROJECT_ROOT / "catalogue"
+CATALOGUE_DIR = PROJECT_ROOT / "tests" / "fixtures" / "catalogue"
 
 
 @pytest.fixture()

@@ -167,7 +167,7 @@ def built_server_no_scopes(fake_cube, result_store, tmp_path):
     from seleric_mcp.config import PROJECT_ROOT, Settings
 
     settings = Settings(
-        catalogue_dir=PROJECT_ROOT / "catalogue",  # v1 fixture ids (see conftest.settings)
+        catalogue_dir=PROJECT_ROOT / "tests" / "fixtures" / "catalogue",  # fixture ids (see conftest.settings)
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",
@@ -596,7 +596,7 @@ def _pinned_settings(tmp_path, module):
     from seleric_mcp.config import PROJECT_ROOT, Settings
 
     return Settings(
-        catalogue_dir=PROJECT_ROOT / "catalogue",  # v1 fixture ids (see conftest.settings)
+        catalogue_dir=PROJECT_ROOT / "tests" / "fixtures" / "catalogue",  # fixture ids (see conftest.settings)
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",

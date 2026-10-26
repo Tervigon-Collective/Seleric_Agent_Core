@@ -1,0 +1,30 @@
+id: funnel_order_purchases
+display_name: Funnel purchases (orders)
+category: web_analytics
+status: certified
+description: 'Funnel purchases at order grain (the mart''s purchases, sliceable by campaign and product). Grain:
+  order. Date axis: native. Ignores date_axis (its own clock, D-36). Redefined in semantic v3 (D-01; D-09): the
+  id is kept, the number may change.'
+formula:
+  human_readable: Funnel purchases at order grain (the mart's purchases, sliceable by campaign and product).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: funnel_orders
+  measure: funnel_orders.funnel_order_purchases
+aggregation: additive
+unit: count
+grain: order
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces: []
+date_axis: native

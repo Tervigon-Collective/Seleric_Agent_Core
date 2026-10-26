@@ -136,7 +136,7 @@ class Settings:
     # from search, resolve and query. Empty = no gating.
     # Env override: SELERIC_SERVE_DB.
     serve_db: str = ""
-    catalogue_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "catalogue_v3")
+    catalogue_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "catalogue")
 
     # --- behavior tunables ---
     resolve_auto_threshold: float = 0.85
@@ -281,8 +281,8 @@ def load_settings(config_path: Path | None = None) -> Settings:
     # Catalogue directory.
     # Env override: SELERIC_CATALOGUE_DIR (relative paths are under the project root).
     catalogue_raw = os.getenv("SELERIC_CATALOGUE_DIR", "").strip()
-    # Default = semantic v3 (catalogue_v3).
-    catalogue_dir = Path(catalogue_raw) if catalogue_raw else PROJECT_ROOT / "catalogue_v3"
+    # Default = semantic v3 (catalogue).
+    catalogue_dir = Path(catalogue_raw) if catalogue_raw else PROJECT_ROOT / "catalogue"
     if not catalogue_dir.is_absolute():
         catalogue_dir = PROJECT_ROOT / catalogue_dir
 

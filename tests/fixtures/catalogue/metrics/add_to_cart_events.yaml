@@ -1,0 +1,51 @@
+id: add_to_cart_events
+display_name: Add-to-Cart Events
+category: web_analytics
+status: certified
+description: >-
+  Add-to-cart events per day and channel on serve.web_events_daily. Counts events, not sessions (for a
+  rate use session_atc_rate). Not Meta pixel add-to-carts.
+formula:
+  human_readable: SUM(events WHERE event_type = 'add_to_cart')
+  authoritative_source: cube
+cube_mapping:
+  view: web_events_daily
+  measure: web_events_daily.add_to_cart_events
+aggregation: additive
+unit: count
+grain: brand × day × fine channel
+supported_dimensions:
+- brand_id
+- report_date
+- channel
+supported_filters:
+- date_range
+- brand_id
+- channel
+data_owner: Growth / Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Add-to-cart events by channel last 7 days
+  request:
+    measures:
+    - add_to_cart_events
+    dimensions:
+    - channel
+    time_range:
+      preset: last_7_days
+validation_tests:
+- add_to_cart_events >= 0
+deprecated_aliases: []
+dashboard_alignment:
+  status: not_implemented
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: channelFunnel/martFunnelClickhouse.js:30
+  note: Only session count (atc_sessions) exists in the dashboard; no event-grain add-to-cart rollup.

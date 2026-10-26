@@ -55,10 +55,10 @@ Every fix below keeps the column name, so the Cube model needs no change for the
   everything under `marts/`. Gotcha found: `fct_session_funnel.session_hour` is the UTC hour, the mart derives the IST hour from `session_start`.
 - **Product cost / price history:** new `serve.product_cost_changes` (over `gold.fct_shopify_product_cost_history`, 8,931 versions, 1,794 SKUs) -> cube
   `product_cost_versions` -> view `product_cost_changes` (hour-capable on `changed_at`; metrics `unit_cost_changes`, `list_price_changes`; before -> after
-  columns). 6,245 of the 8,139 legacy-metafield versions are date-grain (midnight UTC): `has_time_of_day` marks them and `catalogue_v3_src/hourly_notes.yaml` says so.
-- `catalogue_v3/` regenerated with `scripts/build_catalogue_v3.py` against a staging Cube on the edited model (since removed). It also contains what the live Cube
+  columns). 6,245 of the 8,139 legacy-metafield versions are date-grain (midnight UTC): `has_time_of_day` marks them and `catalogue_src/hourly_notes.yaml` says so.
+- `catalogue/` regenerated with `scripts/build_catalogue.py` against a staging Cube on the edited model (since removed). It also contains what the live Cube
   already serves: D-46 payment fields and the ops-app stock / receiving / procurement views, whose generator entries, concepts and datasets are a teammate's
-  concurrent edits in the same tree (not mine). `tests/test_semantic_v3.py` now expects 28 views (18 + 9 ops + product_cost_changes).
+  concurrent edits in the same tree (not mine). `tests/test_semantic.py` now expects 28 views (18 + 9 ops + product_cost_changes).
 
 ## Deploy order (owner-triggered)
 0. Hourly funnel mart (own order, see Mage `docs/MART_FUNNEL_HOURLY.md`): registry lines, enable the var, wait for `gold.mart_funnel_hourly`, then
@@ -68,7 +68,7 @@ Every fix below keeps the column name, so the Cube model needs no change for the
 2. Make the live mount match: commit in `/opt/seleric/mage-ai`, then check out that commit in `/opt/seleric/mage-ai-v3` (it is a detached checkout, now at efa402f,
    so apply on top of it, do not overwrite from the working tree) and restart `seleric-mcp-cube-v3-1`. Cube before the `ad_changes` / `product_cost_changes` DDL breaks
    queries that select the new columns.
-3. Core: rebuild/restart `seleric-mcp-mcp-1` (catalogue_v3 and catalogue_v3_src are bind-mounted; the tool and `datasets` table need the new image).
+3. Core: rebuild/restart `seleric-mcp-mcp-1` (catalogue and catalogue_src are bind-mounted; the tool and `datasets` table need the new image).
 4. Agent: port the edits to `~/work/agent_dowhy_deploy` and build there (never compose from `/opt/seleric/Seleric_Agent`, which is on `gaurav`).
 5. Verify: `python serve/evaluations/v3_contracts.py` (all pass); `serve/evaluations/v3_cube_smoke.py` (includes `gen_refusals_v3.py --check`; refusals_v3.json is
    unchanged by this work) and `v3_cube_refusals.py` against the restarted Cube (they need a deployed Cube, not run here);

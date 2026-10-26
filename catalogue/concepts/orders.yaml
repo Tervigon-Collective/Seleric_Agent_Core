@@ -1,43 +1,110 @@
 id: orders
 display_name: Orders
-one_liner: Count of orders; all-channels total unless a scope/status/attribution is named.
-aliases: [orders, order count, order volume, number of orders]
+one_liner: Orders placed (commerce placement cohort), by order date.
+aliases:
+- orders
+- order count
+- total orders
+- purchases
 axes:
-  attribution: {values: [none, last_touch, channel, platform], default: none}
-  scope: {values: [company, shopify, product], default: company}
-  status: {values: [all, cod, prepaid, new, cancelled, returned, first, repeat, active], default: all}
-  grain: {values: [period, order, daily], default: period}
+  status:
+    values:
+    - all
+    - cod
+    - prepaid
+    - new
+    - first
+    - cancelled
+    - returned
+    - returned_or_cancelled
+    default: all
+  date:
+    values:
+    - order
+    - finance
+    default: order
+  scope:
+    values:
+    - all
+    - product
+    - attributed
+    default: all
+  channel:
+    values:
+    - all
+    - meta
+    - google
+    - whatsapp
+    - organic
+    - unattributed
+    default: all
+  paid:
+    values:
+    - all
+    - paid
+    default: all
+axis_filters:
+  channel:
+    meta:
+      finance_channel: meta
+    google:
+      finance_channel: google
+    whatsapp:
+      finance_channel: whatsapp
+    organic:
+      finance_channel: organic
+    unattributed:
+      finance_channel: unattributed
+  paid:
+    paid:
+      is_paid: 'true'
 resolves:
-  - when: {attribution: none, scope: company, status: all}
-    metric: total_orders
-  - when: {attribution: none, scope: shopify, status: all}
-    metric: orders
-  - when: {attribution: none, scope: product, status: all}
-    metric: product_orders
-  - when: {attribution: last_touch, status: all}
-    metric: attributed_orders
-  - when: {attribution: channel, status: all}
-    metric: channel_orders
-    filter: {channel_type: attribution_closed_set}
-  - when: {attribution: platform, status: all}
-    metric: ad_channel_orders
-    filter: {channel_type: pnl_overview}
-  - when: {status: cod}
-    metric: cod_orders
-  - when: {status: prepaid}
-    metric: prepaid_orders
-  - when: {status: new}
-    metric: new_customer_orders
-  - when: {status: cancelled}
-    metric: cancelled_orders
-  - when: {status: returned}
-    metric: refunded_orders
-  - when: {status: first}
-    metric: first_orders
-  - when: {status: repeat}
-    metric: repeat_orders
-  - when: {status: active}
-    metric: active_orders
-disambiguation: >
-  "by channel" (closed set) and last-touch/platform order counts measure different
-  channel axes and do not reconcile with the Shopify total.
+- when:
+    status: all
+  metric: orders
+- when:
+    status: all
+    scope: product
+  metric: product_orders
+- when:
+    status: all
+    scope: attributed
+  metric: channel_orders
+- when:
+    status: new
+    scope: attributed
+  metric: channel_new_customers
+- when:
+    status: first
+    scope: attributed
+  metric: channel_new_customers
+- when:
+    status: cod
+  metric: cod_orders
+- when:
+    status: prepaid
+  metric: prepaid_orders
+- when:
+    status: new
+  metric: new_customers
+- when:
+    status: first
+  metric: new_customers
+- when:
+    status: cancelled
+  metric: cancelled_orders
+- when:
+    status: returned
+  metric: returned_orders
+- when:
+    status: returned_or_cancelled
+  metric: returned_or_cancelled_orders
+- when:
+    status: new
+    scope: product
+  metric: product_new_customers
+disambiguation: 'orders = dashboard Total Orders (placement cohort, order date). Cancelled / returned default to
+  the orders placed in the period (date_axis=order_date); date_axis=event_date counts them on the day the cancel
+  / return happened.
+
+  '

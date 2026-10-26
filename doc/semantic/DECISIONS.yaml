@@ -1,0 +1,1409 @@
+register: Semantic v3 decision register — machine-readable twin of spec §0B
+source_of_truth: this file for implementation status / location; spec §0B row for the business wording
+repos:
+  mage-ai: /opt/seleric/mage-ai (branch semantic-v3)
+  agent-core: /home/tervigon/work/agent_core_v3 (branch semantic-v3)
+check: python3 scripts/check_decisions.py --mage /opt/seleric/mage-ai
+status_values:
+  implemented: live in v3 code
+  planned: decided, built in the named phase
+  scope: scope boundary, no code
+  process: how we work, no code
+  superseded: replaced by a later decision
+decisions:
+- id: D-00
+  title: Source of truth for ad-facing LPV and revenue
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: DECIDED (2026-10-14, owner instruction) — platform-reported LPV/revenue must not be used as the ad metric
+  options: Website sessions for LPV; Shopify orders (via attribution) for revenue; platform conversion numbers hidden (D-13)
+  evidence: F-25, F-26
+  implemented_in:
+  - mage-ai:serve/core/views/fct_web_session.sql (is_lpv from website sessions)
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (Shopify orders via attribution)
+  tests:
+  - FIN-15
+  - WEB-LPV
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-01
+  title: Exchange treatment
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Continuation + separate exchange lifecycle. Original order is the only commercial sale (keeps order date,
+    customer, attribution). Replacement = linked fulfilment child: no order count, no sales revenue. Price-difference charges/refunds
+    adjust the original order cohort. Exchange COGS, inventory recovery, shipping and handling are separate economic components. Non-cash
+    exchange credits are internal transfers — not cash refunds, not sales deductions. Exchanged items never enter ordinary return metrics.
+    All exchange components reconcile to the original order''s line economics and the canonical P&L.'
+  options: (a) replacement = continuation of original sale (no new order, no new revenue; price difference only) (b) replacement = new
+    order/sale (today)
+  evidence: 'F-07–F-10: 498 replacement orders, ₹8.39L counted as sales; ~390 originals counted as returns; ₹7.14L non-cash "refunds"'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (order_type exchange_replacement, parent/root chain)
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (exchange family; no revenue on replacements)
+  - mage-ai:serve/core/views/fct_order.sql (is_sale_order, root_order_id)
+  evidence_codes:
+  - exchange_replacement_linked
+  tests:
+  - FIN-14
+  - EXCH-ROOT
+  - LEDGER-NO-REVENUE-NONSALE
+  - 'bridge: D-01 replacement not a sale / exchanged item is not a return'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-01a
+  title: Exchange price-adjustment basis
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): value difference — replacement value − exchanged item value, ex-GST, on the root order cohort;
+    0 when the replacement is cancelled / RTO. In-order exchanges (F-10): − exchanged-out line value.'
+  options: value difference / money moved
+  evidence: 'Pragma tags check: lower −₹4.1k, higher +₹8.2k, same ≈ 0 (₹134 mean noise)'
+  implemented_in:
+  - 'mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (adj_rows: exchange_price_adjustment)'
+  tests:
+  - 'bridge: D-01a exchange price adjustment'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-01b
+  title: Which payments are non-cash exchange credits
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): on exchange replacements, gateways manual, shopify_store_credit, partially_paid and blank / ''other''
+    are exchange credits (refunds on exchanged originals through them too); COD and named card / UPI gateways are cash. `serve.fct_payment.payment_class`.'
+  options: manual + store credit only / + blank + partially_paid
+  evidence: 'replacements: manual ₹7.6L + ₹1.6L pending, blank/''other'' ₹2.36L, partially_paid ₹42k, COD ₹26k'
+  implemented_in:
+  - mage-ai:serve/core/views/fct_payment.sql (payment_class)
+  tests:
+  - PAY-CREDIT-SCOPE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-01c
+  title: In-order exchange (item swapped inside the same order) in gross sales
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): remove from gross — gross = what the customer finally kept; memo row `in_order_exchange_swapped_out`
+    keeps the placed value traceable.'
+  options: remove swapped-out value / keep
+  evidence: 32 lines, ₹79k
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (gross_sales minus swapped share; memo in_order_exchange_swapped_out)
+  - mage-ai:serve/semantic_v3/views/02_core_order_line_class.sql (line_in_order_exchange)
+  evidence_codes:
+  - line_in_order_exchange
+  tests:
+  - LINE gross
+  - 'bridge: D-01c'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-01d
+  title: Exchange whose replacement was cancelled / RTO (customer never got the swap)
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): original becomes a customer return when all its replacements failed (6 originals; others have
+    a delivered replacement). Code `exchange_failed_replacement`.'
+  options: original becomes a return / keep sale / unknown
+  evidence: 17 replacements, ₹37.7k exchanged value
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (kids CTE)
+  evidence_codes:
+  - exchange_failed_replacement
+  tests:
+  - 'bridge: D-01d failed exchange = return'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-02
+  title: Revenue recognition basis
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: owner: "all Actives means actually delivered" → net sales = delivered. D-02a DECIDED 2026-10-14: an ACTIVE
+    line (not cancelled / RTO / returned) is treated as delivered; missing delivery flags are considered incomplete tracking. Net sales
+    = ACTIVE lines as of cutoff. (Recent in-transit ACTIVE ≈ ₹2.2L will therefore count as sales and move to RTO/return if they fail.)'
+  options: booked at order (minus cancels/returns as-of) vs delivery-recognised (realised)
+  evidence: 'F-14: ₹22.2L ACTIVE not yet delivered; of which ₹21.5L (1,226 lines, 90% COD) are >45 days old and still lack delivery
+    evidence'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (ACTIVE outcomes)
+  evidence_codes:
+  - active_delivered
+  - active_shipped_no_delivery_status
+  - active_not_shipped
+  tests:
+  - FIN-13
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-02a
+  title: Revenue recognition basis
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: see D-02 (sub-decision recorded in that row)
+  options: booked at order (minus cancels/returns as-of) vs delivery-recognised (realised)
+  evidence: 'F-14: ₹22.2L ACTIVE not yet delivered; of which ₹21.5L (1,226 lines, 90% COD) are >45 days old and still lack delivery
+    evidence'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (ACTIVE ≡ delivered)
+  evidence_codes:
+  - active_delivered
+  - active_shipped_no_delivery_status
+  - active_not_shipped
+  tests:
+  - FIN-13
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-02b
+  title: GST
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: ex-GST for all revenue, margin and ROAS metrics; GST (CGST/SGST/IGST) is its own component; tax-inclusive
+    GMV only as a separately labelled metric.'
+  options: ex-GST vs incl. GST
+  evidence: F-13
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (all revenue ex-GST; gst / shipping_gst memo rows)
+  tests:
+  - ORDER FIN-01
+  - 'bridge: gross basis'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-03
+  title: COGS definition and return recovery
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Split layers. COGS = product (landed purchase) cost only. Packaging, forward/reverse shipping, gateway,
+    COD handling, RTO, checkout fee, weight discrepancy = separate *fulfilment & payment cost* components. Gross profit = net sales
+    − product COGS; contribution = gross profit − fulfilment & payment costs − ad spend. Restock-credit policy: see D-03a'
+  options: pure product COGS vs landed (product+packaging+shipping+gateway); restocked returns credit product cost back or not
+  evidence: F-15, F-20
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (product_cost vs fulfilment_cost families)
+  tests:
+  - LINE product_cost
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-03a
+  title: Returned/RTO stock cost recovery
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Always credit back product COGS for every returned or RTO unit (and exchanged-back unit); reverse shipping/handling
+    remain costs.'
+  options: credit if restocked / always / never
+  evidence: F-20
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (product_cogs_credit, exchange_replacement_cogs_credit)
+  tests:
+  - LINE credit_D03a
+  - LEDGER-CREDIT-LE-COST
+  - 'cost bridge: D-03a'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-04
+  title: Amazon in overview roll-up
+  status: scope
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Out of scope for this rebuild. Brand overview is labelled D2C (Shopify) only; Amazon remains a documented
+    gap; Amazon gold tables are untouched (not deleted)'
+  options: include marketplace sales + Amazon Ads as a channel vs separate P&L
+  evidence: F-02
+- id: D-05
+  title: Cancel vs RTO vs return as separate concepts
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Three concepts. *Cancelled* (before dispatch: no fulfilment cost), *RTO* (shipped, not delivered: forward
+    + reverse shipping, no revenue, stock recovered), *Customer return* (delivered then returned: revenue reversed, reverse shipping,
+    restock). Each has its own rate and cost components, all on the original order date. Exchanges (D-01) are a fourth, separate lifecycle.
+    Refined by D-22 (four evidence-based outcomes incl. Unknown).'
+  options: three classes with own costs vs today's two
+  evidence: 'F-11: ≥643 shipped "cancellations"'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (no_fulfilment on cancelled lines)
+  tests:
+  - LINE packaging_D05 / fwd_shipping_D05
+  - 'cost bridge: D-05'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-05a
+  title: Packaging on shipped orders when gold refunds it
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): charge full packaging once shipped.'
+  options: charge full / follow gold
+  evidence: ₹41k refunded packaging on shipped lines
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (packaging = placed_packaging_cost)
+  tests:
+  - LINE packaging_D05
+  - 'cost bridge: D-05a'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-05b
+  title: Gateway fee on pre-dispatch cancellations
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): keep as cost (the gateway charged it).'
+  options: keep / remove
+  evidence: ₹30k
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (payment_gateway_fee = gold gateway_fee, also on cancels)
+  tests:
+  - LINE gateway
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-06
+  title: Default attribution model for campaign/ad revenue
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: `last_non_direct` is the default; model must be a parameter so the default can be changed later; other
+    models selectable explicitly and never mixed in one total.'
+  options: last_touch / last_non_direct / first / linear
+  evidence: F-29 coverage
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (model parameter, default last_non_direct)
+  tests:
+  - ATTR-CREDIT
+  - ATTR-COMPLETE
+  - ATTR-DEFAULT-FLAG
+  - ATTR-FIN07
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-07
+  title: Ad cost allocation to orders/products
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Period match, no allocation. Period profit = contribution of orders placed in the period − ad spend delivered
+    in the period. Campaign drill = attributed contribution (default model D-06) − that campaign''s spend; *Unattributed/organic* contribution
+    and *spend without attributed orders* are explicit rows so Σ campaigns + unattributed = brand total exactly. Product/line profit
+    stops before ad spend unless explicitly requested. No spend-to-order allocation ledger in this rebuild. Default unchanged; the explicit
+    `allocated` product family (D-19o) is the only allocation and never feeds default/overview answers.'
+  options: none (spend stays at ad level, revenue credited) vs allocate by attribution credit
+  evidence: §6.5
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-07, delivery-date spend, no allocation)
+  - mage-ai:serve/core/views/mart_period_profit.sql (D-07)
+  tests:
+  - MART-SPEND-GOLD
+  - MART-CONTRIB-LEDGER
+  - MART-MEMBERS
+  - MART-AD-KEYS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-08
+  title: Draft / POS / test / revenue-adjustment orders
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: count as sales orders — draft orders (293), POS orders (113), revenue-adjustment orders (45). Excluded
+    — zero-value/free orders (gross after discount ≤ ₹1). Test orders: see D-08a.'
+  options: include vs exclude per type
+  evidence: F-06
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (order_type zero_value; draft/POS/adjustment = sale)
+  tests:
+  - FIN-14
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-08a
+  title: Test orders
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: excluded everywhere.'
+  options: exclude / include
+  evidence: F-05
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (order_type test)
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (test excluded)
+  - mage-ai:serve/core/views/fct_payment.sql (test excluded)
+  tests:
+  - LEDGER-NO-TEST
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-08b
+  title: COD order cancelled and re-placed as prepaid (C2P)
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): cancelled sale (today''s behaviour); the pair is linked (`superseded_by_order_id`). Code `cancel_cod_to_prepaid`.'
+  options: not a sale / cancelled sale
+  evidence: 11 pairs, ₹19.5k, since 2026-08-29 (tags logisy/pragma_c2p_cancelled, attribution supersedes_order_id)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (c2p, superseded_by_order_id)
+  evidence_codes:
+  - cancel_cod_to_prepaid
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-08c
+  title: Costs of zero-value / free orders
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): count the costs in contribution (no revenue, D-08).'
+  options: count / exclude
+  evidence: 18 orders, ₹15.8k
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (zero_value orders post costs, no revenue)
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-09
+  title: Ad revenue measure
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: primary first-party ad revenue = attributed gross sale (Shopify, at placement) → *Gross ROAS*; *Net ROAS*
+    also provided (attributed revenue net of cancels/RTO/returns as of cutoff). Website purchase-event value is a tracking-quality metric
+    only. D-09a DECIDED 2026-10-14: gross sale = line price − discounts, ex-GST, at placement (before cancels/RTO/returns), excluding
+    exchange replacements.'
+  options: Shopify order net revenue via attribution vs website purchase-event value
+  evidence: F-25
+  implemented_in:
+  - mage-ai:serve/core/views/fct_web_session.sql (website_purchase_value = tracking-quality only)
+  - mage-ai:serve/core/views/fct_web_event.sql
+  tests: []
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-09a
+  title: Ad revenue measure
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: see D-09 (sub-decision recorded in that row)
+  options: Shopify order net revenue via attribution vs website purchase-event value
+  evidence: F-25
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (gross_sales = line price − discounts ex-GST, sale orders)
+  tests:
+  - LINE gross
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-10
+  title: Shipping charged to customer
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Order-level revenue. Shipping charged is an explicit order-level net-sales component (ex-GST), not spread
+    to lines; product-level sales exclude it; order/brand totals include it.'
+  options: revenue vs cost offset
+  evidence: 'F-13: ₹1.52L'
+  implemented_in:
+  - 'mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (ship_rows: shipping_revenue, order level)'
+  tests:
+  - ORDER FIN-01
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-10a
+  title: Shipping revenue on undelivered / returned orders
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): reversed for cancelled and RTO orders (and Unknown, D-22h); returned and exchanged orders keep
+    it.'
+  options: reverse on cancel+RTO / +returns / never
+  evidence: 'shipping charged incl. GST: cancelled ₹4.5k, RTO ₹23.1k, returned ₹1.8k, exchanged ₹5.3k'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (shipping_revenue_reversal on cancelled / rto / unknown)
+  tests:
+  - 'bridge: D-10a'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-11
+  title: COGS era break 2026-09
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Back-fill with rates. Legacy era recomputed with the same component set using the rate cards/rules effective
+    at the time; values marked `cost_method=''estimated_backfill''`.'
+  options: back-fill legacy era with new components vs flag method change
+  evidence: F-16
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (cost_method; rate-card amounts as recorded)
+  tests:
+  - LINE reverse_D11c_D11d
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-11a
+  title: Back-fill rates not present in data
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): leave it — no extra data. Legacy COD handling, checkout fee and weight discrepancy stay as gold
+    has them (absent) with `cost_method=''not_recorded''`; never estimated. Rates that *are* in the data (packaging, shipping, gateway,
+    RTO per unit) are used per D-11 (e.g. legacy RTO reverse shipping ₹2.75L, `estimated_backfill`).'
+  options: owner rate card / leave missing
+  evidence: 'F-16: legacy rows have RTO rate (variant cost history) but no COD-handling, checkout-fee or weight-discrepancy rates before
+    2026-09'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (cost_method not_recorded for legacy COD / checkout / weight)
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-11c
+  title: Legacy RTO reverse-shipping back-fill
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): add from the line rate (`estimated_backfill`).'
+  options: add from line rate / leave out
+  evidence: 1,861 legacy RTO lines with no posting, rate on the line, ₹2.75L
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (reverse_shipping_cost estimated_backfill = rto_per_unit × qty)
+  tests:
+  - LINE reverse_D11c_D11d
+  - 'cost bridge: D-11c'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-12
+  title: As-of / closing cutoff
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Live + monthly close. Default = latest state; locked month-end snapshots make closed months reproducible;
+    recent cohorts flagged `maturing` for a defined window (D-12a).'
+  options: rolling (today) vs locked monthly snapshot
+  evidence: §4
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/07_snap_profit_monthly.sql (D-12)
+  - mage-ai:serve/semantic_v3/close_month.py (D-12)
+  - mage-ai:serve/core/views/mart_period_profit_closed.sql (D-12)
+  tests:
+  - CLOSE-ONCE
+  - CLOSE-SCOPE
+  - CLOSE-STATUS
+  - CLOSE-VIEW-SCOPE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-12a
+  title: Maturity window
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: 45 days after order date a cohort is `maturing`.'
+  options: 30 / 45 / 60 days
+  evidence: F-11, F-14
+  implemented_in:
+  - mage-ai:serve/core/views/fct_order.sql (is_maturing)
+  - mage-ai:serve/core/views/ledger_order_component.sql (is_maturing)
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-13
+  title: Platform-reported conversions (Meta purchases/value/LPV, Google conversions/value)
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Hide completely — not exposed in `serve`, Cube or to the Agent. Relaxed by D-13r for LPV only: hidden-by-default
+    diagnostic twin `platform_reported_landing_page_views` is kept.'
+  options: keep labelled / hide
+  evidence: F-25, F-26
+  implemented_in:
+  - mage-ai:serve/core/views/fct_ad_delivery.sql (no platform conversions)
+  - mage-ai:serve/core/views/fct_ad_delivery_hourly.sql
+  tests:
+  - FIN-15
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-13r
+  title: LPV ids
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (plan): `landing_page_views` / `cost_per_landing_page_view` rebound to website LPV (D-17), major version
+    bump; hidden-by-default `platform_reported_landing_page_views` kept for diagnostics. All other platform conversions stay hidden.'
+  options: website source / + platform twin
+  evidence: F-26
+  implemented_in:
+  - mage-ai:serve/core/views/fct_ad_delivery.sql (platform_reported_landing_page_views twin)
+  - mage-ai:serve/core/views/fct_ad_delivery_hourly.sql
+  tests:
+  - FIN-15
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-14
+  title: Google hierarchy
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Native per platform — account → campaign type → campaign → ad group → ad (non-PMax) + device and network
+    as Google-only breakdowns; PMax stops at campaign (+device/network). Cross-platform overview uses only common levels.'
+  options: native per platform / campaign only
+  evidence: F-23, F-24
+  implemented_in:
+  - mage-ai:serve/core/views/fct_ad_delivery.sql (native Google grain, PMax / camp_ ids NULL)
+  - mage-ai:serve/core/views/fct_ad_delivery_hourly.sql (device + network in key)
+  - mage-ai:serve/core/views/fct_web_session.sql
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql
+  tests:
+  - ADS-GRAIN
+  - ADS-HOURLY-GRAIN
+  - ADS-NO-PMAX-AD
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-15
+  title: New-customer definition
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: first placed order (regardless of outcome).'
+  options: first placed / first delivered
+  evidence: —
+  implemented_in:
+  - 'mage-ai:serve/semantic_v3/views/01_core_order_class.sql (seq: person_sale_seq, is_new_customer)'
+  tests:
+  - NEW-CUST
+  - NEW-CUST-ALL
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-16
+  title: Guest identity
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: guest checkouts matched to customers by phone/email for repeat/LTV. Feasible: `gold.dim_customers` has
+    `phone`, `phone_hash`, `email_hash`. *Proposed (not yet decided): use hashed keys in serve, no raw PII to the Agent.*'
+  options: match guests by phone/email / keep separate
+  evidence: —
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (person CTE)
+  tests:
+  - NEW-CUST
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-16a
+  title: Identity key in serve
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): hashed person key (phone_hash, else email_hash, else customer id; customers sharing an email
+    hash merged); no raw phone / email / name / street address in serve, Cube or the Agent.'
+  options: hashed person key / customer id only
+  evidence: 7 phone + 5 email groups share identities across 41,180 customer ids; 40 guest orders carry no contact data
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (person_key = phone_hash / email_hash / customer id)
+  - mage-ai:serve/core/views/fct_order.sql (no raw PII)
+  tests:
+  - PII
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-17
+  title: Website LPV definition
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: LPV = website sessions attributed to the platform/campaign/ad (UTM/click-id) with ≥1 tracked page view.
+    Sessions without `ad_id`/`campaign_id` roll up as explicit `ad unknown` / `campaign unknown` members (Meta 19% / Google 88% of sessions
+    lack ad_id).'
+  options: sessions with ≥1 page view / all sessions / engaged
+  evidence: F-27, F-28
+  implemented_in:
+  - mage-ai:serve/core/views/fct_web_session.sql (is_lpv, campaign / ad unknown members)
+  tests:
+  - WEB-LPV
+  - WEB-PAID-MEMBERS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-18
+  title: Net profit
+  status: planned
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Contribution only. Top published metric = *contribution after ads*. No metric named "net profit" until
+    an opex source exists; Agent explains the gap. `canonical_pnl.net_profit` retired with it. Refined by D-18r: existing `net_profit`
+    ids are kept and resolve to contribution after ads, labelled "excludes opex".'
+  options: contribution only / rename / add opex
+  evidence: F-32
+- id: D-18r
+  title: '`net_profit` ids'
+  status: implemented
+  phase: 6
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (plan): ids kept; resolve to contribution after ads; description and Agent answer state opex is excluded.'
+  options: keep relabelled / hard-cut
+  evidence: ids exist today
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/finance.yml (net_profit description says opex is excluded)
+  tests:
+  - tests/test_semantic.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue (scripts/build_catalogue.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic.py; owner OK for any serve apply; update this entry + spec §0B row'
+- id: D-19
+  title: Product-level ad metrics
+  status: superseded
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Credit-based, no spend split. Product drill shows attributed orders/sales per campaign/ad (which products
+    each ad sold); `product_ad_spend`, `product_gross_roas`, `product_net_roas`, `product_mer`, `product_landing_page_views` and spend
+    allocation in `serve.product_ad_line` are retired. OVERRIDDEN by D-19o (no-capability-loss rule): product-level ad metrics are kept
+    as an explicit `allocated` family.'
+  options: credit-based / allocated family / retire
+  evidence: §0C-C5
+- id: D-19o
+  title: Product-level ad metrics vs no-capability-loss
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (plan): kept as an explicit `allocated` family — allocation = attribution credit (default model) × line
+    gross-sales share; `allocation_rule_version` on every row; Unallocated spend row so totals reconcile; never used in default/overview
+    answers. Period rule for allocation still open (§0D Q2).'
+  options: keep as allocated family / retire
+  evidence: ~25 `product_*` spend/ROAS/MER/CAC/delivery ids exist today
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (D-19o)
+  - mage-ai:serve/core/views/mart_product_ad_allocated.sql (D-19o)
+  tests:
+  - ALLOC-SUM
+  - ALLOC-SHARE
+  - ALLOC-GRAIN
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-20
+  title: Exchange edge cases
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: Evidence-based. (a) Exchange-tagged with no replacement: money refund exists → customer return; otherwise
+    `exchange_in_progress` (not a return). (b) Replacement later returned/refunded in cash → customer return of the root sale''s line
+    on the root order date.'
+  options: evidence-based / as returns / review bucket
+  evidence: F-07–F-10 (≈54 exchange-tagged RETURN originals have no replacement order)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (exchange marker rules)
+  evidence_codes:
+  - exchange_marker_money_refund
+  - exchange_marker_no_replacement
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-20b
+  title: Exchange edge cases
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: see D-20 (sub-decision recorded in that row)
+  options: evidence-based / as returns / review bucket
+  evidence: F-07–F-10 (≈54 exchange-tagged RETURN originals have no replacement order)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (returned_sales on a replacement returned for cash, root cohort)
+  tests:
+  - 'bridge: D-20b'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-21
+  title: Event-date P&L family (`pnl_*`, 25 ids)
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (plan): kept as explicit family, rebuilt on the same component ledger. Order-date cohort stays the default.
+    Reconciliation: equal over all history; per period, event − cohort = itemised cross-period bridge with 0 unexplained ₹ (not equal
+    per month, see §4.1). AMENDED 2026-10-14 by D-28: the pnl_* ids stop being a separate family — they become deprecated aliases of
+    the base metric with date_axis=event_date (Phase 4.5).'
+  options: keep explicit / retire
+  evidence: dashboard-style "processed in period"
+  implemented_in:
+  - mage-ai:serve/core/views/mart_pnl_event.sql (D-21)
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-21)
+  tests:
+  - MART-EVENT-BRIDGE
+  - MART-EVENT-COHORT-ALL
+  - reconcile: EVENT BRIDGE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22
+  title: RTO / return / cancel evidence rule
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner text): four outcomes — Not shipped + cancelled → *Cancellation*; shipped + confirmed RTO → *RTO*;
+    delivered + confirmed return → *Customer Return*; conflicting or insufficient evidence → *Unknown*. Never assume every shipped cancellation
+    is RTO or every delivered cancellation a return. Original order_date kept; each financial deduction counted once; Unknown kept visible
+    for reconciliation; `outcome_evidence` code on every row.'
+  options: class+status / unknown bucket / …
+  evidence: 'Ambiguous: 256 shipped no-status cancels, 898 shipped no-status returns, 93+84 shipped non-delivered, 38 delivered cancels'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql (outcome multiIf)
+  - mage-ai:serve/semantic_v3/views/02_core_order_line_class.sql
+  evidence_codes:
+  - cancel_not_shipped
+  - cancel_shipped_rto_evidence
+  - return_shipped_rto_evidence
+  - return_delivered
+  - cancel_after_delivery
+  - return_rto_evidence_but_delivered
+  - return_no_evidence
+  tests:
+  - FIN-13
+  - FIN-13-LINE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22a
+  title: Bare `RTO` tag on unshipped cancellations
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): real RTO — shipment record lost on cancellation. Evidence code `cancel_rto_tag_shipment_record_lost`.'
+  options: real RTO / pre-dispatch cancel / unknown
+  evidence: 949 orders, ₹18.9L ex-GST, Apr–Nov 2025, 97% COD; unfulfilled, no tracking; 93% of 2025-Q3 cancellations carry the tag
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
+  evidence_codes:
+  - cancel_rto_tag_shipment_record_lost
+  tests:
+  - 'bridge: D-05/D-22a-e'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22b
+  title: RETURN with merchant-created return record, no money refund, no delivery status, no RTO evidence
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): RTO. Code `return_record_no_money_no_delivery`.'
+  options: RTO / customer return / unknown
+  evidence: 707 orders, ₹13.8L, Jan–Jun 2026 (no RTO tagging existed then), 94% COD, return reason `unknown`
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
+  evidence_codes:
+  - return_record_no_money_no_delivery
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22c
+  title: Shipped cancellation, never delivered, no RTO evidence
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): RTO. Code `cancel_shipped_never_delivered`.'
+  options: RTO / unknown
+  evidence: 346 orders, ₹7.0L, mostly Oct–Dec 2025, 98% COD, fulfilled with tracking
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
+  evidence_codes:
+  - cancel_shipped_never_delivered
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22d
+  title: RETURN with money refunded but no delivery status
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): customer return (all 256). Codes `return_request_money_refund`, `return_money_refund_only`.'
+  options: customer return / unknown
+  evidence: 256 orders, ₹5.8L (125 with return request, 131 without)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
+  evidence_codes:
+  - return_request_money_refund
+  - return_money_refund_only
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22e
+  title: ACTIVE order with RTO evidence (Logisy rto_in_transit / rto_delivered tags, courier `failure`, or the 2025 bare `RTO` tag)
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): RTO — tag is newer evidence than the Shopify status; overrides D-02a for these orders. Code `active_with_rto_evidence`.'
+  options: RTO / unknown / active
+  evidence: 46 orders, ₹88k (24 Logisy/courier, 22 bare tag)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
+  evidence_codes:
+  - active_with_rto_evidence
+  tests:
+  - 'bridge: D-22e'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22f
+  title: Line refunded with no return (ACTIVE / ADJUSTMENT orders)
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): cancelled. Line code `line_refund_without_return`; an order whose every line is refunded with
+    no return is `cancelled` (`refund_without_return_all_lines`).'
+  options: cancelled / active + adjustment
+  evidence: 76 lines (66 on sale orders, ₹1.1L ex-GST); on 52 orders every line is refunded with no return
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/01_core_order_class.sql
+  - mage-ai:serve/semantic_v3/views/02_core_order_line_class.sql
+  evidence_codes:
+  - refund_without_return_all_lines
+  - line_refund_without_return
+  tests:
+  - 'bridge: D-22f'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22g
+  title: Returned quantity with no refund on an ACTIVE order
+  status: implemented
+  phase: 1
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): returned. Line code `line_return_qty_without_refund`.'
+  options: returned / unknown
+  evidence: 2 sale lines (₹3.2k)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/02_core_order_line_class.sql
+  evidence_codes:
+  - line_return_qty_without_refund
+  tests:
+  - 'bridge: D-22g'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22h
+  title: Ledger treatment of Unknown-outcome orders
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): treat as cancelled in the ledger (sales deducted, product cost credited, no fulfilment cost,
+    shipping revenue reversed); `outcome=''unknown''` stays visible on every row.'
+  options: separate bucket / delivered / cancelled
+  evidence: 68 sale orders, ₹96k
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (treat unknown as cancelled)
+  tests:
+  - 'bridge: D-22h'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22i
+  title: Which lines a cancel / RTO / return deducts
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): item level for everything — only lines with item evidence (returned / refunded / exchanged quantity,
+    or gold line cancelled / returned revenue) are deducted; other lines of the order stay sold. Clarified: when NO line of the order
+    has item evidence, the order outcome applies to every line (e.g. D-22e RTO-tagged active orders, and returned orders whose refund
+    / return exists only at order level — 116 lines ₹1.43L; re-confirmed by the owner 2026-10-14: deduct them).'
+  options: whole order / item level
+  evidence: 'RTO orders: 132 lines ₹1.99L had no item evidence; returned orders with no line evidence: 116 lines ₹1.43L'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/02_core_order_line_class.sql (item-level rule)
+  evidence_codes:
+  - line_item_evidence
+  - line_kept_no_item_evidence
+  - line_inherits_order
+  tests:
+  - FIN-13-LINE
+  - ITEM-LEVEL
+  - 'bridge: D-22i'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-23
+  title: Rebuild scope and consumers
+  status: process
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner text): `seleric_systems` web dashboard is not used — it and Cube v1 are excluded. Scope = Seleric
+    Agent, Core MCP, Cube v3, new canonical serve. Migrate only `/opt/seleric/reports` scripts still in use. Reconcile new serve financial
+    components to gold at line, order, product, channel, campaign and business level. Retire legacy views after verifying no active
+    consumers; no compatibility for unused systems.'
+  options: keep old surface / migrate dashboard / compat views
+  evidence: consumer scan 2026-10-14
+- id: D-24
+  title: Cutover style
+  status: process
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: parallel build (new serve objects, Cube v3 on :4003, catalogue), switch after the no-capability-loss
+    gate; rollback = env flip; old objects dropped after 2 stable weeks + zero-read check.'
+  options: parallel then switch / in place
+  evidence: no staging ClickHouse/Cube
+- id: D-25
+  title: Committed-but-unapplied `semantic.fct_line_pnl` (mage-ai `f645091`)
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14: superseded — never applied; its line-GST and shipping-tax SQL reused in the new ledger; file removed
+    in cleanup.'
+  options: supersede / apply now
+  evidence: not live in ClickHouse
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (line GST rate; shipping at principal line rate)
+  tests:
+  - ORDER FIN-01
+  - 'bridge: gross basis'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-26
+  title: Live v2 defects F0-1 (4 tax metrics error) / F0-2 (customers × first-order product errors)
+  status: implemented
+  phase: 0
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): leave broken in v2; v3 delivers them (CAPABILITY_MAP `live_defect`). No v2 production write.'
+  options: fix in v2 now / leave until v3
+  evidence: 'Phase 0 sweep 2026-10-14: 7 of 739 Cube v2 members fail; caused by unapplied mage-ai f645091 / 8a2b333'
+  implemented_in:
+  - '(no code: v2 left unchanged)'
+- id: D-22j
+  title: How much a cancel / RTO / return deducts
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: 'The refunded amount: the deduction is gold''s line cancelled / returned revenue (ex-GST) when present.'
+  options: item value / refunded amount
+  evidence: no line had a partial refund below item value on 2026-10-14 (₹0 effect today)
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (lines.gold_ded, lt.ded)
+  tests:
+  - LINE deduction_D22j
+  - LEDGER-DED-LE-GROSS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-22k
+  title: Item came back but nothing was refunded (unpaid COD RTO)
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: Deduct the item value (nothing paid + item returned = no sale).
+  options: deduct item value / keep in sales
+  evidence: 97 lines, ₹1.51L
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (lt.ded fallback = gs × share)
+  tests:
+  - LINE deduction_D22j
+  - 'bridge: D-22k'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-11d
+  title: Reverse shipping posted by gold on kept / pre-dispatch cancelled lines
+  status: implemented
+  phase: 2
+  decided: '2026-10-14'
+  ruling: Keep the cost wherever gold posted it.
+  options: keep cost / drop
+  evidence: ₹20k
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (reverse_shipping_cost)
+  tests:
+  - LINE reverse_D11c_D11d
+  - cost bridge
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-06a
+  title: Default-model attribution for orders without last_non_direct credit
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: Fall back to gold last-touch, rows flagged model_used = last_touch_fallback; other models show an explicit no_model_data row
+    (never mixed).
+  options: last-touch fallback / unattributed / last-touch everywhere
+  evidence: 16,484 pre-June sale orders ₹2.87 Cr + 811 since ₹17.5L
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (gap_rows)
+  tests:
+  - ATTR-CREDIT
+  - ATTR-DEFAULT-FLAG
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-06b
+  title: Credited session without a campaign id
+  status: implemented
+  phase: 3
+  decided: '2026-10-14'
+  ruling: Fill from the order's same-platform last-touch (campaign_source = last_touch_fill); otherwise campaign unknown.
+  options: fill / campaign unknown
+  evidence: 792 Google ₹17.8L + 279 Meta ₹5.6L; 303 / 25 fillable
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/04_bridge_order_attribution.sql (credit_rows.fill)
+  tests:
+  - ATTR-DEFAULT-FLAG
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-27
+  title: 'Allocated product-ad family: period rule'
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): same day, default-model credit. A campaign-day''s spend is spread over the lines of orders credited to that campaign (last_non_direct) on that cohort day, by credit × line gross-sales share; spend with no credited order that day is the Unallocated row; allocation_rule_version on every row.'
+  options: same day + default credit / reproduce v2 last-touch / same month
+  evidence: 'Sep 2026 brand 20 spend 11,93,322: same day default credit allocates 7,87,188; v2 last-touch 4,15,479; same month 10,70,692'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (D-27)
+  tests:
+  - ALLOC-SUM
+  - ALLOC-SHARE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-27b
+  title: 'Allocated product family: LPV source'
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): website sessions (D-17). Product LPV = website LPV sessions allocated by the same rule as spend; changes vs today''s Meta-reported product_landing_page_views.'
+  options: website sessions / platform twin / drop
+  evidence: 'F-26'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/06_mart_product_ad_allocated.sql (D-27b)
+  tests:
+  - ALLOC-LPV
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-12b
+  title: 'Monthly close: months before the first snapshot'
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): reconstructed, flagged. Earlier months are rebuilt from today''s state and carry close_status = reconstructed (never presented as locked); real closes carry locked.'
+  options: reconstructed + flagged / not offered / back-lock now
+  evidence: 'snapshots exist only from the first close'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_period_profit.sql (D-12b)
+  - mage-ai:serve/semantic_v3/close_month.py (D-12b)
+  tests:
+  - CLOSE-STATUS
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-21a
+  title: 'Event-date family: date of the product-cost restock credit'
+  status: superseded
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): order date, as v2. In mart_pnl_event the product_cogs_credit stays on the order''s placement date;
+    every other component falls on its own event date. Scope note (implementation): only product_cogs_credit; the exchange stock-return components (exchange_inventory_recovery,
+    exchange_replacement_cogs_credit) are new in v3, have no v2 timing to keep, and stay on their event date (brand 20 Aug-Oct 2026: 0.3L / 0.3L / 0.3L of them fall in a different month than the cohort). RE-OPENED 2026-10-14: superseded by D-30 when Phase 4.5 lands (the credit follows its deduction); live until then.'
+  options: order date (as v2) / event date
+  evidence: 'Brand 20 Sep 2026 product cost differs by 3,60,032 (Aug 26,475); all-history totals identical; v2 event minus cohort product cost = 0 in every month'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-21a)
+  tests:
+  - MART-EVENT-BRIDGE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-21b
+  title: 'Event-date family: month-by-month differences to v2 pnl_daily'
+  status: implemented
+  phase: 4
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): accept v3 event dating. Every deduction is dated by its ledger event date, one rule for every component; v2 pnl_daily builds the event axis from a different gold fact plus an undated reconciliation plug row (brand 20 contribution: Jul -0.84L, Aug -3.44L, Sep -1.96L), recorded as a v2 defect. Month-by-month differences vs v2 go into the Phase 7 variance report for sign-off; no line-by-line itemisation now.'
+  options: accept v3 dating and list in Phase 7 / itemise v2 event dating line by line first
+  evidence: 'brand 20 net profit v3 minus v2 (event axis): Jul -1.65L, Aug -1.14L, Sep -0.25L; cohort leg (bridged with causes) -0.15L / -1.62L / -1.17L; all history identical (v2 event = v2 cohort, v3 event = v3 cohort)'
+  implemented_in:
+  - mage-ai:serve/evaluations/v3_reconcile_gold.py (event_bridge)
+  tests:
+  - 'reconcile: EVENT BRIDGE'
+  change_how: 'to itemise instead, rebuild v2 event dating from gold.fct_ad_channel_pnl_daily and compare order by order; then update this entry + spec §0B row'
+- id: D-28
+  title: 'Date axis switch (order_date / event_date) — one ledger, one parameter'
+  status: implemented
+  phase: 6
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): two switchable date axes, `order_date` (default) and `event_date`. Serve keeps ONE financial component ledger with both dates; Cube exposes both time dimensions and the same canonical measures; Core MCP resolves a request-level `date_axis` to the Cube time dimension (default order_date). The Agent never selects alternate metric ids for the same measure. No separate P&L formulas, no duplicate metric families: the pnl_* / product_pnl_* ids survive only as deprecated aliases (base metric + date_axis=event_date); the catalogue concept axis `date: finance` is an alias of event_date. Both axes reconcile to identical totals over the same complete population, as-of cutoff and financial policy, including Undated amounts. Axes are never mixed in one aggregation (same rule as D-06 for attribution models).'
+  options: one view + date_axis parameter / keep twin views pnl + order_pnl / both
+  evidence: 'v2 and v3 today: twin views (mart_period_profit, mart_pnl_event) with literally the same SQL on cohort_date vs event_date; 9 catalogue concepts / 57 resolve rows switch by metric id (date: order|finance); ~25 pnl_* + ~25 product_pnl_* ids duplicate the base ids'
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/finance.yml (both time dimensions, meta.date_axis on every measure)
+  - mage-ai:infra/cube/cube_v3.js (one date axis per query)
+  tests:
+  - AXIS-TOTAL
+  - AXIS-NOMIX
+  - tests/test_semantic.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue (scripts/build_catalogue.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic.py; owner OK for any serve apply; update this entry + spec §0B row'
+- id: D-29
+  title: 'Event date of a cancel / RTO / return — precedence, source code, Undated'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): event_date of cancelled / RTO / returned amounts (and every component derived from them) = the first non-null by precedence reversal_event_date → cancellation_date → return_event_date → returned_date → cancelled_date (not the earliest of them). order_date and cash refunded_date are NEVER used as an assumed physical event date. No reliable timestamp → event_date = NULL and event_date_source = `undated`; the amount sits in an explicit `Undated` member and stays in every reconciliation. Every row carries `event_date_source` (which column supplied the date, or `placement` / `undated`).'
+  options: 'keep coalesce incl. order_date fallback + code / Undated bucket / refund date first'
+  evidence: 'brand 20 all history: 5,221 outcome lines (3,187 RTO, 1,259 return, 775 cancel); 50 lines (₹77k: 44 RTO, 1 return, 5 cancel) have no outcome date and fall back to order_date today; 2 RTO lines (₹1.9k) have only refunded_date; "earliest" vs "first by precedence" differs on 14 lines; refunded_date ≠ return_event_date on 21 return + 30 RTO lines'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (D-29 precedence + event_date_source)
+  tests:
+  - AXIS-UNDATED
+  - AXIS-SOURCE-CODE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-30
+  title: 'Restock credit and exchange credits follow their deduction (supersedes D-21a)'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): one date rule for every component. product_cogs_credit (D-03a) and the exchange credits are dated by the same event_date as the sales deduction they reverse, so event-axis gross profit is coherent. Supersedes D-21a (credit on the order date, v2 parity). The event-dating of this credit becomes a leg of the Phase 7 variance report vs v2 pnl_daily.'
+  options: 'follow its deduction / keep D-21a everywhere / pnl_* v2 parity + new rule, labelled'
+  evidence: 'brand 20 Sep 2026: restock credit ₹4,25,878 if event-dated vs ₹65,846 on the order date → event-axis product cost differs by ₹3,60,032; all-history totals identical either way; ledger holds 5,260 credit rows, 4,795 with event_date ≠ cohort_date (₹25.4L)'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/03_ledger_order_component.sql (D-30 credits follow their deduction)
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (no re-dating)
+  tests:
+  - AXIS-TOTAL
+  - MART-EVENT-BRIDGE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-31
+  title: 'Ratio contracts on the event axis'
+  status: implemented
+  phase: 6
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner, table approved): a ratio is allowed on an axis only when numerator and denominator share a clock. Identical on both axes (placement-only): gross ROAS, AOV, CAC, cost per order, new customers, orders. Event axis allowed with a mandatory label, NULL when event-axis net sales ≤ 0: net ROAS, MER, BE ROAS, gross / contribution / net margin %. Cohort-only, refused on the event axis with a pointer to order_date: return rate, cancel rate, RTO rate, repeat rate, LTV. Event counts (returned / cancelled / RTO orders) stay counts on the event axis. CONFIRMED 2026-10-15 (owner, Phase 4.5 checkpoint): the same principle applies to ratios not in the table — net AOV and LTV:CAC ratio are order_date only and refused on event_date; customer and repeat-customer counts are placement-only.'
+  options: 'compute labelled / refuse the unsafe ones / define each (chosen: per-ratio table)'
+  evidence: 'Sep 2026 brand 20: 433 returned orders on the event axis against 931 placed (46%) vs 20 on the cohort axis; net sales ₹4.21L event vs ₹15.7L cohort (₹9.43L returns processed vs ₹0.45L from the Sep cohort)'
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/finance.yml (ratio guard, cohort_only refusal text)
+  - mage-ai:infra/cube/gen_refusals_v3.py (refusals generated from model meta)
+  tests:
+  - AXIS-RATIO-CONTRACT
+  - v3_cube_refusals.py
+  - tests/test_semantic.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue (scripts/build_catalogue.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic.py; owner OK for any serve apply; update this entry + spec §0B row'
+- id: D-32
+  title: 'Undated visibility in event-axis answers'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): every event_date query returns an `Undated` member with its ₹ alongside the dated periods, whatever the date range; a ranged total is labelled "dated only"; Σ of all members equals the order_date total of the same population.'
+  options: 'always an extra row / only when no range / only on request'
+  evidence: '50 lines, ₹77k outcome amount (+ their product cost credit and fulfilment effects) today'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_profit.sql (is_undated, Undated member)
+  tests:
+  - AXIS-UNDATED
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-33
+  title: 'Default axis and ambiguous wording in the Agent'
+  status: planned
+  phase: 6
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): order_date stays the default (AD-03). An outcome or P&L question with no explicit wording is answered on order_date, names the axis in the first line ("orders placed in September, as of <cutoff>") and offers the event_date figure in one line. Only explicit wording switches the axis ("processed in", "happened in", "dashboard-style", "by return date").'
+  options: 'order_date + state it / show both / ask first'
+  evidence: 'AD-03; §4 answer behaviour'
+  tests:
+  - AXIS-AGENT-DEFAULT
+- id: D-34
+  title: 'Product grain and the allocated family on the event axis'
+  status: implemented
+  phase: 6
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): product / variant P&L (before ads) supports date_axis from the same ledger at line grain with the D-29 / D-30 rule. The allocated product-ad family (D-19o, D-27) is order_date only; event_date is refused with a pointer, because ad spend is not an event of an order.'
+  options: 'product yes + allocated no / both / order_date only'
+  evidence: '~25 product_pnl_* ids exist; allocated spend is allocated same-day on the cohort day (D-27)'
+  implemented_in:
+  - mage-ai:infra/cube/model_v3/cubes/product_profit.yml (product P&L on both axes)
+  - mage-ai:infra/cube/model_v3/cubes/product_ads.yml (allocated family cohort-only)
+  tests:
+  - AXIS-PRODUCT-RECON
+  - tests/test_semantic.py
+  change_how: 'edit the rule in implemented_in (search for the decision id), regenerate refusals_v3.json (infra/cube/gen_refusals_v3.py), rebuild catalogue (scripts/build_catalogue.py), run v3_cube_parity.py / v3_cube_refusals.py and tests/test_semantic.py; owner OK for any serve apply; update this entry + spec §0B row'
+- id: D-35
+  title: 'Maturity and close on the event axis'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): event-axis rows carry no `maturing` flag (an event is a fact, not a cohort waiting for outcomes). close_status (open / restatable / reconstructed / locked) is unchanged and comes from the same monthly snapshots, which already hold both axes. A locked month restated by a late-dated event or an Undated → dated change is reported in the close as a restatement.'
+  options: 'no maturing on event axis / keep 45-day flag / event-axis close at +45d'
+  evidence: '752 of 4,434 brand 20 outcome orders have an event within the last 45 days'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_profit.sql (no maturing on the event axis)
+  - mage-ai:serve/semantic_v3/close_month.py (snapshot holds both axes)
+  tests:
+  - AXIS-CLOSE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-36
+  title: 'Native clocks never switch (cash, payments, ads, web); order-lifecycle events = event_date'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): cash and payment views (returns.refund_date, payments.transaction_date) keep their native posting clock, labelled "cash date", and ignore date_axis; no cash date is ever substituted for an event date. Ad delivery and website sessions / events keep their native clock (AD-04) and ignore date_axis, and the answer says so. Commerce order-lifecycle events (cancel / return) are the same event_date as the ledger.'
+  options: 'native, never switched / add a cash_date axis / retire cash clocks'
+  evidence: 'v2 had three event-like clocks: commerce.event_date, returns.refund_date, payments.transaction_date'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_profit.sql (spend rows native clock)
+  tests:
+  - AXIS-NATIVE
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-37
+  title: 'Placement costs and outcome order counts on the event axis'
+  status: implemented
+  phase: 4.5
+  decided: '2026-10-14'
+  ruling: 'DECIDED 2026-10-14 (owner): placement costs (packaging, forward shipping, gateway, COD handling, checkout fee, weight discrepancy) stay on the order date on the event axis; cancelled / RTO / returned order counts land on the order''s first event date (as today).'
+  options: 'confirm both / dispatch-date costs / count per event'
+  evidence: '2026 brand 20: dispatch dating would move ₹66k of ₹31.6L placement cost to another month; 525 lines have no dispatch date (₹20.5k cost on never-dispatched lines); 1 of 4,426 outcome orders has more than one event date'
+  implemented_in:
+  - mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql (D-37)
+  tests:
+  - AXIS-PLACEMENT
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: apply_v3.py --check; v3_contracts.py --preview --inline
+    <changed objects>; v3_reconcile_gold.py --preview --inline <changed objects>; owner OK; apply_v3.py --apply <objects>; update this
+    entry + spec §0B row'
+- id: D-38
+  title: 'Product after-ads totals include organic and order-level rows (Σ over products = brand)'
+  status: implemented
+  phase: 7
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner, Phase 7 certification): the allocated product-ad family carries every ₹ of the order-date cohort exactly once. serve.mart_product_ad_profit gains two P&L-only row types besides allocated / unallocated: `organic` (a sale line with no allocated row — no paid credit, or credited to a campaign-day with no delivery) and `order_level` (the order''s own postings: shipping revenue, packaging, gateway ...; product 0). Σ attributed net sales and contribution over all row types = serve.mart_profit; Σ spend = delivery (unchanged); product_net_profit, MER, BE ROAS, CAC and cost per order at product level therefore tie to the brand figures as in v2. Organic and order-level rows carry no delivery (allocated_* = 0). Supersedes the paid-credited-only totals built in Phase 5.'
+  options: 'add organic rows (Σ = brand) / keep paid-only and label / refuse totals without a campaign or ad dimension'
+  evidence: 'Sep 2026 brand 20: product_net_profit −₹4.69L vs brand net_profit −₹2.83L (v2: both −₹2.11L); product_mer 0.98 vs brand 1.33. Gap ₹1.86L = contribution of orders with no paid credit (organic lines ₹1.59L, order-level postings ₹0.26L; net sales ₹3.83L + ₹0.26L)'
+  implemented_in:
+  - mage-ai:serve/core/views/mart_product_ad_profit.sql (D-38)
+  - mage-ai:infra/cube/model_v3/cubes/product_ads.yml (D-38)
+  tests:
+  - ALLOC-PROFIT
+  - ALLOC-PROFIT-TOTAL
+  - 'v3_cube_parity.py product_ads = finance per brand x month (7 measures)'
+  change_how: 'edit the rule in implemented_in (search for the decision id), then: v3_contracts.py --preview; owner OK; apply_views.py --allow-new mart_product_ad_profit; restart the Cube rig; regenerate catalogue; update this entry + spec §0B row'
+- id: D-39
+  title: 'Gateway-type fee on COD orders is a real cost'
+  status: implemented
+  phase: 7
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner, Phase 7 variance sign-off): the gateway-type fee that gold posts on COD orders is a real cost and stays in v3 (as built: payment_gateway_fee = gold gateway_fee, D-05b). v2 charged nothing on COD orders. It does not overlap the COD-handling fee (no order carries both).'
+  options: 'real cost, keep (as built) / not a cost, drop / unsure, check with finance first'
+  evidence: 'Brand 20 all history: 9,349 COD orders (about ₹87 each) carry ₹5.08L of gold gateway fee that v2 charged as ₹0; posted through Aug 2026, none from Sep 2026 (Jul ₹63k, Aug ₹33k of contribution vs v2). 0 orders carry both gateway fee and COD handling.'
+  implemented_in:
+  - '(no code change: confirms the as-built rule of D-05b — payment_gateway_fee = gold gateway_fee on every order, COD included)'
+  tests:
+  - LINE gateway
+  - doc/semantic/VARIANCE_REPORT.md section 4 (L-17)
+- id: D-40
+  title: 'Landing page views by audience: refuse and point to the platform twin'
+  status: implemented
+  phase: 7
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner, Phase 7): landing page views sliced by age, gender, breakdown type, device, impression device, platform position or publisher platform are refused; the refusal names `platform_reported_landing_page_views` (the Meta figure), which answers those slices. The website figure (D-17) has no audience slice. No labelled substitute is returned.'
+  options: 'refuse with a pointer / answer with the Meta figure, labelled'
+  evidence: 'capability_check_v3 dims layer: landing_page_views / cost_per_landing_page_view x 7 audience dimensions (brand 20, Sep 2026) are refused with a pointer; v2 answered them with the Meta number under the same name.'
+  implemented_in:
+  - '(no code change in mage-ai: confirms the planner refusal D-13r in agent-core src/seleric_mcp/app/query_planner.py)'
+  tests:
+  - tests/test_semantic.py
+  - capability_check_v3.py dims layer
+- id: D-41
+  title: 'Payment bucket manual: label it, fix upstream'
+  status: implemented
+  phase: 6
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner): keep the classification rule as built; the `manual` payment-bucket member is labelled unclassified (not a payment type) with a coverage note whenever `payment_bucket`, `payment_method`, `payment_gateway` or `is_cod` is used (the `cod_orders` / `prepaid_orders` totals themselves carry no note: notes attach to dimensions); the checkout-app data issue is raised upstream. No ledger or serve change; COD vs prepaid shares for Sep 2026 are understated and say so.'
+  options: 'label it, fix upstream / infer prepaid / leave as is'
+  evidence: 'Brand 20 Sep 2026: 864 of 931 sale orders have gateway/method literally manual; 51 COD and 13 online are classified (v2 showed 122 prepaid, 108 of them exchange replacements).'
+  implemented_in:
+  - '(no code change in mage-ai: coverage note on four payment dimensions in agent-core scripts/build_catalogue.py DIM_NOTES, regenerated catalogue/dimensions/core.yaml; shown as a planner warning, checked on the :4003 rig 2026-10-16)'
+  tests:
+  - tests/test_semantic.py
+- id: D-42
+  title: 'No Cube pre-aggregations (no write path)'
+  status: process
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner): stay without Cube pre-aggregations; no separate write login or schema in ClickHouse. Heavy queries run 0.3-3.4 s on brand 20 without them. Revisit only if latency or load grows after cutover.'
+  options: 'no, stay without / yes later if load requires / yes, set it up'
+  evidence: 'finance daily 12 months 3.4 s; campaign / product / commerce / paid-media slices 0.3-0.5 s; the first pre-aggregation attempt was refused by the read-only serving login.'
+- id: D-43
+  title: 'First monthly close: August 2026'
+  status: implemented
+  phase: 4
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner): lock August 2026 now. Applied 2026-10-16 with `close_month.py --month 2026-08 --apply` (5,460 rows: brand 20 4,967, brand 28 493; cohort contribution before ads 14,56,716.78, event 13,27,267.81; restatement check 0). The recurring schedule is NOT installed yet: close_month.py exists only on this branch (the production cron checkouts are /opt/seleric/mage-ai on main) and the lock timing for a maturing month is an open question (see L-27).'
+  options: 'lock Aug 2026 now / wait for Sep (mid-Nov) / decide at cutover'
+  evidence: 'Aug 2026 cohort is past the 45-day maturity window (D-12a) since 2026-10-15; dry run listed the rows; --restatements: 1 locked month, 0 restated brand-months.'
+  implemented_in:
+  - '(no code change: serve/semantic_v3/close_month.py run as built, D-12, D-12b)'
+  tests:
+  - AXIS-CLOSE
+- id: D-44
+  title: 'Certification scope is brand 20; no low-volume flag on brands 24-27'
+  status: process
+  decided: '2026-10-16'
+  ruling: 'DECIDED 2026-10-16 (owner: "no action on other brands, only brand 20 data"): brands 24-27 get no refusal and no low-volume flag; v3 is certified on brand 20 only. Brand 28 keeps its spend-only refusal (L-16). Q11 (brand 28 value -> refusal) confirmed by the owner at the Phase 7 variance sign-off, 2026-10-17.'
+  options: 'answer + low-volume caveat / refuse profit, ROAS, AOV / no change'
+  evidence: 'Brands 24-27 have 1-32 orders each; v2 gave them no caveat.'
+- id: D-45
+  title: 'Website landing page views by ad account: refuse and point to campaign slices'
+  status: implemented
+  phase: 7
+  decided: '2026-10-17'
+  ruling: 'DECIDED 2026-10-17 (owner, Phase 7): a filter or slice of `landing_page_views` / `cost_per_landing_page_view` by `account_id` is refused. Website sessions are attributed to a campaign / ad, never to an ad account (D-17), so the figure would read 0 beside real spend. The refusal points to campaign slices and to `platform_reported_landing_page_views` (Meta account view, diagnostic). No data-model change.'
+  options: 'refuse with a pointer / populate account_id on website rows from the credited campaign / defer'
+  evidence: 'Sep 2026 brand 20: 100 % of website LPV (50,380) has no account; QA AD01-AD08 filtered one Meta account and passed with LPV 0 beside spend of Rs 4,97,667 (1-11 Oct). Brand 20 has one Meta account (1685189008684458), so dropping the filter gives the same spend and the real LPV.'
+  implemented_in:
+  - '(no code change in mage-ai: agent-core scripts/build_catalogue.py EXCLUDED_DIMS puts account_id into excluded_dimensions of landing_page_views and cost_per_landing_page_view in catalogue; the planner refuses the filter and the slice)'
+  tests:
+  - tests/test_semantic.py::test_account_slice_or_filter_of_website_lpv_is_refused
+  - scripts/certify_qa.py AD01-AD10
+  change_how: 'To populate the account instead: add account_id to website LPV rows in serve.fct_paid_media_daily / _hourly from the credited campaign (owner OK, serve view change), remove the EXCLUDED_DIMS entry, regenerate catalogue, then change this decision.'
+- id: D-46
+  title: 'Payment method resolved from the order tags where gold says manual (amends D-41)'
+  status: implemented
+  phase: 7
+  decided: '2026-10-17'
+  ruling: 'DECIDED 2026-10-17 (owner: serve v3 now, gold untouched): the Pragma 1Checkout app (tag pragma_1checkout, first order 2026-08-26) records every payment with gateway / method `manual`; the real method is on the order tags. Where gold says manual or blank and the tags name exactly one of `phonepe` (prepaid) or `cod` (cash on delivery), serve resolves payment_gateway / payment_method / is_cod / payment_bucket from the tag (payment_source tag_phonepe | tag_cod). Gold''s explicit value always wins (payment_source gold); an order with both tags or neither stays manual. Orders tagged phonepe that are partially paid (advance online, balance on delivery, from Oct 2026) count as online (owner 2026-10-17: stable and simple; residual in L-35). The ledger (costs, outcome rules) and serve.fct_payment keep gold''s raw values, so no rupee total moves; only cod / online / manual shares and COD flags.'
+  options: 'serve v3 now / upstream in gold dbt / both; partial-advance orders as online / cod while partially paid / new partial_cod bucket'
+  evidence: 'Brand 20 sale orders: Aug 226 of 245 manual recoverable (120 phonepe, 106 cod), Sep 846 of 862 (623 / 223), Oct 600 of 602 (415 / 185). Tags are mutually exclusive; phonepe tags carry a PhonePe order id (pg_id), gold posts a gateway fee on 704 of 973 phonepe-tagged paid orders and a COD handling fee on 233 of 271 cod-tagged ones. Exchange replacements carry no payment tags. 3 orders where gold says COD and the tag says PhonePe keep gold.'
+  implemented_in:
+  - 'mage-ai:serve/core/views/fct_order.sql'
+  - 'mage-ai:serve/core/views/fct_order_commerce.sql'
+  - 'mage-ai:serve/core/views/mart_product_profit.sql'
+  - 'mage-ai:serve/semantic_v3/views/05_mart_profit_fact.sql'
+  - 'mage-ai:infra/cube/model_v3/cubes/commerce.yml'
+  tests:
+  - v3_contracts.py PAYMENT-RESOLVE
+  change_how: 'To drop the override once gold records the real method: remove the pay_* resolver in the four SQL files (each carries the D-46 id), re-apply fct_order / fct_order_commerce / mart_product_profit (apply_views.py, explicit names) and the 05 mart MV (apply_v3.py), and leave payment_source = gold.'
+

@@ -1,0 +1,45 @@
+id: purchase_orders
+display_name: Purchase orders
+one_liner: Purchase requests / POs by order date.
+aliases:
+- purchase orders
+- purchase requests
+- pos
+- open pos
+- overdue pos
+- po value
+- pending deliveries
+axes:
+  measure:
+    values:
+    - count
+    - open
+    - overdue
+    - value
+    - fill_rate
+    - planned_lead
+    - actual_lead
+    default: count
+resolves:
+- when:
+    measure: count
+  metric: po_count
+- when:
+    measure: open
+  metric: open_purchase_orders
+- when:
+    measure: overdue
+  metric: overdue_purchase_orders
+- when:
+    measure: value
+  metric: po_value
+- when:
+    measure: fill_rate
+  metric: po_fill_rate
+- when:
+    measure: planned_lead
+  metric: avg_planned_lead_days
+- when:
+    measure: actual_lead
+  metric: avg_actual_lead_days
+disambiguation: Value includes GST and header freight. Fill rate = QC-received / ordered units.

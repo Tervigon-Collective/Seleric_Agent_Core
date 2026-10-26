@@ -1,0 +1,45 @@
+id: product_order_product_cost
+display_name: Product product cost (P&L basis)
+category: product
+status: certified
+description: 'Product cost net of the restock credit. Grain: order_line_event. Date axis: switchable. date_axis=order_date
+  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic
+  v3 (D-03; D-03a; D-01; D-02; D-02a; D-02b; D-05; D-06…): the id is kept, the number may change. Also answers the
+  ids: product_line_cost, product_pnl_product_cost.'
+formula:
+  human_readable: Product cost net of the restock credit.
+  authoritative_source: cube
+  depends_on:
+  - product_gross_cogs
+  - product_order_product_cogs_credit
+  composition:
+  - metric: product_gross_cogs
+    sign: 1
+  - metric: product_order_product_cogs_credit
+    sign: -1
+cube_mapping:
+  view: product_profit
+  measure: product_profit.product_cost
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: order_line_event
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: product_profit.order_date
+  event_date: product_profit.event_date
+decision_ids:
+- D-03
+- D-03a

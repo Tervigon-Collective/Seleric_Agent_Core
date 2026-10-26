@@ -1,0 +1,38 @@
+id: exchange_cost
+display_name: Exchange cost
+category: finance
+status: certified
+description: 'Net cost of exchange fulfilment: replacement product cost less credits and recovered stock, plus exchange
+  shipping and handling (D-01). Grain: brand_day_channel_ad. Date axis: switchable. date_axis=order_date (default,
+  orders placed in the period) or event_date (outcomes on the day they happen).'
+formula:
+  human_readable: 'Net cost of exchange fulfilment: replacement product cost less credits and recovered stock, plus
+    exchange shipping and handling (D-01).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: finance
+  measure: finance.exchange_cost
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: brand_day_channel_ad
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: finance.order_date
+  event_date: finance.event_date
+decision_ids:
+- D-01
+- D-30

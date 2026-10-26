@@ -1,63 +1,36 @@
 id: refund_lines
-display_name: Return Refund Lines
+display_name: Refund lines
 category: operations
 status: certified
-description: >-
-  Refunded/returned line items (product lines) on the refund date, from serve.return_lifecycle, with
-  SKU and restock type.
+description: 'Refunded line items. Refunds of exchanged items are excluded: exchanges never enter return metrics
+  (D-01); the refund date is a native cash clock and ignores date_axis (D-36). Grain: refund. Date axis: native.
+  Ignores date_axis (its own clock, D-36). Redefined in semantic v3 (D-01; D-20; D-36; D-02b; D-22): the id is kept,
+  the number may change.'
 formula:
-  human_readable: COUNT(refund_line_item_id)
+  human_readable: 'Refunded line items. Refunds of exchanged items are excluded: exchanges never enter return metrics
+    (D-01); the refund date is a native cash clock and ignores date_axis (D-36).'
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: return_lifecycle
-  measure: return_lifecycle.refund_lines
-  time_dimension: return_lifecycle.refund_date
+  view: returns
+  measure: returns.refund_lines
 aggregation: additive
 unit: count
-grain: refund line
-supported_dimensions:
-- brand_id
-- refund_date
-- order_date
-- pnl_refund_class
-- return_status
-- restock_type
-- sku
-- product_id
-- variant_id
-- product_title
-- variant_title
-- is_cod
-supported_filters:
-- date_range
-- brand_id
-- pnl_refund_class
-- return_status
-- sku
-- is_cod
+grain: refund
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Return Refund Lines last 30 days
-  request:
-    measures:
-    - refund_lines
-    time_range:
-      preset: last_30d
-validation_tests:
-- refund_lines >= 0 for any slice
-deprecated_aliases: []
-dashboard_alignment:
-  status: not_implemented
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: lineItemHistoricalSql.js:335-361
-  note: fct_refund_line_items CTE exists but is never joined into output — dead code.
+version: 2.0.0
+replaces: []
+date_axis: native
+decision_ids:
+- D-01
+- D-20
+- D-36

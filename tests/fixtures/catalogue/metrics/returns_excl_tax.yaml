@@ -1,0 +1,82 @@
+id: returns_excl_tax
+display_name: Returns (ex-GST, refund events)
+category: operations
+status: certified
+description: >-
+  Return-class refund amount (ex-GST) on the refund date, from serve.refund_events. Refund-transaction
+  view; for the P&L return deduction use return_revenue.
+formula:
+  human_readable: SUM(returns_excl_tax)
+  authoritative_source: cube
+cube_mapping:
+  view: refund_events
+  measure: refund_events.returns_excl_tax
+  time_dimension: refund_events.refund_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: refund event
+supported_dimensions:
+- brand_id
+- refund_date
+- order_date
+- pnl_refund_class
+- return_status
+- primary_return_status
+- shopify_return_status
+- order_status
+- payment_status
+- is_cod
+- restock
+- is_unprocessed
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- payment_method
+- payment_gateway
+- payment_bucket
+- is_prepaid
+supported_filters:
+- date_range
+- brand_id
+- pnl_refund_class
+- return_status
+- payment_status
+- is_cod
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- payment_method
+- payment_gateway
+- payment_bucket
+- is_prepaid
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Returns (ex-GST, refund events) last 30 days
+  request:
+    measures:
+    - returns_excl_tax
+    time_range:
+      preset: last_30d
+validation_tests:
+- returns_excl_tax >= 0 for any slice
+deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:42-63,315-332,689
+  note: Formula/tax logic matches at brand×day totals but catalogued dims (restock, return_status, geo, payment) have zero support in the live query.

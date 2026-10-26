@@ -1,0 +1,37 @@
+id: rto_revenue
+display_name: Rto revenue
+category: commerce
+status: certified
+description: 'Sales of shipped orders that came back (RTO) ex-GST (positive deduction). Grain: order. Date axis:
+  switchable. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they
+  happen).'
+formula:
+  human_readable: Sales of shipped orders that came back (RTO) ex-GST (positive deduction).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: commerce
+  measure: commerce.rto_revenue
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: order
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-05
+- D-22

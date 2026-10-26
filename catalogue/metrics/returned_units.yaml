@@ -1,89 +1,35 @@
 id: returned_units
-display_name: Returned Units
+display_name: Returned units
 category: product
 status: certified
-description: >-
-  Units returned per product/SKU/variant, attached to the ORDER date of the original sale, from
-  serve.product_performance — use to rank "most returned products" (with product_return_revenue as the
-  value). For returns counted on the return date use refunded_orders / event_return_revenue (order
-  level, no product).
+description: 'Units of customer-returned line shares (D-22). Grain: order_line_event. Date axis: switchable. date_axis=order_date
+  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic
+  v3 (D-22; D-01; D-02b; D-03; D-03a; D-05; D-08; D-08a…): the id is kept, the number may change.'
 formula:
-  human_readable: SUM(returned quantity) on eligible lines
+  human_readable: Units of customer-returned line shares (D-22).
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: product_performance
-  measure: product_performance.returned_units
+  view: product_profit
+  measure: product_profit.returned_units
 aggregation: additive
-companion_measures:
-- product_return_revenue
 unit: count
-grain: order_item
-supported_dimensions:
-- brand_id
-- order_date
-- product_title
-- variant_title
-- sku
-- product_type
-- vendor
-- product_id
-- variant_id
-- shipping_city
-- shipping_region
-- shipping_country
-- order_status
-- return_status
-- pnl_refund_class
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- source_name
-supported_filters:
-- date_range
-- brand_id
-- product_title
-- sku
-- product_type
-- vendor
-- product_id
-- variant_id
-- shipping_country
-- shipping_region
-- shipping_city
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- pnl_refund_class
-- source_name
+grain: order_line_event
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Top returned products last month
-  request:
-    measures:
-    - returned_units
-    - product_return_revenue
-    dimensions:
-    - product_title
-    sort:
-    - field: returned_units
-      direction: desc
-    limit: 10
-    time_range:
-      preset: last_month
-validation_tests: []
-deprecated_aliases: []
+version: 2.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: product_profit.order_date
+  event_date: product_profit.event_date
+decision_ids:
+- D-22

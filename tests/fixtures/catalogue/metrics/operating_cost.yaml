@@ -1,0 +1,47 @@
+id: operating_cost
+display_name: Operating Cost non-product (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Non-product fulfilment costs inside Net COGS: shipping + packaging + payment-gateway fees + RTO (=
+  net_cogs − product_cost), per brand-day on serve.canonical_pnl (INR). Use for "fulfilment /
+  logistics cost excluding product". Already included in Net COGS — never add it to net_cogs.
+formula:
+  human_readable: SUM(operating_cost)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.operating_cost
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: Non-product operating cost breakdown for June 2026
+  request:
+    measures:
+    - operating_cost
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- operating_cost = shipping + packaging + gateway + rto
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:616-621

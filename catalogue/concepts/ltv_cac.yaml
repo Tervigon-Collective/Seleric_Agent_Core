@@ -1,8 +1,19 @@
 id: ltv_cac
 display_name: LTV:CAC
-one_liner: Ratio of first-order LTV to CAC for new customers.
-aliases: [ltv:cac, ltv cac, ltv to cac, ltv/cac]
-axes: {}
+one_liner: LTV ÷ CAC.
+aliases:
+- ltv:cac
+- ltv cac
+- ltv to cac
+- ltv/cac
+axes:
+  scope:
+    values:
+    - all
+    - product
+    default: all
 resolves:
-  - when: {}
-    metric: ltv_cac_ratio
+- metric: ltv_cac_ratio
+- when:
+    scope: product
+  metric: product_ltv_cac_ratio

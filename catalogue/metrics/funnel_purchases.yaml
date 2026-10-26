@@ -1,50 +1,29 @@
 id: funnel_purchases
-display_name: Funnel Purchases
+display_name: Funnel purchases
 category: web_analytics
 status: certified
-description: >-
-  Orders per day and fine channel (ig_feed, fb_feed, google_pmax, organic, …) on serve.funnel_daily,
-  assigned by last-touch order attribution (includes active, partially refunded and payment-pending
-  orders).
+description: 'Purchases seen in the web funnel (Snowplow) — not the orders count. Grain: brand_day. Date axis: native.
+  Ignores date_axis (its own clock, D-36). Redefined in semantic v3 (D-09): the id is kept, the number may change.'
 formula:
-  human_readable: SUM(purchases)
+  human_readable: Purchases seen in the web funnel (Snowplow) — not the orders count.
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: funnel_daily
-  measure: funnel_daily.purchases
+  view: web_funnel
+  measure: web_funnel.funnel_purchases
 aggregation: additive
 unit: count
-grain: brand × day × fine channel
-supported_dimensions:
-- brand_id
-- report_date
-- channel
-supported_filters:
-- date_range
-- brand_id
-- channel
+grain: brand_day
 data_owner: Growth / Analytics
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Funnel Purchases last 30 days
-  request:
-    measures:
-    - funnel_purchases
-    time_range:
-      preset: last_30d
-validation_tests:
-- funnel_purchases >= 0
-deprecated_aliases: []
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: channelFunnel/martFunnelClickhouse.js:6-9,33,49
-  note: Live mart uses session-attributed purchase counts that double-count per the code comment; catalogue claims last-touch attributed orders.
+version: 2.0.0
+replaces: []
+date_axis: native
+direction_bad: down

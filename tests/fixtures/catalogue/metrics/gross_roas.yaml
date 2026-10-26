@@ -1,0 +1,52 @@
+id: gross_roas
+display_name: Gross ROAS (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Gross ROAS: gross sales (ex-GST) ÷ Meta+Google ad spend, from period sums on serve.canonical_pnl.
+  Same number as gross_roas_all_channels — prefer that id unless the user says "Shopify-only".
+formula:
+  human_readable: SUM(gross_sales) / SUM(shopify_ad_spend)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.gross_roas
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  scopes:
+  - metrics:read
+examples:
+- question: Shopify-only Gross ROAS for June 2026
+  request:
+    measures:
+    - gross_roas
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- June 2026 brand 20 ≈ dashboard Shopify Gross ROAS
+deprecated_aliases: []
+ratio_components:
+  numerator: canonical_pnl.gross_sales
+  denominator: canonical_pnl.shopify_ad_spend
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/services/dashboardService.js:142
+  note: >
+    Shopify-only. Bare "Gross ROAS" / Historical All-channels resolve to
+    gross_roas_all_channels via glossary. Do not use this for All-channels cards.

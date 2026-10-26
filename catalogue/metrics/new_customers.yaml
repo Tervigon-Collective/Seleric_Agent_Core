@@ -1,42 +1,39 @@
 id: new_customers
-display_name: New Customers
-category: customer
+display_name: New customers
+category: commerce
 status: certified
-description: >-
-  New customers acquired in the period = customers whose first order falls in the period (last-touch
-  order cohort), per brand-day on serve.ltv_cac_daily — default for "new customers", "customers
-  acquired". Denominator of cac and ltv. Same count as first_orders. By marketing source →
-  attributed_new_customer_orders.
+description: 'First placed orders of new customers (D-15). Grain: order. Date axis: placement only. date_axis=order_date
+  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic
+  v3 (D-15; D-16; D-01; D-08; D-08a): the id is kept, the number may change.'
 formula:
-  human_readable: COUNT(new customers where is_new_customer = 1)
+  human_readable: First placed orders of new customers (D-15).
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: ltv_cac
-  measure: ltv_cac.new_customers
+  view: commerce
+  measure: commerce.new_customers
 aggregation: additive
 unit: count
-grain: daily
-supported_dimensions:
-- brand_id
-- report_date
-supported_filters:
-- date_range
-- brand_id
+grain: order
 data_owner: Growth
 access_policy:
-  roles_allowed: [exec, finance, growth_lead, analyst]
-  scopes: [metrics:read]
-examples:
-- question: New Customers last 30 days
-  request:
-    measures:
-    - new_customers
-    time_range:
-      preset: last_30d
-validation_tests: []
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-27'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalAnalytics/analyticsClickhouse.js getNewCustomerMetrics
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces:
+- attributed_new_customer_orders
+- first_orders
+- new_customer_orders
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-15
+- D-16
+direction_bad: down

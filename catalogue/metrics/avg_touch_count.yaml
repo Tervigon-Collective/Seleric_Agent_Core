@@ -1,48 +1,30 @@
 id: avg_touch_count
-display_name: Average Touches per Path
+display_name: Avg touch count
 category: attribution
 status: certified
-description: >-
-  Average number of marketing touches before purchase: total touches ÷ order paths on
-  serve.attribution_paths (order date), recomputed for any slice. Use for "how many touches before
-  buying". Journey metric — not credit or revenue.
+description: 'Average touches per attribution path. Grain: order_model. Date axis: native. Ignores date_axis (its
+  own clock, D-36). Redefined in semantic v3 (D-01): the id is kept, the number may change.'
 formula:
-  human_readable: AVG(touch_count)
+  human_readable: Average touches per attribution path.
   authoritative_source: cube
+  depends_on:
+  - touches
 cube_mapping:
   view: attribution_paths
   measure: attribution_paths.avg_touch_count
 aggregation: ratio
-unit: count
-grain: order x model
-supported_dimensions:
-- brand_id
-- order_date
-- attribution_model
-supported_filters:
-- date_range
-- brand_id
+unit: ratio
+grain: order_model
 data_owner: Growth / Attribution
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Average Touches per Path last 30 days
-  request:
-    measures:
-    - avg_touch_count
-    time_range:
-      preset: last_30d
-validation_tests:
-- avg_touch_count is defined on attribution_paths
-dashboard_alignment:
-  status: not_in_dashboard
-  audited_on: '2026-09-09'
-  source: Seleric_Dashboard/Node-Backend
-  note: Certified Cube port; no single Historical Analytics card maps 1:1.
+version: 2.0.0
+replaces: []
+date_axis: native

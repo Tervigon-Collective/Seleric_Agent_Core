@@ -1,89 +1,40 @@
 id: total_sales
-display_name: Total Sales (Shopify-only, incl. GST)
+display_name: Total sales
 category: commerce
 status: certified
-description: >-
-  Shopify Total Sales: checkout value before discounts INCLUDING GST, on the order date, from
-  serve.commerce_orders (dashboard Total Sales card). Includes later-cancelled orders. Sliceable by
-  geo, payment, UTM, customer type. Same total as total_sales_all_channels. Ex-GST equivalent →
-  gross_sales.
+description: 'Total sales INCLUDING GST at placement (paid + discounts); a separately labelled tax-inclusive figure
+  (D-02b). Grain: order. Date axis: placement only. date_axis=order_date (default, orders placed in the period)
+  or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-02b; D-01; D-08; D-08a; D-09a; D-10):
+  the id is kept, the number may change.'
 formula:
-  human_readable: Sum of gross_revenue + total_discounts per eligible order
+  human_readable: Total sales INCLUDING GST at placement (paid + discounts); a separately labelled tax-inclusive
+    figure (D-02b).
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.total_sales
+  view: commerce
+  measure: commerce.total_sales
 aggregation: additive
-unit: currency
+unit: INR
 currency_default: INR
 grain: order
-supported_dimensions:
-- brand_id
-- order_date
-- order_created_at_ist
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
-supported_filters:
-- date_range
-- brand_id
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Total sales last week
-  request:
-    measures:
-    - total_sales
-    time_range:
-      preset: last_7d
-validation_tests:
-- total_sales >= commerce_net_revenue for same period when both on placement axis
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalQueryHelpers.js:90
+version: 2.0.0
+replaces:
+- total_sales_all_channels
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-02b
+direction_bad: down

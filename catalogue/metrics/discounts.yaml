@@ -1,91 +1,36 @@
 id: discounts
-display_name: Discounts (Shopify-only, ex-GST)
+display_name: Discounts
 category: commerce
 status: certified
-description: >-
-  Discount/coupon value given on orders placed in the period, ex-GST, from serve.commerce_orders
-  (order date; dashboard Discounts card). Sliceable by geo, payment, UTM, customer type. Gross sales −
-  discounts = pre-return net sales.
+description: 'Discounts ex-GST (memo: already deducted inside gross sales, D-09a). Grain: order. Date axis: placement
+  only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen).
+  Redefined in semantic v3 (D-09a; D-01; D-02b; D-08; D-08a; D-10): the id is kept, the number may change.'
 formula:
-  human_readable: 'Sum of total_discounts x ((gross_revenue - total_tax) / gross_revenue) per eligible
-    order (is_test = 0, is_revenue_adjustment = 0)
-
-    '
+  human_readable: 'Discounts ex-GST (memo: already deducted inside gross sales, D-09a).'
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.discount_amount_excl_tax
+  view: commerce
+  measure: commerce.discounts
 aggregation: additive
-unit: currency
+unit: INR
 currency_default: INR
 grain: order
-supported_dimensions:
-- brand_id
-- order_date
-- order_created_at_ist
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
-supported_filters:
-- date_range
-- brand_id
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Discounts given last month
-  request:
-    measures:
-    - discounts
-    time_range:
-      preset: last_month
-validation_tests:
-- reconciles to dashboard Discounts card for closed periods
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalQueryHelpers.js:36-37,63-64
+version: 2.0.0
+replaces: []
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-09a

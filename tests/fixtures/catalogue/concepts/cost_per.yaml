@@ -1,0 +1,20 @@
+id: cost_per
+display_name: CTR / CPC / CPM
+one_liner: Ad efficiency (CTR/CPC/CPM); name the platform.
+aliases: [ctr, cpc, cpm, click through rate, cost per click, cost per mille]
+axes:
+  platform: {values: [meta, google]}
+  metric_kind: {values: [ctr, cpc, cpm], default: ctr}
+resolves:
+  - when: {platform: meta, metric_kind: ctr}
+    metric: meta_ctr
+  - when: {platform: meta, metric_kind: cpc}
+    metric: meta_cpc
+  - when: {platform: meta, metric_kind: cpm}
+    metric: meta_cpm
+  - when: {platform: google, metric_kind: ctr}
+    metric: google_ctr
+  - when: {platform: google, metric_kind: cpc}
+    metric: google_cpc
+  - when: {platform: google, metric_kind: cpm}
+    metric: google_cpm

@@ -12,7 +12,7 @@ def _metric(catalogue, mid):
 
 @pytest.fixture(scope="module")
 def v2():
-    return CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v2"))
+    return CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue"))
 
 
 def test_additive_totals_and_delta(catalogue):

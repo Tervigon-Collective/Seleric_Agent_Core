@@ -1,0 +1,29 @@
+id: avg_sampling_cogs
+display_name: Avg sampling cogs
+category: operations
+status: certified
+description: 'Mean COGS. Grain: sampling_variant. Date axis: native. Ignores date_axis (its own clock, D-36).'
+formula:
+  human_readable: Mean COGS.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: procurement_sampling
+  measure: procurement_sampling.avg_sampling_cogs
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: sampling_variant
+data_owner: Supply Chain Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

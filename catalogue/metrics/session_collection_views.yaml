@@ -1,96 +1,29 @@
 id: session_collection_views
-display_name: Session Collection Views
+display_name: Session collection views
 category: web_analytics
 status: certified
-description: >-
-  Total collection/category page views within sessions, summed on serve.session_funnel.
+description: 'Collection views counted in session summaries. Grain: session. Date axis: native. Ignores date_axis
+  (its own clock, D-36).'
 formula:
-  human_readable: SUM(collection_view_count)
+  human_readable: Collection views counted in session summaries.
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: session_funnel
-  measure: session_funnel.collection_views
+  view: web_sessions
+  measure: web_sessions.session_collection_views
 aggregation: additive
 unit: count
-grain: session (journey)
-supported_dimensions:
-- brand_id
-- session_date
-- session_hour
-- session_day_of_week
-- funnel_web_platform
-- channel
-- funnel_stage
-- furthest_stage_bucket
-- converted
-- device_type
-- browser_family
-- os_family
-- geo_city
-- geo_region
-- geo_country
-- landing_page_path
-- landing_page_resolved
-- exit_page_path
-- utm_source
-- utm_medium
-- utm_campaign
-- utm_content
-- utm_term
-- campaign_id
-- campaign_name
-- adset_id
-- adset_name
-- ad_id
-- ad_name
-- identity_resolution_method
-supported_filters:
-- brand_id
-- session_date
-- session_hour
-- session_day_of_week
-- funnel_web_platform
-- channel
-- funnel_stage
-- furthest_stage_bucket
-- converted
-- device_type
-- browser_family
-- os_family
-- geo_city
-- geo_region
-- geo_country
-- landing_page_path
-- landing_page_resolved
-- exit_page_path
-- utm_source
-- utm_medium
-- utm_campaign
-- utm_content
-- utm_term
-- campaign_id
-- campaign_name
-- adset_id
-- adset_name
-- ad_id
-- ad_name
-- identity_resolution_method
+grain: session
 data_owner: Growth / Web Analytics
 access_policy:
-  roles_allowed: [exec, growth_lead, analyst, ops]
-  scopes: [metrics:read]
-examples:
-- question: Session Collection Views last 30 days
-  request:
-    measures:
-    - session_collection_views
-    time_range:
-      preset: last_30d
-validation_tests:
-- session_collection_views resolves on session_funnel at ad/funnel/device grain
-currency_default: INR
-dashboard_alignment:
-  status: not_in_dashboard
-  audited_on: '2026-07-31'
-  source: serve.session_funnel (Snowplow journey OLAP)
-  note: Journey OLAP surface; no direct dashboard card. First-touch ad attribution.
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+direction_bad: down

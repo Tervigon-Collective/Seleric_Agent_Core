@@ -1,0 +1,29 @@
+id: remaining_units
+display_name: Remaining units
+category: operations
+status: certified
+description: 'Units of those layers still unconsumed. Grain: receipt_layer. Date axis: native. Ignores date_axis
+  (its own clock, D-36).'
+formula:
+  human_readable: Units of those layers still unconsumed.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: stock_layers
+  measure: stock_layers.remaining_units
+aggregation: additive
+unit: count
+grain: receipt_layer
+data_owner: Supply Chain Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

@@ -2,10 +2,8 @@
 
 Model-agnostic MCP gateway over the Seleric Cube semantic layer (ClickHouse
 gold), with a governed metric catalogue, deterministic insights, and safe
-action execution (propose → confirm → commit). The live surface is **semantic v2**
-(since 2026-10-04): `catalogue_v2/` on Cube v2 — design, decisions and history in
-[doc/semantic_v2/](./doc/semantic_v2/) (PLAN.md, PROGRESS.md). Superseded v1 material is in
-[deprecated/](./deprecated/README.md).
+action execution (propose → confirm → commit). One catalogue (`catalogue/`) on one Cube —
+design, decisions and history in [doc/semantic/](./doc/semantic/) (PLAN.md, PROGRESS.md, DECISIONS.md).
 
 ## Design invariants
 
@@ -25,7 +23,7 @@ action execution (propose → confirm → commit). The live surface is **semanti
 
 ```bash
 uv sync
-cp .env.example .env          # fill CUBEJS_API_SECRET (or SELERIC_API_KEY); Cube URL defaults to v2 :4002 in config.yaml
+cp .env.example .env          # fill CUBEJS_API_SECRET (or SELERIC_API_KEY); Cube URL defaults to :4003 in config.yaml
 
 uv run pytest -m "not live"   # unit tests
 uv run pytest                 # + live tests when Cube is reachable
@@ -66,30 +64,29 @@ is editable text in `scripts/agent_policy.md`, loaded at startup.
 
 ## Semantic layer
 
-The Cube model lives in **mage-ai** (`infra/cube/model_v2`, conformed facts + dimensions, 18 agent views)
-and runs from this repo's `docker-compose.yml` as `cube-v2` on 127.0.0.1:4002 (ClickHouse login
-`cube_serve`, SELECT `serve.*` only, from `mage-ai/infra/cube/.env.v2`). The MCP reaches it in-network
-(`CUBE_API_URL=http://cube-v2:4000`). The v1 service `cube` (:4001, `infra/cube/model`) is frozen and kept
-only for seleric_systems (nginx `/cube/`).
+The Cube model lives in **mage-ai** (`infra/cube/`, conformed facts + dimensions) and runs from this repo's
+`docker-compose.yml` on 127.0.0.1:4003 (ClickHouse login `cube_serve`, SELECT `serve.*` only, from
+`mage-ai/infra/cube/.env.v2`). The MCP reaches it in-network (`CUBE_API_URL=http://cube-v3:4000`).
 
 ```bash
-docker compose up -d                          # cube (v1, frozen), cube-v2, mcp
-uv run python scripts/smoke_cube.py           # Cube v2 + catalogue_v2 live smoke
+docker compose up -d                          # cube, cubestore, mcp
+uv run python scripts/smoke_cube.py           # Cube + catalogue live smoke
 SELERIC_CUBE_ENV=/opt/seleric/mage-ai/infra/cube/.env \
-  uv run python scripts/v2_gates.py --live    # resolution / registry / hard-cut / slices / filters / duplicates
+  uv run python scripts/catalogue_gates.py --live    # resolution / slices / filters / duplicates
 ```
 
 ## Catalogue
 
-`catalogue_v2/` is what the MCP serves (default `catalogue_dir`; `SELERIC_CATALOGUE_DIR=catalogue` is the
-v1 rollback). It is GENERATED — edit `scripts/build_catalogue_v2.py`, `catalogue/migrations/v2_id_map.yaml`
-or `catalogue_v2_src/concepts.yaml` and regenerate, never the YAML. One number = one metric id; scope,
-platform and paid are filters; every v1 id is rejected naming its replacement + filters.
+`catalogue/` is what the MCP serves (default `catalogue_dir`). It is the source of truth: edit the YAML
+(`metrics/<id>.yaml`, `concepts/`, `glossary/`, `dimensions/`, `views.yaml`, `metric_aliases.yaml`) and check it with
+`scripts/validate_catalogue.py` (live Cube) and `pytest`. Hand-authored inputs sit in `catalogue_src/`:
+`datasets.yaml`, `agent_policy.yaml` (`direction_bad` / owning domain, copied onto the metrics), `causal_priors.yaml`
+(feeds `scripts/build_dependency_graph.py`) and the duplicate-number waivers. One number = one metric id; scope, platform
+and paid are filters; a retired id is rejected naming its replacement + filters.
 
-- Inventory: `doc/METRIC_INVENTORY.xlsx` (`scripts/build_metric_inventory_v2.py`, from the live surface).
-- v1 → v2 values: `scripts/v2_parity.py`. Gates: `scripts/v2_gates.py`.
-- `catalogue/` (v1) is frozen: rollback path, phrase seeds for the gates, and the id map in
-  `catalogue/migrations/`.
+- Certification: `scripts/{axis_certify,golden_axis,drill_check,cube_member_sweep,semantic_sql_check,certify_qa,certify_datasets}.py`
+  (shared helpers in `scripts/gate_common.py`), gates in `scripts/catalogue_gates.py`, decisions in `doc/semantic/DECISIONS.yaml`.
+- `tests/fixtures/catalogue/` is a small stand-alone catalogue used only by the unit tests of the MCP machinery.
 
 ## Known follow-ups (see plan §Risks)
 

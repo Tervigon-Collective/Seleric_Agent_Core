@@ -21,7 +21,7 @@ class _Cube:
 
 
 async def test_ratio_components_are_checked_as_cube_members_not_metric_ids() -> None:
-    service = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v2"))
+    service = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue"))
     ratio = next(m for m in service.cat.metrics.values() if m.ratio_components and m.ratio_component_members)
     members = {ratio.cube_mapping.measure}
     for pair in ratio.ratio_component_members.values():
@@ -35,7 +35,7 @@ async def test_ratio_components_are_checked_as_cube_members_not_metric_ids() -> 
 
 
 async def test_ratio_with_a_missing_component_member_is_still_broken() -> None:
-    service = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v2"))
+    service = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue"))
     ratio = next(m for m in service.cat.metrics.values() if m.ratio_components and m.ratio_component_members)
     drift = await validate_against_cube(service, _Cube({ratio.cube_mapping.measure}))  # type: ignore[arg-type]
     assert ratio.id in drift["broken"]

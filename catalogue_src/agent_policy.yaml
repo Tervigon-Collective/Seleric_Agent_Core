@@ -1,0 +1,125 @@
+# Agent policy per catalogue metric. Hand-authored; copied onto catalogue/metrics/*.yaml (direction_bad, agent_domain).
+#   direction_bad: which way is bad for the business ("up" = a rise is bad, e.g. a cost; "down" = a fall is bad, e.g. sales).
+#                  Unset means "up" for the agent.
+#   domain:        the swarm domain whose agent owns the metric, only where it differs from the one the catalogue
+#                  category gives (commerce, attribution, funnel, product, performance, finance, customer, operations).
+# This replaces Seleric_Agent/config/metric_registry.yaml (retired 2026-10-26): the catalogue is the only metric registry.
+metrics:
+  add_to_cart_events:
+    direction_bad: down
+  add_to_cart_rate:
+    direction_bad: down
+  add_to_cart_to_checkout_rate:
+    direction_bad: down
+  add_to_carts:
+    direction_bad: down
+  avg_page_depth:
+    direction_bad: down
+  avg_seconds_to_add_to_cart:
+    direction_bad: up
+  avg_seconds_to_checkout:
+    direction_bad: up
+  avg_seconds_to_purchase:
+    direction_bad: up
+  bounce_rate:
+    direction_bad: up
+  cancelled_orders:
+    direction_bad: up
+  channel_cac:
+    domain: performance
+  checkout_rate:
+    direction_bad: down
+  checkout_steps:
+    direction_bad: down
+  checkout_to_purchase_rate:
+    direction_bad: down
+  clicks:
+    direction_bad: down
+  collection_view_events:
+    direction_bad: down
+  contribution_margin:
+    direction_bad: down
+  contribution_margin_pct:
+    direction_bad: down
+  conversion_rate:
+    direction_bad: down
+  ctr:
+    direction_bad: down
+  customers:
+    direction_bad: down
+  events_per_session:
+    direction_bad: down
+  funnel_purchases:
+    direction_bad: down
+  gross_roas:
+    direction_bad: down
+    domain: performance
+  gross_sales:
+    direction_bad: down
+  impressions:
+    direction_bad: down
+  landing_page_views:
+    direction_bad: down
+  mer:
+    direction_bad: down
+  net_aov:
+    direction_bad: down
+    domain: attribution
+  net_margin_pct:
+    direction_bad: down
+  net_profit:
+    direction_bad: down
+  net_roas:
+    direction_bad: down
+    domain: performance
+  net_sales:
+    direction_bad: down
+  new_customers:
+    direction_bad: down
+  order_value_incl_tax:
+    direction_bad: down
+    domain: attribution
+  orders:
+    direction_bad: down
+  page_views:
+    direction_bad: down
+  product_contribution_margin_pct:
+    direction_bad: down
+  product_order_gross_sales:
+    direction_bad: down
+  product_order_net_sales:
+    direction_bad: down
+  product_view_events:
+    direction_bad: down
+  product_view_rate:
+    direction_bad: down
+  refund_amount:
+    domain: attribution
+  remove_from_carts:
+    direction_bad: up
+  repeat_customers:
+    direction_bad: down
+  repeat_rate:
+    direction_bad: down
+  returned_or_cancelled_orders:
+    direction_bad: up
+  returned_orders:
+    direction_bad: up
+  session_collection_views:
+    direction_bad: down
+  session_product_views:
+    direction_bad: down
+  sessions:
+    direction_bad: down
+  site_search_events:
+    direction_bad: down
+  site_searches:
+    direction_bad: down
+  total_sales:
+    direction_bad: down
+  units_sold:
+    direction_bad: down
+  video_completion_rate:
+    direction_bad: down
+  web_events:
+    direction_bad: down

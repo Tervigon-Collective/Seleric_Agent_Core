@@ -42,7 +42,7 @@ NOT_MODELLED = (
 )
 
 
-HOURLY_NOTES_FILE = PROJECT_ROOT / "catalogue_v3_src" / "hourly_notes.yaml"
+HOURLY_NOTES_FILE = PROJECT_ROOT / "catalogue_src" / "hourly_notes.yaml"
 
 
 def load_hourly_notes(path=HOURLY_NOTES_FILE) -> dict[str, str]:

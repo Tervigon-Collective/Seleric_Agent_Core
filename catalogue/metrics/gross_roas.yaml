@@ -1,25 +1,26 @@
 id: gross_roas
-display_name: Gross ROAS (Shopify-only)
+display_name: Gross ROAS
 category: finance
 status: certified
-description: >-
-  Gross ROAS: gross sales (ex-GST) ÷ Meta+Google ad spend, from period sums on serve.canonical_pnl.
-  Same number as gross_roas_all_channels — prefer that id unless the user says "Shopify-only".
+description: 'Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09). Grain: brand_day_channel_ad.
+  Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes
+  on the day they happen). Redefined in semantic v3 (D-09; D-31; D-01; D-02; D-02a; D-02b; D-03; D-03a…): the id
+  is kept, the number may change.'
 formula:
-  human_readable: SUM(gross_sales) / SUM(shopify_ad_spend)
+  human_readable: Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09).
   authoritative_source: cube
+  depends_on:
+  - gross_sales
+  - ad_spend
 cube_mapping:
-  view: canonical_pnl
-  measure: canonical_pnl.gross_roas
+  view: finance
+  measure: finance.gross_roas
 aggregation: ratio
+ratio_components:
+  numerator: gross_sales
+  denominator: ad_spend
 unit: ratio
-grain: daily
-supported_dimensions:
-- brand_id
-- report_date
-supported_filters:
-- date_range
-- brand_id
+grain: brand_day_channel_ad
 data_owner: Finance
 access_policy:
   roles_allowed:
@@ -28,25 +29,16 @@ access_policy:
   - growth_lead
   scopes:
   - metrics:read
-examples:
-- question: Shopify-only Gross ROAS for June 2026
-  request:
-    measures:
-    - gross_roas
-    time_range:
-      start: '2026-06-01'
-      end: '2026-06-30'
-validation_tests:
-- June 2026 brand 20 ≈ dashboard Shopify Gross ROAS
-deprecated_aliases: []
-ratio_components:
-  numerator: canonical_pnl.gross_sales
-  denominator: canonical_pnl.shopify_ad_spend
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: src/services/dashboardService.js:142
-  note: >
-    Shopify-only. Bare "Gross ROAS" / Historical All-channels resolve to
-    gross_roas_all_channels via glossary. Do not use this for All-channels cards.
+version: 3.0.0
+replaces:
+- gross_roas_all_channels
+- pnl_gross_roas
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: finance.order_date
+  event_date: finance.event_date
+decision_ids:
+- D-09
+- D-31
+direction_bad: down
+agent_domain: performance

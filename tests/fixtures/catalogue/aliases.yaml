@@ -1,0 +1,16 @@
+# Compat aliases: old shorthand / metric id -> concept + axis selection. Lets the
+# agent and saved queries keep working while resolution moves to the concept layer.
+# Each entry expands to a deterministic concept resolution (§04 of doc/serve-revamp).
+aliases:
+  ns:
+    concept: sales
+    axes: {basis: net, scope: company}
+  np:
+    concept: profit
+    axes: {basis: net, scope: all_channels}
+  gs:
+    concept: sales
+    axes: {basis: gross, scope: company}
+  ts:
+    concept: sales
+    axes: {basis: total, scope: company}

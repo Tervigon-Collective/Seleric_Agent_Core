@@ -1,0 +1,29 @@
+id: stock_movements
+display_name: Stock movements
+category: operations
+status: certified
+description: 'Number of stock movements. Grain: stock_movement. Date axis: native. Ignores date_axis (its own clock,
+  D-36).'
+formula:
+  human_readable: Number of stock movements.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: stock_movements
+  measure: stock_movements.stock_movements
+aggregation: additive
+unit: count
+grain: stock_movement
+data_owner: Supply Chain Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

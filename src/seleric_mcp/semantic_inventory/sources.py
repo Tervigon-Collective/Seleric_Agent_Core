@@ -282,7 +282,7 @@ def load_metric_records(catalogue_dir: Path) -> tuple[str, list[MetricRecord]]:
 
 
 def catalogue_dir() -> Path:
-    return Path(os.environ.get("SELERIC_CATALOGUE_DIR", str(_REPO / "catalogue_v3")))
+    return Path(os.environ.get("SELERIC_CATALOGUE_DIR", str(_REPO / "catalogue")))
 
 
 # ---------------------------------------------------------------- Agent surface

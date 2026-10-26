@@ -1,53 +1,34 @@
 id: ltv_cac_ratio
-display_name: LTV:CAC
+display_name: LTV:CAC ratio
 category: finance
 status: certified
-description: >-
-  LTV:CAC ratio as shown on the dashboard = (first-order net sales per new customer) ÷ (ad spend per
-  new customer), from period sums on serve.ltv_cac_daily. Because "LTV" here is first-order value, a
-  ratio below 1 means the first order does not pay back acquisition cost. Components: ltv and cac.
+description: 'LTV ÷ CAC (cohort-only; mixed clocks, refused on event_date, D-31 owner-confirmed 2026-10-15). Grain:
+  brand_day_channel_ad. Date axis: cohort only. Order-date cohort only (refuses event_date). Redefined in semantic
+  v3 (D-31; D-01; D-02b; D-07; D-08; D-08a; D-15; D-16): the id is kept, the number may change.'
 formula:
-  human_readable: ltv / cac
+  human_readable: LTV ÷ CAC (cohort-only; mixed clocks, refused on event_date, D-31 owner-confirmed 2026-10-15).
   authoritative_source: cube
   depends_on:
   - ltv
-  - cac
+  - channel_cac
 cube_mapping:
-  view: ltv_cac
-  measure: ltv_cac.ltv_cac_ratio
+  view: finance
+  measure: finance.ltv_cac_ratio
 aggregation: ratio
 unit: ratio
-grain: daily
-supported_dimensions:
-- brand_id
-- report_date
-supported_filters:
-- date_range
-- brand_id
+grain: brand_day_channel_ad
 data_owner: Growth / Finance
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   scopes:
   - metrics:read
-examples:
-- question: LTV:CAC for June 2026
-  request:
-    measures:
-    - ltv_cac_ratio
-    time_range:
-      start: '2026-06-01'
-      end: '2026-06-30'
-validation_tests: []
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-31'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalAnalytics/analyticsClickhouse.js getNewCustomerMetrics + fe performanceSummary.js
-ratio_components:
-  numerator: ltv_cac.ltv
-  denominator: ltv_cac.cac
+version: 2.0.0
+replaces: []
+date_axis: cohort_only
+date_axis_refusal: 'cohort-defined rate (D-31): use date_axis=order_date; this measure has no event-date meaning'
+decision_ids:
+- D-31

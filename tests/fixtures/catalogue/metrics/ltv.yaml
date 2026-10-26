@@ -1,0 +1,56 @@
+id: ltv
+display_name: New-customer first-order AOV (LTV card)
+category: finance
+status: certified
+description: >-
+  Average first-order net sales per new customer in the period (ex-GST): new-customer revenue ÷ new
+  customers on serve.ltv_cac_daily. Labelled "LTV" on the LTV:CAC dashboard card, but it is
+  first-order value, NOT lifetime value. Real all-time value per customer (avg_ltv) is not yet
+  queryable — say so rather than presenting this as lifetime value.
+formula:
+  human_readable: new_customer_revenue / new_customers
+  authoritative_source: cube
+  depends_on:
+  - new_customers
+cube_mapping:
+  view: ltv_cac
+  measure: ltv_cac.ltv
+aggregation: ratio
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: New-customer first-order AOV (LTV card) last 30 days
+  request:
+    measures:
+    - ltv
+    time_range:
+      preset: last_30d
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-31'
+  source: Seleric_Dashboard fe-dashboard performanceSummary.js
+  note: 'First-order AOV for new attributed customers; reconciles with attributed_net_revenue filtered
+    to is_new_customer=1. Not lifetime LTV.
+
+    '
+ratio_components:
+  numerator: ltv_cac.new_customer_revenue
+  denominator: ltv_cac.new_customers

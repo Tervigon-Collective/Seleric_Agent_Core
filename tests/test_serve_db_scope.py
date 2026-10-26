@@ -14,7 +14,7 @@ from seleric_mcp.catalogue_service.service import (
 )
 from seleric_mcp.config import PROJECT_ROOT
 
-CATALOGUE_DIR = PROJECT_ROOT / "catalogue"
+CATALOGUE_DIR = PROJECT_ROOT / "tests" / "fixtures" / "catalogue"
 
 
 def _with_databases(cat, overrides: dict[str, list[str]]):

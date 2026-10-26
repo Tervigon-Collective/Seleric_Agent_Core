@@ -1,0 +1,1086 @@
+# Business language -> canonical metric id. This is what makes
+# catalogue_search_metrics("topline") resolve without guessing.
+# Only reference ids that exist under catalogue/metrics/.
+terms:
+  # Topline/period totals must match the dashboard Net Sales card, which nets
+  # returns/cancels on their event date -> commerce_net_revenue_daily.
+  # commerce_net_revenue stays placement-axis, order-grain, for breakdowns
+  # (city/UTM/payment method) that commerce_performance can't provide.
+  - term: topline
+    canonical_id: net_sales_all_channels
+  - term: net sales
+    canonical_id: net_sales_all_channels
+    definition: >
+      Defaults to All-channels Net Sales. Shopify-only → commerce_net_revenue_daily
+      (or "shopify net sales").
+  - term: net sales (ex-gst)
+    canonical_id: net_sales_all_channels
+  - term: net sales ex-gst
+    canonical_id: net_sales_all_channels
+  - term: net sales (shopify-only)
+    canonical_id: commerce_net_revenue_daily
+  - term: shopify net sales
+    canonical_id: commerce_net_revenue_daily
+  - term: revenue
+    canonical_id: net_sales_all_channels
+  - term: commerce net revenue
+    canonical_id: commerce_net_revenue_daily
+  - term: revenue by city
+    canonical_id: commerce_net_revenue
+  - term: net revenue by city
+    canonical_id: commerce_net_revenue
+  - term: AOV
+    canonical_id: aov
+  - term: basket size
+    canonical_id: aov
+  - term: average order value
+    canonical_id: aov
+  - term: order volume
+    canonical_id: total_orders
+    definition: >
+      Defaults to Total Orders (all channels). For Shopify-only ask for
+      "shopify orders".
+  - term: total orders
+    canonical_id: total_orders
+  - term: order count
+    canonical_id: total_orders
+  - term: orders
+    canonical_id: total_orders
+    definition: >
+      Defaults to Total Orders (all channels = Shopify).
+      For Shopify-only use "shopify orders".
+  - term: shopify orders
+    canonical_id: orders
+  - term: shopify order count
+    canonical_id: orders
+  - term: units sold
+    canonical_id: units_sold
+  - term: units
+    canonical_id: units_sold
+  - term: product revenue
+    canonical_id: product_net_revenue
+  - term: SKU revenue
+    canonical_id: product_net_revenue
+  - term: sales by product
+    canonical_id: product_net_revenue
+  - term: most profitable product
+    canonical_id: product_gross_profit
+    definition: "Rupee gross profit per product (product_gross_profit): rank desc for most profitable, asc for loss-making. For efficiency use product_gross_margin_pct (0–100 scale). Products with unmaintained cost book 0 COGS and look inflated — check cost_coverage_pct."
+  - term: loss making product
+    canonical_id: product_gross_profit
+  - term: loss making products
+    canonical_id: product_gross_profit
+  - term: least profitable product
+    canonical_id: product_gross_profit
+  - term: product margin
+    canonical_id: product_gross_margin_pct
+  - term: gross margin by SKU
+    canonical_id: product_gross_margin_pct
+  - term: ASP
+    canonical_id: product_net_revenue
+    definition: "Average selling price = product_net_revenue ÷ units_sold; query both and divide."
+  - term: average selling price
+    canonical_id: product_net_revenue
+    definition: "Average selling price = product_net_revenue ÷ units_sold; query both and divide."
+  - term: best selling product
+    canonical_id: null
+    definition: >
+      Ambiguous — "best" can mean highest units_sold, product_net_revenue, or
+      product_gross_profit. Resolve from context (default to units_sold for
+      "best selling"); clarify only when the business meaning materially changes.
+  - term: gross sales
+    canonical_id: gross_sales_all_channels
+    definition: >
+      Defaults to All-channels Gross Sales. Shopify-only → gross_sales.
+  - term: gross sales (ex-gst)
+    canonical_id: gross_sales_all_channels
+  - term: gross sales ex-gst
+    canonical_id: gross_sales_all_channels
+  - term: gross sales (shopify-only)
+    canonical_id: gross_sales
+  - term: shopify gross sales
+    canonical_id: gross_sales
+  - term: discounts
+    canonical_id: discounts
+  - term: discount
+    canonical_id: discounts
+  - term: discounts (shopify-only)
+    canonical_id: discounts
+  - term: coupons
+    canonical_id: discounts
+  - term: returns and cancellations
+    canonical_id: returns_cancels_all_channels
+  - term: returns and cancels
+    canonical_id: returns_cancels_all_channels
+  - term: returns/cancels
+    canonical_id: returns_cancels_all_channels
+  - term: returns / cancels
+    canonical_id: returns_cancels_all_channels
+    definition: >
+      Defaults to All-channels Returns/Cancels. Shopify-only → returns_cancels.
+  - term: returns cancels all channels
+    canonical_id: returns_cancels_all_channels
+  - term: all channels returns cancels
+    canonical_id: returns_cancels_all_channels
+  - term: shopify returns cancels
+    canonical_id: returns_cancels
+  - term: return / cancel rev
+    canonical_id: return_cancel_revenue_all_channels
+    definition: >
+      Defaults to All-channels Return/Cancel Revenue (ex-GST) — the dashboard
+      card. Shopify-only → return_cancel_revenue.
+  - term: return / cancel revenue
+    canonical_id: return_cancel_revenue_all_channels
+  - term: return cancel revenue
+    canonical_id: return_cancel_revenue_all_channels
+  - term: return / cancel rev (shopify-only)
+    canonical_id: return_cancel_revenue
+  - term: shopify return cancel revenue
+    canonical_id: return_cancel_revenue
+  - term: shopify-only returns cancels
+    canonical_id: returns_cancels
+  - term: return revenue
+    canonical_id: return_revenue
+  - term: return revenue by state
+    canonical_id: event_return_revenue
+  - term: return revenue by region
+    canonical_id: event_return_revenue
+  - term: returns by state
+    canonical_id: refunded_orders
+  - term: returns by region
+    canonical_id: refunded_orders
+  - term: returns revenue
+    canonical_id: return_revenue
+  - term: returns
+    canonical_id: return_revenue
+    definition: >
+      P&L Returns card = return revenue ex-GST on event date. For order counts
+      ask for "returned orders" / refunded_orders. For geo/payment breakdowns
+      use event_return_revenue or refunded_orders with shipping_region.
+  - term: revenue lost to returns
+    canonical_id: return_cancel_revenue
+  - term: cancelled
+    canonical_id: cancel_revenue
+  - term: cancelled revenue
+    canonical_id: cancel_revenue
+  - term: cancel revenue
+    canonical_id: cancel_revenue
+  - term: cancel revenue by state
+    canonical_id: event_cancel_revenue
+  - term: cancellations by region
+    canonical_id: cancelled_orders
+  - term: cancelled revenue by region
+    canonical_id: event_cancel_revenue
+  - term: RTO
+    canonical_id: rto_cost
+    definition: >
+      Return to Origin logistics cost arm of Net COGS (FE §13 RTO Logistics Cost).
+  - term: rto logistics cost
+    canonical_id: rto_cost
+  - term: rto cost
+    canonical_id: rto_cost
+  - term: bottom line
+    canonical_id: net_profit
+  - term: profit
+    canonical_id: net_profit
+  - term: net profit
+    canonical_id: net_profit_all_channels
+    definition: >
+      Defaults to All-channels Net Profit (Historical / P&L). For Shopify-only
+      use net_profit (Net Sales − Net COGS − Meta+Google spend).
+  - term: net profit (shopify-only)
+    canonical_id: net_profit
+  - term: shopify only net profit
+    canonical_id: net_profit
+  - term: shopify-only net profit
+    canonical_id: net_profit
+  - term: shopify net profit
+    canonical_id: net_profit
+  - term: pnl net profit
+    canonical_id: net_profit_all_channels
+  - term: net profit (all channels)
+    canonical_id: net_profit_all_channels
+  - term: net profit all channels
+    canonical_id: net_profit_all_channels
+  - term: historical all channels net profit
+    canonical_id: net_profit_all_channels
+  - term: net profit blended
+    canonical_id: net_profit_blended
+  - term: net profit (all platforms)
+    canonical_id: net_profit_blended
+  - term: COGS
+    canonical_id: total_operating_cost_all_channels
+  - term: company COGS
+    canonical_id: total_operating_cost_all_channels
+  - term: net cogs
+    canonical_id: total_operating_cost_all_channels
+    definition: >
+      Defaults to All-channels Net COGS / TOC. Shopify-only → net_cogs.
+  - term: Net COGS
+    canonical_id: total_operating_cost_all_channels
+  - term: net cogs (shopify-only)
+    canonical_id: net_cogs
+  - term: shopify net cogs
+    canonical_id: net_cogs
+  - term: cost of goods
+    canonical_id: total_operating_cost_all_channels
+  - term: product cost
+    canonical_id: product_cost_all_channels
+  - term: product cost (all channels)
+    canonical_id: product_cost_all_channels
+  - term: pnl product cost
+    canonical_id: product_cost_all_channels
+  - term: product cost (shopify-only)
+    canonical_id: product_cost
+  - term: shopify product cost
+    canonical_id: product_cost
+  - term: product COGS
+    canonical_id: product_cogs
+  - term: total operating cost
+    canonical_id: total_operating_cost_all_channels
+  - term: total operating cost (all channels)
+    canonical_id: total_operating_cost_all_channels
+  - term: pnl total operating cost
+    canonical_id: total_operating_cost_all_channels
+  - term: total operating cost (shopify-only)
+    canonical_id: total_operating_cost
+  - term: shopify total operating cost
+    canonical_id: total_operating_cost
+  - term: operating cost
+    canonical_id: total_operating_cost_all_channels
+    definition: >
+      On the P&L Metrics page this means Total Operating Cost (= Shopify Net COGS). For Shopify-only say
+      "shopify only total operating cost". For the non-product breakdown only,
+      use metric operating_cost.
+  - term: packaging cost
+    canonical_id: packaging_cost
+  - term: shipping cost
+    canonical_id: shipping_cost
+  - term: shipping cost (courier)
+    canonical_id: shipping_cost
+  - term: payment gateway fees
+    canonical_id: payment_gateway_fees
+  - term: taxes
+    canonical_id: taxes_on_net_sales
+  - term: taxes (18% on shopify net)
+    canonical_id: taxes_on_net_sales
+  - term: taxes 18%
+    canonical_id: taxes_on_net_sales
+  - term: gst on net sales
+    canonical_id: taxes_on_net_sales
+  - term: gross margin
+    canonical_id: gross_margin_pct
+  - term: gross margin %
+    canonical_id: gross_margin_pct
+  - term: gross profit
+    canonical_id: gross_profit
+    definition: >
+      Bare "gross profit" defaults to brand-day P&L Gross Profit (Net Sales − Net COGS,
+      no channel). When a channel is named (google/meta/organic), use channel_gross_profit
+      (Gross Sales − Ad Spend − Gross COGS, the Attribution Overview tile).
+  - term: gross profit by channel
+    canonical_id: channel_gross_profit
+  - term: channel gross profit
+    canonical_id: channel_gross_profit
+  - term: gross profit from google
+    canonical_id: channel_gross_profit
+  - term: gross profit from google channel
+    canonical_id: channel_gross_profit
+  - term: google channel gross profit
+    canonical_id: channel_gross_profit
+  - term: google gross profit
+    canonical_id: channel_gross_profit
+  - term: gross profit from meta
+    canonical_id: channel_gross_profit
+  - term: gross profit from meta channel
+    canonical_id: channel_gross_profit
+  - term: meta channel gross profit
+    canonical_id: channel_gross_profit
+  - term: meta gross profit
+    canonical_id: channel_gross_profit
+  - term: gross cogs by channel
+    canonical_id: channel_gross_cogs
+  - term: channel gross cogs
+    canonical_id: channel_gross_cogs
+  - term: google gross cogs
+    canonical_id: channel_gross_cogs
+  - term: meta gross cogs
+    canonical_id: channel_gross_cogs
+  - term: MER
+    canonical_id: mer
+  - term: marketing efficiency ratio
+    canonical_id: mer
+  - term: ROAS
+    canonical_id: net_roas_all_channels
+    definition: >
+      Defaults to All-channels Net ROAS. Shopify-only → net_roas.
+      Platform-reported Meta/Google ROAS is not certified.
+  - term: net ROAS
+    canonical_id: net_roas_all_channels
+  - term: net roas
+    canonical_id: net_roas_all_channels
+  - term: net ROAS all channels
+    canonical_id: net_roas_all_channels
+  - term: shopify net ROAS
+    canonical_id: net_roas
+  - term: shopify-only net ROAS
+    canonical_id: net_roas
+  - term: gross ROAS
+    canonical_id: gross_roas_all_channels
+    definition: >
+      Defaults to All-channels Gross ROAS (Shopify gross / total ad spend). For Shopify-only use gross_roas.
+  - term: gross roas
+    canonical_id: gross_roas_all_channels
+    definition: >
+      Defaults to All-channels. Prefer gross_roas when the question says Shopify only.
+  - term: gross ROAS all channels
+    canonical_id: gross_roas_all_channels
+  - term: gross roas all channels
+    canonical_id: gross_roas_all_channels
+  - term: all channels gross ROAS
+    canonical_id: gross_roas_all_channels
+  - term: shopify gross ROAS
+    canonical_id: gross_roas
+  - term: shopify-only gross ROAS
+    canonical_id: gross_roas
+  - term: gross ROAS shopify
+    canonical_id: gross_roas
+  - term: BE ROAS
+    canonical_id: be_roas_all_channels
+  - term: break even ROAS
+    canonical_id: be_roas_all_channels
+  - term: breakeven ROAS
+    canonical_id: be_roas_all_channels
+  - term: BE ROAS all channels
+    canonical_id: be_roas_all_channels
+  - term: shopify BE ROAS
+    canonical_id: be_roas
+  - term: shopify-only BE ROAS
+    canonical_id: be_roas
+  - term: return on ad spend
+    canonical_id: net_roas_all_channels
+  - term: LTV:CAC
+    canonical_id: ltv_cac_ratio
+    definition: >
+      Period first-order AOV / CAC for first-time attributed customers.
+      Use ltv_cac.ltv_cac_ratio — not customer_ltv. Revenue arm matches
+      attributed_net_revenue for is_new_customer=1 (dashboard net, incl. unpaid COD).
+  - term: ltv cac
+    canonical_id: ltv_cac_ratio
+  - term: ltv to cac
+    canonical_id: ltv_cac_ratio
+  - term: CAC
+    canonical_id: cac
+  - term: customer acquisition cost
+    canonical_id: cac
+  - term: LTV
+    canonical_id: ltv
+    definition: >
+      Period new-customer first-order AOV (new_customer_revenue / new_customers),
+      not lifetime customer_ltv.avg_ltv. Same dashboard net basis as
+      attributed_net_revenue for new customers (incl. unpaid COD).
+  - term: first-order AOV
+    canonical_id: ltv
+    definition: >
+      Alias for the Historical LTV card — new-customer first-order AOV.
+  - term: new customers
+    canonical_id: new_customers
+  - term: meta net profit
+    canonical_id: meta_net_profit
+  - term: meta channel net profit
+    canonical_id: meta_net_profit
+  - term: net profit from meta
+    canonical_id: meta_net_profit
+  - term: net profit from meta channel
+    canonical_id: meta_net_profit
+  - term: google net profit
+    canonical_id: google_net_profit
+  - term: google channel net profit
+    canonical_id: google_net_profit
+  - term: net profit from google
+    canonical_id: google_net_profit
+  - term: net profit from google channel
+    canonical_id: google_net_profit
+  - term: meta net cogs
+    canonical_id: meta_net_cogs
+  - term: google net cogs
+    canonical_id: google_net_cogs
+  - term: ad spend
+    canonical_id: total_ad_spend
+    definition: >
+      Defaults to Total Ad Spend (all platforms) = Total Performance Marketing
+      (Meta+Google). For Meta-only / Google-only say that platform. For Shopify Historical card (Meta+Google) use shopify_ad_spend.
+  - term: total ad spend
+    canonical_id: total_ad_spend
+  - term: total ad spend (all platforms)
+    canonical_id: total_ad_spend
+  - term: total ads
+    canonical_id: total_ad_spend
+  - term: all platforms ad spend
+    canonical_id: total_ad_spend
+  - term: all platforms ads
+    canonical_id: total_ad_spend
+  - term: total adspend
+    canonical_id: total_ad_spend
+  - term: marketing spend
+    canonical_id: total_ad_spend
+  - term: marketing & sales
+    canonical_id: total_ad_spend
+    definition: >
+      P&L Marketing & Sales section total = Total Ad Spend (all platforms) =
+      Total Performance Marketing (Meta+Google).
+  - term: total performance marketing
+    canonical_id: total_ad_spend
+  - term: performance marketing
+    canonical_id: total_ad_spend
+  - term: blended ad spend
+    canonical_id: total_ad_spend
+  - term: shopify ad spend
+    canonical_id: shopify_ad_spend
+  - term: total ad spend (shopify-only)
+    canonical_id: shopify_ad_spend
+  - term: total ad spend shopify
+    canonical_id: shopify_ad_spend
+  - term: shopify only ad spend
+    canonical_id: shopify_ad_spend
+  - term: shopify only ads
+    canonical_id: shopify_ad_spend
+  - term: meta ads
+    canonical_id: meta_spend
+  - term: meta spend
+    canonical_id: meta_spend
+  - term: meta only
+    canonical_id: meta_spend
+    definition: Meta Ads spend (platform-only). For Meta delivery metrics say meta impressions/clicks/CTR.
+  - term: meta only spend
+    canonical_id: meta_spend
+  - term: meta only ads
+    canonical_id: meta_spend
+  - term: meta ads only
+    canonical_id: meta_spend
+  - term: meta only ad spend
+    canonical_id: meta_spend
+  - term: meta impressions
+    canonical_id: meta_impressions
+  - term: meta only impressions
+    canonical_id: meta_impressions
+  - term: meta clicks
+    canonical_id: meta_clicks
+  - term: meta only clicks
+    canonical_id: meta_clicks
+  - term: meta CTR
+    canonical_id: meta_ctr
+  - term: meta only CTR
+    canonical_id: meta_ctr
+  - term: meta CPC
+    canonical_id: meta_cpc
+  - term: meta only CPC
+    canonical_id: meta_cpc
+  - term: meta CPM
+    canonical_id: meta_cpm
+  - term: meta only CPM
+    canonical_id: meta_cpm
+  - term: meta hook rate
+    canonical_id: meta_hook_rate
+  - term: meta thruplay
+    canonical_id: meta_thruplays
+  - term: google ads
+    canonical_id: google_spend
+  - term: google spend
+    canonical_id: google_spend
+  - term: google only
+    canonical_id: google_spend
+    definition: Google Ads spend (platform-only).
+  - term: google only spend
+    canonical_id: google_spend
+  - term: google only ads
+    canonical_id: google_spend
+  - term: google ads only
+    canonical_id: google_spend
+  - term: google only ad spend
+    canonical_id: google_spend
+  - term: google impressions
+    canonical_id: google_impressions
+  - term: google only impressions
+    canonical_id: google_impressions
+  - term: google clicks
+    canonical_id: google_clicks
+  - term: google only clicks
+    canonical_id: google_clicks
+  - term: google CTR
+    canonical_id: google_ctr
+  - term: google only CTR
+    canonical_id: google_ctr
+  - term: google CPC
+    canonical_id: google_cpc
+  - term: google only CPC
+    canonical_id: google_cpc
+  - term: google CPM
+    canonical_id: google_cpm
+  - term: google only CPM
+    canonical_id: google_cpm
+  - term: meta purchases
+    canonical_id: null
+    definition: >
+      Platform-reported Meta purchases are non-canonical (attribution boundary).
+      Not queryable on the certified serve surface.
+  - term: meta CPA
+    canonical_id: null
+    definition: Platform-reported Meta CPA — not certified in PaidMedia V1.
+  - term: meta purchase value
+    canonical_id: null
+    definition: Platform-reported Meta purchase value — not certified in PaidMedia V1.
+  - term: contribution
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: lifetime value
+    canonical_id: avg_ltv
+    definition: >
+      Customer lifetime net revenue / customers (customer_ltv.avg_ltv). Distinct from
+      the Historical "LTV" card which is new-customer first-order AOV (catalogue id ltv).
+  - term: attributed revenue
+    canonical_id: attributed_net_revenue
+    definition: >
+      First-party attributed net revenue (ex-GST) from order_attribution.
+      Not commerce Total/Net Sales and not platform-reported Meta purchase value.
+  - term: attributed net revenue
+    canonical_id: attributed_net_revenue
+  - term: attributed sales
+    canonical_id: attributed_net_revenue
+    definition: >
+      All-channel last-touch net revenue (order_attribution oracle). For per-campaign/
+      adset/ad economics use ad_channel_net_sales / ad_channel_roas on ad_channel_pnl
+      (cross-platform, sliced by channel); for the Meta Attribution Overview "Net Sales"
+      card use meta_attribution_net_sales. These do not reconcile with attributed_net_revenue.
+  - term: attr sales
+    canonical_id: attributed_net_revenue
+  - term: attr revenue
+    canonical_id: attributed_net_revenue
+  - term: attribution sales
+    canonical_id: attributed_net_revenue
+  - term: attribution revenue
+    canonical_id: attributed_net_revenue
+  - term: last-touch revenue
+    canonical_id: attributed_net_revenue
+  - term: last touch revenue
+    canonical_id: attributed_net_revenue
+  - term: last-touch sales
+    canonical_id: attributed_net_revenue
+  - term: campaign revenue
+    canonical_id: attributed_net_revenue
+    definition: >
+      Use attributed_net_revenue (optionally break down by lt_campaign_name).
+      Per-campaign/ad economics (cross-platform) → ad_channel_net_sales on ad_channel_pnl.
+  - term: attributed gross revenue
+    canonical_id: attributed_gross_revenue
+  - term: attributed gross sales
+    canonical_id: attributed_gross_revenue
+  - term: attr gross sales
+    canonical_id: attributed_gross_revenue
+  - term: attributed orders
+    canonical_id: attributed_orders
+    definition: >
+      All-channel last-touch order count (order_attribution oracle), one row per
+      order. For orders per campaign/adset/ad use ad_channel_orders on ad_channel_pnl
+      (cross-platform, sliced by channel). Use attributed_orders for all-channel or
+      order-level breakdowns (city / payment / new-vs-repeat).
+  - term: attr orders
+    canonical_id: attributed_orders
+  - term: attribution orders
+    canonical_id: attributed_orders
+    definition: >
+      All-channel last-touch order count (order_attribution). For orders per
+      campaign/adset/ad (cross-platform) use ad_channel_orders on ad_channel_pnl.
+  - term: last-touch orders
+    canonical_id: attributed_orders
+  - term: attributed aov
+    canonical_id: attributed_aov
+  - term: attr aov
+    canonical_id: attributed_aov
+  - term: attributed refunds
+    canonical_id: attributed_refund_amount
+  - term: attributed refund amount
+    canonical_id: attributed_refund_amount
+  - term: attributed new customer orders
+    canonical_id: attributed_new_customer_orders
+  - term: attr new customer orders
+    canonical_id: attributed_new_customer_orders
+  - term: touch attributed orders
+    canonical_id: touch_attributed_orders
+  - term: touch-attributed orders
+    canonical_id: touch_attributed_orders
+  - term: attribution rate
+    canonical_id: attribution_rate
+  - term: attribution confidence
+    canonical_id: avg_attribution_confidence
+  - term: average attribution confidence
+    canonical_id: avg_attribution_confidence
+  # Platform-prefixed ad-grain attribution (meta_attr_* / platform_attribution_commerce
+  # meta|google_attribution_gross/total/orders) retired from the agent surface
+  # (2026-09-24). Cross-platform ad economics now come from ad_channel_* on
+  # ad_channel_pnl (sliced by channel); all-channel last-touch from order_attribution.
+  # channel_pnl net-sales survivors kept below for Attribution Analysis Overview parity.
+  - term: meta attribution sales
+    canonical_id: meta_attribution_net_sales
+    definition: >
+      Meta Attribution Analysis Overview Net Sales (channel-day, channel_pnl). For
+      cross-platform ad-grain spend/ROAS/profit use the ad_channel_* metrics.
+  - term: meta attribution net sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta attribution analysis net sales
+    canonical_id: meta_attribution_net_sales
+  - term: google attribution net sales
+    canonical_id: google_attribution_net_sales
+  - term: google attribution analysis net sales
+    canonical_id: google_attribution_net_sales
+  - term: channel orders
+    canonical_id: channel_orders
+  - term: channel sales
+    canonical_id: ad_channel_net_sales
+    canonical_dimension_id: channel
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
+  - term: channel revenue
+    canonical_id: ad_channel_net_sales
+    canonical_dimension_id: channel
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
+  - term: channel net revenue
+    canonical_id: ad_channel_net_sales
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
+  - term: channel attribution sales
+    canonical_id: ad_channel_net_sales
+  - term: channel attribution daily sales
+    canonical_id: ad_channel_net_sales
+  - term: channel gross revenue
+    canonical_id: attributed_gross_revenue
+    definition: "Gross sales by last-touch source: attributed_gross_revenue grouped by lt_platform."
+  - term: orders by channel
+    canonical_id: channel_orders
+    canonical_dimension_id: channel
+  - term: sales by channel
+    canonical_id: ad_channel_net_sales
+    canonical_dimension_id: channel
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
+  - term: revenue by channel
+    canonical_id: ad_channel_net_sales
+    canonical_dimension_id: channel
+    definition: "Net sales per channel (meta | google | organic | unattributed) on the channel-P&L basis: ad_channel_net_sales grouped by channel (include reconciliation rows). For sales of orders placed in the window by source use attributed_net_revenue grouped by lt_platform."
+  - term: by channel
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel (ChannelAttribution closed set by
+      default — see ontology grain_defaults). Distinct from last-touch
+      lt_channel. No measure is implied; resolve the dimension first.
+  - term: channel wise
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel. Not a measure shortcut. Distinct
+      from lt_channel (last-touch FINE). Unspecified channel-wise report uses
+      ChannelAttribution + channel_orders.
+  - term: channel-wise
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel. Not a measure shortcut.
+  - term: channelwise
+    canonical_dimension_id: channel
+    definition: >
+      Grain language for dimension channel. Not a measure shortcut.
+  - term: attribution analysis by channel
+    canonical_id: null
+    definition: >
+      Query meta_attribution_net_sales, meta_attribution_orders,
+      google_attribution_net_sales, google_attribution_orders separately — not
+      channel_net_revenue.
+  - term: meta google attribution breakdown
+    canonical_id: null
+    definition: >
+      Meta/Google Attribution Analysis Overview — use meta_attribution_* and
+      google_attribution_* metrics, not channel_net_revenue.
+  - term: product views
+    canonical_id: product_views
+    definition: >
+      Snowplow product_view events (PDP views) on WebAnalytics.EventStream —
+      counts events, not sessions (pdp_sessions on SessionFunnel counts sessions).
+  - term: pdp views
+    canonical_id: product_views
+  - term: add to carts
+    canonical_id: add_to_cart_events
+    definition: >
+      Snowplow add_to_cart events on WebAnalytics.EventStream — counts events,
+      not sessions (atc_sessions on SessionFunnel counts sessions). Not
+      comparable to Meta pixel ATC.
+  - term: add-to-carts
+    canonical_id: add_to_cart_events
+  - term: atc events
+    canonical_id: add_to_cart_events
+  - term: page views
+    canonical_id: web_page_views
+  - term: pageviews
+    canonical_id: web_page_views
+  - term: website events
+    canonical_id: web_events
+  - term: web events
+    canonical_id: web_events
+  - term: collection views
+    canonical_id: collection_views
+  - term: site searches
+    canonical_id: site_search_events
+  - term: search events
+    canonical_id: site_search_events
+  - term: events per session
+    canonical_id: events_per_session
+  - term: checkouts
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: funnel purchases
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: cart abandonment
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: checkout abandonment
+    canonical_id: null
+    definition: Not catalogued in the current commerce/product metric set.
+  - term: google conversions
+    canonical_id: null
+    definition: >
+      Platform-reported Google conversions are non-canonical on the certified
+      serve surface. Use google_clicks / google_ctr for delivery.
+  - term: google conversion value
+    canonical_id: null
+    definition: Platform-reported Google conversion value — not certified in PaidMedia V1.
+  - term: google CPA
+    canonical_id: null
+    definition: Platform-reported Google CPA — not certified in PaidMedia V1.
+  - term: total sales
+    canonical_id: total_sales_all_channels
+    definition: >
+      Total Sales across all served channels (Shopify, incl. GST). For Shopify-only say "shopify
+      total sales".
+  - term: total sales (including gst)
+    canonical_id: total_sales_all_channels
+  - term: total sales including gst
+    canonical_id: total_sales_all_channels
+  - term: total sales (all channels)
+    canonical_id: total_sales_all_channels
+  - term: total sales all channels
+    canonical_id: total_sales_all_channels
+  - term: all channels total sales
+    canonical_id: total_sales_all_channels
+  - term: total sales (shopify-only)
+    canonical_id: total_sales
+  - term: shopify total sales
+    canonical_id: total_sales
+  - term: shopify only total sales
+    canonical_id: total_sales
+  - term: gross sales (all channels)
+    canonical_id: gross_sales_all_channels
+  - term: gross sales all channels
+    canonical_id: gross_sales_all_channels
+  - term: all channels gross sales
+    canonical_id: gross_sales_all_channels
+  - term: net sales (all channels)
+    canonical_id: net_sales_all_channels
+  - term: net sales all channels
+    canonical_id: net_sales_all_channels
+  - term: all channels net sales
+    canonical_id: net_sales_all_channels
+  - term: shopify only orders
+    canonical_id: orders
+  - term: gross units
+    canonical_id: gross_units_ordered
+  - term: cancelled orders
+    canonical_id: cancelled_orders
+  - term: cancellations
+    canonical_id: cancelled_orders
+  - term: refunded orders
+    canonical_id: refunded_orders
+  - term: returned orders
+    canonical_id: refunded_orders
+  - term: multi-item returned orders
+    canonical_id: refunded_orders
+  - term: returned orders with more than 1 item
+    canonical_id: refunded_orders
+  - term: multi-item orders
+    canonical_id: orders
+  - term: COD orders
+    canonical_id: cod_orders
+  - term: cash on delivery
+    canonical_id: cod_orders
+  - term: prepaid orders
+    canonical_id: prepaid_orders
+  - term: online orders
+    canonical_id: prepaid_orders
+  - term: online payment
+    canonical_id: prepaid_orders
+  - term: payment mix
+    definition: >
+      Break down Shopify orders by payment_bucket (online, cod, paytm card machine,
+      manual) using total_sales, orders, commerce_net_revenue, or product_net_revenue
+      with dimension payment_bucket.
+  - term: sales by payment method
+    definition: >
+      Use total_sales or commerce_net_revenue with dimension payment_method or
+      payment_bucket on commerce_orders (Shopify-only). For gateway-level detail
+      use payment_gateway.
+  - term: sales by state
+    canonical_id: total_sales_all_channels
+    definition: >
+      Break down total_sales_all_channels (and/or total_orders) with dimension
+      shipping_region (alias state/province) — never Cube members like
+      sales_all_channels.total_sales. For "with order count" request BOTH
+      total_sales_all_channels and total_orders in one metrics_query; expect
+      composed multi-view parts — narrate separately, do not join. Shopify-only:
+      total_sales + orders on the same view. City → shipping_city. Geo values
+      are uppercased (MAHARASHTRA).
+  - term: sales by city
+    canonical_id: total_sales_all_channels
+    definition: >
+      Use total_sales_all_channels / total_orders (or Shopify total_sales /
+      orders) with dimension shipping_city. Same composed-parts rule as sales
+      by state when both all-channel metrics are requested.
+  - term: orders by pincode
+    canonical_id: total_orders
+    definition: >
+      Use total_orders or commerce event metrics with dimension shipping_pincode
+      (Shopify shipping zip).
+  - term: cancels by payment type
+    canonical_id: event_cancel_revenue
+    definition: >
+      Use cancelled_orders or event_cancel_revenue with payment_bucket or is_cod
+      on commerce_orders (event_date axis).
+  - term: returns by payment type
+    canonical_id: event_return_revenue
+    definition: >
+      Use refunded_orders or event_return_revenue with payment_bucket on
+      commerce_orders (event_date axis).
+  - term: returns by payment
+    canonical_id: event_return_revenue
+  - term: return revenue by COD
+    canonical_id: event_return_revenue
+  - term: cancelled by COD
+    canonical_id: cancelled_orders
+  - term: prepaid vs cod
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
+  - term: cod vs prepaid
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
+  - term: COD vs prepaid
+    definition: >
+      Compare cod_orders and prepaid_orders counts, or break down total_sales /
+      orders by payment_bucket (cod vs online).
+  - term: product cancel revenue
+    canonical_id: product_cancel_revenue
+  - term: product return revenue
+    canonical_id: product_return_revenue
+  - term: top returned products
+    canonical_id: returned_units
+    definition: >
+      SEM-01 canonical: rank product_title (or sku / variant_title) by
+      returned_units desc, with product_return_revenue as the value column.
+      Order-grain return metrics (refunded_orders, return_revenue,
+      event_return_revenue) cannot be broken down by product.
+  - term: most returned products
+    canonical_id: returned_units
+  - term: returned products
+    canonical_id: returned_units
+  - term: returns by product
+    canonical_id: returned_units
+  - term: product returns
+    canonical_id: returned_units
+  - term: most returned sku
+    canonical_id: returned_units
+  - term: returns by sku
+    canonical_id: returned_units
+  - term: returned units
+    canonical_id: returned_units
+  - term: units returned
+    canonical_id: returned_units
+  - term: refund count
+    canonical_id: refund_count
+  - term: refunds issued
+    canonical_id: refund_count
+  - term: return refund lines
+    canonical_id: refund_lines
+  - term: web sessions
+    canonical_id: web_sessions
+  - term: sessions
+    canonical_id: web_sessions
+  - term: spend on product
+    definition: >
+      Use product_total_ad_spend (all), product_meta_ad_spend, product_google_ad_spend,
+      and product_other_ad_spend with dimension product_title or sku. Pair with
+      product_net_revenue for product ROAS. Allocation is directional (campaign
+      spend shared across SKUs on attributed orders).
+  - term: active orders
+    canonical_id: active_orders
+  - term: new customer orders
+    canonical_id: new_customer_orders
+  - term: product orders
+    canonical_id: product_orders
+  - term: units per order
+    canonical_id: units_per_order
+  - term: meta reach
+    canonical_id: meta_reach
+  - term: meta frequency
+    canonical_id: meta_frequency
+  - term: meta link clicks
+    canonical_id: meta_link_clicks
+  - term: meta landing page views
+    canonical_id: meta_landing_page_views
+  - term: meta video completion rate
+    canonical_id: meta_video_completion_rate
+  - term: meta hold rate
+    canonical_id: meta_hold_rate_15s
+  - term: meta breakdown spend
+    canonical_id: meta_breakdown_spend
+  - term: meta breakdown CTR
+    canonical_id: meta_breakdown_ctr
+  # ---- Cross-platform ad performance (ad_channel_pnl) ----
+  # Channel-agnostic ad questions route here so BOTH Meta and Google are returned
+  # (slice by channel). See ontology grain_defaults.by_platform.
+  - term: ad performance
+    canonical_id: ad_channel_roas
+    definition: >
+      Cross-platform ad performance = ad_channel_pnl sliced by channel (meta/google). Report
+      ad_channel_spend, ad_channel_roas, ad_channel_net_profit, ad_channel_orders together — never
+      one platform alone. Drill channel → campaign → adset → ad (adset/ad Meta-deep; Google to
+      campaign). Platform-specific creative/video/hourly detail → meta_ad_performance /
+      google_ad_performance.
+  - term: how are my ads doing
+    canonical_id: ad_channel_roas
+    definition: >
+      Cross-platform ad performance. Default to ad_channel_spend + ad_channel_roas +
+      ad_channel_net_profit by channel (Meta and Google both).
+  - term: paid media
+    canonical_id: null
+    definition: >
+      Paid-media performance across Meta + Google. For economics (spend/ROAS/profit by
+      platform/campaign) use the ad_channel_* metrics on ad_channel_pnl; for platform delivery
+      detail use meta_ad_performance / google_ad_performance.
+  - term: advertising
+    canonical_id: null
+    definition: >
+      Ad performance across platforms — see "ad performance" (ad_channel_* on ad_channel_pnl).
+  - term: ad spend by campaign
+    canonical_id: ad_channel_spend
+  - term: ad spend by platform
+    canonical_id: ad_channel_spend
+  - term: campaign spend
+    canonical_id: ad_channel_spend
+  - term: spend by campaign
+    canonical_id: ad_channel_spend
+  - term: spend by ad
+    canonical_id: ad_channel_spend
+  - term: ad roas
+    canonical_id: ad_channel_roas
+  - term: roas by campaign
+    canonical_id: ad_channel_roas
+  - term: roas by platform
+    canonical_id: ad_channel_roas
+  - term: campaign roas
+    canonical_id: ad_channel_roas
+  - term: ad net profit
+    canonical_id: ad_channel_net_profit
+  - term: net profit by campaign
+    canonical_id: ad_channel_net_profit
+  - term: profit by campaign
+    canonical_id: ad_channel_net_profit
+  - term: orders by campaign
+    canonical_id: ad_channel_orders
+
+  # Channel-qualified terms (2026-09-25). Search matches a term when all of its
+  # words appear in the question, and longer terms rank ahead of shorter ones.
+  - term: meta net sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta sales
+    canonical_id: meta_attribution_net_sales
+  - term: meta revenue
+    canonical_id: meta_attribution_net_sales
+  - term: facebook sales
+    canonical_id: meta_attribution_net_sales
+  - term: facebook revenue
+    canonical_id: meta_attribution_net_sales
+  - term: instagram sales
+    canonical_id: meta_attribution_net_sales
+  - term: instagram revenue
+    canonical_id: meta_attribution_net_sales
+  - term: google net sales
+    canonical_id: google_attribution_net_sales
+  - term: google sales
+    canonical_id: google_attribution_net_sales
+  - term: google revenue
+    canonical_id: google_attribution_net_sales
+  - term: meta profit
+    canonical_id: meta_net_profit
+  - term: facebook profit
+    canonical_id: meta_net_profit
+  - term: google profit
+    canonical_id: google_net_profit
+  - term: meta cogs
+    canonical_id: meta_net_cogs
+  - term: google cogs
+    canonical_id: google_net_cogs
+  - term: meta roas
+    canonical_id: ad_channel_roas
+    definition: "Meta ROAS = ad_channel_roas filtered channel=meta (first-party net sales ÷ Meta spend). Not Meta Ads Manager reported ROAS."
+  - term: facebook roas
+    canonical_id: ad_channel_roas
+    definition: "Meta ROAS = ad_channel_roas filtered channel=meta."
+  - term: google roas
+    canonical_id: ad_channel_roas
+    definition: "Google ROAS = ad_channel_roas filtered channel=google (first-party net sales ÷ Google spend)."
+  - term: meta orders
+    canonical_id: channel_orders
+    definition: "Orders from Meta = channel_orders filtered channel=meta (order date)."
+  - term: google orders
+    canonical_id: channel_orders
+    definition: "Orders from Google = channel_orders filtered channel=google (order date)."
+  - term: meta sessions
+    canonical_id: web_sessions
+    definition: "Meta traffic = web_sessions filtered channel in (ig_feed, fb_feed, audience_network)."
+  - term: meta traffic
+    canonical_id: web_sessions
+    definition: "Meta traffic = web_sessions filtered channel in (ig_feed, fb_feed, audience_network)."
+  - term: google sessions
+    canonical_id: web_sessions
+    definition: "Google traffic = web_sessions filtered channel in (google_pmax, google_search, google_shopping)."
+  - term: google traffic
+    canonical_id: web_sessions
+    definition: "Google traffic = web_sessions filtered channel in (google_pmax, google_search, google_shopping)."
+  - term: meta new customers
+    canonical_id: attributed_new_customer_orders
+    definition: "New customers from Meta = attributed_new_customer_orders filtered lt_platform=meta."
+  - term: google new customers
+    canonical_id: attributed_new_customer_orders
+    definition: "New customers from Google = attributed_new_customer_orders filtered lt_platform=google."
+  - term: net sales by campaign
+    canonical_id: ad_channel_net_sales
+  - term: sales by campaign
+    canonical_id: ad_channel_net_sales
+  - term: revenue by campaign
+    canonical_id: ad_channel_net_sales
+  - term: sales by ad
+    canonical_id: ad_channel_net_sales
+  - term: profit by ad
+    canonical_id: ad_channel_net_profit
+  - term: roas by ad
+    canonical_id: ad_channel_roas
+  - term: net sales by city
+    canonical_id: commerce_net_revenue
+    definition: "Order-date net sales by city = commerce_net_revenue grouped by shipping_city (later returns not deducted)."
+  - term: net sales by state
+    canonical_id: commerce_net_revenue
+    definition: "Order-date net sales by state = commerce_net_revenue grouped by shipping_region."
+  - term: conversion rate
+    canonical_id: session_conversion_rate
+  - term: website conversion rate
+    canonical_id: session_conversion_rate
+  - term: add to cart rate
+    canonical_id: session_atc_rate
+  - term: traffic
+    canonical_id: web_sessions
+  - term: visits
+    canonical_id: web_sessions

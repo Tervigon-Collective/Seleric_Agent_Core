@@ -1,95 +1,42 @@
 id: orders
-display_name: Orders (Shopify-only)
+display_name: Orders
 category: commerce
 status: certified
-description: >-
-  Shopify orders placed in the period (order date), excluding test/revenue-adjustment orders, including later-cancelled (id: orders); formula: count of eligible orders (is_test=0, is_revenue_adjustment=0); grain: order, additive; date axis: order_date (IST); scope: Shopify eligible placements, includes later cancels, excludes test orders; siblings: for all-channels default use total_orders, for new customers use new_customer_orders, for attributed orders use attributed_orders, for event-date cancels/returns use cancelled_orders / refunded_orders on event_date.
+description: 'Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).
+  Grain: order. Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date
+  (outcomes on the day they happen). Redefined in semantic v3 (D-01; D-08; D-08a): the id is kept, the number may
+  change.'
 formula:
-  human_readable: Count of eligible orders placed (is_test = 0, is_revenue_adjustment = 0)
+  human_readable: Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.orders
+  view: commerce
+  measure: commerce.orders
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions:
-- brand_id
-- order_date
-- order_created_at_ist
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
-- item_count
-- order_name
-- commerce_order_id
-supported_filters:
-- date_range
-- brand_id
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
-- item_count
-- order_name
-- commerce_order_id
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Orders by payment method last 30 days
-  request:
-    measures:
-    - orders
-    dimensions:
-    - payment_method
-    time_range:
-      preset: last_30d
-validation_tests:
-- orders >= active_orders for any slice
-deprecated_aliases:
-- daily_pnl.orders_created
-- daily_pnl.total_orders
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: lineItemHistoricalSql.js:186-190
+version: 2.0.0
+replaces:
+- ad_channel_orders
+- attributed_orders
+- total_orders
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-01
+- D-08
+- D-08a
+direction_bad: down

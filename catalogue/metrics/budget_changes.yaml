@@ -1,0 +1,28 @@
+id: budget_changes
+display_name: Budget changes
+category: paid_media
+status: certified
+description: 'Budget changes. Grain: change_event. Date axis: native. Ignores date_axis (its own clock, D-36).'
+formula:
+  human_readable: Budget changes.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: paid_media_changes
+  measure: paid_media_changes.budget_changes
+aggregation: additive
+unit: count
+grain: change_event
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

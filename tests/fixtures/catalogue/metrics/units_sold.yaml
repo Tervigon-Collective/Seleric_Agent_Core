@@ -1,0 +1,84 @@
+id: units_sold
+display_name: Units Sold (net)
+category: product
+status: certified
+description: >-
+  Net units sold (ordered − returned/refunded quantity) per product/SKU/variant, on the order date,
+  from serve.product_performance — default for "units sold", "quantity sold". For returned units use
+  returned_units (units before returns = units_sold + returned_units).
+formula:
+  human_readable: Sum of net_quantity (ordered − refunded) on eligible lines
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.units_sold
+aggregation: additive
+unit: count
+grain: order_item
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- variant_title
+- sku
+- product_type
+- vendor
+- shipping_city
+- shipping_region
+- shipping_country
+- order_status
+- return_status
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- product_id
+- variant_id
+- pnl_refund_class
+- source_name
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- product_type
+- vendor
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- product_id
+- variant_id
+- pnl_refund_class
+- source_name
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Units sold by SKU last 30 days
+  request:
+    measures:
+    - units_sold
+    dimensions:
+    - sku
+    time_range:
+      preset: last_30d
+validation_tests:
+- matches dashboard product-performance net quantity for closed months
+deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:1676,1701
+  note: Basis matches but only exists inside channel-scoped attribution query, not standalone.

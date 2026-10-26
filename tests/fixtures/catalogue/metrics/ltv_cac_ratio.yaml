@@ -1,0 +1,53 @@
+id: ltv_cac_ratio
+display_name: LTV:CAC
+category: finance
+status: certified
+description: >-
+  LTV:CAC ratio as shown on the dashboard = (first-order net sales per new customer) ÷ (ad spend per
+  new customer), from period sums on serve.ltv_cac_daily. Because "LTV" here is first-order value, a
+  ratio below 1 means the first order does not pay back acquisition cost. Components: ltv and cac.
+formula:
+  human_readable: ltv / cac
+  authoritative_source: cube
+  depends_on:
+  - ltv
+  - cac
+cube_mapping:
+  view: ltv_cac
+  measure: ltv_cac.ltv_cac_ratio
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Growth / Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: LTV:CAC for June 2026
+  request:
+    measures:
+    - ltv_cac_ratio
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests: []
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-31'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/analyticsClickhouse.js getNewCustomerMetrics + fe performanceSummary.js
+ratio_components:
+  numerator: ltv_cac.ltv
+  denominator: ltv_cac.cac

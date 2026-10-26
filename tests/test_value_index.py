@@ -359,7 +359,7 @@ def test_v2_catalogue_filter_values_are_scope_not_vocabulary(catalogue):
     from seleric_mcp.catalogue_service.service import CatalogueService
     from seleric_mcp.config import PROJECT_ROOT
 
-    v2 = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v2"))
+    v2 = CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue"))
     snap = _snap({("platform", "commerce"): {"meta": 588, "google": 254, "whatsapp": 23}})
     out = _index(v2).resolve("which channels drove our meta orders", snap)
     meta = next(t for t in out["terms"] if t["term"] == "meta")

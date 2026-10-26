@@ -1,8 +1,24 @@
 id: taxes
 display_name: Taxes
-one_liner: GST on net sales.
-aliases: [taxes, tax, gst, gst on net sales]
-axes: {}
+one_liner: GST on net sales, each order line at its own rate.
+aliases:
+- taxes
+- tax
+- gst
+axes:
+  date:
+    values:
+    - order
+    - finance
+    default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
 resolves:
-  - when: {}
-    metric: taxes_on_net_sales
+- when: {}
+  metric: taxes_on_net_sales
+- when:
+    scope: product
+  metric: product_taxes_on_net_sales

@@ -1,84 +1,48 @@
 id: units_sold
-display_name: Units Sold (net)
+display_name: Units sold
 category: product
 status: certified
-description: >-
-  Net units sold (ordered − returned/refunded quantity) per product/SKU/variant, on the order date,
-  from serve.product_performance — default for "units sold", "quantity sold". For returned units use
-  returned_units (units before returns = units_sold + returned_units).
+description: 'Net units sold = units ordered − cancelled − RTO − returned. Grain: order_line_event. Date axis: switchable.
+  date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined
+  in semantic v3 (D-22; D-01; D-02b; D-03; D-03a; D-05; D-08; D-08a…): the id is kept, the number may change.'
 formula:
-  human_readable: Sum of net_quantity (ordered − refunded) on eligible lines
+  human_readable: Net units sold = units ordered − cancelled − RTO − returned.
   authoritative_source: cube
+  depends_on:
+  - units_ordered
+  - units_cancelled
+  - units_rto
+  - returned_units
+  composition:
+  - metric: units_ordered
+    sign: 1
+  - metric: units_cancelled
+    sign: -1
+  - metric: units_rto
+    sign: -1
+  - metric: returned_units
+    sign: -1
 cube_mapping:
-  view: product_performance
-  measure: product_performance.units_sold
+  view: product_profit
+  measure: product_profit.units_sold
 aggregation: additive
 unit: count
-grain: order_item
-supported_dimensions:
-- brand_id
-- order_date
-- product_title
-- variant_title
-- sku
-- product_type
-- vendor
-- shipping_city
-- shipping_region
-- shipping_country
-- order_status
-- return_status
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- product_id
-- variant_id
-- pnl_refund_class
-- source_name
-supported_filters:
-- date_range
-- brand_id
-- product_title
-- sku
-- product_type
-- vendor
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- product_id
-- variant_id
-- pnl_refund_class
-- source_name
+grain: order_line_event
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   scopes:
   - metrics:read
-examples:
-- question: Units sold by SKU last 30 days
-  request:
-    measures:
-    - units_sold
-    dimensions:
-    - sku
-    time_range:
-      preset: last_30d
-validation_tests:
-- matches dashboard product-performance net quantity for closed months
-deprecated_aliases: []
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: lineItemHistoricalSql.js:1676,1701
-  note: Basis matches but only exists inside channel-scoped attribution query, not standalone.
+version: 2.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: product_profit.order_date
+  event_date: product_profit.event_date
+decision_ids:
+- D-22
+direction_bad: down

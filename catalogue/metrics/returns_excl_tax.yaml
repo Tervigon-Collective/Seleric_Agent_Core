@@ -1,82 +1,48 @@
 id: returns_excl_tax
-display_name: Returns (ex-GST, refund events)
+display_name: Returns excl tax
 category: operations
 status: certified
-description: >-
-  Return-class refund amount (ex-GST) on the refund date, from serve.refund_events. Refund-transaction
-  view; for the P&L return deduction use return_revenue.
+description: 'Returns value ex-GST, by refund date. Refunds of exchanged items are excluded: exchanges never enter
+  return metrics (D-01); the refund date is a native cash clock and ignores date_axis (D-36). Grain: refund. Date
+  axis: native. Ignores date_axis (its own clock, D-36). Redefined in semantic v3 (D-01; D-20; D-36; D-02b; D-22):
+  the id is kept, the number may change.'
 formula:
-  human_readable: SUM(returns_excl_tax)
+  human_readable: 'Returns value ex-GST, by refund date. Refunds of exchanged items are excluded: exchanges never
+    enter return metrics (D-01); the refund date is a native cash clock and ignores date_axis (D-36).'
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: refund_events
-  measure: refund_events.returns_excl_tax
-  time_dimension: refund_events.refund_date
+  view: returns
+  measure: returns.returns_excl_tax
 aggregation: additive
-unit: currency
+unit: INR
 currency_default: INR
-grain: refund event
-supported_dimensions:
-- brand_id
-- refund_date
-- order_date
-- pnl_refund_class
-- return_status
-- primary_return_status
-- shopify_return_status
-- order_status
-- payment_status
-- is_cod
-- restock
-- is_unprocessed
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- payment_method
-- payment_gateway
-- payment_bucket
-- is_prepaid
-supported_filters:
-- date_range
-- brand_id
-- pnl_refund_class
-- return_status
-- payment_status
-- is_cod
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- payment_method
-- payment_gateway
-- payment_bucket
-- is_prepaid
+grain: refund
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Returns (ex-GST, refund events) last 30 days
-  request:
-    measures:
-    - returns_excl_tax
-    time_range:
-      preset: last_30d
-validation_tests:
-- returns_excl_tax >= 0 for any slice
-deprecated_aliases: []
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: lineItemHistoricalSql.js:42-63,315-332,689
-  note: Formula/tax logic matches at brand×day totals but catalogued dims (restock, return_status, geo, payment) have zero support in the live query.
+version: 2.0.0
+replaces: []
+date_axis: native
+decision_ids:
+- D-01
+- D-20
+- D-36
+excluded_dimensions:
+  product_type: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'
+  product_title: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'
+  variant_title: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'
+  sku: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole refund on
+    every line. Use the line-grain product_* twin.'
+  restock_type: 'Refund-level amount: split by the refunded lines'' product / restock it would repeat the whole
+    refund on every line. Use the line-grain product_* twin.'

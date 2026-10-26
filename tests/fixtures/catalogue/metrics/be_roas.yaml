@@ -1,0 +1,52 @@
+id: be_roas
+display_name: Break-Even ROAS (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Break-even ROAS: net sales ÷ (net sales − Net COGS), from period sums on serve.canonical_pnl. Same
+  number as be_roas_all_channels — prefer that id unless the user says "Shopify-only".
+formula:
+  human_readable: commerce_net_revenue_daily / (commerce_net_revenue_daily - net_cogs)
+  authoritative_source: cube
+  depends_on:
+  - commerce_net_revenue_daily
+  - net_cogs
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.be_roas
+aggregation: ratio
+unit: ratio
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  scopes:
+  - metrics:read
+examples:
+- question: BE ROAS for June 2026
+  request:
+    measures:
+    - be_roas
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- June 2026 brand 20 ≈ dashboard 1.97x
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/attributionPnLHelpers.js:195-196
+ratio_components:
+  numerator: canonical_pnl.net_sales
+  denominator: canonical_pnl.net_cogs

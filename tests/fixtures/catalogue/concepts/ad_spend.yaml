@@ -1,0 +1,25 @@
+id: ad_spend
+display_name: Ad Spend
+one_liner: Advertising spend; all platforms (Meta+Google) unless one is named.
+aliases: [ad spend, spend, marketing spend, performance marketing, adspend, total ad spend]
+axes:
+  platform: {values: [all, meta, google, shopify_card], default: all}
+  grain: {values: [period, campaign, adset, ad], default: period}
+resolves:
+  - when: {platform: all, grain: period}
+    metric: total_ad_spend
+  - when: {platform: shopify_card, grain: period}
+    metric: shopify_ad_spend
+  - when: {platform: meta, grain: period}
+    metric: meta_spend
+  - when: {platform: google, grain: period}
+    metric: google_spend
+  - when: {grain: campaign}
+    metric: ad_channel_spend
+  - when: {grain: adset}
+    metric: ad_channel_spend
+  - when: {grain: ad}
+    metric: ad_channel_spend
+disambiguation: >
+  "meta spend"/"google spend" = ad_channel_spend filtered to that channel at the
+  ad grain; the period total is total_ad_spend (all platforms).

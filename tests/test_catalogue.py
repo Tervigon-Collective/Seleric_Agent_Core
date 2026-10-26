@@ -431,7 +431,7 @@ def test_resolution_thresholds_are_configurable():
     from seleric_mcp.config import PROJECT_ROOT
 
     strict = CatalogueService(
-        load_catalogue(PROJECT_ROOT / "catalogue"),
+        load_catalogue(PROJECT_ROOT / "tests" / "fixtures" / "catalogue"),
         auto_threshold=0.99,
         ambiguous_threshold=0.60,
         runner_up_margin=0.05,

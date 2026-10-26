@@ -1,92 +1,40 @@
 id: gross_sales
-display_name: Gross Sales (Shopify-only, ex-GST)
+display_name: Gross sales
 category: commerce
 status: certified
-description: >-
-  Shopify gross sales: order value before discounts, ex-GST, on the order date, from
-  serve.commerce_orders — includes orders later cancelled or voided (dashboard Gross Sales card).
-  Sliceable by geo, payment, UTM, customer type. Same total as gross_sales_all_channels. Incl.-GST
-  equivalent → total_sales.
+description: 'Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales. Grain:
+  order. Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes
+  on the day they happen). Redefined in semantic v3 (D-09a; D-02b; D-01; D-08; D-08a; D-10): the id is kept, the
+  number may change.'
 formula:
-  human_readable: 'Sum of (gross_excl_tax_derived + discount_excl_tax) per eligible order (is_test = 0,
-    is_revenue_adjustment = 0); proportional GST strip per policy v1
-
-    '
+  human_readable: Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales.
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.gross_sales_excl_tax
+  view: commerce
+  measure: commerce.gross_sales
 aggregation: additive
-unit: currency
+unit: INR
 currency_default: INR
 grain: order
-supported_dimensions:
-- brand_id
-- order_date
-- order_created_at_ist
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
-supported_filters:
-- date_range
-- brand_id
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Gross sales this month
-  request:
-    measures:
-    - gross_sales
-    time_range:
-      preset: this_month
-validation_tests:
-- reconciles to dashboard Gross Sales card for closed periods
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalQueryHelpers.js:28-29,57-58
+version: 2.0.0
+replaces:
+- gross_sales_all_channels
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-09a
+- D-02b
+direction_bad: down

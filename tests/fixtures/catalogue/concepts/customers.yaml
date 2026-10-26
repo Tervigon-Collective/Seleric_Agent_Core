@@ -1,0 +1,13 @@
+id: customers
+display_name: Customers
+one_liner: Customer counts; total unless new/repeat is named.
+aliases: [customers, new customers, repeat customers, buyers]
+axes:
+  type: {values: [all, new, repeat], default: all}
+resolves:
+  - when: {type: all}
+    metric: customers
+  - when: {type: new}
+    metric: new_customers
+  - when: {type: repeat}
+    metric: repeat_customers

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """SEM-15 dataset contract certification against live ClickHouse.
 
-For every contract in ``catalogue_v2_src/datasets.yaml`` this runs the gates the
+For every contract in ``catalogue_src/datasets.yaml`` this runs the gates the
 review asked for on each physical binding:
 
   U  uniqueness   ``count()`` == distinct (declared_keys)  (no duplicate rows)
@@ -38,8 +38,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from seleric_mcp.semantic_inventory.sources import ch_query  # noqa: E402
 
-# v2 by default; semantic v3 (Phase 7): CERTIFY_DATASETS=catalogue_v3_src CERTIFY_OUT=doc/semantic_v3/results/datasets
-_SRC = os.environ.get("CERTIFY_DATASETS", "catalogue_v2_src")
+# CERTIFY_DATASETS=catalogue_src CERTIFY_OUT=doc/semantic/results/datasets
+_SRC = os.environ.get("CERTIFY_DATASETS", "catalogue_src")
 _OUT = Path(os.environ.get("CERTIFY_OUT", "doc/semantic_datasets"))
 DATASETS = ROOT / _SRC / "datasets.yaml"
 OUT_JSON = ROOT / _OUT / "certification.json"

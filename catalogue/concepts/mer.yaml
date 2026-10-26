@@ -1,8 +1,53 @@
 id: mer
 display_name: MER
-one_liner: Marketing efficiency ratio (net sales / total ad spend).
-aliases: [mer, marketing efficiency ratio]
-axes: {}
+one_liner: Marketing efficiency ratio = net sales ÷ ad spend.
+aliases:
+- mer
+- marketing efficiency ratio
+- blended roas
+axes:
+  date:
+    values:
+    - order
+    - finance
+    default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
+  channel:
+    values:
+    - all
+    - meta
+    - google
+    - whatsapp
+    - organic
+    - unattributed
+    default: all
+  paid:
+    values:
+    - all
+    - paid
+    default: all
+axis_filters:
+  channel:
+    meta:
+      finance_channel: meta
+    google:
+      finance_channel: google
+    whatsapp:
+      finance_channel: whatsapp
+    organic:
+      finance_channel: organic
+    unattributed:
+      finance_channel: unattributed
+  paid:
+    paid:
+      is_paid: 'true'
 resolves:
-  - when: {}
-    metric: mer
+- when: {}
+  metric: mer
+- when:
+    scope: product
+  metric: product_mer

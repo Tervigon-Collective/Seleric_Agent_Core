@@ -1,0 +1,35 @@
+id: product_clicks
+display_name: Product clicks (allocated)
+category: product
+status: certified
+description: 'Clicks allocated to the product line. Grain: campaign_day_line. Date axis: cohort only. Order-date
+  cohort only (refuses event_date). Redefined in semantic v3 (D-19o; D-27; D-06): the id is kept, the number may
+  change.'
+formula:
+  human_readable: Clicks allocated to the product line.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: product_ads
+  measure: product_ads.product_clicks
+aggregation: additive
+unit: count
+grain: campaign_day_line
+data_owner: Growth / Paid Media
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces: []
+date_axis: cohort_only
+date_axis_refusal: 'allocated product-ad family (D-19o, D-27, D-34): use date_axis=order_date; ad spend is not an
+  event of an order'
+decision_ids:
+- D-19o
+- D-27

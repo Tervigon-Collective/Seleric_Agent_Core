@@ -27,7 +27,7 @@ import yaml
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_catalogue_v2 import OUT  # noqa: E402
+OUT = REPO / "catalogue"
 from verify_compositions import _load  # noqa: E402
 from seleric_mcp.catalogue_service.loader import load_catalogue  # noqa: E402
 

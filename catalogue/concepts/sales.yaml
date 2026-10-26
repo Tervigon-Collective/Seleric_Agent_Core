@@ -1,57 +1,92 @@
 id: sales
-display_name: Sales / Revenue
-one_liner: Money from sales; net (ex-GST, after discounts & returns) unless stated.
-aliases: [revenue, sales, net sales, net revenue, topline, turnover, gross sales, total sales]
+display_name: Sales
+one_liner: Net sales of the orders placed in the period (order date, as of now). date_axis=event_date gives the
+  same metric with cancels / RTO / returns on the day they happen.
+aliases:
+- sales
+- sale
+- revenue
+- topline
+- turnover
+- gross sale
+- net sale
 axes:
-  basis: {values: [net, gross, total], default: net}
-  scope: {values: [company, shopify, product], default: company}
-  attribution: {values: [none, last_touch, channel, platform], default: none}
-  platform: {values: [all, meta, google], default: all}
-  grain: {values: [period, order, daily], default: period}
+  basis:
+    values:
+    - net
+    - gross
+    - total
+    default: net
+  date:
+    values:
+    - order
+    - finance
+    default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
+  channel:
+    values:
+    - all
+    - meta
+    - google
+    - whatsapp
+    - organic
+    - unattributed
+    default: all
+  paid:
+    values:
+    - all
+    - paid
+    default: all
+axis_filters:
+  channel:
+    meta:
+      finance_channel: meta
+    google:
+      finance_channel: google
+    whatsapp:
+      finance_channel: whatsapp
+    organic:
+      finance_channel: organic
+    unattributed:
+      finance_channel: unattributed
+  paid:
+    paid:
+      is_paid: 'true'
 resolves:
-  - when: {basis: net, scope: company, attribution: none}
-    metric: net_sales_all_channels
-  - when: {basis: gross, scope: company, attribution: none}
-    metric: gross_sales_all_channels
-  - when: {basis: total, scope: company, attribution: none}
-    metric: total_sales_all_channels
-  - when: {basis: net, scope: shopify, attribution: none, grain: period}
-    metric: commerce_net_revenue_daily
-  - when: {basis: net, scope: shopify, attribution: none, grain: order}
-    metric: commerce_net_revenue
-  - when: {basis: gross, scope: shopify, attribution: none}
-    metric: gross_sales
-  - when: {basis: total, scope: shopify, attribution: none}
-    metric: total_sales
-  - when: {basis: net, scope: product}
-    metric: product_net_revenue
-  - when: {basis: net, attribution: last_touch}
-    metric: attributed_net_revenue
-  - when: {basis: gross, attribution: last_touch}
-    metric: attributed_gross_revenue
-  - when: {basis: net, attribution: channel}
-    metric: channel_net_revenue
-    filter: {channel_type: attribution_closed_set}
-    fallback:
-      metric: channel_orders
-      note: >
-        Channel net revenue is uncertified; reporting orders by channel. For
-        dashboard-parity channel revenue use meta_attribution_net_sales /
-        google_attribution_net_sales (per platform).
-  - when: {basis: gross, attribution: channel}
-    metric: channel_gross_revenue
-    filter: {channel_type: attribution_closed_set}
-    fallback:
-      metric: channel_orders
-      note: Channel gross revenue is uncertified; reporting orders by channel.
-  - when: {basis: net, attribution: platform, platform: meta}
-    metric: meta_attribution_net_sales
-  - when: {basis: net, attribution: platform, platform: google}
-    metric: google_attribution_net_sales
-disambiguation: >
-  attribution=none (P&L) and attribution=last_touch/channel are different readings
-  and do NOT reconcile (~20% apart). If attribution is unstated, default to none
-  (all-channels P&L) and say so.
+- when:
+    basis: net
+  metric: net_sales
+- when:
+    basis: gross
+  metric: gross_sales
+- when:
+    basis: total
+  metric: total_sales
+- when:
+    basis: net
+    scope: product
+  metric: product_order_net_sales
+- when:
+    basis: gross
+    scope: product
+  metric: product_order_gross_sales
 unsupported:
-  - when: {basis: total, scope: product}
-    reason: product/line grain has no incl-GST (total) measure
+- when:
+    basis: total
+    scope: product
+  reason: Total sales (incl. GST) is order level only. By product use gross (product_gross_sale) or net (product_net_revenue)
+    — both ex-GST.
+disambiguation: 'Default net sales = net_sales: the orders placed in the period (order date). date_axis=event_date
+  ("P&L net sales", "processed in") books returns / cancels on the day they happen — the Finance dashboard Net Sales
+  card; the answer then also shows the Undated member. Gross and total sales are booked at placement, so order and
+  event date give the same number. A channel (meta / google / whatsapp / organic / unattributed) filters finance_channel
+  — Meta includes Meta organic; add paid=paid for paid clicks only. scope=product (any breakdown / filter by product,
+  variant, SKU or product type) is line level, ex-GST: gross = product_gross_sale (before discounts / returns /
+  cancels), net = product_net_revenue (after them). The order-level ids (net_sales, gross_sales) cannot be split
+  by product — an order holds several products.
+
+  '

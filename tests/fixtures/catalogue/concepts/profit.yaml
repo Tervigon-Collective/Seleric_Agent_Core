@@ -1,0 +1,37 @@
+id: profit
+display_name: Profit
+one_liner: Bottom-line profit; all-channels net unless stated.
+aliases: [profit, net profit, bottom line, gross profit]
+axes:
+  basis: {values: [gross, net, contribution], default: net}
+  scope: {values: [company, all_channels, shopify, blended, product, channel], default: all_channels}
+resolves:
+  - when: {basis: gross, scope: channel}
+    metric: channel_gross_profit
+  - when: {basis: net, scope: channel}
+    metric: ad_channel_net_profit
+  - when: {basis: contribution, scope: channel}
+    metric: channel_gross_profit
+  - when: {basis: net, scope: all_channels}
+    metric: net_profit_all_channels
+  - when: {basis: net, scope: company}
+    metric: net_profit_all_channels
+  - when: {basis: net, scope: shopify}
+    metric: net_profit
+  - when: {basis: net, scope: blended}
+    metric: net_profit_blended
+  - when: {basis: gross, scope: company}
+    metric: gross_profit
+  - when: {basis: gross, scope: all_channels}
+    metric: gross_profit
+  - when: {basis: contribution, scope: company}
+    metric: contribution_margin
+  - when: {basis: contribution, scope: all_channels}
+    metric: contribution_margin
+  - when: {basis: gross, scope: product}
+    metric: product_gross_profit
+disambiguation: >
+  Net profit defaults to all-channels (Historical/P&L). Shopify-only is a narrower
+  scope; blended is all-platforms. When a marketing channel is named (google/meta/organic),
+  use scope=channel: gross → channel_gross_profit (Gross Sales − Ad Spend − Gross COGS,
+  Attribution Overview tile), net → ad_channel_net_profit (filter channel=...).

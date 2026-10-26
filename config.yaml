@@ -2,8 +2,8 @@
 # Env vars still override any key here (useful for tests and one-off ops).
 
 cube:
-  # Semantic v3 (doc/semantic_v3): Cube v3 model mage-ai/infra/cube/model_v3, compose service cube-v3 on
-  # 127.0.0.1:4003 (in compose the MCP uses http://cube-v3:4000 via CUBE_API_URL). Cube v1 / v2 were retired in Phase 9.
+  # Cube model: mage-ai infra/cube/model_v3 (cube_v3.js), compose service cube-v3 on
+  # 127.0.0.1:4003 (in compose the MCP uses http://cube-v3:4000 via CUBE_API_URL).
   api_url: http://127.0.0.1:4003
 
 pipeboard:

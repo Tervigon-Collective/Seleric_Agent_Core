@@ -1,0 +1,38 @@
+id: product_gross_cogs
+display_name: Product gross cogs
+category: product
+status: certified
+description: 'Product (landed purchase) cost of all placed units, no return adjustment (D-03). Grain: order_line_event.
+  Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes
+  on the day they happen). Redefined in semantic v3 (D-03; D-11; D-01; D-02b; D-03a; D-05; D-08; D-08a…): the id
+  is kept, the number may change.'
+formula:
+  human_readable: Product (landed purchase) cost of all placed units, no return adjustment (D-03).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: product_profit
+  measure: product_profit.gross_cogs
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: order_line_event
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces: []
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: product_profit.order_date
+  event_date: product_profit.event_date
+decision_ids:
+- D-03
+- D-11

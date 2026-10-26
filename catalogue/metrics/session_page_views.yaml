@@ -1,0 +1,31 @@
+id: session_page_views
+display_name: Page views (sessions)
+category: web_analytics
+status: certified
+description: 'Page views of web sessions, sliceable by traffic source, campaign, device and landing page (≈1.3 %
+  below the daily mart page_views, which also counts session-less events). Grain: session. Date axis: native. Ignores
+  date_axis (its own clock, D-36).'
+formula:
+  human_readable: Page views of web sessions, sliceable by traffic source, campaign, device and landing page (≈1.3
+    % below the daily mart page_views, which also counts session-less events).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: web_sessions
+  measure: web_sessions.session_page_views
+aggregation: additive
+unit: count
+grain: session
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

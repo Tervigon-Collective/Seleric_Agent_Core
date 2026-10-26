@@ -1,14 +1,19 @@
 id: ltv
 display_name: LTV
-one_liner: Lifetime value; new-customer first-order AOV unless lifetime is asked.
-aliases: [ltv, lifetime value, customer lifetime value]
+one_liner: First-order net revenue per new customer (dashboard LTV basis).
+aliases:
+- ltv
+- lifetime value
+- customer lifetime value
+- clv
 axes:
-  horizon: {values: [first_order, lifetime], default: first_order}
+  scope:
+    values:
+    - all
+    - attributed
+    default: all
 resolves:
-  - when: {horizon: first_order}
-    metric: ltv
-  - when: {horizon: lifetime}
-    metric: avg_ltv
-disambiguation: >
-  The Historical "LTV" card is new-customer first-order AOV (ltv); customer lifetime
-  net revenue / customers is avg_ltv.
+- metric: ltv
+- when:
+    scope: attributed
+  metric: new_customer_ltv

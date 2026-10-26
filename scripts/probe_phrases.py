@@ -1,4 +1,4 @@
-"""Phrases a user might type for a metric — seeds the semantic v2 resolution gate (scripts/v2_gates.py)
+"""Phrases a user might type for a metric — seeds the semantic v2 resolution gate (scripts/catalogue_gates.py)
 and the inventory (scripts/build_metric_inventory_v2.py), on top of glossary terms, concept aliases and
 registry aliases. Moved from the retired v1 scripts/build_metric_inventory.py."""
 

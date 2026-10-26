@@ -1,11 +1,29 @@
 id: impressions
 display_name: Impressions
-one_liner: Ad impressions; name the platform (Meta or Google).
-aliases: [impressions, ad impressions]
+one_liner: Ad impressions.
+aliases:
+- impressions
+- impr
 axes:
-  platform: {values: [meta, google]}
+  platform:
+    values:
+    - all
+    - meta
+    - google
+    default: all
+  scope:
+    values:
+    - all
+    - product
+    default: all
+axis_filters:
+  platform:
+    meta:
+      ad_platform: meta
+    google:
+      ad_platform: google
 resolves:
-  - when: {platform: meta}
-    metric: meta_impressions
-  - when: {platform: google}
-    metric: google_impressions
+- metric: impressions
+- when:
+    scope: product
+  metric: product_impressions

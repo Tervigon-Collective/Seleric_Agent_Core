@@ -1,56 +1,37 @@
 id: ltv
-display_name: New-customer first-order AOV (LTV card)
+display_name: LTV
 category: finance
 status: certified
-description: >-
-  Average first-order net sales per new customer in the period (ex-GST): new-customer revenue ÷ new
-  customers on serve.ltv_cac_daily. Labelled "LTV" on the LTV:CAC dashboard card, but it is
-  first-order value, NOT lifetime value. Real all-time value per customer (avg_ltv) is not yet
-  queryable — say so rather than presenting this as lifetime value.
+description: 'LTV = first-order net sales ex-GST of new customers ÷ new customers, by channel / campaign (v1 definition,
+  cohort-only: refused on event_date, D-31). Grain: brand_day_channel_ad. Date axis: cohort only. Order-date cohort
+  only (refuses event_date). Redefined in semantic v3 (D-15; D-31; D-01; D-02b; D-07; D-08; D-08a; D-16): the id
+  is kept, the number may change.'
 formula:
-  human_readable: new_customer_revenue / new_customers
+  human_readable: 'LTV = first-order net sales ex-GST of new customers ÷ new customers, by channel / campaign (v1
+    definition, cohort-only: refused on event_date, D-31).'
   authoritative_source: cube
   depends_on:
   - new_customers
 cube_mapping:
-  view: ltv_cac
-  measure: ltv_cac.ltv
+  view: finance
+  measure: finance.ltv
 aggregation: ratio
-unit: currency
+unit: INR
 currency_default: INR
-grain: daily
-supported_dimensions:
-- brand_id
-- report_date
-supported_filters:
-- date_range
-- brand_id
+grain: brand_day_channel_ad
 data_owner: Growth / Finance
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   scopes:
   - metrics:read
-examples:
-- question: New-customer first-order AOV (LTV card) last 30 days
-  request:
-    measures:
-    - ltv
-    time_range:
-      preset: last_30d
-validation_tests: []
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-31'
-  source: Seleric_Dashboard fe-dashboard performanceSummary.js
-  note: 'First-order AOV for new attributed customers; reconciles with attributed_net_revenue filtered
-    to is_new_customer=1. Not lifetime LTV.
-
-    '
-ratio_components:
-  numerator: ltv_cac.new_customer_revenue
-  denominator: ltv_cac.new_customers
+version: 2.0.0
+replaces: []
+date_axis: cohort_only
+date_axis_refusal: 'cohort-defined rate (D-31): use date_axis=order_date; this measure has no event-date meaning'
+decision_ids:
+- D-15
+- D-31

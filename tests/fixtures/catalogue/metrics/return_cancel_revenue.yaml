@@ -1,0 +1,91 @@
+id: return_cancel_revenue
+display_name: Return / Cancel Revenue (Shopify-only, ex-GST)
+category: commerce
+status: certified
+description: >-
+  Revenue deducted by returns and cancellations in the period, ex-GST, on the event date, from
+  serve.commerce_order_events (dashboard Return / Cancel Rev card, shown negated). Sliceable by geo,
+  payment, UTM, event_type. Same total as return_cancel_revenue_all_channels.
+formula:
+  human_readable: 'Sum of per-line return/cancel revenue deductions (returned_revenue_excl_gst or cancelled_revenue_excl_gst,
+    falling back to placement gross ex-GST) for events in period; gift cards excluded
+
+    '
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.event_revenue_deduction_excl_tax
+  time_dimension: commerce_orders.event_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: order
+supported_dimensions:
+- brand_id
+- event_date
+- payment_method
+- payment_bucket
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- payment_gateway
+- is_cod
+- is_prepaid
+- financial_status
+- event_type
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- payment_bucket
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- payment_gateway
+- is_cod
+- is_prepaid
+- financial_status
+- event_type
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Revenue lost to returns and cancellations last month
+  request:
+    measures:
+    - return_cancel_revenue
+    time_range:
+      preset: last_month
+validation_tests:
+- reconciles to dashboard Return / Cancel Rev card for closed periods (sign-flipped)
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:294,322

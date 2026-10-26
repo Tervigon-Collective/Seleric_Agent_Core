@@ -1,0 +1,63 @@
+id: order_pnl_net_sales
+display_name: Net sales (P&L basis)
+category: finance
+status: certified
+description: 'Net sales ex-GST = gross sales + shipping revenue − cancelled − RTO − returned − shipping reversed
+  ± exchange price adjustment. Grain: brand_day_channel_ad. Date axis: switchable. date_axis=order_date (default,
+  orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-02;
+  D-02a; D-02b; D-10; D-01; D-03; D-03a; D-05…): the id is kept, the number may change. Also answers the ids: pnl_net_sales.'
+formula:
+  human_readable: Net sales ex-GST = gross sales + shipping revenue − cancelled − RTO − returned − shipping reversed
+    ± exchange price adjustment.
+  authoritative_source: cube
+  depends_on:
+  - order_pnl_gross_sales
+  - shipping_revenue
+  - order_pnl_cancel_revenue
+  - order_pnl_rto_revenue
+  - order_pnl_return_revenue
+  - shipping_revenue_reversal
+  - exchange_price_adjustment
+  composition:
+  - metric: order_pnl_gross_sales
+    sign: 1
+  - metric: shipping_revenue
+    sign: 1
+  - metric: order_pnl_cancel_revenue
+    sign: -1
+  - metric: order_pnl_rto_revenue
+    sign: -1
+  - metric: order_pnl_return_revenue
+    sign: -1
+  - metric: shipping_revenue_reversal
+    sign: -1
+  - metric: exchange_price_adjustment
+    sign: 1
+cube_mapping:
+  view: finance
+  measure: finance.net_sales
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: brand_day_channel_ad
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: finance.order_date
+  event_date: finance.event_date
+decision_ids:
+- D-02
+- D-02a
+- D-02b
+- D-10

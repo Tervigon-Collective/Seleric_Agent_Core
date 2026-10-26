@@ -1,78 +1,29 @@
 id: events_per_session
-display_name: Events per Session
+display_name: Events per session
 category: web_analytics
 status: certified
-description: >-
-  Average website events per session: event count ÷ distinct sessions on serve.web_events (event
-  grain), recomputed for any slice.
+description: 'Events per session. Grain: event. Date axis: native. Ignores date_axis (its own clock, D-36).'
 formula:
-  human_readable: COUNT(events) / COUNT(DISTINCT session_id)
+  human_readable: Events per session.
   authoritative_source: cube
+  depends_on:
+  - web_events
 cube_mapping:
-  view: web_events
-  measure: web_events.events_per_session
+  view: web_event_detail
+  measure: web_event_detail.events_per_session
 aggregation: ratio
 unit: ratio
-grain: brand × event (aggregated on any slice)
-supported_dimensions:
-- brand_id
-- event_date
-- event_type
-- channel
-- utm_source
-- utm_medium
-- utm_campaign
-- geo_city
-- geo_region
-- geo_country
-- page_path
-- product_id
-- sku
-- collection
-- session_platform
-supported_filters:
-- date_range
-- brand_id
-- event_type
-- channel
-- utm_source
-- utm_medium
-- utm_campaign
-- geo_city
-- geo_region
-- geo_country
-- page_path
-- product_id
-- sku
-- collection
-- session_platform
+grain: event
 data_owner: Growth / Analytics
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Events per Session last 30 days
-  request:
-    measures:
-    - events_per_session
-    time_range:
-      preset: last_30d
-validation_tests:
-- events_per_session >= 1 on unfiltered slices
-ratio_components:
-  numerator: web_events.events
-  denominator: web_events.unique_sessions
-companion_measures:
-- web_events
-deprecated_aliases: []
-dashboard_alignment:
-  status: not_implemented
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: —
-  note: Zero hits for events-per-session anywhere in Node-Backend.
+version: 1.0.0
+replaces: []
+date_axis: native
+direction_bad: down

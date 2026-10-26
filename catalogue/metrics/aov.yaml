@@ -1,70 +1,42 @@
 id: aov
-display_name: Average Order Value (Shopify-only)
+display_name: AOV
 category: commerce
 status: certified
-description: >-
-  Average order value (dashboard AOV card): Total Sales INCLUDING GST ÷ orders placed, on the order
-  date, from serve.commerce_orders; includes later-cancelled orders in both parts. Slice by shipping
-  region/country/city. For AOV by marketing source (ex-GST net basis) use attributed_aov.
+description: 'Average order value incl. GST = total sales ÷ orders (D-02b). Grain: order. Date axis: placement only.
+  date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined
+  in semantic v3 (D-02b; D-31; D-01; D-08; D-08a; D-09a; D-10): the id is kept, the number may change.'
 formula:
-  human_readable: total_sales / orders
+  human_readable: Average order value incl. GST = total sales ÷ orders (D-02b).
   authoritative_source: cube
   depends_on:
   - total_sales
   - orders
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.aov
-  measure_pct: null
+  view: commerce
+  measure: commerce.aov
 aggregation: ratio
-unit: currency
+ratio_components:
+  numerator: total_sales
+  denominator: orders
+unit: INR
 currency_default: INR
-grain: daily
-supported_dimensions:
-- brand_id
-- order_date
-- shipping_region
-- shipping_country
-- shipping_city
-supported_filters:
-- date_range
-- brand_id
-- shipping_region
-- shipping_country
-- shipping_city
+grain: order
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: AOV by shipping region this quarter
-  request:
-    measures:
-    - aov
-    dimensions:
-    - shipping_region
-    time_range:
-      preset: last_90d
-validation_tests:
-- aov > 0 for any slice with orders
-- aov equals total_sales_incl_tax ÷ orders for the same slice
-deprecated_aliases:
-- daily_pnl.avg_order_value
-dashboard_alignment:
-  status: MATCH
-  audited_on: '2026-09-04'
-  source: Seleric_Dashboard/fe-dashboard
-  evidence: src/lib/metrics/dashboardMetricDefinitions.js Average Order Value; storeMetrics.js totalSales/orders
-  note: 'Cube commerce_orders.aov already uses total_sales_incl_tax / orders. Distinct from Attribution
-    card AOV (Gross Sales ÷ Orders) and True AOV.
-
-    '
-ratio_components:
-  numerator: commerce_orders.total_sales
-  denominator: commerce_orders.orders
+version: 2.0.0
+replaces: []
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-02b
+- D-31

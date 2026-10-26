@@ -397,7 +397,7 @@ _AXIS_KEYWORDS_V2: dict[str, list[tuple[str, str]]] = {
 }
 
 
-# Semantic v3 (catalogue_v3): the same hints, plus the wording that asks for the EVENT date explicitly (D-33). The
+# Semantic v3 (catalogue): the same hints, plus the wording that asks for the EVENT date explicitly (D-33). The
 # `date` axis only selects the request's date_axis (finance -> event_date); it never selects another metric.
 # Ambiguous wording ("returns in September") is NOT here: it stays on the default, order_date, and the Agent adds
 # the one-line event figure. v2 keeps _AXIS_KEYWORDS_V2 untouched.

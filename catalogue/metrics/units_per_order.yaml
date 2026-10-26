@@ -1,86 +1,39 @@
 id: units_per_order
-display_name: Average Units per Order
+display_name: Units per order
 category: product
 status: certified
-description: >-
-  Net units per order: units_sold ÷ distinct orders, recomputed from sums on serve.product_performance
-  for any slice.
+description: 'Units ordered per order containing the product. Grain: order_line_event. Date axis: placement only.
+  date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined
+  in semantic v3 (D-31; D-01; D-02b; D-03; D-03a; D-05; D-08; D-08a…): the id is kept, the number may change.'
 formula:
-  human_readable: Units sold (net) / distinct eligible orders
+  human_readable: Units ordered per order containing the product.
   authoritative_source: cube
+  depends_on:
+  - units_sold
+  - orders
 cube_mapping:
-  view: product_performance
-  measure: product_performance.units_per_order
+  view: product_profit
+  measure: product_profit.units_per_order
 aggregation: ratio
 ratio_components:
-  numerator: product_performance.units_sold
-  denominator: product_performance.product_orders
-unit: count
-grain: order_item
-supported_dimensions:
-- brand_id
-- order_date
-- product_title
-- sku
-- product_type
-- vendor
-- order_status
-- return_status
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- shipping_city
-- shipping_region
-- shipping_country
-- variant_title
-- product_id
-- variant_id
-- pnl_refund_class
-- source_name
-supported_filters:
-- date_range
-- brand_id
-- product_title
-- sku
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- shipping_city
-- shipping_region
-- shipping_country
-- variant_title
-- product_id
-- variant_id
-- pnl_refund_class
-- source_name
+  numerator: units_sold
+  denominator: orders
+unit: ratio
+grain: order_line_event
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   scopes:
   - metrics:read
-examples:
-- question: Average units per order last 30 days
-  request:
-    measures:
-    - units_per_order
-    time_range:
-      preset: last_30d
-validation_tests:
-- period value equals sum(units_sold)/uniq(product_orders) for the same slice
-deprecated_aliases: []
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: shopify/analytics.js:4937-4938
-  note: Only exists in legacy gross-incl-GST path, opposite of catalogue claimed corrected ex-GST basis.
+version: 2.0.0
+replaces: []
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: product_profit.order_date
+  event_date: product_profit.event_date
+decision_ids:
+- D-31

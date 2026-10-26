@@ -1,49 +1,43 @@
 id: contribution_margin_pct
-display_name: Contribution Margin % (Shopify-only)
+display_name: Contribution margin %
 category: finance
 status: certified
-description: >-
-  Contribution margin as a share of net sales: (net sales − Net COGS) ÷ net sales, recomputed from the
-  period sums on serve.canonical_pnl (0–1 ratio). Identical to gross_margin_pct.
+description: 'Contribution margin ÷ net sales. NULL when net sales <= 0; labelled on the event axis (D-31). Grain:
+  brand_day_channel_ad. Date axis: switchable. date_axis=order_date (default, orders placed in the period) or event_date
+  (outcomes on the day they happen). Redefined in semantic v3 (D-31; D-01; D-02; D-02a; D-02b; D-03; D-03a; D-05…):
+  the id is kept, the number may change. Also answers the ids: pnl_contribution_margin_pct.'
 formula:
-  human_readable: 100 x SUM(contribution_margin) / SUM(net_sales)
+  human_readable: Contribution margin ÷ net sales. NULL when net sales <= 0; labelled on the event axis (D-31).
   authoritative_source: cube
+  depends_on:
+  - contribution_margin
+  - order_pnl_net_sales
 cube_mapping:
-  view: canonical_pnl
-  measure: canonical_pnl.contribution_margin_pct
+  view: finance
+  measure: finance.contribution_margin_pct
 aggregation: ratio
-unit: percent
-grain: daily
-supported_dimensions:
-- brand_id
-- report_date
-supported_filters:
-- date_range
-- brand_id
+ratio_components:
+  numerator: contribution_margin
+  denominator: order_pnl_net_sales
+unit: ratio
+grain: brand_day_channel_ad
 data_owner: Finance
 access_policy:
   roles_allowed:
   - exec
   - finance
+  - growth_lead
+  - analyst
+  - ops
   scopes:
   - metrics:read
-examples:
-- question: Contribution Margin % for June 2026
-  request:
-    measures:
-    - contribution_margin_pct
-    time_range:
-      start: '2026-06-01'
-      end: '2026-06-30'
-validation_tests:
-- period value equals 100 x sum(contribution_margin)/sum(net_sales) for the same slice
-deprecated_aliases: []
-ratio_components:
-  numerator: canonical_pnl.contribution_margin
-  denominator: canonical_pnl.net_sales
-dashboard_alignment:
-  status: not_implemented
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: —
-  note: No percent-of-sales contribution-margin field anywhere in Node-Backend.
+version: 3.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: finance.order_date
+  event_date: finance.event_date
+ratio_contract: labelled_null_when_net_sales_nonpositive
+decision_ids:
+- D-31
+direction_bad: down

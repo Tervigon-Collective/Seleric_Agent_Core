@@ -1,0 +1,30 @@
+id: movement_value
+display_name: Movement value
+category: operations
+status: certified
+description: 'Signed movement value at the movement''s unit cost. Grain: stock_movement. Date axis: native. Ignores
+  date_axis (its own clock, D-36).'
+formula:
+  human_readable: Signed movement value at the movement's unit cost.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: stock_movements
+  measure: stock_movements.movement_value
+aggregation: additive
+unit: INR
+currency_default: INR
+grain: stock_movement
+data_owner: Supply Chain Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

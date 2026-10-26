@@ -1,16 +1,101 @@
-# Compat aliases: old shorthand / metric id -> concept + axis selection. Lets the
-# agent and saved queries keep working while resolution moves to the concept layer.
-# Each entry expands to a deterministic concept resolution (§04 of doc/serve-revamp).
 aliases:
+  cost per click:
+    concept: cost_per
+    axes:
+      metric_kind: cpc
+  cost per mille:
+    concept: cost_per
+    axes:
+      metric_kind: cpm
+  cost per thousand impressions:
+    concept: cost_per
+    axes:
+      metric_kind: cpm
+  click through rate:
+    concept: cost_per
+    axes:
+      metric_kind: ctr
+  click-through rate:
+    concept: cost_per
+    axes:
+      metric_kind: ctr
+  cost per lpv:
+    concept: cost_per
+    axes:
+      metric_kind: landing_page
+  cost per landing page view:
+    concept: cost_per
+    axes:
+      metric_kind: landing_page
+  cost per order:
+    concept: cac
+    axes:
+      basis: order
+  cost per purchase:
+    concept: cac
+    axes:
+      basis: order
+  cpa:
+    concept: cac
+    axes:
+      basis: order
+  unit return rate:
+    concept: return_rate
+    axes:
+      measure: units
+  units return rate:
+    concept: return_rate
+    axes:
+      measure: units
+  return rate by units:
+    concept: return_rate
+    axes:
+      measure: units
+  funnel step 1:
+    concept: conversion_rate
+    axes:
+      stage: product_view
+  funnel product view step:
+    concept: conversion_rate
+    axes:
+      stage: product_view
+  funnel step 2:
+    concept: conversion_rate
+    axes:
+      stage: add_to_cart
+  funnel add to cart step:
+    concept: conversion_rate
+    axes:
+      stage: add_to_cart
+  funnel step 3:
+    concept: conversion_rate
+    axes:
+      stage: checkout
+  funnel checkout step:
+    concept: conversion_rate
+    axes:
+      stage: checkout
+  funnel step 4:
+    concept: conversion_rate
+    axes:
+      stage: purchase
+  funnel purchase step:
+    concept: conversion_rate
+    axes:
+      stage: purchase
   ns:
     concept: sales
-    axes: {basis: net, scope: company}
+    axes:
+      basis: net
   np:
     concept: profit
-    axes: {basis: net, scope: all_channels}
+    axes:
+      basis: net
   gs:
     concept: sales
-    axes: {basis: gross, scope: company}
+    axes:
+      basis: gross
   ts:
     concept: sales
-    axes: {basis: total, scope: company}
+    axes:
+      basis: total

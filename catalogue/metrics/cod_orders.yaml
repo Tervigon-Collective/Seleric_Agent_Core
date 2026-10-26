@@ -1,88 +1,38 @@
 id: cod_orders
-display_name: COD Orders (Shopify-only)
+display_name: Cod orders
 category: commerce
 status: certified
-description: >-
-  Cash-on-delivery orders placed in the period (payment_bucket='cod', excluding draft orders), from
-  serve.commerce_orders (order date). Use for COD share: cod_orders ÷ total_payments.
+description: 'Cash-on-delivery sale orders. Grain: order. Date axis: placement only. date_axis=order_date (default,
+  orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-01;
+  D-08; D-08a; D-46): the id is kept, the number may change.'
 formula:
-  human_readable: Count of orders in COD payment bucket
+  human_readable: Cash-on-delivery sale orders.
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.cod_orders
+  view: commerce
+  measure: commerce.cod_orders
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions:
-- brand_id
-- order_date
-- order_created_at_ist
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
-supported_filters:
-- date_range
-- brand_id
-- payment_method
-- payment_bucket
-- payment_gateway
-- is_cod
-- is_prepaid
-- is_new_customer
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- financial_status
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: COD orders by shipping region last 7 days
-  request:
-    measures:
-    - cod_orders
-    dimensions:
-    - shipping_region
-    time_range:
-      preset: last_7d
-validation_tests:
-- cod_orders <= orders for any slice
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalAnalytics/lineItemHistoricalSql.js:424-467
+version: 2.0.0
+replaces: []
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-01
+- D-08
+- D-08a
+- D-46

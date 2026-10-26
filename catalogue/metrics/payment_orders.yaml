@@ -1,0 +1,40 @@
+id: payment_orders
+display_name: Payment orders
+category: commerce
+status: certified
+description: 'Sale orders with a recognised payment bucket (cod / online / manual / paytm card machine), as v2.
+  Grain: order. Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date
+  (outcomes on the day they happen). Redefined in semantic v3 (D-01; D-08; D-08a; D-46): the id is kept, the number
+  may change.'
+formula:
+  human_readable: Sale orders with a recognised payment bucket (cod / online / manual / paytm card machine), as
+    v2.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: commerce
+  measure: commerce.payment_orders
+aggregation: additive
+unit: count
+grain: order
+data_owner: Commerce
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces:
+- total_payments
+date_axis: placement_only
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-01
+- D-08
+- D-08a
+- D-46

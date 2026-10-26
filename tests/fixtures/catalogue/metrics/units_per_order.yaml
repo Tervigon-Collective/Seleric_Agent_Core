@@ -1,0 +1,86 @@
+id: units_per_order
+display_name: Average Units per Order
+category: product
+status: certified
+description: >-
+  Net units per order: units_sold ÷ distinct orders, recomputed from sums on serve.product_performance
+  for any slice.
+formula:
+  human_readable: Units sold (net) / distinct eligible orders
+  authoritative_source: cube
+cube_mapping:
+  view: product_performance
+  measure: product_performance.units_per_order
+aggregation: ratio
+ratio_components:
+  numerator: product_performance.units_sold
+  denominator: product_performance.product_orders
+unit: count
+grain: order_item
+supported_dimensions:
+- brand_id
+- order_date
+- product_title
+- sku
+- product_type
+- vendor
+- order_status
+- return_status
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- shipping_city
+- shipping_region
+- shipping_country
+- variant_title
+- product_id
+- variant_id
+- pnl_refund_class
+- source_name
+supported_filters:
+- date_range
+- brand_id
+- product_title
+- sku
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- shipping_city
+- shipping_region
+- shipping_country
+- variant_title
+- product_id
+- variant_id
+- pnl_refund_class
+- source_name
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  scopes:
+  - metrics:read
+examples:
+- question: Average units per order last 30 days
+  request:
+    measures:
+    - units_per_order
+    time_range:
+      preset: last_30d
+validation_tests:
+- period value equals sum(units_sold)/uniq(product_orders) for the same slice
+deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: shopify/analytics.js:4937-4938
+  note: Only exists in legacy gross-incl-GST path, opposite of catalogue claimed corrected ex-GST basis.

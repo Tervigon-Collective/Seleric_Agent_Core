@@ -1,4 +1,4 @@
-"""Live smoke check of the agent surface: Cube v3 (default http://127.0.0.1:4003) + catalogue_v3.
+"""Live smoke check of the agent surface: Cube (default http://127.0.0.1:4003) + catalogue.
 
 Run:  uv run python scripts/smoke_cube.py
 """
@@ -27,7 +27,7 @@ async def main() -> int:
     ok = await cube.health()
     print(f"1. /v1/meta health: {'OK' if ok else 'FAILED'}")
     if not ok:
-        print("   Cube unreachable — start it via this repo's docker-compose.yml (service cube-v3)")
+        print("   Cube unreachable — start it via this repo's docker-compose.yml (service cube)")
         return 1
 
     service = CatalogueService(load_catalogue(settings.catalogue_dir))

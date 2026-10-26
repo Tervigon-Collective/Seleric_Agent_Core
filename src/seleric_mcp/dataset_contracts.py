@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def _datasets_path() -> Path:
-    """catalogue_<n>_src/datasets.yaml next to the catalogue in use (SELERIC_CATALOGUE_DIR=catalogue_v3 -> catalogue_v3_src);
-    catalogue_v3_src otherwise."""
-    name = Path(os.environ.get("SELERIC_CATALOGUE_DIR", "") or "catalogue_v3").name
+    """catalogue_<n>_src/datasets.yaml next to the catalogue in use (SELERIC_CATALOGUE_DIR=catalogue -> catalogue_src);
+    catalogue_src otherwise."""
+    name = Path(os.environ.get("SELERIC_CATALOGUE_DIR", "") or "catalogue").name
     cand = ROOT / f"{name}_src" / "datasets.yaml"
-    return cand if cand.exists() else ROOT / "catalogue_v3_src" / "datasets.yaml"
+    return cand if cand.exists() else ROOT / "catalogue_src" / "datasets.yaml"
 
 
 DATASETS = _datasets_path()
@@ -43,7 +43,7 @@ class DatasetContract:
 
 
 def load_dataset_contracts() -> dict[str, DatasetContract]:
-    """Load dataset contracts from catalogue_v3_src/datasets.yaml."""
+    """Load dataset contracts from catalogue_src/datasets.yaml."""
     raw = yaml.safe_load(DATASETS.read_text())
     contracts = {}
     for name, ds in raw.items():

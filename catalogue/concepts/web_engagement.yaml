@@ -1,19 +1,105 @@
 id: web_engagement
-display_name: Web Engagement
-one_liner: On-site engagement events (PDP/collection/ATC/pageviews/search).
-aliases: [product views, pdp views, collection views, add to carts, page views, site searches, engagement]
+display_name: Web engagement
+one_liner: Web event counts (product views unless stated).
+aliases:
+- product views
+- pdp views
+- collection views
+- add to carts
+- page views
+- site searches
+- engagement
+- web events
+- events per session
+- bounce rate
 axes:
-  event: {values: [pdp, collection, atc, pageview, search, per_session], default: pdp}
+  event:
+    values:
+    - pdp
+    - collection
+    - atc
+    - pageview
+    - search
+    - all
+    - per_session
+    - bounce
+    default: pdp
+  scope:
+    values:
+    - all
+    - session
+    - event
+    default: all
 resolves:
-  - when: {event: pdp}
-    metric: product_views
-  - when: {event: collection}
-    metric: collection_views
-  - when: {event: atc}
-    metric: add_to_cart_events
-  - when: {event: pageview}
-    metric: web_page_views
-  - when: {event: search}
-    metric: site_search_events
-  - when: {event: per_session}
-    metric: events_per_session
+- when:
+    event: pdp
+    scope: session
+  metric: session_product_views
+- when:
+    event: collection
+    scope: session
+  metric: session_collection_views
+- when:
+    event: atc
+    scope: session
+  metric: add_to_carts
+- when:
+    event: pageview
+    scope: session
+  metric: session_page_views
+- when:
+    event: search
+    scope: session
+  metric: site_searches
+- when:
+    event: bounce
+    scope: session
+  metric: session_bounce_rate
+- when:
+    event: pageview
+    scope: event
+  metric: event_page_views
+- when:
+    event: pdp
+    scope: event
+  metric: event_product_views
+- when:
+    event: collection
+    scope: event
+  metric: event_collection_views
+- when:
+    event: atc
+    scope: event
+  metric: event_add_to_carts
+- when:
+    event: search
+    scope: event
+  metric: event_site_searches
+- when:
+    event: all
+    scope: event
+  metric: event_count
+- when:
+    event: pdp
+  metric: product_view_events
+- when:
+    event: collection
+  metric: collection_view_events
+- when:
+    event: atc
+  metric: add_to_cart_events
+- when:
+    event: pageview
+  metric: page_views
+- when:
+    event: search
+  metric: site_search_events
+- when:
+    event: all
+  metric: web_events
+- when:
+    event: per_session
+  metric: events_per_session
+- when:
+    event: bounce
+  metric: bounce_rate

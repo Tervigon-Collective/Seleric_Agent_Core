@@ -1,0 +1,29 @@
+id: rejected_quality_checks
+display_name: Rejected quality checks
+category: operations
+status: certified
+description: 'Quality checks with status rejected. Grain: quality_check. Date axis: native. Ignores date_axis (its
+  own clock, D-36).'
+formula:
+  human_readable: Quality checks with status rejected.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: quality_checks
+  measure: quality_checks.rejected_quality_checks
+aggregation: additive
+unit: count
+grain: quality_check
+data_owner: Supply Chain Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

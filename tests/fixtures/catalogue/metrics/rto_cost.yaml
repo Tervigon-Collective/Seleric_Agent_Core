@@ -1,0 +1,47 @@
+id: rto_cost
+display_name: RTO Logistics Cost (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Return-to-origin (RTO) logistics cost for returned/undelivered orders, recognised on the return
+  date, per brand-day on serve.canonical_pnl (INR). Part of net_cogs — do not add it again.
+formula:
+  human_readable: SUM(rto_cost)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.rto_cost
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: RTO Logistics Cost for June 2026
+  request:
+    measures:
+    - rto_cost
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- rto_cost >= 0 for any slice
+- June 2026 brand 20 ≈ ₹29,367.00
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:621

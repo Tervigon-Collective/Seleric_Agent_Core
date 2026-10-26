@@ -1,93 +1,38 @@
 id: cancelled_orders
-display_name: Cancelled Orders (Shopify-only)
+display_name: Cancelled orders
 category: commerce
 status: certified
-description: >-
-  Orders cancelled in the period, counted on the CANCEL date (not the order date), from
-  serve.commerce_order_events. Sliceable by geo, payment, UTM. Revenue lost to those cancellations →
-  event_cancel_revenue (sliceable) or cancel_revenue (brand-day total).
+description: 'Sale orders with a cancelled (or Unknown) line, counted on the event date (D-37). Grain: order. Date
+  axis: switchable. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day
+  they happen). Redefined in semantic v3 (D-22; D-37; D-01; D-02a; D-05; D-08; D-08a; D-20): the id is kept, the
+  number may change.'
 formula:
-  human_readable: Distinct orders with cancellation event in period
+  human_readable: Sale orders with a cancelled (or Unknown) line, counted on the event date (D-37).
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: commerce_orders
-  measure: commerce_orders.cancelled_orders
-  time_dimension: commerce_orders.event_date
+  view: commerce
+  measure: commerce.cancelled_orders
 aggregation: additive
 unit: count
 grain: order
-supported_dimensions:
-- brand_id
-- event_date
-- payment_method
-- payment_bucket
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- payment_gateway
-- is_cod
-- is_prepaid
-- financial_status
-- event_type
-- item_count
-- order_name
-- commerce_order_id
-supported_filters:
-- date_range
-- brand_id
-- payment_method
-- payment_bucket
-- utm_source
-- utm_medium
-- utm_campaign
-- source_name
-- shipping_country
-- shipping_region
-- shipping_city
-- shipping_pincode
-- shipping_state_code
-- order_status
-- return_status
-- fulfillment_status
-- payment_gateway
-- is_cod
-- is_prepaid
-- financial_status
-- event_type
-- item_count
-- order_name
-- commerce_order_id
 data_owner: Commerce Ops
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - finance
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Cancelled orders last 30 days
-  request:
-    measures:
-    - cancelled_orders
-    time_range:
-      preset: last_30d
-validation_tests:
-- reconciles to dashboard Cancellations card for closed periods
-deprecated_aliases: []
-dashboard_alignment:
-  status: match
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: historicalAnalytics/lineItemHistoricalSql.js:279-305
+version: 2.0.0
+replaces: []
+date_axis: switchable
+date_axis_dimensions:
+  order_date: commerce.order_date
+  event_date: commerce.event_date
+decision_ids:
+- D-22
+- D-37
+direction_bad: up

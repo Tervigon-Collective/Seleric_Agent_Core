@@ -1,0 +1,29 @@
+id: line_received_units
+display_name: Line received units
+category: operations
+status: certified
+description: 'Units received (QC actual). Grain: purchase_request_line. Date axis: native. Ignores date_axis (its
+  own clock, D-36).'
+formula:
+  human_readable: Units received (QC actual).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: purchase_order_lines
+  measure: purchase_order_lines.line_received_units
+aggregation: additive
+unit: count
+grain: purchase_request_line
+data_owner: Supply Chain Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

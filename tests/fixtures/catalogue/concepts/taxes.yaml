@@ -1,0 +1,8 @@
+id: taxes
+display_name: Taxes
+one_liner: GST on net sales.
+aliases: [taxes, tax, gst, gst on net sales]
+axes: {}
+resolves:
+  - when: {}
+    metric: taxes_on_net_sales

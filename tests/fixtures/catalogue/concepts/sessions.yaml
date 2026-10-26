@@ -1,0 +1,8 @@
+id: sessions
+display_name: Sessions
+one_liner: Web sessions.
+aliases: [sessions, web sessions, visits, traffic]
+axes: {}
+resolves:
+  - when: {}
+    metric: web_sessions

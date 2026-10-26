@@ -1,0 +1,284 @@
+# Pairs of v3 metrics that return the same number on purpose. Read by scripts/catalogue_gates.py (duplicate-numbers gate).
+waivers:
+- ids:
+  - ad_spend
+  - order_pnl_ad_spend
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - ad_spend
+  - product_order_ad_spend
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - cancel_revenue
+  - order_pnl_cancel_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - cancelled_orders
+  - channel_cancelled_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - cancelled_orders
+  - product_order_cancelled_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - channel_cancelled_orders
+  - product_order_cancelled_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - channel_rto_orders
+  - product_rto_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - channel_rto_orders
+  - rto_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - checkout_fee
+  - product_order_checkout_fee
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - cod_handling_fee
+  - product_order_cod_handling_fee
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - discounts
+  - order_pnl_discounts
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - exchange_cost
+  - product_order_exchange_cost
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - exchange_price_adjustment
+  - product_order_exchange_price_adjustment
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - gross_sales
+  - order_pnl_gross_sales
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - net_sales
+  - order_pnl_net_sales
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_ad_spend
+  - product_ad_spend
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_ad_spend
+  - product_order_ad_spend
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_cancel_revenue
+  - product_order_cancel_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_discounts
+  - product_order_discounts
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_gross_sales
+  - product_order_gross_sales
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_net_sales
+  - product_order_net_sales
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_return_cancel_revenue
+  - product_order_return_cancel_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_return_cancel_revenue
+  - return_cancel_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_return_revenue
+  - product_order_return_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_return_revenue
+  - return_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_rto_revenue
+  - product_order_rto_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_pnl_rto_revenue
+  - rto_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - order_value_incl_tax
+  - paid_sales
+  reason: Pre-existing (same view, equal numbers in Jul-Sep 2026). Kept; owner decision in Phase 7 whether
+    the two stay separate ids.
+- ids:
+  - product_ad_spend
+  - product_order_ad_spend
+  reason: 'Two ids kept for the same allocated spend (no capability loss): product_pnl_ad_spend aliases product_order_ad_spend.
+    Merge decided in Phase 7.'
+- ids:
+  - product_cogs_credit
+  - product_order_product_cogs_credit
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_provisional_ops_cost
+  - provisional_ops_cost
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_return_cancel_revenue
+  - return_cancel_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_returned_or_cancelled_orders
+  - returned_or_cancelled_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_returned_orders
+  - returned_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_rto_revenue
+  - rto_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_shipping_revenue
+  - shipping_revenue
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_order_shipping_revenue_reversal
+  - shipping_revenue_reversal
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - product_rto_orders
+  - rto_orders
+  reason: 'Same ledger measure served on two views (commerce / finance / product_profit / paid_media / product_ads): equal
+    at brand level by construction (COMMERCE-ORDERS, AXIS-PRODUCT-RECON, ALLOC-PROFIT contracts). The concept `scope` axis
+    and the view decide the grain; not a duplicate definition.'
+- ids:
+  - contribution_margin
+  - product_attributed_contribution
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - gross_sales
+  - product_attributed_revenue
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - net_sales
+  - product_attributed_net_sales
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - order_pnl_gross_sales
+  - product_attributed_revenue
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - order_pnl_net_sales
+  - product_attributed_net_sales
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - product_attributed_contribution
+  - product_contribution_margin
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - product_attributed_net_sales
+  - product_order_net_sales
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - product_attributed_revenue
+  - product_order_gross_sales
+  reason: 'D-38: the allocated product-ad family carries every rupee of the order-date cohort exactly once (organic and order-
+    level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
+    TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
+    when the product x ad attribution is asked for; not a duplicate definition.'

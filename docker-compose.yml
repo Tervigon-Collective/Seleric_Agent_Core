@@ -5,11 +5,11 @@
 #   uv run python scripts/smoke_cube.py
 #
 # Public:
-#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core, on cube-v3 + catalogue_v3)
+#   https://mcp.seleric.com/mcp   → 127.0.0.1:8765  (Agent Core, on cube-v3 + catalogue)
 name: seleric-mcp
 
 services:
-  # Semantic v3 Cube (doc/semantic_v3, Phase 5): model_v3 + cube_v3.js (brand scope plus the capability refusals of refusals_v3.json), dev mode OFF,
+  # Semantic v3 Cube (doc/semantic, Phase 5): model_v3 + cube_v3.js (brand scope plus the capability refusals of refusals_v3.json), dev mode OFF,
   # serve-only login (cube_serve via .env.v2; SELECT only; no pre-aggregations are defined because Cube's ClickHouse driver would CREATE TABLE in the source DB).
   # Runbook: after a model edit, `docker restart seleric-mcp-cube-v3-1`, then regenerate the catalogue. The MCP moves here at the Phase 8 cutover
   # (rollback = env flip). Live since the Phase 8 cutover (2026-10-19).
@@ -51,12 +51,9 @@ services:
     env_file:
       - .env
     environment:
-      # Semantic v3 (doc/semantic_v3, Phase 8 cutover 2026-10-19): catalogue_v3 on Cube v3.
-      # Cube v1 / v2 and catalogue_v2 were retired in Phase 9 (2026-10-26); rollback is git history.
       CUBE_API_URL: http://cube-v3:4000
       # Semantic SQL: Postgres-protocol SQL API on cube-v3:15432 (checkSqlAuth in cube_v3.js; user brand_<id> scopes the brand).
       CUBE_SQL_DSN: postgresql://user:password@cube-v3:15432/cube
-      SELERIC_CATALOGUE_DIR: catalogue_v3
       SELERIC_MCP_DB: /data/seleric_mcp.db
       OPENMETADATA_BASE_URL: http://host.docker.internal:8585
       # FastMCP DNS-rebinding / CORS — same public domain via nginx
@@ -65,9 +62,7 @@ services:
       MCP_ALLOWED_ORIGINS: https://mcp.seleric.com,http://127.0.0.1:*,http://localhost:*
     volumes:
       - ./catalogue:/app/catalogue:ro
-      # Semantic v3 (live since the Phase 8 cutover): read when SELERIC_CATALOGUE_DIR=catalogue_v3 and CUBE_API_URL=http://cube-v3:4000
-      - ./catalogue_v3:/app/catalogue_v3:ro
-      - ./catalogue_v3_src:/app/catalogue_v3_src:ro
+      - ./catalogue_src:/app/catalogue_src:ro
       - ./config.yaml:/app/config.yaml:ro
       - mcp-data:/data
     ports:

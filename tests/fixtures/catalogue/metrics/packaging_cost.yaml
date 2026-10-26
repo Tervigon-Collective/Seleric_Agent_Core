@@ -1,0 +1,48 @@
+id: packaging_cost
+display_name: Packaging Cost (Shopify-only)
+category: finance
+status: certified
+description: >-
+  Packaging cost component of Net COGS, per brand-day on serve.canonical_pnl (INR): placement
+  packaging on the order date plus packaging on fully-returned orders on the return date. Part of
+  net_cogs — do not add it again.
+formula:
+  human_readable: SUM(packaging_cost)
+  authoritative_source: cube
+cube_mapping:
+  view: canonical_pnl
+  measure: canonical_pnl.packaging_cost
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: daily
+supported_dimensions:
+- brand_id
+- report_date
+supported_filters:
+- date_range
+- brand_id
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  scopes:
+  - metrics:read
+examples:
+- question: Packaging Cost for June 2026
+  request:
+    measures:
+    - packaging_cost
+    time_range:
+      start: '2026-06-01'
+      end: '2026-06-30'
+validation_tests:
+- packaging_cost >= 0 for any slice
+- June 2026 brand 20 ≈ ₹23,640.00
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: src/integrations/historicalAnalytics/lineItemHistoricalSql.js:617

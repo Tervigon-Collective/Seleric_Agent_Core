@@ -127,11 +127,11 @@ class MetricDef(BaseModel):
     valid_for: dict[str, list[str]] = Field(default_factory=dict)
     valid_for_reason: str | None = None
     unavailable_reason: str | None = None  # why a broken metric cannot be answered
-    # --- agent policy (catalogue_v3_src/agent_policy.yaml) ---
+    # --- agent policy (catalogue_src/agent_policy.yaml) ---
     direction_bad: Literal["up", "down"] | None = None  # which way is bad for the business; unset reads as "up"
     agent_domain: str | None = None  # owning swarm domain where it differs from the category default
     replaces: list[str] = Field(default_factory=list)  # retired v1 ids that map here
-    # --- semantic v3 (catalogue_v3/, semantic_version >= 3): one metric, a date_axis request parameter (D-28) ---
+    # --- semantic v3 (catalogue/, semantic_version >= 3): one metric, a date_axis request parameter (D-28) ---
     # switchable: order_date | event_date change the number; placement_only: identical on both; native: its own
     # clock, the parameter is ignored (and says so, D-36); cohort_only: event_date is refused (D-31 / D-34).
     date_axis: Literal["switchable", "placement_only", "native", "cohort_only"] | None = None

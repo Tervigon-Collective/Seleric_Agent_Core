@@ -1,0 +1,61 @@
+id: return_recovered_cogs
+display_name: Recovered COGS (Returns)
+category: operations
+status: certified
+description: >-
+  Cost recovered or reversed on returned lines (product + packaging + shipping + gateway + RTO
+  components), on the refund date, from serve.return_lifecycle (INR).
+formula:
+  human_readable: SUM(recovered_cogs)
+  authoritative_source: cube
+cube_mapping:
+  view: return_lifecycle
+  measure: return_lifecycle.recovered_cogs
+  time_dimension: return_lifecycle.refund_date
+aggregation: additive
+unit: currency
+currency_default: INR
+grain: refund line
+supported_dimensions:
+- brand_id
+- refund_date
+- order_date
+- pnl_refund_class
+- return_status
+- restock_type
+- sku
+- product_title
+- variant_title
+- is_cod
+supported_filters:
+- date_range
+- brand_id
+- pnl_refund_class
+- return_status
+- sku
+- is_cod
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: Recovered COGS (Returns) last 30 days
+  request:
+    measures:
+    - return_recovered_cogs
+    time_range:
+      preset: last_30d
+validation_tests:
+- return_recovered_cogs >= 0 for any slice
+deprecated_aliases: []
+dashboard_alignment:
+  status: drift_corrected
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: lineItemHistoricalSql.js:335-361 vs 364-393,617-646
+  note: 'Matching CTE is dead code; live logic adds return cost to COGS — the opposite operation — see cross-cutting #8.'

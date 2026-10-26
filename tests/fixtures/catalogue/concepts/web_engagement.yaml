@@ -1,0 +1,19 @@
+id: web_engagement
+display_name: Web Engagement
+one_liner: On-site engagement events (PDP/collection/ATC/pageviews/search).
+aliases: [product views, pdp views, collection views, add to carts, page views, site searches, engagement]
+axes:
+  event: {values: [pdp, collection, atc, pageview, search, per_session], default: pdp}
+resolves:
+  - when: {event: pdp}
+    metric: product_views
+  - when: {event: collection}
+    metric: collection_views
+  - when: {event: atc}
+    metric: add_to_cart_events
+  - when: {event: pageview}
+    metric: web_page_views
+  - when: {event: search}
+    metric: site_search_events
+  - when: {event: per_session}
+    metric: events_per_session

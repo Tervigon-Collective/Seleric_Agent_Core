@@ -1,37 +1,84 @@
 id: profit
 display_name: Profit
-one_liner: Bottom-line profit; all-channels net unless stated.
-aliases: [profit, net profit, bottom line, gross profit]
+one_liner: Net profit = net sales − net COGS − ad spend of the orders placed in the period (order date).
+aliases:
+- profit
+- net profit
+- np
+- earnings
+- bottom line
 axes:
-  basis: {values: [gross, net, contribution], default: net}
-  scope: {values: [company, all_channels, shopify, blended, product, channel], default: all_channels}
+  basis:
+    values:
+    - net
+    - contribution
+    - gross
+    default: net
+  scope:
+    values:
+    - all
+    - product
+    default: all
+  date:
+    values:
+    - order
+    - finance
+    default: order
+  channel:
+    values:
+    - all
+    - meta
+    - google
+    - whatsapp
+    - organic
+    - unattributed
+    default: all
+  paid:
+    values:
+    - all
+    - paid
+    default: all
+axis_filters:
+  channel:
+    meta:
+      finance_channel: meta
+    google:
+      finance_channel: google
+    whatsapp:
+      finance_channel: whatsapp
+    organic:
+      finance_channel: organic
+    unattributed:
+      finance_channel: unattributed
+  paid:
+    paid:
+      is_paid: 'true'
 resolves:
-  - when: {basis: gross, scope: channel}
-    metric: channel_gross_profit
-  - when: {basis: net, scope: channel}
-    metric: ad_channel_net_profit
-  - when: {basis: contribution, scope: channel}
-    metric: channel_gross_profit
-  - when: {basis: net, scope: all_channels}
-    metric: net_profit_all_channels
-  - when: {basis: net, scope: company}
-    metric: net_profit_all_channels
-  - when: {basis: net, scope: shopify}
-    metric: net_profit
-  - when: {basis: net, scope: blended}
-    metric: net_profit_blended
-  - when: {basis: gross, scope: company}
-    metric: gross_profit
-  - when: {basis: gross, scope: all_channels}
-    metric: gross_profit
-  - when: {basis: contribution, scope: company}
-    metric: contribution_margin
-  - when: {basis: contribution, scope: all_channels}
-    metric: contribution_margin
-  - when: {basis: gross, scope: product}
-    metric: product_gross_profit
-disambiguation: >
-  Net profit defaults to all-channels (Historical/P&L). Shopify-only is a narrower
-  scope; blended is all-platforms. When a marketing channel is named (google/meta/organic),
-  use scope=channel: gross → channel_gross_profit (Gross Sales − Ad Spend − Gross COGS,
-  Attribution Overview tile), net → ad_channel_net_profit (filter channel=...).
+- when:
+    basis: net
+  metric: net_profit
+- when:
+    basis: contribution
+  metric: contribution_margin
+- when:
+    basis: gross
+  metric: gross_profit
+- when:
+    basis: net
+    scope: product
+  metric: product_net_profit
+- when:
+    basis: contribution
+    scope: product
+  metric: product_contribution_margin
+- when:
+    basis: gross
+    scope: product
+  metric: product_contribution_margin
+disambiguation: 'contribution = net sales − net COGS (before ad spend; v1 called it gross_profit). gross = gross
+  sales − gross COGS − ad spend (the Attribution Overview Gross Profit tile). scope=product (by product / variant
+  / SKU): net = product_net_profit (the order P&L spread over the order''s lines, minus the ad spend allocated to
+  the product — products sum to the P&L before unallocated spend), contribution = product_contribution_margin; gross
+  stays line-level product_gross_profit.
+
+  '

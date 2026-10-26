@@ -1,49 +1,28 @@
 id: site_search_events
-display_name: Site Search Events
+display_name: Site search events
 category: web_analytics
 status: certified
-description: >-
-  On-site search events per day and channel on serve.web_events_daily. Volume only — search terms are
-  not available.
+description: 'Site search events. Grain: day_event_type. Date axis: native. Ignores date_axis (its own clock, D-36).'
 formula:
-  human_readable: SUM(events WHERE event_type = 'site_search')
+  human_readable: Site search events.
   authoritative_source: cube
+  depends_on: []
 cube_mapping:
-  view: web_events_daily
-  measure: web_events_daily.site_search_events
+  view: web_events
+  measure: web_events.site_search_events
 aggregation: additive
 unit: count
-grain: brand × day × fine channel
-supported_dimensions:
-- brand_id
-- report_date
-- channel
-supported_filters:
-- date_range
-- brand_id
-- channel
+grain: day_event_type
 data_owner: Growth / Analytics
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Site Search Events last 30 days
-  request:
-    measures:
-    - site_search_events
-    time_range:
-      preset: last_30d
-validation_tests:
-- site_search_events >= 0
-deprecated_aliases: []
-dashboard_alignment:
-  status: not_implemented
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: customerJourneyClickhouse.js:23,139-140
-  note: Only inside single-order journey lookups, capped at 300 rows/order.
+version: 1.0.0
+replaces: []
+date_axis: native
+direction_bad: down

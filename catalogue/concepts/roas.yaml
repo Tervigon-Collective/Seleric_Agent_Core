@@ -1,26 +1,93 @@
 id: roas
 display_name: ROAS
-one_liner: Return on ad spend; all-channels net unless stated.
-aliases: [roas, return on ad spend]
+one_liner: Return on ad spend from first-party net sales (not platform-reported ROAS).
+aliases:
+- roas
+- return on ad spend
+- return on adspend
+- return on advertising spend
 axes:
-  basis: {values: [net, gross, breakeven], default: net}
-  scope: {values: [company, shopify], default: company}
-  platform: {values: [all, cross], default: all}
+  basis:
+    values:
+    - net
+    - gross
+    - breakeven
+    - mer
+    default: net
+  date:
+    values:
+    - order
+    - finance
+    default: order
+  scope:
+    values:
+    - all
+    - product
+    default: all
+  channel:
+    values:
+    - all
+    - meta
+    - google
+    - whatsapp
+    - organic
+    - unattributed
+    default: all
+  paid:
+    values:
+    - all
+    - paid
+    default: all
+axis_filters:
+  channel:
+    meta:
+      finance_channel: meta
+    google:
+      finance_channel: google
+    whatsapp:
+      finance_channel: whatsapp
+    organic:
+      finance_channel: organic
+    unattributed:
+      finance_channel: unattributed
+  paid:
+    paid:
+      is_paid: 'true'
 resolves:
-  - when: {basis: net, scope: company, platform: all}
-    metric: net_roas_all_channels
-  - when: {basis: net, scope: shopify, platform: all}
-    metric: net_roas
-  - when: {basis: gross, scope: company, platform: all}
-    metric: gross_roas_all_channels
-  - when: {basis: gross, scope: shopify, platform: all}
-    metric: gross_roas
-  - when: {basis: breakeven, scope: company, platform: all}
-    metric: be_roas_all_channels
-  - when: {basis: breakeven, scope: shopify, platform: all}
-    metric: be_roas
-  - when: {platform: cross}
-    metric: ad_channel_roas
-disambiguation: >
-  Platform-reported Meta/Google ROAS is not certified; cross-platform ad ROAS by
-  channel/campaign is ad_channel_roas.
+- when:
+    basis: net
+  metric: net_roas
+- when:
+    basis: gross
+  metric: gross_roas
+- when:
+    basis: breakeven
+  metric: be_roas
+- when:
+    basis: mer
+  metric: mer
+- when:
+    basis: net
+    scope: product
+  metric: product_net_roas
+- when:
+    basis: gross
+    scope: product
+  metric: product_gross_roas
+- when:
+    basis: mer
+    scope: product
+  metric: product_mer
+- when:
+    basis: breakeven
+    scope: product
+  metric: product_be_roas
+disambiguation: 'net ROAS = (net sales − net COGS) ÷ ad spend; gross ROAS = gross sales ÷ ad spend; MER = net sales
+  ÷ ad spend; break-even ROAS = net sales ÷ contribution margin. By product (scope=product) ROAS is the product''s
+  ad-attributed lines ÷ the ad spend allocated to them (product_net_roas / product_gross_roas / product_mer — a
+  model, see product_ad_spend); break-even ROAS by product is product_be_roas (P&L basis). Channel ROAS (channel=meta)
+  includes Meta organic sales in the numerator — add paid=paid for paid-only. Platform-reported ROAS is not certified.
+  Default is the order date (sales of the orders placed ÷ spend delivered in the period); date_axis=event_date is
+  the P&L ROAS (NULL when event-axis net sales are not positive).
+
+  '

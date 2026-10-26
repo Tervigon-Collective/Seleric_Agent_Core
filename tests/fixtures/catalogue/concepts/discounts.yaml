@@ -1,0 +1,9 @@
+id: discounts
+display_name: Discounts
+one_liner: Coupon/discount value given (ex-GST).
+aliases: [discounts, discount, coupons]
+axes:
+  scope: {values: [company, shopify], default: company}
+resolves:
+  - when: {}
+    metric: discounts

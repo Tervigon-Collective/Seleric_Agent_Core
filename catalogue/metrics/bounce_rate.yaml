@@ -1,54 +1,30 @@
 id: bounce_rate
-display_name: Bounce Rate
+display_name: Bounce rate
 category: web_analytics
 status: certified
-description: >-
-  Share of sessions that never viewed a product page: (sessions − sessions with a product view) ÷
-  sessions, per day and fine channel on serve.funnel_daily. Not the classic single-page bounce rate.
+description: 'Share of sessions without a product view (funnel definition; ≠ single-page bounce). Grain: brand_day.
+  Date axis: native. Ignores date_axis (its own clock, D-36).'
 formula:
-  human_readable: (SUM(sessions) - SUM(pdp_sessions)) / SUM(sessions)
+  human_readable: Share of sessions without a product view (funnel definition; ≠ single-page bounce).
   authoritative_source: cube
+  depends_on:
+  - funnel_purchases
 cube_mapping:
-  view: funnel_daily
-  measure: funnel_daily.bounce_rate
+  view: web_funnel
+  measure: web_funnel.bounce_rate
 aggregation: ratio
 unit: ratio
-grain: brand × day × fine channel
-supported_dimensions:
-- brand_id
-- report_date
-- channel
-supported_filters:
-- date_range
-- brand_id
-- channel
+grain: brand_day
 data_owner: Growth / Analytics
 access_policy:
   roles_allowed:
+  - analyst
   - exec
   - growth_lead
-  - analyst
   - ops
   scopes:
   - metrics:read
-examples:
-- question: Bounce Rate last 30 days
-  request:
-    measures:
-    - bounce_rate
-    time_range:
-      preset: last_30d
-validation_tests:
-- bounce_rate between 0 and 1 on any slice
-ratio_components:
-  numerator: funnel_daily.bounce_sessions
-  denominator: funnel_daily.sessions
-companion_measures:
-- web_sessions
-deprecated_aliases: []
-dashboard_alignment:
-  status: drift_corrected
-  audited_on: '2026-07-21'
-  source: Seleric_Dashboard/Node-Backend
-  evidence: channelFunnel/sessionDrilldownClickhouse.js:74-94
-  note: Dashboard uses native is_bounce flag (avg(is_bounce)), not the catalogued funnel-proxy (sessions - pdp) / sessions formula. Description and formula left for Cube layer; alignment recorded.
+version: 1.0.0
+replaces: []
+date_axis: native
+direction_bad: up

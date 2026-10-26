@@ -1,0 +1,31 @@
+id: orders_with_touchpoints
+display_name: Orders with touchpoints
+category: attribution
+status: certified
+description: 'Orders with at least one recorded touch. Grain: order_touch. Date axis: native. Ignores date_axis
+  (its own clock, D-36). Redefined in semantic v3 (D-01; D-08; D-08a): the id is kept, the number may change.'
+formula:
+  human_readable: Orders with at least one recorded touch.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: attribution
+  measure: attribution.orders_with_touchpoints
+aggregation: additive
+unit: count
+grain: order_touch
+data_owner: Growth / Attribution
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 2.0.0
+replaces:
+- attribution_path_orders
+- touch_distinct_orders
+date_axis: native

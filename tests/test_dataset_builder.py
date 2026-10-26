@@ -1,5 +1,5 @@
 """build_dataset_query: alignment of per-view parts into one table, zero vs missing, partial hour, persistence,
-scoping and caps. Runs on the committed catalogue_v3/ and a Cube double — no live Cube, no ClickHouse."""
+scoping and caps. Runs on the committed catalogue/ and a Cube double — no live Cube, no ClickHouse."""
 from __future__ import annotations
 
 import pytest
@@ -19,7 +19,7 @@ DAY = TimeRange(start="2026-10-22", end="2026-10-22")
 
 @pytest.fixture(scope="module")
 def v3() -> CatalogueService:
-    return CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue_v3"))
+    return CatalogueService(load_catalogue(PROJECT_ROOT / "catalogue"))
 
 
 @pytest.fixture()
@@ -211,7 +211,7 @@ def tool(settings, cube, result_store, monkeypatch):
     from seleric_mcp.gateway.server import build_server
 
     monkeypatch.setattr(db_mod, "_now_bucket", lambda grain: "2026-10-23 12:00" if grain == "hour" else "2026-10-23")
-    s = dataclasses.replace(settings, catalogue_dir=PROJECT_ROOT / "catalogue_v3", freshness_enforcement=False,
+    s = dataclasses.replace(settings, catalogue_dir=PROJECT_ROOT / "catalogue", freshness_enforcement=False,
                             default_brand_id="20")
     mcp = build_server(s)
     ctx = mcp._seleric_ctx

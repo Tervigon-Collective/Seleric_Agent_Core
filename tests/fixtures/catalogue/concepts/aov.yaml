@@ -1,0 +1,11 @@
+id: aov
+display_name: AOV
+one_liner: Average order value.
+aliases: [aov, average order value, basket size]
+axes:
+  attribution: {values: [none, last_touch], default: none}
+resolves:
+  - when: {attribution: none}
+    metric: aov
+  - when: {attribution: last_touch}
+    metric: attributed_aov

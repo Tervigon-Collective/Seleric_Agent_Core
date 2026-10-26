@@ -820,10 +820,8 @@ async def _global_ratio_check():
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "src"))
 
-# v2 defaults; Phase 7 of semantic v3 points the same questions at Cube v3:
-#   CERTIFY_CUBE_URL=http://127.0.0.1:4003 CERTIFY_CATALOGUE=catalogue_v3 CERTIFY_OUT=doc/semantic_v3/results/qa_v3 scripts/certify_qa.py
-CUBE_API_URL = os.environ.get("CERTIFY_CUBE_URL", "http://127.0.0.1:4002")
-CATALOGUE_DIR = BASE_DIR / os.environ.get("CERTIFY_CATALOGUE", "catalogue_v2")
+CUBE_API_URL = os.environ.get("CERTIFY_CUBE_URL", "http://127.0.0.1:4003")
+CATALOGUE_DIR = BASE_DIR / os.environ.get("CERTIFY_CATALOGUE", "catalogue")
 _OUT = os.environ.get("CERTIFY_OUT")
 REPORT_PATH = (BASE_DIR / _OUT / "CERTIFICATION.md") if _OUT else BASE_DIR / "doc" / "semantic_qa" / "CERTIFICATION.md"
 EVIDENCE_DIR = (BASE_DIR / _OUT / "evidence") if _OUT else BASE_DIR / "doc" / "semantic_qa" / "evidence"

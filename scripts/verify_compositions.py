@@ -27,10 +27,9 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import os  # noqa: E402
 
-if os.environ.get("SELERIC_CATALOGUE_DIR", "catalogue_v2").rstrip("/").endswith("catalogue_v3"):
-    from build_catalogue_v3 import CUBE_ENV, CUBE_V3_URL as CUBE_V2_URL, OUT  # noqa: E402  (semantic v3: Cube :4003)
-else:
-    from build_catalogue_v2 import CUBE_ENV, CUBE_V2_URL, OUT  # noqa: E402
+CUBE_ENV = Path(os.environ.get("SELERIC_CUBE_ENV", "/opt/seleric/mage-ai/infra/cube/.env"))
+CUBE_URL = os.environ.get("CUBE_URL", "http://127.0.0.1:4003")
+OUT = Path(__file__).resolve().parents[1] / "catalogue"
 
 _TOLERANCE = 0.05  # currency units per day: float sums of paise-level rows
 
@@ -49,7 +48,7 @@ def _token() -> str:
 
 
 def _load(query: dict) -> list[dict]:
-    url = f"{CUBE_V2_URL}/cubejs-api/v1/load?query=" + urllib.parse.quote(json.dumps(query))
+    url = f"{CUBE_URL}/cubejs-api/v1/load?query=" + urllib.parse.quote(json.dumps(query))
     tok = _token()
     for _ in range(30):
         res = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"Authorization": tok}), timeout=120))

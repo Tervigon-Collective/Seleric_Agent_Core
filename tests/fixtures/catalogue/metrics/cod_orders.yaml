@@ -1,0 +1,88 @@
+id: cod_orders
+display_name: COD Orders (Shopify-only)
+category: commerce
+status: certified
+description: >-
+  Cash-on-delivery orders placed in the period (payment_bucket='cod', excluding draft orders), from
+  serve.commerce_orders (order date). Use for COD share: cod_orders ÷ total_payments.
+formula:
+  human_readable: Count of orders in COD payment bucket
+  authoritative_source: cube
+cube_mapping:
+  view: commerce_orders
+  measure: commerce_orders.cod_orders
+aggregation: additive
+unit: count
+grain: order
+supported_dimensions:
+- brand_id
+- order_date
+- order_created_at_ist
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- financial_status
+supported_filters:
+- date_range
+- brand_id
+- payment_method
+- payment_bucket
+- payment_gateway
+- is_cod
+- is_prepaid
+- is_new_customer
+- utm_source
+- utm_medium
+- utm_campaign
+- source_name
+- shipping_country
+- shipping_region
+- shipping_city
+- shipping_pincode
+- shipping_state_code
+- order_status
+- return_status
+- fulfillment_status
+- financial_status
+data_owner: Commerce Ops
+access_policy:
+  roles_allowed:
+  - exec
+  - finance
+  - growth_lead
+  - analyst
+  - ops
+  scopes:
+  - metrics:read
+examples:
+- question: COD orders by shipping region last 7 days
+  request:
+    measures:
+    - cod_orders
+    dimensions:
+    - shipping_region
+    time_range:
+      preset: last_7d
+validation_tests:
+- cod_orders <= orders for any slice
+deprecated_aliases: []
+dashboard_alignment:
+  status: match
+  audited_on: '2026-07-21'
+  source: Seleric_Dashboard/Node-Backend
+  evidence: historicalAnalytics/lineItemHistoricalSql.js:424-467

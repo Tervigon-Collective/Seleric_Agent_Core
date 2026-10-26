@@ -10,6 +10,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 COPY catalogue ./catalogue
+COPY catalogue_src ./catalogue_src
 COPY config.yaml ./config.yaml
 COPY scripts ./scripts
 

@@ -1,0 +1,14 @@
+id: clicks
+display_name: Clicks
+one_liner: Ad clicks; name the platform (Meta or Google).
+aliases: [clicks, ad clicks, link clicks]
+axes:
+  platform: {values: [meta, google]}
+  kind: {values: [all, link], default: all}
+resolves:
+  - when: {platform: meta, kind: all}
+    metric: meta_clicks
+  - when: {platform: meta, kind: link}
+    metric: meta_link_clicks
+  - when: {platform: google, kind: all}
+    metric: google_clicks
