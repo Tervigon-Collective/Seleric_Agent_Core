@@ -8,6 +8,10 @@ modules:
     - web_events
     - web_event_detail
     - funnel_orders
+    - pdp_visits
+    - pdp_section_reach
+    - pdp_interaction_log
+    - listing_card_events
   commerce:
     display_name: Commerce Rollup
     description: Orders, sales, and refunds/returns across all channels.

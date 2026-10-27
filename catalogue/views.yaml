@@ -222,3 +222,35 @@ views:
     expected_cadence: hourly after gold sync, IST
   description: 'Procurement sampling pipeline: variants, MRP / COGS / margin, MOQ and sample quantities by product
     status.'
+- name: pdp_visits
+  title: PDP Visits
+  date_dimension: page_view_date
+  freshness:
+    source: Cube v3 view pdp_visits (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Product-page views (bots excluded) from the tracker cutoff 2026-10-26 18:19 UTC: views, engaged and add-to-cart
+    rates, credited orders; by product, template, layout, device, channel and campaign. Measured, not modelled.'
+- name: pdp_section_reach
+  title: PDP Section Reach
+  date_dimension: page_view_date
+  freshness:
+    source: Cube v3 view pdp_section_reach (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: Reach and dwell per product-page section instance (gallery, buy_box, delivery, features, size_guide, faq, reviews,
+    recommendations, banner, page_end). Pool across products by template and layout; per-product rows are small.
+- name: pdp_interaction_log
+  title: PDP Interactions
+  date_dimension: event_date
+  freshness:
+    source: Cube v3 view pdp_interaction_log (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: Tracked product-page interactions (variant select, media change, accordions, offers, add-to-cart / buy-now
+    clicks) with the section they happened in.
+- name: listing_card_events
+  title: Listing Card Events
+  date_dimension: event_date
+  freshness:
+    source: Cube v3 view listing_card_events (serve.* via cube_serve)
+    expected_cadence: hourly after gold sync, IST
+  description: 'Collection / home / search card interactions: quick add, add to cart, Buy it now, product click. Empty until
+    the theme flag seleric_listing_enabled is on.'

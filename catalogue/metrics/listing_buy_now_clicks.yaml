@@ -1,0 +1,28 @@
+id: listing_buy_now_clicks
+display_name: Listing card Buy it now clicks
+category: web_analytics
+status: approved
+description: 'Buy-it-now clicks from a card dialog (goes straight to checkout, no add-to-cart event). Grain: listing_interaction.
+  Measured from 2026-10-26 18:19 UTC; bots excluded. Not certified.'
+formula:
+  human_readable: Buy-it-now clicks from a card dialog (goes straight to checkout, no add-to-cart event).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: listing_card_events
+  measure: listing_card_events.listing_buy_now_clicks
+aggregation: additive
+unit: count
+grain: listing_interaction
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

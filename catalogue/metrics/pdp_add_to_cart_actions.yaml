@@ -1,0 +1,28 @@
+id: pdp_add_to_cart_actions
+display_name: PDP add-to-cart actions
+category: web_analytics
+status: approved
+description: 'Distinct cart add requests that succeeded from the page. Grain: page_view. Measured from 2026-10-26 18:19 UTC;
+  bots excluded. Not certified.'
+formula:
+  human_readable: Distinct cart add requests that succeeded from the page.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: pdp_visits
+  measure: pdp_visits.pdp_add_to_cart_actions
+aggregation: additive
+unit: count
+grain: page_view
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

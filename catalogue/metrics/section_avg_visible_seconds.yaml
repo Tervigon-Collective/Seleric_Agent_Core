@@ -1,0 +1,28 @@
+id: section_avg_visible_seconds
+display_name: PDP section average visible seconds
+category: web_analytics
+status: approved
+description: 'Average visible seconds over instances with a snapshot. Grain: section_instance. Measured from 2026-10-26 18:19
+  UTC; bots excluded. Not certified.'
+formula:
+  human_readable: AVG(Average visible seconds over instances with a snapshot)
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: pdp_section_reach
+  measure: pdp_section_reach.section_avg_visible_seconds
+aggregation: ratio
+unit: seconds
+grain: section_instance
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

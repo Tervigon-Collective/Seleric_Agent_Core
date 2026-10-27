@@ -1,0 +1,306 @@
+dimensions:
+- id: brand_id
+  display_name: Brand Id
+  description: Brand id (the agent scopes every query by it).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.brand_id
+    pdp_section_reach: pdp_section_reach.brand_id
+    pdp_interaction_log: pdp_interaction_log.brand_id
+    listing_card_events: listing_card_events.brand_id
+  aliases: []
+- id: page_view_date
+  display_name: Page View Date
+  description: Page view date (IST).
+  is_time: true
+  views:
+    pdp_visits: pdp_visits.page_view_date
+    pdp_section_reach: pdp_section_reach.page_view_date
+  aliases: []
+- id: page_view_timestamp
+  display_name: Page View Timestamp
+  description: Page view instant (UTC).
+  is_time: true
+  views:
+    pdp_visits: pdp_visits.page_view_timestamp
+  aliases: []
+- id: product_id
+  display_name: Product Id
+  description: Shopify product id.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.product_id
+    pdp_section_reach: pdp_section_reach.product_id
+  aliases: []
+- id: product_handle
+  display_name: Product Handle
+  description: Product handle.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.product_handle
+    pdp_section_reach: pdp_section_reach.product_handle
+  aliases: []
+- id: template_key
+  display_name: Template Key
+  description: Product template suffix.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.template_key
+    pdp_section_reach: pdp_section_reach.template_key
+  aliases: []
+- id: layout_version
+  display_name: Layout Version
+  description: Layout version (dev constant or auto signature of the rendered sections).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.layout_version
+    pdp_section_reach: pdp_section_reach.layout_version
+  aliases: []
+- id: viewport_class
+  display_name: Viewport Class
+  description: mobile | tablet | desktop.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.viewport_class
+    pdp_section_reach: pdp_section_reach.viewport_class
+  aliases: []
+- id: device_type
+  display_name: Device Type
+  description: Device type.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.device_type
+  aliases: []
+- id: browser
+  display_name: Browser
+  description: Browser.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.browser
+  aliases: []
+- id: geo_region
+  display_name: Geo Region
+  description: Visitor region.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.geo_region
+  aliases: []
+- id: geo_city
+  display_name: Geo City
+  description: Visitor city.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.geo_city
+  aliases: []
+- id: channel
+  display_name: Channel
+  description: Channel within the platform (e.g. ig_feed, google_pmax, meta_organic, google_organic, whatsapp).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.channel
+  aliases: []
+- id: sub_channel
+  display_name: Sub Channel
+  description: Detail within the channel (ad surface, or medium / source).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.sub_channel
+  aliases: []
+- id: platform
+  display_name: Platform
+  description: 'Traffic platform: meta, google, whatsapp, email, sms, organic, referral, ai, exchange, unattributed.'
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.platform
+  aliases: []
+- id: campaign_name
+  display_name: Campaign Name
+  description: Campaign name.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.campaign_name
+  aliases: []
+- id: pdp_index_in_session
+  display_name: Pdp Index In Session
+  description: 1 = first product page of the session.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.pdp_index_in_session
+  aliases: []
+- id: furthest_section_instance_id
+  display_name: Furthest Section Instance Id
+  description: Furthest section instance reached in the last snapshot.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.furthest_section_instance_id
+  aliases: []
+- id: last_checkpoint_reason
+  display_name: Last Checkpoint Reason
+  description: Why the last snapshot was sent (interval, hidden, pagehide ...).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.last_checkpoint_reason
+  aliases: []
+- id: has_snapshot
+  display_name: Has Snapshot
+  description: False = the visitor left before the first checkpoint, so engaged time is unknown (not zero).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.has_snapshot
+  aliases: []
+- id: is_engaged
+  display_name: Is Engaged
+  description: Engaged 10 s or interacted.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.is_engaged
+  aliases: []
+- id: purchased
+  display_name: Purchased
+  description: An order is credited to this page view (latest PDP view in the session before purchase).
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.purchased
+  aliases: []
+- id: added_to_cart
+  display_name: Added To Cart
+  description: A cart add succeeded from this page view.
+  is_time: false
+  views:
+    pdp_visits: pdp_visits.added_to_cart
+  aliases: []
+- id: section_id
+  display_name: Section Id
+  description: Section type (gallery, buy_box, delivery, features, size_guide, faq, reviews, recommendations, banner, page_end).
+  is_time: false
+  views:
+    pdp_section_reach: pdp_section_reach.section_id
+  aliases: []
+- id: section_instance_id
+  display_name: Section Instance Id
+  description: Section instance (a section can appear twice, e.g. two recommendation lists).
+  is_time: false
+  views:
+    pdp_section_reach: pdp_section_reach.section_instance_id
+  aliases: []
+- id: placement
+  display_name: Placement
+  description: Placement of the instance.
+  is_time: false
+  views:
+    pdp_section_reach: pdp_section_reach.placement
+  aliases: []
+- id: render_state
+  display_name: Render State
+  description: Final render state of the instance.
+  is_time: false
+  views:
+    pdp_section_reach: pdp_section_reach.render_state
+  aliases: []
+- id: reached
+  display_name: Reached
+  description: Qualified exposure (25% visible for 1 s in the foreground).
+  is_time: false
+  views:
+    pdp_section_reach: pdp_section_reach.reached
+  aliases: []
+- id: event_date
+  display_name: Event Date
+  description: 'Event date. Finance, commerce and product P&L views: the day a cancel / RTO / return is booked (D-29); NULL
+    = the Undated member (D-32). Web event detail: the day of the web event (its own clock).'
+  is_time: true
+  views:
+    pdp_interaction_log: pdp_interaction_log.event_date
+    listing_card_events: listing_card_events.event_date
+  aliases: []
+- id: event_timestamp
+  display_name: Event Timestamp
+  description: Event timestamp.
+  is_time: true
+  views:
+    pdp_interaction_log: pdp_interaction_log.event_timestamp
+  aliases: []
+- id: interaction_action
+  display_name: Interaction Action
+  description: Interaction type.
+  is_time: false
+  views:
+    pdp_interaction_log: pdp_interaction_log.interaction_action
+  aliases: []
+- id: interaction_section_id
+  display_name: Interaction Section Id
+  description: Section the interaction happened in.
+  is_time: false
+  views:
+    pdp_interaction_log: pdp_interaction_log.interaction_section_id
+  aliases: []
+- id: interaction_product_id
+  display_name: Interaction Product Id
+  description: Product of the page.
+  is_time: false
+  views:
+    pdp_interaction_log: pdp_interaction_log.interaction_product_id
+  aliases: []
+- id: interaction_template_key
+  display_name: Interaction Template Key
+  description: Product template suffix.
+  is_time: false
+  views:
+    pdp_interaction_log: pdp_interaction_log.interaction_template_key
+  aliases: []
+- id: interaction_viewport_class
+  display_name: Interaction Viewport Class
+  description: mobile | tablet | desktop.
+  is_time: false
+  views:
+    pdp_interaction_log: pdp_interaction_log.interaction_viewport_class
+  aliases: []
+- id: listing_action
+  display_name: Listing Action
+  description: quick_add_open | add_to_cart_click | buy_now_click | product_click.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.listing_action
+  aliases: []
+- id: listing_surface
+  display_name: Listing Surface
+  description: collection | home | search.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.listing_surface
+  aliases: []
+- id: listing_source
+  display_name: Listing Source
+  description: card | quick_add_dialog.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.listing_source
+  aliases: []
+- id: listing_product_id
+  display_name: Listing Product Id
+  description: Product of the card.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.listing_product_id
+  aliases: []
+- id: listing_product_handle
+  display_name: Listing Product Handle
+  description: Product handle.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.listing_product_handle
+  aliases: []
+- id: collection_handle
+  display_name: Collection Handle
+  description: Collection the card was on.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.collection_handle
+  aliases: []
+- id: card_index
+  display_name: Card Index
+  description: Position of the card in the listing.
+  is_time: false
+  views:
+    listing_card_events: listing_card_events.card_index
+  aliases: []

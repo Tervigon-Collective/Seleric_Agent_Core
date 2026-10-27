@@ -1,0 +1,48 @@
+id: pdp_behaviour
+display_name: Product page behaviour
+one_liner: 'Measured product-page visits since 2026-10-26 (bots excluded): engagement, add-to-cart and credited-order rates per page view. Not the older product_view event counts.'
+aliases:
+- product page behaviour
+- product page behavior
+- pdp behaviour
+- pdp behavior
+- pdp engagement
+- product page engagement
+- product page add to cart rate
+- product page conversion
+- pdp visits
+axes:
+  measure:
+    values:
+    - visits
+    - engaged
+    - engaged_rate
+    - add_to_cart_rate
+    - purchase_rate
+    - credited_revenue
+    default: visits
+resolves:
+- when:
+    measure: visits
+  metric: pdp_page_views
+- when:
+    measure: engaged
+  metric: pdp_engaged_page_views
+- when:
+    measure: engaged_rate
+  metric: pdp_engaged_rate
+- when:
+    measure: add_to_cart_rate
+  metric: pdp_add_to_cart_rate
+- when:
+    measure: purchase_rate
+  metric: pdp_purchase_rate
+- when:
+    measure: credited_revenue
+  metric: pdp_credited_net_revenue
+disambiguation: 'Measured behaviour from the tracker cutoff 2026-10-26 18:19 UTC, one row per product-page view; earlier dates are empty by design
+  (the separate modelled history is not in this view). "pdp views" / "pdp rate" keep meaning the product_view event counts. Credit rule: an order is
+  credited to the latest product-page view of its session before purchase; orders with no session link are not credited. Engaged rate is a lower bound
+  (visits that left before the first checkpoint count as not engaged unless they interacted).
+
+  '

@@ -1,0 +1,28 @@
+id: listing_interactions
+display_name: Listing card interactions
+category: web_analytics
+status: approved
+description: 'Listing-card interactions. Grain: listing_interaction. Measured from 2026-10-26 18:19 UTC; bots excluded. Not
+  certified.'
+formula:
+  human_readable: Listing-card interactions.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: listing_card_events
+  measure: listing_card_events.listing_interactions
+aggregation: additive
+unit: count
+grain: listing_interaction
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

@@ -1,0 +1,33 @@
+id: section_reach_rate
+display_name: PDP section reach rate
+category: web_analytics
+status: approved
+description: 'Share of rendered section instances that were reached. Grain: section_instance. Measured from 2026-10-26 18:19
+  UTC; bots excluded. Not certified.'
+formula:
+  human_readable: Share of rendered section instances that were reached.
+  authoritative_source: cube
+  depends_on:
+  - section_reached
+  - section_exposed
+cube_mapping:
+  view: pdp_section_reach
+  measure: pdp_section_reach.section_reach_rate
+aggregation: ratio
+ratio_components:
+  numerator: section_reached
+  denominator: section_exposed
+unit: ratio
+grain: section_instance
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

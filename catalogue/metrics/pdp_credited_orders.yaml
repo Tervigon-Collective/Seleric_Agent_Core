@@ -1,0 +1,27 @@
+id: pdp_credited_orders
+display_name: PDP credited orders
+category: web_analytics
+status: approved
+description: 'Orders credited to page views. Grain: page_view. Measured from 2026-10-26 18:19 UTC; bots excluded. Not certified.'
+formula:
+  human_readable: Orders credited to page views.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: pdp_visits
+  measure: pdp_visits.pdp_credited_orders
+aggregation: additive
+unit: count
+grain: page_view
+data_owner: Growth / Web Analytics
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

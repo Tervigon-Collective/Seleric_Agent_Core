@@ -1,0 +1,40 @@
+id: pdp_section_reach
+display_name: Product page section reach
+one_liner: 'How many product-page visits reach each section (gallery, buy box, delivery, features, size guide, FAQ, reviews, recommendations) and for how long.'
+aliases:
+- section reach
+- pdp section reach
+- product page section reach
+- section views
+- how far visitors scroll
+- which sections visitors see
+- scroll depth by section
+axes:
+  measure:
+    values:
+    - reach_rate
+    - reached
+    - exposed
+    - visible_seconds
+    - seconds_to_reach
+    default: reach_rate
+resolves:
+- when:
+    measure: reach_rate
+  metric: section_reach_rate
+- when:
+    measure: reached
+  metric: section_reached
+- when:
+    measure: exposed
+  metric: section_exposed
+- when:
+    measure: visible_seconds
+  metric: section_avg_visible_seconds
+- when:
+    measure: seconds_to_reach
+  metric: section_avg_qualified_seconds
+disambiguation: 'A section counts as reached after 25% of it was visible for one second in the foreground. Reach rate = reached / rendered instances; slice by
+  section_id and pool by template_key and layout_version (single products are small). Measured from 2026-10-26 18:19 UTC only.
+
+  '
