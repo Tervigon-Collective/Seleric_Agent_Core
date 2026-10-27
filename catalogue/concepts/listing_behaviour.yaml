@@ -1,0 +1,31 @@
+id: listing_behaviour
+display_name: Collection / home / search card behaviour
+one_liner: 'Taps on product cards in collection, home and search listings (quick add, add, Buy now, product click). Not ad clicks. Measured since the listing tracker flag was switched on; empty before.'
+aliases:
+- listing card interactions
+- listing card clicks
+- collection card interactions
+- collection card clicks
+- product card clicks
+- product card interactions
+- listing card buy now
+- collection card buy now
+- listing behaviour
+- listing behavior
+axes:
+  measure:
+    values:
+    - interactions
+    - buy_now_clicks
+    default: interactions
+resolves:
+- when:
+    measure: interactions
+  metric: listing_interactions
+- when:
+    measure: buy_now_clicks
+  metric: listing_buy_now_clicks
+disambiguation: 'Card taps on listing pages, from the storefront tracker; ad clicks are a different quantity (clicks, meta_clicks, google_clicks). Counts are zero
+  until the theme flag seleric_listing_enabled is on, and bots are excluded.
+
+  '

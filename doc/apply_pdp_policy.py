@@ -9,7 +9,9 @@ SRC = "/opt/seleric/Seleric_Agent_Core/catalogue_src/"
 DOWN = """pdp_add_to_cart_actions pdp_add_to_cart_page_views pdp_add_to_cart_rate pdp_avg_engaged_seconds
 pdp_credited_net_revenue pdp_credited_orders pdp_engaged_page_views pdp_engaged_rate pdp_interacted_page_views
 pdp_interactions_leading_to_cart pdp_purchase_rate pdp_purchased_page_views section_avg_visible_seconds
-section_interacted section_reach_rate section_reached""".split()
+section_interacted section_reach_rate section_reached
+listing_buy_now_clicks listing_interactions pdp_interaction_page_views pdp_interactions pdp_page_views
+pdp_snapshot_page_views section_exposed""".split()
 UP = ["section_avg_qualified_seconds"]
 TIERS = ["pdp_visits", "pdp_section_reach", "pdp_interaction_log", "listing_card_events"]
 
@@ -37,6 +39,6 @@ open(SRC + "agent_policy.yaml", "w").write(text)
 p = yaml.safe_load(open(SRC + "agent_policy.yaml"))["metrics"]
 t = yaml.safe_load(open(SRC + "causal_priors.yaml"))["view_tiers"]
 n = len([k for k in DOWN + UP if k in p])
-ok = n == 17 and all(t.get(v) == 4 for v in TIERS)
-print("policy entries: %d (expect 17); tiers: %s -> %s" % (n, [t.get(v) for v in TIERS], "OK" if ok else "FAIL"))
+ok = n == 24 and all(t.get(v) == 4 for v in TIERS)
+print("policy entries: %d (expect 24); tiers: %s -> %s" % (n, [t.get(v) for v in TIERS], "OK" if ok else "FAIL"))
 sys.exit(0 if ok else 1)
