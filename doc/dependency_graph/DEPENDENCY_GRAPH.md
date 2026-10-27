@@ -391,7 +391,7 @@ A lag-0 causal edge may only point from a lower tier to a higher one; lagged fee
 | 1 | `ad_spend`, `discounts`, `discounts_incl_tax`, `order_pnl_ad_spend`, `order_pnl_discounts`, `product_ad_spend`, `product_order_ad_spend`, `product_order_discounts` |
 | 2 | `impressions`, `platform_reported_landing_page_views`, `product_impressions` |
 | 3 | `clicks`, `landing_page_views`, `link_clicks`, `product_clicks`, `product_landing_page_views`, `product_link_clicks`, `product_thruplays`, `thruplays` |
-| 4 | `event_count`, `event_page_views`, `page_views`, `session_page_views`, `sessions`, `web_events` |
+| 4 | `event_count`, `event_page_views`, `listing_buy_now_clicks`, `listing_interactions`, `page_views`, `pdp_add_to_cart_actions`, `pdp_add_to_cart_page_views`, `pdp_credited_net_revenue`, `pdp_credited_orders`, `pdp_engaged_page_views`, `pdp_interacted_page_views`, `pdp_interaction_page_views`, `pdp_interactions`, `pdp_interactions_leading_to_cart`, `pdp_page_views`, `pdp_purchased_page_views`, `pdp_snapshot_page_views`, `section_exposed`, `section_interacted`, `section_reached`, `session_page_views`, `sessions`, `web_events` |
 | 5 | `add_to_cart_events`, `add_to_carts`, `checkout_steps`, `collection_view_events`, `event_add_to_carts`, `event_collection_views`, `event_product_views`, `event_site_searches`, `product_view_events`, `remove_from_carts`, `session_collection_views`, `session_product_views`, `site_search_events`, `site_searches`, `touches` |
 | 6 | `channel_new_customers`, `channel_orders`, `cod_orders`, `customers`, `funnel_order_purchases`, `funnel_purchases`, `new_customers`, `orders`, `orders_with_touchpoints`, `payment_orders`, `prepaid_orders`, `product_new_customers`, `product_orders`, `repeat_customers`, `units_ordered` |
 | 7 | `exchange_credit_amount`, `gross_sales`, `order_pnl_gross_sales`, `order_value_incl_tax`, `paid_sales`, `payment_amount`, `product_order_gross_sales`, `rto_orders`, `rto_revenue`, `total_sales`, `transactions` |
@@ -466,7 +466,7 @@ Dimensions shared by many views are where a change can be followed from one doma
 
 - Broken in the catalogue (do not use as evidence): `avg_seconds_to_checkout`, `avg_seconds_to_purchase`, `checkout_steps`.
 - Metrics with no edge at all (81): `available_units`, `avg_actual_lead_days`, `avg_hours_to_resolve`, `avg_planned_lead_days`, `avg_sampling_cogs`, `avg_sampling_margin_pct`, `avg_sampling_mrp`, `channel_cancelled_orders`, `channel_returned_or_cancelled_orders`, `channel_rto_orders`, `channel_unknown_orders`, `checkout_steps`, `discounts_incl_tax`, `exchange_credit_amount`, `exchange_refund_count`, `inventory_sync_errors`, `items_with_layer_gap`, `layered_units`, `line_value`, `listing_buy_now_clicks`, `listing_interactions`, `movement_value`, `net_sales_deductions`, `net_stock_change`, `new_customer_net_sales`, `on_hand_units`, `open_inventory_sync_errors`, `open_purchase_orders`, `order_value_incl_tax`, `out_of_stock_items`, `overdue_purchase_orders`, `pdp_add_to_cart_actions`, `pdp_avg_engaged_seconds`, `pdp_credited_net_revenue`, `pdp_credited_orders`, `pdp_interacted_page_views`, `pdp_interaction_page_views`, `pdp_interactions`, `pdp_interactions_leading_to_cart`, `pdp_snapshot_page_views`, `platform_reported_landing_page_views`, `po_count`, `po_lines`, `po_value`, `product_attributed_contribution`, `product_attributed_net_sales`, `product_attributed_revenue`, `product_order_cancelled_orders`, `product_order_returned_or_cancelled_orders`, `product_rto_orders`, `qc_count`, `qc_damage_value`, `receipt_layers`, `received_units`, `received_value`, `refund_amount`, `refund_lines`, `rejected_quality_checks`, `remaining_units`, `remaining_value`, `remove_from_carts`, `reserved_units`, `return_cancel_revenue`, `return_recovered_cogs`, `returned_or_cancelled_orders`, `rto_orders`, `rto_revenue`, `sample_units`, `sample_units_in_inventory`, `sampling_products`, `sampling_variant_count`, `section_avg_qualified_seconds`, `section_avg_visible_seconds`, `section_interacted`, `stock_movements`, `stock_value_fifo`, `stocked_items`, `transactions`, `units_in`, `units_out`, `vendor_count`. They can still be scanned for anomalies but the engine has no prior on how they relate.
-- Validation: 0 errors, 155 warnings.
+- Validation: 0 errors, 131 warnings.
   - available_units: no tier (view stock_levels has no view_tiers entry)
   - avg_actual_lead_days: no tier (view purchase_orders has no view_tiers entry)
   - avg_hours_to_resolve: no tier (view stock_sync_errors has no view_tiers entry)
@@ -494,8 +494,6 @@ Dimensions shared by many views are where a change can be followed from one doma
   - line_ordered_units: no tier (view purchase_order_lines has no view_tiers entry)
   - line_received_units: no tier (view purchase_order_lines has no view_tiers entry)
   - line_value: no tier (view purchase_order_lines has no view_tiers entry)
-  - listing_buy_now_clicks: no tier (view listing_card_events has no view_tiers entry)
-  - listing_interactions: no tier (view listing_card_events has no view_tiers entry)
   - ltv: no tier (view finance has no view_tiers entry)
   - ltv_cac_ratio: no tier (view finance has no view_tiers entry)
   - mer: no tier (view finance has no view_tiers entry)
@@ -514,22 +512,6 @@ Dimensions shared by many views are where a change can be followed from one doma
   - overdue_purchase_orders: no tier (view purchase_orders has no view_tiers entry)
   - packaging_cost: no tier (view finance has no view_tiers entry)
   - payment_gateway_fees: no tier (view finance has no view_tiers entry)
-  - pdp_add_to_cart_actions: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_add_to_cart_page_views: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_add_to_cart_rate: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_avg_engaged_seconds: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_credited_net_revenue: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_credited_orders: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_engaged_page_views: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_engaged_rate: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_interacted_page_views: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_interaction_page_views: no tier (view pdp_interaction_log has no view_tiers entry)
-  - pdp_interactions: no tier (view pdp_interaction_log has no view_tiers entry)
-  - pdp_interactions_leading_to_cart: no tier (view pdp_interaction_log has no view_tiers entry)
-  - pdp_page_views: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_purchase_rate: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_purchased_page_views: no tier (view pdp_visits has no view_tiers entry)
-  - pdp_snapshot_page_views: no tier (view pdp_visits has no view_tiers entry)
   - po_count: no tier (view purchase_orders has no view_tiers entry)
   - po_fill_rate: no tier (view purchase_orders has no view_tiers entry)
   - po_lines: no tier (view purchase_order_lines has no view_tiers entry)
@@ -601,12 +583,6 @@ Dimensions shared by many views are where a change can be followed from one doma
   - sample_units_in_inventory: no tier (view procurement_sampling has no view_tiers entry)
   - sampling_products: no tier (view procurement_sampling has no view_tiers entry)
   - sampling_variant_count: no tier (view procurement_sampling has no view_tiers entry)
-  - section_avg_qualified_seconds: no tier (view pdp_section_reach has no view_tiers entry)
-  - section_avg_visible_seconds: no tier (view pdp_section_reach has no view_tiers entry)
-  - section_exposed: no tier (view pdp_section_reach has no view_tiers entry)
-  - section_interacted: no tier (view pdp_section_reach has no view_tiers entry)
-  - section_reach_rate: no tier (view pdp_section_reach has no view_tiers entry)
-  - section_reached: no tier (view pdp_section_reach has no view_tiers entry)
   - shipping_cost: no tier (view finance has no view_tiers entry)
   - shipping_revenue: no tier (view finance has no view_tiers entry)
   - shipping_revenue_reversal: no tier (view finance has no view_tiers entry)

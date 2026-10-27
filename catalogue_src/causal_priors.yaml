@@ -44,6 +44,10 @@ view_tiers:
   paid_media_hourly: 2
   paid_media_breakdowns: 2
   web_sessions: 4
+  pdp_visits: 4
+  pdp_section_reach: 4
+  pdp_interaction_log: 4
+  listing_card_events: 4
   web_events: 4
   web_event_detail: 4
   web_funnel: 6

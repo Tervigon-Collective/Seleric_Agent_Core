@@ -123,3 +123,37 @@ metrics:
     direction_bad: down
   web_events:
     direction_bad: down
+  pdp_add_to_cart_actions:
+    direction_bad: down
+  pdp_add_to_cart_page_views:
+    direction_bad: down
+  pdp_add_to_cart_rate:
+    direction_bad: down
+  pdp_avg_engaged_seconds:
+    direction_bad: down
+  pdp_credited_net_revenue:
+    direction_bad: down
+  pdp_credited_orders:
+    direction_bad: down
+  pdp_engaged_page_views:
+    direction_bad: down
+  pdp_engaged_rate:
+    direction_bad: down
+  pdp_interacted_page_views:
+    direction_bad: down
+  pdp_interactions_leading_to_cart:
+    direction_bad: down
+  pdp_purchase_rate:
+    direction_bad: down
+  pdp_purchased_page_views:
+    direction_bad: down
+  section_avg_visible_seconds:
+    direction_bad: down
+  section_interacted:
+    direction_bad: down
+  section_reach_rate:
+    direction_bad: down
+  section_reached:
+    direction_bad: down
+  section_avg_qualified_seconds:
+    direction_bad: up
