@@ -157,3 +157,17 @@ metrics:
     direction_bad: down
   section_avg_qualified_seconds:
     direction_bad: up
+  listing_buy_now_clicks:
+    direction_bad: down
+  listing_interactions:
+    direction_bad: down
+  pdp_interaction_page_views:
+    direction_bad: down
+  pdp_interactions:
+    direction_bad: down
+  pdp_page_views:
+    direction_bad: down
+  pdp_snapshot_page_views:
+    direction_bad: down
+  section_exposed:
+    direction_bad: down
