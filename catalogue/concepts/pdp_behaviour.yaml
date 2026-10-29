@@ -1,6 +1,6 @@
 id: pdp_behaviour
 display_name: Product page behaviour
-one_liner: 'Measured product-page visits since 2026-10-26 (bots excluded): engagement, add-to-cart and credited-order rates per page view. Not the older product_view event counts.'
+one_liner: 'Measured product-page behaviour since 2026-10-26 (bots excluded): visits, engagement, add-to-cart and credited-order rates per page view (pdp_visits), how far visitors get and how long they stay in each page section (pdp_section_reach), and what they click (pdp_interaction_log). Not the older product_view event counts.'
 aliases:
 - product page behaviour
 - product page behavior
@@ -11,6 +11,15 @@ aliases:
 - product page add to cart rate
 - product page conversion
 - pdp visits
+- pdp behaviour analysis
+- pdp behavior analysis
+- pdp customer behaviour
+- pdp customer behavior
+- product page customer behaviour
+- product page customer behavior
+- how customers behave on product pages
+- pdp sectionization
+- pdp analytics
 axes:
   measure:
     values:
@@ -40,7 +49,7 @@ resolves:
 - when:
     measure: credited_revenue
   metric: pdp_credited_net_revenue
-disambiguation: 'Measured behaviour from the tracker cutoff 2026-10-26 18:19 UTC, one row per product-page view; earlier dates are empty by design
+disambiguation: 'A single number resolves to pdp_visits. A behaviour ANALYSIS ("pdp behaviour", "customer behaviour on product pages", what visitors do, where they drop off) is three views, query all of them: pdp_visits for the funnel (views, engaged, add-to-cart, purchase), pdp_section_reach for section reach and dwell by section_id, pdp_interaction_log for clicks by interaction_action and interaction_section_id. Break down by channel, product_handle and device_type on pdp_visits; section reach slices by section_id, template_key and viewport_class only. Measured behaviour from the tracker cutoff 2026-10-26 18:19 UTC, one row per product-page view; earlier dates are empty by design
   (the separate modelled history is not in this view). "pdp views" / "pdp rate" keep meaning the product_view event counts. Credit rule: an order is
   credited to the latest product-page view of its session before purchase; orders with no session link are not credited. Engaged rate is a lower bound
   (visits that left before the first checkpoint count as not engaged unless they interacted).

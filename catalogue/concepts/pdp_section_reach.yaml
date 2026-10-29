@@ -9,6 +9,13 @@ aliases:
 - how far visitors scroll
 - which sections visitors see
 - scroll depth by section
+- pdp sections
+- product page sections
+- pdp sectionization
+- section dwell
+- time spent on each section
+- where visitors drop off on the product page
+- product page drop off
 axes:
   measure:
     values:
@@ -34,7 +41,7 @@ resolves:
 - when:
     measure: seconds_to_reach
   metric: section_avg_qualified_seconds
-disambiguation: 'A section counts as reached after 25% of it was visible for one second in the foreground. Reach rate = reached / rendered instances; slice by
+disambiguation: 'Part of PDP behaviour (see pdp_behaviour): pair with pdp_visits for the funnel and pdp_interaction_log for clicks. A section counts as reached after 25% of it was visible for one second in the foreground. Reach rate = reached / rendered instances; slice by
   section_id and pool by template_key and layout_version (single products are small). Measured from 2026-10-26 18:19 UTC only.
 
   '

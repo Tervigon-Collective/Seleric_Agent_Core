@@ -555,3 +555,38 @@ async def test_sort_by_ratio_component_cube_member(planner, fake_cube):
     )
     assert "error" not in out
     assert fake_cube.queries[0]["order"] == {"customer_ltv.customers": "desc"}
+
+
+def _m(date_axis="native", time_dimension=None):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(date_axis=date_axis, cube_mapping=SimpleNamespace(time_dimension=time_dimension))
+
+
+def test_partial_day_comparison_is_cut_at_the_same_time_of_day():
+    from datetime import datetime
+
+    from seleric_mcp.app.query_planner import partial_compare_window
+
+    now = datetime(2026, 10, 28, 17, 20, 5)
+    out = partial_compare_window("pdp_visits.page_view_timestamp", [_m()], (date(2026, 10, 28),) * 2, (date(2026, 10, 27),) * 2, now)
+    assert out == ("pdp_visits.page_view_timestamp", ["2026-10-27T00:00:00.000", "2026-10-27T17:20:05.000"])
+    # a multi-day window that reaches today shifts the cut-off by the same span
+    out = partial_compare_window("v.ts", [_m()], (date(2026, 10, 22), date(2026, 10, 28)), (date(2026, 10, 15), date(2026, 10, 21)), now)
+    assert out == ("v.ts", ["2026-10-15T00:00:00.000", "2026-10-21T17:20:05.000"])
+
+
+def test_complete_windows_and_other_clocks_keep_the_whole_comparison_window():
+    from datetime import datetime
+
+    from seleric_mcp.app.query_planner import partial_compare_window
+
+    now = datetime(2026, 10, 28, 17, 20)
+    cur, cmp_ = (date(2026, 10, 27),) * 2, (date(2026, 10, 26),) * 2
+    assert partial_compare_window("v.ts", [_m()], cur, cmp_, now) is None  # a complete day
+    today, prev = (date(2026, 10, 28),) * 2, (date(2026, 10, 27),) * 2
+    assert partial_compare_window(None, [_m()], today, prev, now) is None  # no intraday timestamp on the view
+    assert partial_compare_window("v.ts", [_m(date_axis="cohort_only")], today, prev, now) is None
+    # a switchable metric on its default order_date axis is cut too; on event_date it carries its own time_dimension
+    assert partial_compare_window("v.ts", [_m(date_axis="switchable")], today, prev, now) is not None
+    assert partial_compare_window("v.ts", [_m(time_dimension="v.placed_at")], today, prev, now) is None

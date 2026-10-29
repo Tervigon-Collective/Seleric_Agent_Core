@@ -188,7 +188,7 @@ class DatasetBuilder:
                     p.rows = [r for r in p.rows if r[BUCKET] < current]
         elif reaches_now:
             partial_bucket = current
-            notes.append(f"The current day ({current}) is partial: its figures are 'so far'.")
+            notes.append(f"The current day ({current}) runs to now.")
 
         last = end.isoformat() if spec.grain == "day" else f"{end.isoformat()} 23:00"
         keep_partial = spec.grain == "day" or spec.include_partial_hour

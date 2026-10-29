@@ -1,0 +1,31 @@
+id: pdp_interactions
+display_name: Product page interactions
+one_liner: 'What visitors do on the product page: variant selects, media changes, accordion / FAQ / offers opens, delivery checks, add-to-cart and buy-now clicks, and which section each happened in.'
+aliases:
+- pdp interactions
+- product page interactions
+- product page clicks
+- what visitors click on product pages
+- variant selects
+- add to cart clicks
+- buy now clicks
+axes:
+  measure:
+    values:
+    - interactions
+    - interacted_page_views
+    - to_cart
+    default: interactions
+resolves:
+- when:
+    measure: interactions
+  metric: pdp_interactions
+- when:
+    measure: interacted_page_views
+  metric: pdp_interaction_page_views
+- when:
+    measure: to_cart
+  metric: pdp_interactions_leading_to_cart
+disambiguation: 'Part of PDP behaviour (see pdp_behaviour). Slice by interaction_action and interaction_section_id; this view has no channel, product_handle or device dimension (use pdp_visits for those). Measured from 2026-10-26 18:19 UTC only; the separate modelled history is not in this view.
+
+  '

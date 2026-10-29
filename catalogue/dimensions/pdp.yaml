@@ -133,7 +133,10 @@ dimensions:
   is_time: false
   views:
     pdp_visits: pdp_visits.furthest_section_instance_id
-  aliases: []
+  aliases:
+  - furthest section
+  - deepest section reached
+  - scroll depth section
 - id: last_checkpoint_reason
   display_name: Last Checkpoint Reason
   description: Why the last snapshot was sent (interval, hidden, pagehide ...).
@@ -175,14 +178,18 @@ dimensions:
   is_time: false
   views:
     pdp_section_reach: pdp_section_reach.section_id
-  aliases: []
+  aliases:
+  - pdp section
+  - product page section
+  - section
 - id: section_instance_id
   display_name: Section Instance Id
   description: Section instance (a section can appear twice, e.g. two recommendation lists).
   is_time: false
   views:
     pdp_section_reach: pdp_section_reach.section_instance_id
-  aliases: []
+  aliases:
+  - pdp section instance
 - id: placement
   display_name: Placement
   description: Placement of the instance.
@@ -226,14 +233,19 @@ dimensions:
   is_time: false
   views:
     pdp_interaction_log: pdp_interaction_log.interaction_action
-  aliases: []
+  aliases:
+  - pdp interaction
+  - product page interaction
+  - interaction type
 - id: interaction_section_id
   display_name: Interaction Section Id
   description: Section the interaction happened in.
   is_time: false
   views:
     pdp_interaction_log: pdp_interaction_log.interaction_section_id
-  aliases: []
+  aliases:
+  - section of interaction
+  - interaction section
 - id: interaction_product_id
   display_name: Interaction Product Id
   description: Product of the page.

@@ -897,6 +897,7 @@ class CatalogueService:
             "dimensions": dimensions,
             "grain_defaults": onto.get("grain_defaults") if "error" not in onto else None,
             "catalogue_version": self.version,
+            "views": {n: v.description for n, v in self.cat.views.items() if v.description and (allowed_views is None or n in allowed_views)},
         }
         if self.is_v2:
             out["semantic_version"] = self.cat.semantic_version

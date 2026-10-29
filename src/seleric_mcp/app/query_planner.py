@@ -12,7 +12,7 @@ import json
 import os
 import re
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from ..catalogue_service.loader import CubeMapping, DimensionDef, MetricDef
@@ -95,6 +95,28 @@ def derive_compare_range(start: date, end: date, mode: str) -> tuple[date, date]
         except ValueError:  # Feb 29
             return start - timedelta(days=365), end - timedelta(days=365)
     raise PlanError(f"Unknown compare_period: {mode}")
+
+
+def partial_compare_window(
+    datetime_dimension: str | None,
+    metrics: list,
+    current: tuple[date, date],
+    compare: tuple[date, date],
+    now: datetime,
+) -> tuple[str, list[str]] | None:
+    """(time dimension, [from, to]) that cuts the comparison window at the same time of day as the partial current one.
+
+    A window that reaches today covers only the hours elapsed, so comparing it with the whole previous day reads as a
+    fall. Applies to views with an intraday timestamp and metrics on the view's own clock or its order-placement date
+    (a switchable metric on its default order_date axis); anything else (the event-date axis, a view with no timestamp)
+    keeps the whole-day window."""
+    if not datetime_dimension or current[1] < now.date():
+        return None
+    if any(m.cube_mapping.time_dimension is not None or m.date_axis not in ("native", "switchable", "placement_only") for m in metrics):
+        return None
+    fmt = "%Y-%m-%dT%H:%M:%S.000"
+    cut = now - (current[0] - compare[0])
+    return datetime_dimension, [datetime.combine(compare[0], time.min).strftime(fmt), cut.strftime(fmt)]
 
 
 def _sql_literal(text: str) -> str:
@@ -879,6 +901,7 @@ class QueryPlanner:
         limit: int | None,
         sort_order: dict[str, str] | None = None,
         time_dimension: str | None = None,
+        date_window: list[str] | None = None,
     ) -> dict:
         view = metrics[0].cube_mapping.view
         measures: list[str] = []
@@ -908,7 +931,7 @@ class QueryPlanner:
         if date_dim:
             td: dict = {
                 "dimension": date_dim,
-                "dateRange": [date_range[0].isoformat(), date_range[1].isoformat()],
+                "dateRange": date_window or [date_range[0].isoformat(), date_range[1].isoformat()],
             }
             if granularity != "none":
                 td["granularity"] = granularity
@@ -993,13 +1016,27 @@ class QueryPlanner:
         )
 
         compare_range = None
+        cutoff = None
         if request.compare_period:
             compare_range = derive_compare_range(*current_range, request.compare_period)
+            view_def = self.catalogue.cat.views.get(view)
+            now = datetime.now(IST).replace(tzinfo=None, microsecond=0)
+            cutoff = partial_compare_window(
+                view_def.datetime_dimension and f"{view}.{view_def.datetime_dimension}",
+                metrics, current_range, compare_range, now,
+            )
             compare_query = self._build_cube_query(
                 metrics, qualified_dims, cube_filters, compare_range,
                 request.granularity, request.limit, sort_order=sort_order,
-                time_dimension=time_dimension,
+                time_dimension=cutoff[0] if cutoff else time_dimension,
+                date_window=cutoff[1] if cutoff else None,
             )
+            if cutoff:
+                filter_warnings = [
+                    *filter_warnings,
+                    f"Today runs to {now:%H:%M} IST: the comparison window was cut at the same time of day "
+                    f"({cutoff[1][0][:16]} to {cutoff[1][1][:16]}), so both sides cover the same hours.",
+                ]
         # Semantic-v2 lineage (the Cube-generated SQL) needs only the query, not its
         # result: fetch it alongside the load instead of after it.
         lineage = (
@@ -1057,6 +1094,8 @@ class QueryPlanner:
             currency=currency,
         )
 
+        if cutoff:
+            provenance["compare_cutoff"] = {"from": cutoff[1][0], "to": cutoff[1][1]}
         if lineage is not None:
             provenance["semantic"] = await lineage
 
