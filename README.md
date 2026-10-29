@@ -40,6 +40,16 @@ uv run python scripts/chat_client.py
 
 Claude Code picks up `.mcp.json` in this directory automatically.
 
+### ChatGPT custom MCP (OAuth)
+
+1. Server URL: `https://mcp.seleric.com/mcp`
+2. Authentication: **OAuth** (not “No authentication”)
+3. When prompted, sign in with `MCP_SERVICE_TOKEN` (or `MCP_OAUTH_PASSWORD` if set)
+4. Requires `MCP_OAUTH_ENABLED=true` + `MCP_OAUTH_SIGNING_KEY` on Core, and nginx
+   proxying `/.well-known/` + `/oauth/` (see `deploy/nginx/`).
+
+Cursor / Claude / Seleric Agent keep using the static Bearer header — unchanged.
+
 ## MCP surface
 
 Tools: `catalogue_search_metrics`, `catalogue_get_metric`,
@@ -93,6 +103,11 @@ and paid are filters; a retired id is rejected naming its replacement + filters.
 - Pipeboard write endpoint shape (`POST /actions/{type}`) is inherited from
   seleric_systems convention but unverified against Pipeboard's current API —
   swap `actions/executors/pipeboard.py` for an MCP-client executor if needed.
-- OAuth 2.1 at the gateway is deferred (shared bearer token today).
+- OAuth 2.1 for ChatGPT custom MCP: set `MCP_OAUTH_ENABLED=true` +
+  `MCP_OAUTH_SIGNING_KEY`, deploy nginx from `deploy/nginx/mcp.seleric.com`
+  (proxies `/.well-known/` + `/oauth/`). In ChatGPT: Server URL
+  `https://mcp.seleric.com/mcp`, Authentication **OAuth**, sign in with
+  `MCP_SERVICE_TOKEN` (or `MCP_OAUTH_PASSWORD`). Cursor / Seleric Agent keep
+  using the static Bearer token.
 - `blended_roas` has no catalogued ratio components yet, so its period
   comparisons are flagged approximations.

@@ -50,6 +50,14 @@ def create_http_app():
             "MCP_SERVICE_TOKEN must be set for the http transport "
             "(stdio is the only unauthenticated mode)."
         )
+    if settings.mcp_oauth_enabled and not settings.mcp_oauth_signing_key:
+        raise SystemExit(
+            "MCP_OAUTH_SIGNING_KEY must be set when MCP_OAUTH_ENABLED=true."
+        )
+    if settings.mcp_oauth_enabled and not settings.mcp_public_base_url:
+        raise SystemExit(
+            "MCP_PUBLIC_BASE_URL must be set when MCP_OAUTH_ENABLED=true."
+        )
 
     mcp = build_server(settings)
     skip_drift = os.environ.get("SELERIC_SKIP_DRIFT_CHECK", "0") == "1"
@@ -75,7 +83,16 @@ def create_http_app():
     from .gateway.analyst import mount_analyst_routes
 
     mount_analyst_routes(app, mcp)
-    return BearerTokenMiddleware(app, settings.mcp_service_token)
+    if settings.mcp_oauth_enabled:
+        from .gateway.oauth import mount_oauth_routes
+
+        mount_oauth_routes(app, settings)
+        structlog.get_logger().info(
+            "mcp_oauth_enabled",
+            public_base=settings.mcp_public_base_url,
+            resource=f"{settings.mcp_public_base_url.rstrip('/')}/mcp",
+        )
+    return BearerTokenMiddleware(app, settings.mcp_service_token, settings=settings)
 
 
 def main() -> None:

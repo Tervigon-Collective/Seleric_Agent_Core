@@ -122,6 +122,14 @@ class Settings:
     approval_secret: str
     caller_scopes: frozenset[str]
     db_path: Path
+    # ChatGPT / OAuth 2.1 hosts (see gateway/oauth.py). When enabled, Core serves
+    # discovery + authorize/token/register and accepts JWTs minted there in
+    # addition to MCP_SERVICE_TOKEN. Signing key required when enabled.
+    mcp_oauth_enabled: bool = False
+    mcp_public_base_url: str = ""
+    mcp_oauth_signing_key: str = ""
+    # Login secret for the OAuth HTML form; empty = reuse MCP_SERVICE_TOKEN.
+    mcp_oauth_password: str = ""
     # Optional deployment-level module pin (catalogue/modules.yaml id). When set,
     # this instance is locked to that module: query/search tools scope to it and
     # a per-call module that contradicts it is refused. Empty = unscoped.
@@ -406,6 +414,12 @@ def load_settings(config_path: Path | None = None) -> Settings:
         write_enabled=write_enabled,
         mcp_service_token=_env_str("MCP_SERVICE_TOKEN"),
         approval_secret=_env_str("APPROVAL_SECRET"),
+        mcp_oauth_enabled=_as_bool(_env_or("MCP_OAUTH_ENABLED", False), False),
+        mcp_public_base_url=str(
+            _env_or("MCP_PUBLIC_BASE_URL", "https://mcp.seleric.com")
+        ).rstrip("/"),
+        mcp_oauth_signing_key=_env_str("MCP_OAUTH_SIGNING_KEY"),
+        mcp_oauth_password=_env_str("MCP_OAUTH_PASSWORD"),
         caller_scopes=scopes,
         module=module,
         ads_tools_enabled=ads_tools_enabled,
