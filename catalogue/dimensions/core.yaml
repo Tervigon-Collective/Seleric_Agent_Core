@@ -1461,7 +1461,7 @@ dimensions:
     partially paid, from Oct 2026) count as online (L-35).'
 - id: payment_type
   display_name: Payment Type
-  description: 'cod | prepaid | unknown from the order tags (D-99): cod = tag cod or Shopify COD flag, prepaid = gateway-id / PhonePe / Razorpay tag, unknown = no payment tag. CURRENT state of the order: the split of a past period moves as returns close; totals do not. Ad spend sits in the n/a bucket.'
+  description: 'cod | prepaid (D-99, D-101): cod = order tag cod or Shopify COD flag; every other order, exchange replacements included, is prepaid (1Checkout books all payments as gateway manual). CURRENT state of the order: the split of a past period moves as returns close; totals do not. Ad spend sits in the n/a bucket.'
   is_time: false
   views:
     ssot_pnl: ssot_pnl.payment_type
