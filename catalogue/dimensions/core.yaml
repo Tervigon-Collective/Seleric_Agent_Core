@@ -803,6 +803,7 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.financial_status
+    ssot_pnl: ssot_pnl.financial_status
   aliases:
   - payment status
   - financial status
@@ -1332,9 +1333,19 @@ dimensions:
   is_time: false
   views:
     commerce: commerce.order_status
+    ssot_pnl: ssot_pnl.order_status
   aliases:
   - status
   - order status
+- id: order_kind
+  display_name: Order Kind
+  description: 'draft or regular (SSOT mart, D-98). CURRENT state of the order: the split of a past period moves as returns close; totals do not. Ad spend sits in the n/a bucket.'
+  is_time: false
+  views:
+    ssot_pnl: ssot_pnl.order_kind
+  aliases:
+  - draft or regular
+  - order kind
 - id: order_type
   display_name: Order Type
   description: sale | exchange_replacement | zero_value (test orders are excluded, D-01 / D-08 / D-08a).
@@ -1448,6 +1459,17 @@ dimensions:
     cod = COD; gold''s explicit value always wins; D-46). What is still ''manual'' is unclassified, not a payment
     type: untagged orders (drafts, POS, some exchanges). ''Advance online, balance on delivery'' orders (tag phonepe,
     partially paid, from Oct 2026) count as online (L-35).'
+- id: payment_type
+  display_name: Payment Type
+  description: 'cod | prepaid | unknown from the order tags (D-99): cod = tag cod or Shopify COD flag, prepaid = gateway-id / PhonePe / Razorpay tag, unknown = no payment tag. CURRENT state of the order: the split of a past period moves as returns close; totals do not. Ad spend sits in the n/a bucket.'
+  is_time: false
+  views:
+    ssot_pnl: ssot_pnl.payment_type
+  aliases:
+  - cod vs prepaid
+  - cod or prepaid
+  - payment mode
+  - payment type
 - id: payment_source
   display_name: Payment Source
   description: Where the payment method comes from (D-46) - gold (gold's own value), tag_phonepe or tag_cod (resolved
@@ -1697,6 +1719,7 @@ dimensions:
   views:
     commerce: commerce.return_status
     returns: returns.return_status
+    ssot_pnl: ssot_pnl.return_status
   aliases:
   - return status
 - id: root_order_id

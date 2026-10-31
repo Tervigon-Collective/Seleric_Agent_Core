@@ -9692,6 +9692,16 @@
     "family": "product_type"
    },
    {
+    "id": "return_status",
+    "label": "Return Status",
+    "views": [
+     "commerce",
+     "returns",
+     "ssot_pnl"
+    ],
+    "family": null
+   },
+   {
     "id": "shipping_city",
     "label": "Shipping City",
     "views": [
@@ -9742,7 +9752,7 @@
     "family": "variant"
    }
   ],
-  "dimension_count": 176
+  "dimension_count": 178
  },
  "validation": {
   "errors": [],

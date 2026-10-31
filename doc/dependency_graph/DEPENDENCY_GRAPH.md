@@ -464,6 +464,7 @@ Dimensions shared by many views are where a change can be followed from one doma
 | `order_id` | commerce, product_ads, product_profit |
 | `order_type` | commerce, payments, returns |
 | `product_type` | product_ads, product_profit, returns |
+| `return_status` | commerce, returns, ssot_pnl |
 | `shipping_city` | commerce, product_ads, product_profit |
 | `shipping_region` | finance, product_ads, product_profit |
 | `shipping_state` | commerce, product_ads, product_profit |
