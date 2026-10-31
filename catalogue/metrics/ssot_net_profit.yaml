@@ -4,7 +4,7 @@ category: finance
 status: approved
 description: 'Net Profit = Gross Profit - ad spend: after COGS and ads, before fixed overheads and tax (D-19). Grain: brand_day_channel.
   Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L
-  view over gold.fct_ssot_pnl_daily (Shopify; Amazon is not included).'
+  view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Net Profit = Gross Profit - ad spend: after COGS and ads, before fixed overheads and tax (D-19).'
   authoritative_source: cube

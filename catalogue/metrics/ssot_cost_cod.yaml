@@ -3,8 +3,7 @@ display_name: SSOT COD handling fee
 category: finance
 status: approved
 description: 'COD handling fee, order date. Grain: brand_day_channel. Date axis: native (one hybrid axis: order date for sales
-  and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify; Amazon is not
-  included).'
+  and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: COD handling fee, order date.
   authoritative_source: cube

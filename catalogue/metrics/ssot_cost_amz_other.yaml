@@ -1,0 +1,30 @@
+id: ssot_cost_amz_other
+display_name: SSOT Amazon other service fees
+category: finance
+status: approved
+description: 'Amazon other service fees, purchase date. Amazon only. Grain: brand_day_channel. Date axis: native (one hybrid
+  axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: Amazon other service fees, purchase date. Amazon only.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_amz_other
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

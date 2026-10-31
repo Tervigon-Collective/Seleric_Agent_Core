@@ -4,7 +4,7 @@ category: finance
 status: approved
 description: 'Net COGS = gross COGS + return courier cost - product-cost credit. Grain: brand_day_channel. Date axis: native
   (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify; Amazon is not included).'
+  (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: Net COGS = gross COGS + return courier cost - product-cost credit.
   authoritative_source: cube

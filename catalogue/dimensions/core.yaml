@@ -1729,6 +1729,16 @@ dimensions:
   views:
     commerce: commerce.root_order_id
   aliases: []
+- id: sales_platform
+  display_name: Sales Platform
+  description: 'shopify | amazon (SSOT mart, D-104). Channel amazon is the whole Amazon marketplace; filter sales_platform to separate the two. Measures add across both. Not the traffic platform (platform).'
+  is_time: false
+  views:
+    ssot_pnl: ssot_pnl.sales_platform
+  aliases:
+  - sales platform
+  - marketplace
+  - shopify or amazon
 - id: sample_moved_to_inventory
   display_name: Sample Moved to Inventory
   description: Sample Moved to Inventory

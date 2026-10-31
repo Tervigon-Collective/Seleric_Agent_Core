@@ -4,7 +4,7 @@ category: finance
 status: approved
 description: 'Discounts ex-GST (order-level GST ratio), order date. Memo: already taken off product net. Grain: brand_day_channel.
   Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L
-  view over gold.fct_ssot_pnl_daily (Shopify; Amazon is not included).'
+  view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Discounts ex-GST (order-level GST ratio), order date. Memo: already taken off product net.'
   authoritative_source: cube

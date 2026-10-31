@@ -4,7 +4,7 @@ category: finance
 status: approved
 description: 'Return courier cost on the return date (any status). Grain: brand_day_channel. Date axis: native (one hybrid
   axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify; Amazon is not included).'
+  (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: Return courier cost on the return date (any status).
   authoritative_source: cube

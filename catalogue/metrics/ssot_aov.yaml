@@ -4,7 +4,7 @@ category: finance
 status: approved
 description: 'AOV = (Gross Sales - exchange) / (placed orders - exchange), ex-GST (D-41, D-63). Grain: brand_day_channel.
   Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L
-  view over gold.fct_ssot_pnl_daily (Shopify; Amazon is not included).'
+  view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: AOV = (Gross Sales - exchange) / (placed orders - exchange), ex-GST (D-41, D-63).
   authoritative_source: cube

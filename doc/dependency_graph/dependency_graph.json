@@ -62,7 +62,7 @@
   "allocation": 11,
   "co_measure": 18,
   "composition": 59,
-  "declared_input": 35,
+  "declared_input": 40,
   "feedback": 3,
   "mechanism": 37,
   "ratio_component": 80,
@@ -4990,6 +4990,70 @@
    "same_quantity_group": []
   },
   {
+   "id": "ssot_cost_amz_closing",
+   "label": "SSOT Amazon closing fee",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Amazon closing fee, ex-GST, purchase date (estimated until settled). Amazon only.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_cost_amz_commission",
+   "label": "SSOT Amazon commission",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Amazon commission, ex-GST, purchase date (estimated until settled). Amazon only.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_cost_amz_other",
+   "label": "SSOT Amazon other service fees",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Amazon other service fees, purchase date. Amazon only.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_cost_amz_shipping",
+   "label": "SSOT Amazon shipping fee",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Amazon shipping fee (Amazon shipping fees, D-75), purchase date. Amazon only.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
    "id": "ssot_cost_checkout",
    "label": "SSOT checkout fee",
    "view": "ssot_pnl",
@@ -5188,6 +5252,22 @@
    "same_quantity_group": []
   },
   {
+   "id": "ssot_fee_reversal",
+   "label": "SSOT Amazon fee reversals",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Marketplace fees Amazon gives back on a refund, ex-GST, refund-paid date; reduces Net COGS. Amazon only.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
    "id": "ssot_gross_profit",
    "label": "SSOT gross profit",
    "view": "ssot_pnl",
@@ -5235,6 +5315,22 @@
    "tier": null,
    "allocated": false,
    "formula": "Gross Sales = product net + discounts + shipping charged: before discount, ex-GST, incl. shipping (D-40, D-52).",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_marketplace_fees",
+   "label": "SSOT Amazon marketplace fees",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Amazon marketplace fees (Total Fees): commission + closing + shipping + other service fees on the purchase date, minus the fees Amazon gives back on refunds (refund date). Equals the Dashboard Amazon page platform fees; tax withheld (TCS/TDS) not included. Amazon only.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -5334,6 +5430,22 @@
    "tier": null,
    "allocated": false,
    "formula": "Gross COGS: every placed cost line.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_platform_adjustments",
+   "label": "SSOT Amazon settlement adjustments",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Itemised Amazon settlement adjustments (postage refunds, platform adjustments), report date; added to Net Profit. Amazon only.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -7204,6 +7316,41 @@
    "confidence": "definitional",
    "role": "denominator",
    "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_cost_amz_commission",
+   "to": "ssot_marketplace_fees",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
+   "from": "ssot_cost_amz_closing",
+   "to": "ssot_marketplace_fees",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
+   "from": "ssot_cost_amz_shipping",
+   "to": "ssot_marketplace_fees",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
+   "from": "ssot_cost_amz_other",
+   "to": "ssot_marketplace_fees",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
+   "from": "ssot_fee_reversal",
+   "to": "ssot_marketplace_fees",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
   },
   {
    "from": "ssot_gross_profit",
@@ -9752,7 +9899,7 @@
     "family": "variant"
    }
   ],
-  "dimension_count": 178
+  "dimension_count": 179
  },
  "validation": {
   "errors": [],
@@ -9881,6 +10028,10 @@
    "ssot_break_even_gross_roas: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cancel_rate: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cancels: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_cost_amz_closing: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_cost_amz_commission: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_cost_amz_other: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_cost_amz_shipping: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cost_checkout: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cost_cod: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cost_courier: no tier (view ssot_pnl has no view_tiers entry)",
@@ -9893,15 +10044,18 @@
    "ssot_cost_weight: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_discount_rate: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_discounts: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_fee_reversal: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_gross_profit: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_gross_roas: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_gross_sales: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_marketplace_fees: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_cogs: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_profit: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_roas: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_sales: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_orders: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_placed_cogs: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_platform_adjustments: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_product_cost_credit: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_product_net: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_return_rate: no tier (view ssot_pnl has no view_tiers entry)",
