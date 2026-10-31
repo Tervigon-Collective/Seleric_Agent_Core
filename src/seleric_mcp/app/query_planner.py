@@ -161,6 +161,7 @@ class QueryPlanner:
         cube: CubeClient,
         store: ResultStore,
         default_brand_id: str | None = None,
+        default_date_axis: str = "order_date",
     ):
         self.catalogue = catalogue
         self.cube = cube
@@ -169,6 +170,8 @@ class QueryPlanner:
         # this brand on views that expose a brand_id dimension (single-tenant
         # deployments must not silently aggregate other/test brands).
         self.default_brand_id = default_brand_id
+        # Axis used when the request names none (D-44). Cohort-only metrics always fall back to order_date.
+        self.default_date_axis = default_date_axis if default_date_axis in ("order_date", "event_date") else "order_date"
         # Dataset contracts for grain/policy enforcement (SEM-16)
         self.dataset_contracts = load_dataset_contracts()
 
@@ -311,15 +314,23 @@ class QueryPlanner:
                     suggestions=[m.id],
                 )
         plain = [m for m in metrics if m.date_axis == "switchable" and not m.requested_date_axis]
-        if "event_date" in alias_axes and plain and asked is None:
+        default = self.default_date_axis
+        defaulted_note: list[str] = []
+        cohort = [m for m in metrics if m.date_axis == "cohort_only"]
+        if default == "event_date" and asked is None and not alias_axes and cohort:
+            default = "order_date"  # a cohort measure has no event-date meaning: answer the whole query on order_date
+            defaulted_note.append(f"'{cohort[0].id}' is a cohort measure (no event-date meaning), so this query is on order_date.")
+        if "event_date" in alias_axes and plain and asked is None and default != "event_date":
             raise PlanError(
                 f"'{plain[0].id}' (order-date by default) and the event-date id "
                 f"'{next(m.requested_as or m.id for m in metrics if m.requested_date_axis)}' are in one query. "
                 "One date axis per query (D-28): pass date_axis explicitly, or ask them separately.",
                 suggestions=["date_axis=order_date", "date_axis=event_date"],
             )
-        eff = asked or ("event_date" if "event_date" in alias_axes else "order_date")
-        notes: list[str] = []
+        eff = asked or ("event_date" if "event_date" in alias_axes else default)
+        notes: list[str] = list(defaulted_note)
+        if eff == "event_date" and asked is None and not alias_axes:
+            notes.append("date_axis defaulted to event_date (owner decision D-44); pass date_axis=order_date for the orders-placed view.")
         out: list[MetricDef] = []
         for m in metrics:
             if m.date_axis is None:

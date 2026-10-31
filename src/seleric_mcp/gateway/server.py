@@ -93,6 +93,7 @@ class AppContext:
             self.cube,
             self.result_store,
             default_brand_id=settings.default_brand_id or None,
+            default_date_axis=settings.default_date_axis,
         )
         self.datasets = DatasetStore(
             self.db,
@@ -1603,7 +1604,8 @@ def build_server(settings: Settings) -> FastMCP:
     def no_hallucination_guard() -> str:
         """Standing instruction: resolve via catalogue, never invent numbers."""
         return prompt_templates.with_date_axis_guide(
-            prompt_templates.NO_HALLUCINATION_GUARD, ctx.catalogue.cat.semantic_version
+            prompt_templates.NO_HALLUCINATION_GUARD, ctx.catalogue.cat.semantic_version,
+            ctx.planner.default_date_axis,
         )
 
     @mcp.prompt()

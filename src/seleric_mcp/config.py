@@ -174,6 +174,9 @@ class Settings:
     list_metrics_rate_limit: int = 0
     freshness_enforcement: bool = True
     freshness_grace_days: int = 1
+    # Date axis a query gets when the caller names none (semantic v3, D-44): order_date | event_date.
+    # Env override: SELERIC_DEFAULT_DATE_AXIS.
+    default_date_axis: str = "order_date"
     default_brand_id: str = "20"
     # Value index (catalogue_service/value_index.py): live dimension values
     # learned from Cube for resolving user words to data values.
@@ -431,6 +434,9 @@ def load_settings(config_path: Path | None = None) -> Settings:
         ),
         resolve_ambiguous_threshold=_tunable_float(
             "SELERIC_RESOLVE_AMBIGUOUS_THRESHOLD", "resolve_ambiguous_threshold"
+        ),
+        default_date_axis=(lambda v: v if v in ("order_date", "event_date") else "order_date")(
+            str(_env_or("SELERIC_DEFAULT_DATE_AXIS", _cfg_get(tunables, "default_date_axis", "order_date"))).strip().lower()
         ),
         resolve_runner_up_margin=_tunable_float(
             "SELERIC_RESOLVE_RUNNER_UP_MARGIN", "resolve_runner_up_margin"
