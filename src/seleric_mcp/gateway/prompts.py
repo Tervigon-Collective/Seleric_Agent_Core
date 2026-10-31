@@ -555,9 +555,35 @@ Every figure is on ONE date axis. Name it in the first line of the answer.
 """
 
 
-def with_date_axis_guide(text: str, semantic_version: int) -> str:
-    """The standing prompt plus the v3 date-axis rules (a v2 catalogue gets the prompt unchanged)."""
-    return text + "\n\n" + DATE_AXIS_GUIDE_V3 if semantic_version >= 3 else text
+# Replaces the first four bullets of the guide when the server default is event_date (D-44).
+DATE_AXIS_EVENT_DEFAULT_RULES = """\
+- Default = event_date (owner decision D-44): placement amounts and costs stay on the order
+  date; cancels / RTO / returns sit on the day they were booked. It is the server default:
+  do not pass date_axis for it.
+- order_date = the orders placed in the period, with cancels / RTO / returns as of now. Use
+  it ONLY when the user's own words say so ("orders placed in", "of the orders placed",
+  "as of now", cohort questions). Pass date_axis="order_date"; never pick a different
+  metric id for it.
+- Ambiguous wording ("returns in September") is answered on the default (event_date), then
+  add ONE line with the order_date figure and say which is which.
+- Always show the Undated member returned beside the dated rows (outcomes with no outcome
+  date) and call the ranged total "dated only". An RTO date is the day the cancel/return
+  was booked, not a courier date.
+"""
+
+
+def _date_axis_guide(default_axis: str) -> str:
+    if default_axis != "event_date":
+        return DATE_AXIS_GUIDE_V3
+    start = DATE_AXIS_GUIDE_V3.index("- Default = order_date")
+    end = DATE_AXIS_GUIDE_V3.index("- Never mix the two axes")
+    return DATE_AXIS_GUIDE_V3[:start] + DATE_AXIS_EVENT_DEFAULT_RULES + DATE_AXIS_GUIDE_V3[end:]
+
+
+def with_date_axis_guide(text: str, semantic_version: int, default_axis: str = "order_date") -> str:
+    """The standing prompt plus the v3 date-axis rules (a v2 catalogue gets the prompt unchanged).
+    ``default_axis`` is the server's default (D-44): the rules name the axis the server applies when none is passed."""
+    return text + "\n\n" + _date_axis_guide(default_axis) if semantic_version >= 3 else text
 
 
 def dashboard_analyst_prompt(module_label: str = "", brand_label: str = "", semantic_version: int = 2) -> str:

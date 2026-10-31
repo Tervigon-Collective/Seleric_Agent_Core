@@ -360,3 +360,50 @@ def test_agent_policy_is_in_the_catalogue_and_the_bootstrap(v3):
     assert rows[with_direction]["direction_bad"] == policy[with_direction]["direction_bad"]
     assert rows["net_roas"]["agent_domain"] == "performance"
     assert not any(m.direction_bad for mid, m in v3.cat.metrics.items() if mid not in policy)
+
+
+# ---------------------------------------------------------------- planner: configurable default axis (D-44)
+
+@pytest.fixture()
+def planner_event(v3, cube, result_store) -> QueryPlanner:
+    return QueryPlanner(v3, cube, result_store, default_date_axis="event_date")
+
+
+def test_event_default_applies_when_no_axis_is_named(planner_event, cube):
+    cube.by_prefix["finance"] = [{"finance.net_sales": "10"}]
+    out = run(planner_event, ["order_pnl_net_sales"])
+    assert cube.queries[0]["timeDimensions"][0]["dimension"] == "finance.event_date"
+    assert out["date_axis"] == "event_date" and "undated" in out
+    assert any("defaulted to event_date" in w for w in out["warnings"])
+
+
+def test_event_default_does_not_override_an_explicit_order_date(planner_event, cube):
+    cube.by_prefix["finance"] = [{"finance.net_sales": "10"}]
+    out = run(planner_event, ["order_pnl_net_sales"], "order_date")
+    assert cube.queries[0]["timeDimensions"][0]["dimension"] == "finance.order_date"
+    assert out["date_axis"] == "order_date" and not any("defaulted" in w for w in out["warnings"])
+
+
+def test_cohort_metric_falls_back_to_order_date_under_the_event_default(planner_event, cube):
+    cube.by_prefix["finance"] = [{"finance.return_rate": "0.1"}]
+    out = run(planner_event, ["return_rate"])
+    assert out["date_axis"] == "order_date"
+    assert any("cohort measure" in w for w in out["warnings"])
+
+
+def test_plain_and_event_alias_share_a_query_under_the_event_default(planner_event, cube):
+    cube.by_prefix["finance"] = [{"finance.net_profit": "5", "finance.net_sales": "9"}]
+    out = run(planner_event, ["pnl_net_profit", "order_pnl_net_sales"])
+    assert out["date_axis"] == "event_date"
+
+
+def test_the_code_default_is_still_order_date(planner):
+    assert planner.default_date_axis == "order_date"
+
+
+def test_prompt_guide_names_the_server_default():
+    from seleric_mcp.gateway.prompts import with_date_axis_guide
+    ev = with_date_axis_guide("x", 3, "event_date")
+    od = with_date_axis_guide("x", 3)
+    assert "Default = event_date" in ev and "Default = order_date" not in ev and "Never mix the two axes" in ev
+    assert "Default = order_date" in od and "Default = event_date" not in od

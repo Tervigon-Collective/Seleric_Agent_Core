@@ -92,6 +92,9 @@ tunables:
   freshness_cache_ttl_seconds: 600
   freshness_enforcement: true
   freshness_grace_days: 1
+  # Date axis for a query that names none (semantic v3). event_date = sales/costs on the order date, cancels / RTO /
+  # returns on the day booked (owner decision D-44, 2026-10-31). Rollback: order_date.
+  default_date_axis: event_date
 
 # Terminal / web chat clients (scripts/chat_*.py). API key stays in .env.
 # One Azure AI Foundry endpoint serves every model below — routing just swaps
