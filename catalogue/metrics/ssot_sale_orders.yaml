@@ -1,0 +1,30 @@
+id: ssot_sale_orders
+display_name: SSOT sale orders
+category: finance
+status: approved
+description: 'Placed orders without the exchange channel (D-18). Grain: brand_day_channel. Date axis: native (one hybrid axis:
+  order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify;
+  Amazon is not included).'
+formula:
+  human_readable: Placed orders without the exchange channel (D-18).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.sale_orders
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

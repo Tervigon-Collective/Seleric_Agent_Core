@@ -1,0 +1,31 @@
+id: ssot_gross_profit
+display_name: SSOT gross profit
+category: finance
+status: approved
+description: 'Gross Profit = Net Sales - Net COGS, before ads (D-19). Grain: brand_day_channel. Date axis: native (one hybrid
+  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify; Amazon is not included).'
+formula:
+  human_readable: Gross Profit = Net Sales - Net COGS, before ads (D-19).
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.gross_profit
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

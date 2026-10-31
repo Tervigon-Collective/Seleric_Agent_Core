@@ -1,0 +1,31 @@
+id: ssot_cancels
+display_name: SSOT cancellations
+category: finance
+status: approved
+description: 'Cancelled / voided value ex-GST on the cancellation date. Grain: brand_day_channel. Date axis: native (one hybrid
+  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify; Amazon is not included).'
+formula:
+  human_readable: Cancelled / voided value ex-GST on the cancellation date.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cancels
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

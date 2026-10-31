@@ -1,0 +1,31 @@
+id: ssot_cost_unallocated
+display_name: SSOT cost not split into lines
+category: finance
+status: approved
+description: 'Gross COGS minus the eight cost lines; zero from 2026-09. Grain: brand_day_channel. Date axis: native (one hybrid
+  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify; Amazon is not included).'
+formula:
+  human_readable: Gross COGS minus the eight cost lines; zero from 2026-09.
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_unallocated
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

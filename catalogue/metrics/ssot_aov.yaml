@@ -1,0 +1,35 @@
+id: ssot_aov
+display_name: SSOT AOV
+category: finance
+status: approved
+description: 'AOV = (Gross Sales - exchange) / (placed orders - exchange), ex-GST (D-41, D-63). Grain: brand_day_channel.
+  Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L
+  view over gold.fct_ssot_pnl_daily (Shopify; Amazon is not included).'
+formula:
+  human_readable: AOV = (Gross Sales - exchange) / (placed orders - exchange), ex-GST (D-41, D-63).
+  authoritative_source: cube
+  depends_on:
+  - ssot_sale_gross_sales
+  - ssot_sale_orders
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.aov
+aggregation: ratio
+unit: ratio
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_sale_gross_sales
+  denominator: ssot_sale_orders

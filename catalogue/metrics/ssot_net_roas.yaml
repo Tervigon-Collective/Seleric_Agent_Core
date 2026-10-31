@@ -1,0 +1,35 @@
+id: ssot_net_roas
+display_name: SSOT Net ROAS
+category: finance
+status: approved
+description: 'Net ROAS = Gross Profit / ad spend; break-even is 1.00. Grain: brand_day_channel. Date axis: native (one hybrid
+  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify; Amazon is not included).'
+formula:
+  human_readable: Net ROAS = Gross Profit / ad spend; break-even is 1.00.
+  authoritative_source: cube
+  depends_on:
+  - ssot_gross_profit
+  - ssot_ad_spend
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.net_roas
+aggregation: ratio
+unit: ratio
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_gross_profit
+  denominator: ssot_ad_spend

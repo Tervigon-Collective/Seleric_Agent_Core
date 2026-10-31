@@ -373,6 +373,7 @@ dimensions:
     returns: returns.brand_id
     payments: payments.brand_id
     finance: finance.brand_id
+    ssot_pnl: ssot_pnl.brand_id
     stock_movements: stock_movements.brand_id
     stock_levels: stock_levels.brand_id
     stock_layers: stock_layers.brand_id
@@ -565,6 +566,7 @@ dimensions:
     attribution_paths: attribution_paths.channel
     returns: returns.channel
     payments: payments.channel
+    ssot_pnl: ssot_pnl.channel
   aliases: []
   family: channel
   family_rank: 0
@@ -1659,6 +1661,7 @@ dimensions:
     ONLY: event_date is refused for this family (D-34).'
   is_time: true
   views:
+    ssot_pnl: ssot_pnl.report_date
     product_ads: product_ads.report_date
     paid_media: paid_media.report_date
     paid_media_hourly: paid_media_hourly.report_date
