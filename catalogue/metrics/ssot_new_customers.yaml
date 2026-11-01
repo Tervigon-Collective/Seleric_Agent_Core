@@ -1,0 +1,33 @@
+id: ssot_new_customers
+display_name: SSOT new customers
+category: finance
+status: approved
+description: 'Customers whose first ever sale order falls in the window (any channel, exchange replacements excluded, Amazon
+  outside). Formula: count of first orders. Date: order date (IST). GST: not applicable. Shopify: Needs a customer-level model.
+  Amazon: Outside. Excludes: exchange, Amazon. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L
+  view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Customers whose first ever sale order falls in the window (any channel, exchange replacements excluded,
+    Amazon outside). Formula: count of first orders. Date: order date (IST). GST: not applicable. Shopify: Needs a customer-level
+    model. Amazon: Outside. Excludes: exchange, Amazon.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.new_customers
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

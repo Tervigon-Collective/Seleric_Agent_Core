@@ -1,0 +1,35 @@
+id: ssot_shopify_ad_spend
+display_name: SSOT Shopify ad spend
+category: finance
+status: approved
+description: 'Ad spend of the Shopify business (Meta and Google): ad spend without the Amazon channel. Used where an Amazon-free
+  cost is needed (CAC, new-customer ROAS). Formula: ad_spend, amazon channel removed. Date: ad report day of the platform.
+  GST: as ad_spend. Shopify: Meta on channel meta, Google on channel google. Amazon: Left out. Excludes: Amazon Ads. Grain:
+  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
+  channel amazon; D-104).'
+formula:
+  human_readable: 'Ad spend of the Shopify business (Meta and Google): ad spend without the Amazon channel. Used where an
+    Amazon-free cost is needed (CAC, new-customer ROAS). Formula: ad_spend, amazon channel removed. Date: ad report day of
+    the platform. GST: as ad_spend. Shopify: Meta on channel meta, Google on channel google. Amazon: Left out. Excludes: Amazon
+    Ads.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.shopify_ad_spend
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

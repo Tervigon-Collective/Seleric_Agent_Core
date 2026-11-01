@@ -1339,7 +1339,7 @@ dimensions:
   - order status
 - id: order_kind
   display_name: Order Kind
-  description: 'draft or regular (SSOT mart, D-98). CURRENT state of the order: the split of a past period moves as returns close; totals do not. Ad spend sits in the n/a bucket.'
+  description: "draft | regular. Shopify draft orders are draft. Amazon rows are regular. CURRENT state of the order (a past period split moves as orders change; totals do not). n/a on ad spend rows."
   is_time: false
   views:
     ssot_pnl: ssot_pnl.order_kind
@@ -1461,7 +1461,7 @@ dimensions:
     partially paid, from Oct 2026) count as online (L-35).'
 - id: payment_type
   display_name: Payment Type
-  description: 'cod | prepaid (D-99, D-101): cod = order tag cod or Shopify COD flag; every other order, exchange replacements included, is prepaid (1Checkout books all payments as gateway manual). CURRENT state of the order: the split of a past period moves as returns close; totals do not. Ad spend sits in the n/a bucket.'
+  description: "cod | prepaid | marketplace | n/a. cod = the order carries a tag in var ssot_cod_tags (cod), or the Shopify COD flag, or the ops app charged a COD handling fee on it (D-109, F-2 decided; so a tagged COD order not yet costed stays cod); every other Shopify order is prepaid, exchange replacements included (1Checkout books all payments as gateway manual; D-99, D-101). Amazon rows: marketplace (Amazon collects the payment). n/a on ad spend rows. CURRENT state of the order."
   is_time: false
   views:
     ssot_pnl: ssot_pnl.payment_type
@@ -1731,7 +1731,7 @@ dimensions:
   aliases: []
 - id: sales_platform
   display_name: Sales Platform
-  description: 'shopify | amazon (SSOT mart, D-104). Channel amazon is the whole Amazon marketplace; filter sales_platform to separate the two. Measures add across both. Not the traffic platform (platform).'
+  description: "shopify | amazon. Which sales platform the row belongs to. Business total = both. Not the traffic platform (that is channel / the catalogue dimension platform)."
   is_time: false
   views:
     ssot_pnl: ssot_pnl.sales_platform

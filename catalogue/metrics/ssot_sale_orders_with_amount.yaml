@@ -1,0 +1,33 @@
+id: ssot_sale_orders_with_amount
+display_name: SSOT sale orders with amount
+category: finance
+status: approved
+description: 'Orders with amount, without the exchange channel. Formula: orders_with_amount, exchange channel removed. Date:
+  order date (IST). GST: not applicable. Shopify: Channel exchange is left out. Amazon: Included. Excludes: exchange channel.
+  Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify
+  and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Orders with amount, without the exchange channel. Formula: orders_with_amount, exchange channel removed.
+    Date: order date (IST). GST: not applicable. Shopify: Channel exchange is left out. Amazon: Included. Excludes: exchange
+    channel.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.sale_orders_with_amount
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

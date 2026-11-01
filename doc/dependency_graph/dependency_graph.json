@@ -62,10 +62,10 @@
   "allocation": 11,
   "co_measure": 18,
   "composition": 59,
-  "declared_input": 40,
+  "declared_input": 45,
   "feedback": 3,
   "mechanism": 37,
-  "ratio_component": 80,
+  "ratio_component": 86,
   "subset": 9,
   "twin": 69
  },
@@ -4955,6 +4955,25 @@
    "same_quantity_group": []
   },
   {
+   "id": "ssot_cac",
+   "label": "SSOT CAC",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "ratio",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Cost to win one new customer: Shopify ad spend (Meta + Google) per new customer. Formula: shopify_ad_spend / new_customers. Date: mixed: ad day over order date. GST: as ad_spend. Shopify: As formula (D-71, D-18). Amazon: Outside. Excludes: Amazon Ads, exchange.",
+   "ratio": {
+    "numerator": "ssot_sale_gross_sales",
+    "denominator": "ssot_sale_orders"
+   },
+   "same_quantity_group": []
+  },
+  {
    "id": "ssot_cancel_rate",
    "label": "SSOT cancel rate",
    "view": "ssot_pnl",
@@ -5081,7 +5100,7 @@
    "status": "approved",
    "tier": null,
    "allocated": false,
-   "formula": "Cash-on-delivery handling fee charged by the courier on COD orders. Formula: sum of COD handling fee of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app costing, booked when the ops app treats the order as COD. In Oct 1-29, 108 orders that the mart calls prepaid (no cod tag) carry this fee (3,711.27) and 133 mart-COD orders carry none: the ops app and the cod tag disagree (OPEN F-2). Amazon: 0. Excludes: gateway fee. OPEN: F-2 COD per tag vs COD per ops app.",
+   "formula": "Cash-on-delivery handling fee charged by the courier on COD orders. Formula: sum of COD handling fee of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app costing. Since D-109 an order that carries this fee is COD in payment_type, so the fee sits only on COD orders. Amazon: 0. Excludes: gateway fee.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -5314,7 +5333,7 @@
    "status": "approved",
    "tier": null,
    "allocated": false,
-   "formula": "Everything customers were charged before discounts and before any return or cancel: product value before discount plus shipping charged. Formula: product_net + discounts + shipping_charged. Date: order date (IST). GST: ex-GST for product and discount; shipping charged as booked (see F-1). Shopify: Sum of the three Shopify columns. Amazon: Order total / 1.18 (shipping inside). Excludes: returns, cancels.",
+   "formula": "Everything customers were charged before discounts and before any return or cancel: product value before discount plus shipping charged. Formula: product_net + discounts + shipping_charged. Date: order date (IST). GST: ex-GST for product, discount and shipping (shipping GST removed, D-109). Shopify: Sum of the three Shopify columns. Amazon: Order total / 1.18 (shipping inside). Excludes: returns, cancels.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -5332,6 +5351,25 @@
    "allocated": false,
    "formula": "Total Amazon fees: commission + closing + shipping fee + other service fees, minus the fees Amazon gave back on refunds. Same figure as the Dashboard Amazon page \"platform fees\". Formula: cost_amz_commission + cost_amz_closing + cost_amz_shipping + cost_amz_other - fee_reversal. Date: fees on purchase date, reversals on refund-paid date (IST). GST: as stored in the warehouse; reversals / 1.18. Shopify: 0. Amazon: As the formula. Excludes: tax withheld (TCS/TDS).",
    "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_nc_roas",
+   "label": "SSOT new-customer ROAS",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "ratio",
+   "unit": "ratio",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "New-customer ROAS: Gross Sales of first orders of new customers per rupee of Shopify ad spend. Formula: new_customer_gross_sales / shopify_ad_spend. Date: mixed: order date over ad day. GST: as gross_sales and ad_spend. Shopify: As formula. Amazon: Amazon is outside (no customer identity, Amazon ad spend left out). Excludes: returning customers, Amazon.",
+   "ratio": {
+    "numerator": "ssot_sale_gross_sales",
+    "denominator": "ssot_sale_orders"
+   },
    "same_quantity_group": []
   },
   {
@@ -5362,7 +5400,7 @@
    "status": "approved",
    "tier": null,
    "allocated": false,
-   "formula": "Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels) + Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST. Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own channel), Amazon. Excludes: salaries, rent, tax, owner drawings. OPEN: F-1 GST basis of shipping.",
+   "formula": "Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels) + Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST. Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own channel), Amazon. Excludes: salaries, rent, tax, owner drawings.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -5397,7 +5435,39 @@
    "status": "approved",
    "tier": null,
    "allocated": false,
-   "formula": "What the business keeps from sales after returns and cancels. Shipping charged stays inside. Formula: product_net + shipping_charged - returns_closed - cancels. Date: mixed on purpose (D-07): placement on order date, returns and cancels on their event dates. GST: ex-GST for product, returns and cancels; shipping as booked (F-1). Shopify: Exchange replacement orders are revenue in their own channel (D-02); nothing is removed. Amazon: Same identity; the refund (principal) is the only deduction. Includes: shipping charged, exchange replacements. Excludes: discounts (already out of product_net). OPEN: F-1 GST basis of shipping.",
+   "formula": "What the business keeps from sales after returns and cancels. Shipping charged stays inside. Formula: product_net + shipping_charged - returns_closed - cancels. Date: mixed on purpose (D-07): placement on order date, returns and cancels on their event dates. GST: ex-GST. Shopify: Exchange replacement orders are revenue in their own channel (D-02); nothing is removed. Amazon: Same identity; the refund (principal) is the only deduction. Includes: shipping charged, exchange replacements. Excludes: discounts (already out of product_net).",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_new_customer_gross_sales",
+   "label": "SSOT new-customer gross sales",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Gross Sales of the first orders of new customers (the same orders as New customers). Formula: sum of gross sales of the orders counted in new_customers. Date: order date (IST). GST: as gross_sales. Shopify: product net + discounts + GST-free shipping of those orders. Amazon: 0. Excludes: returns and cancels of those orders (they sit on other rows).",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_new_customers",
+   "label": "SSOT new customers",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "count",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Customers whose first ever sale order falls in the window (any channel, exchange replacements excluded, Amazon outside). Formula: count of first orders. Date: order date (IST). GST: not applicable. Shopify: Needs a customer-level model. Amazon: Outside. Excludes: exchange, Amazon.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -5414,6 +5484,22 @@
    "tier": null,
    "allocated": false,
    "formula": "Number of orders placed. Every order counts once, whatever happened to it later: exchange replacements, returned, RTO, cancelled and unpaid orders all count. Formula: count of distinct orders with at least one qualifying line. Date: order date (IST). GST: not applicable. Shopify: An order counts if it is not a test order and has at least one line that is not a gift card. Draft orders count (order_kind draft). One Shopify KPI rule (is_revenue_adjustment with gross <= 0) drops the free draft in the Dashboard; the mart keeps it, so consumers with the KPI rule read one order less until their SSOT flag is on. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included, on the purchase date. Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders, gift-card-only orders.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_orders_with_amount",
+   "label": "SSOT orders with amount",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "count",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Orders that actually charged money: placed orders whose amount after discount (product net + shipping charged) is above zero. Free drafts, zero-value replacements and cancelled Amazon orders are not in it. Formula: count of placed orders with product_net + shipping_charged > 0. Date: order date (IST). GST: ex-GST amounts. Shopify: Per order: sum of product net over its lines + GST-free shipping > 0. Amazon: Amazon order total / 1.18 > 0 (cancelled orders and orders with no order total are out). Excludes: zero-value orders.",
    "ratio": null,
    "same_quantity_group": []
   },
@@ -5565,6 +5651,22 @@
    "same_quantity_group": []
   },
   {
+   "id": "ssot_sale_orders_with_amount",
+   "label": "SSOT sale orders with amount",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "count",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Orders with amount, without the exchange channel. Formula: orders_with_amount, exchange channel removed. Date: order date (IST). GST: not applicable. Shopify: Channel exchange is left out. Amazon: Included. Excludes: exchange channel.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
    "id": "ssot_shipping_charged",
    "label": "SSOT shipping charged",
    "view": "ssot_pnl",
@@ -5576,8 +5678,59 @@
    "status": "approved",
    "tier": null,
    "allocated": false,
-   "formula": "Shipping the customer paid on the order, as booked on the order. Never reversed on a return or cancel; stays inside Net Sales. Formula: sum of the order shipping lines (Shopify shipping_lines price). Date: order date (IST). GST: AS BOOKED. The code takes the shipping line price and does not remove GST. All Oct 1-29 shipping sits on orders with taxes_included = true and the prices are round customer prices (49, 99, 149), so this line is very likely GST-INCLUSIVE while the other sales lines are ex-GST. OPEN F-1: the owner must decide (strip GST, about 7,300 in Oct 1-29, or keep).. Shopify: fct_orders.total_shipping_charged (silver trino_shopify_orders.shipping_amount). Amazon: 0 (Amazon shipping is inside product net, not split). Includes: exchange replacements. Excludes: courier cost (that is a cost line). OPEN: F-1 GST basis of shipping.",
+   "formula": "Shipping the customer paid on the order, with GST taken out. Never reversed on a return or cancel; stays inside Net Sales. Formula: sum of the order shipping lines (Shopify shipping_lines price), divided by (1 + shipping GST rate) on orders with taxes_included. Date: order date (IST). GST: ex-GST (D-109, F-1 decided): on orders with taxes_included = true the shipping price is divided by 1.18 (dbt var ssot_shipping_gst_rate = 0.18); on orders with taxes_included = false it is taken as booked. The GST taken out is the memo metric shipping_gst. Metric version 2; version 1 (as booked, GST-inclusive) is retired.. Shopify: fct_orders.total_shipping_charged (silver trino_shopify_orders.shipping_amount) with the GST rule above. Amazon: 0 (Amazon shipping is inside product net, not split). Includes: exchange replacements. Excludes: courier cost (that is a cost line).",
    "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_shipping_gst",
+   "label": "SSOT GST removed from shipping",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "GST that was taken out of Shipping charged. Memo line: not part of any formula; it is the amount by which Gross Sales and Net Sales are lower than the as-booked shipping. Formula: sum of (shipping line price - shipping line price / (1 + shipping GST rate)) on orders with taxes_included. Date: order date (IST). GST: this IS the GST. Shopify: fct_orders.total_shipping_charged on orders with taxes_included = true. Amazon: 0.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_shopify_ad_spend",
+   "label": "SSOT Shopify ad spend",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "additive",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Ad spend of the Shopify business (Meta and Google): ad spend without the Amazon channel. Used where an Amazon-free cost is needed (CAC, new-customer ROAS). Formula: ad_spend, amazon channel removed. Date: ad report day of the platform. GST: as ad_spend. Shopify: Meta on channel meta, Google on channel google. Amazon: Left out. Excludes: Amazon Ads.",
+   "ratio": null,
+   "same_quantity_group": []
+  },
+  {
+   "id": "ssot_true_aov",
+   "label": "SSOT true AOV",
+   "view": "ssot_pnl",
+   "category": "finance",
+   "aggregation": "ratio",
+   "unit": "INR",
+   "grain": "brand_day_channel",
+   "date_axis": "native",
+   "status": "approved",
+   "tier": null,
+   "allocated": false,
+   "formula": "Average value of the orders that charged money: Gross Sales per sale order with amount, exchange replacements left out of both. Formula: sale_gross_sales / sale_orders_with_amount. Date: order date (IST). GST: as gross_sales. Shopify: Zero-value orders are out of the denominator. Amazon: Included (cancelled Amazon orders are out of the denominator). Excludes: exchange, zero-value orders.",
+   "ratio": {
+    "numerator": "ssot_sale_gross_sales",
+    "denominator": "ssot_sale_orders"
+   },
    "same_quantity_group": []
   },
   {
@@ -7246,6 +7399,38 @@
    "verified_by": "scripts/verify_ratio_components.py"
   },
   {
+   "from": "ssot_sale_gross_sales",
+   "to": "ssot_cac",
+   "kind": "ratio_component",
+   "basis": "catalogue:ratio_components",
+   "confidence": "definitional",
+   "role": "numerator",
+   "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_sale_orders",
+   "to": "ssot_cac",
+   "kind": "ratio_component",
+   "basis": "catalogue:ratio_components",
+   "confidence": "definitional",
+   "role": "denominator",
+   "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_shopify_ad_spend",
+   "to": "ssot_cac",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
+   "from": "ssot_new_customers",
+   "to": "ssot_cac",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
    "from": "ssot_cancels",
    "to": "ssot_cancel_rate",
    "kind": "ratio_component",
@@ -7353,6 +7538,38 @@
    "confidence": "definitional_partial"
   },
   {
+   "from": "ssot_sale_gross_sales",
+   "to": "ssot_nc_roas",
+   "kind": "ratio_component",
+   "basis": "catalogue:ratio_components",
+   "confidence": "definitional",
+   "role": "numerator",
+   "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_sale_orders",
+   "to": "ssot_nc_roas",
+   "kind": "ratio_component",
+   "basis": "catalogue:ratio_components",
+   "confidence": "definitional",
+   "role": "denominator",
+   "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_new_customer_gross_sales",
+   "to": "ssot_nc_roas",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
+   "from": "ssot_shopify_ad_spend",
+   "to": "ssot_nc_roas",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
+  },
+  {
    "from": "ssot_gross_profit",
    "to": "ssot_net_roas",
    "kind": "ratio_component",
@@ -7387,6 +7604,31 @@
    "confidence": "definitional",
    "role": "denominator",
    "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_sale_gross_sales",
+   "to": "ssot_true_aov",
+   "kind": "ratio_component",
+   "basis": "catalogue:ratio_components",
+   "confidence": "definitional",
+   "role": "numerator",
+   "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_sale_orders",
+   "to": "ssot_true_aov",
+   "kind": "ratio_component",
+   "basis": "catalogue:ratio_components",
+   "confidence": "definitional",
+   "role": "denominator",
+   "verified_by": "scripts/verify_ratio_components.py"
+  },
+  {
+   "from": "ssot_sale_orders_with_amount",
+   "to": "ssot_true_aov",
+   "kind": "declared_input",
+   "basis": "catalogue:formula.depends_on",
+   "confidence": "definitional_partial"
   },
   {
    "from": "returned_units",
@@ -10026,6 +10268,7 @@
    "ssot_ad_spend: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_aov: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_break_even_gross_roas: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_cac: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cancel_rate: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cancels: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_cost_amz_closing: no tier (view ssot_pnl has no view_tiers entry)",
@@ -10049,11 +10292,15 @@
    "ssot_gross_roas: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_gross_sales: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_marketplace_fees: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_nc_roas: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_cogs: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_profit: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_roas: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_net_sales: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_new_customer_gross_sales: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_new_customers: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_orders: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_orders_with_amount: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_placed_cogs: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_platform_adjustments: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_product_cost_credit: no tier (view ssot_pnl has no view_tiers entry)",
@@ -10063,7 +10310,11 @@
    "ssot_rto_cost: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_sale_gross_sales: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_sale_orders: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_sale_orders_with_amount: no tier (view ssot_pnl has no view_tiers entry)",
    "ssot_shipping_charged: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_shipping_gst: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_shopify_ad_spend: no tier (view ssot_pnl has no view_tiers entry)",
+   "ssot_true_aov: no tier (view ssot_pnl has no view_tiers entry)",
    "stock_movements: no tier (view stock_movements has no view_tiers entry)",
    "stock_value_fifo: no tier (view stock_levels has no view_tiers entry)",
    "stocked_items: no tier (view stock_levels has no view_tiers entry)",

@@ -1,0 +1,35 @@
+id: ssot_shipping_gst
+display_name: SSOT GST removed from shipping
+category: finance
+status: approved
+description: 'GST that was taken out of Shipping charged. Memo line: not part of any formula; it is the amount by which Gross
+  Sales and Net Sales are lower than the as-booked shipping. Formula: sum of (shipping line price - shipping line price /
+  (1 + shipping GST rate)) on orders with taxes_included. Date: order date (IST). GST: this IS the GST. Shopify: fct_orders.total_shipping_charged
+  on orders with taxes_included = true. Amazon: 0. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT
+  P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'GST that was taken out of Shipping charged. Memo line: not part of any formula; it is the amount by which
+    Gross Sales and Net Sales are lower than the as-booked shipping. Formula: sum of (shipping line price - shipping line
+    price / (1 + shipping GST rate)) on orders with taxes_included. Date: order date (IST). GST: this IS the GST. Shopify:
+    fct_orders.total_shipping_charged on orders with taxes_included = true. Amazon: 0.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.shipping_gst
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

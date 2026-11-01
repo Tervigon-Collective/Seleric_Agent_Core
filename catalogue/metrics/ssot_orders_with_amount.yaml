@@ -1,0 +1,37 @@
+id: ssot_orders_with_amount
+display_name: SSOT orders with amount
+category: finance
+status: approved
+description: 'Orders that actually charged money: placed orders whose amount after discount (product net + shipping charged)
+  is above zero. Free drafts, zero-value replacements and cancelled Amazon orders are not in it. Formula: count of placed
+  orders with product_net + shipping_charged > 0. Date: order date (IST). GST: ex-GST amounts. Shopify: Per order: sum of
+  product net over its lines + GST-free shipping > 0. Amazon: Amazon order total / 1.18 > 0 (cancelled orders and orders with
+  no order total are out). Excludes: zero-value orders. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Orders that actually charged money: placed orders whose amount after discount (product net + shipping charged)
+    is above zero. Free drafts, zero-value replacements and cancelled Amazon orders are not in it. Formula: count of placed
+    orders with product_net + shipping_charged > 0. Date: order date (IST). GST: ex-GST amounts. Shopify: Per order: sum of
+    product net over its lines + GST-free shipping > 0. Amazon: Amazon order total / 1.18 > 0 (cancelled orders and orders
+    with no order total are out). Excludes: zero-value orders.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.orders_with_amount
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

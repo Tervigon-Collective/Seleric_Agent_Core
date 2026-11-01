@@ -4,18 +4,16 @@ category: finance
 status: approved
 description: 'What the business keeps from sales after returns and cancels. Shipping charged stays inside. Formula: product_net
   + shipping_charged - returns_closed - cancels. Date: mixed on purpose (D-07): placement on order date, returns and cancels
-  on their event dates. GST: ex-GST for product, returns and cancels; shipping as booked (F-1). Shopify: Exchange replacement
-  orders are revenue in their own channel (D-02); nothing is removed. Amazon: Same identity; the refund (principal) is the
-  only deduction. Includes: shipping charged, exchange replacements. Excludes: discounts (already out of product_net). OPEN:
-  F-1 GST basis of shipping. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+  on their event dates. GST: ex-GST. Shopify: Exchange replacement orders are revenue in their own channel (D-02); nothing
+  is removed. Amazon: Same identity; the refund (principal) is the only deduction. Includes: shipping charged, exchange replacements.
+  Excludes: discounts (already out of product_net). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT
+  P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'What the business keeps from sales after returns and cancels. Shipping charged stays inside. Formula: product_net
     + shipping_charged - returns_closed - cancels. Date: mixed on purpose (D-07): placement on order date, returns and cancels
-    on their event dates. GST: ex-GST for product, returns and cancels; shipping as booked (F-1). Shopify: Exchange replacement
-    orders are revenue in their own channel (D-02); nothing is removed. Amazon: Same identity; the refund (principal) is the
-    only deduction. Includes: shipping charged, exchange replacements. Excludes: discounts (already out of product_net). OPEN:
-    F-1 GST basis of shipping.'
+    on their event dates. GST: ex-GST. Shopify: Exchange replacement orders are revenue in their own channel (D-02); nothing
+    is removed. Amazon: Same identity; the refund (principal) is the only deduction. Includes: shipping charged, exchange
+    replacements. Excludes: discounts (already out of product_net).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

@@ -1,0 +1,34 @@
+id: ssot_new_customer_gross_sales
+display_name: SSOT new-customer gross sales
+category: finance
+status: approved
+description: 'Gross Sales of the first orders of new customers (the same orders as New customers). Formula: sum of gross sales
+  of the orders counted in new_customers. Date: order date (IST). GST: as gross_sales. Shopify: product net + discounts +
+  GST-free shipping of those orders. Amazon: 0. Excludes: returns and cancels of those orders (they sit on other rows). Grain:
+  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
+  channel amazon; D-104).'
+formula:
+  human_readable: 'Gross Sales of the first orders of new customers (the same orders as New customers). Formula: sum of gross
+    sales of the orders counted in new_customers. Date: order date (IST). GST: as gross_sales. Shopify: product net + discounts
+    + GST-free shipping of those orders. Amazon: 0. Excludes: returns and cancels of those orders (they sit on other rows).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.new_customer_gross_sales
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
