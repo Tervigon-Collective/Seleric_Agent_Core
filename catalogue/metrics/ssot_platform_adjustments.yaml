@@ -2,12 +2,15 @@ id: ssot_platform_adjustments
 display_name: SSOT Amazon settlement adjustments
 category: finance
 status: approved
-description: 'Itemised Amazon settlement adjustments (postage refunds, platform adjustments), report date; added to Net Profit.
-  Amazon only. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Itemised Amazon settlement adjustments (postage refunds, other platform adjustments). Added to Net Profit, not
+  part of COGS. Formula: sum of platform_pnl_adjustment per day. Date: report date of fct_amazon_daily_pnl (IST day). GST:
+  as stored in the warehouse. Shopify: 0. Amazon: fct_amazon_daily_pnl.platform_pnl_adjustment. Grain: brand_day_channel.
+  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
+  D-104).'
 formula:
-  human_readable: Itemised Amazon settlement adjustments (postage refunds, platform adjustments), report date; added to Net
-    Profit. Amazon only.
+  human_readable: 'Itemised Amazon settlement adjustments (postage refunds, other platform adjustments). Added to Net Profit,
+    not part of COGS. Formula: sum of platform_pnl_adjustment per day. Date: report date of fct_amazon_daily_pnl (IST day).
+    GST: as stored in the warehouse. Shopify: 0. Amazon: fct_amazon_daily_pnl.platform_pnl_adjustment.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

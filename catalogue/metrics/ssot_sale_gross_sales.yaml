@@ -2,11 +2,13 @@ id: ssot_sale_gross_sales
 display_name: SSOT sale gross sales
 category: finance
 status: approved
-description: 'Gross Sales without the exchange channel. Grain: brand_day_channel. Date axis: native (one hybrid axis: order
-  date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify;
-  Amazon is not included).'
+description: 'Gross Sales without the exchange channel. Formula: gross_sales, exchange channel removed. Date: order date (IST).
+  GST: as gross_sales. Shopify: Channel exchange is left out. Amazon: Included. Excludes: exchange channel. Grain: brand_day_channel.
+  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
+  D-104).'
 formula:
-  human_readable: Gross Sales without the exchange channel.
+  human_readable: 'Gross Sales without the exchange channel. Formula: gross_sales, exchange channel removed. Date: order date
+    (IST). GST: as gross_sales. Shopify: Channel exchange is left out. Amazon: Included. Excludes: exchange channel.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

@@ -2,11 +2,20 @@ id: ssot_cost_product
 display_name: SSOT product cost
 category: finance
 status: approved
-description: 'Product cost (landed unit cost x quantity), order date. Grain: brand_day_channel. Date axis: native (one hybrid
-  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Landed purchase cost of the goods in the placed orders (unit cost x quantity), no GST. Formula: sum of product
+  cost of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: From 2026-09-01: the ops app costing (PG
+  core.order_cogs) when the order is costed ("final"); otherwise unit cost at the order date from the SKU cost history x quantity
+  ("provisional"). Before 2026-09-01: legacy metafield landed unit cost x quantity. Cost is booked once and never repeated
+  on a return; the credit is a separate line. Amazon: Warehouse total_cogs of the order (fct_amazon_sp_order_pnl.total_cogs);
+  0 for cancelled orders. Excludes: packaging, courier, fees (own lines). Grain: brand_day_channel. Date axis: native (one
+  hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Product cost (landed unit cost x quantity), order date.
+  human_readable: 'Landed purchase cost of the goods in the placed orders (unit cost x quantity), no GST. Formula: sum of
+    product cost of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: From 2026-09-01: the ops app
+    costing (PG core.order_cogs) when the order is costed ("final"); otherwise unit cost at the order date from the SKU cost
+    history x quantity ("provisional"). Before 2026-09-01: legacy metafield landed unit cost x quantity. Cost is booked once
+    and never repeated on a return; the credit is a separate line. Amazon: Warehouse total_cogs of the order (fct_amazon_sp_order_pnl.total_cogs);
+    0 for cancelled orders. Excludes: packaging, courier, fees (own lines).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

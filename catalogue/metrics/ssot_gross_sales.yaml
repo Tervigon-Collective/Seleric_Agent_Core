@@ -2,12 +2,16 @@ id: ssot_gross_sales
 display_name: SSOT gross sales
 category: finance
 status: approved
-description: 'Gross Sales = product net + discounts + shipping charged: before discount, ex-GST, incl. shipping (D-40, D-52).
-  Grain: brand_day_channel. Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and
-  cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Everything customers were charged before discounts and before any return or cancel: product value before discount
+  plus shipping charged. Formula: product_net + discounts + shipping_charged. Date: order date (IST). GST: ex-GST for product
+  and discount; shipping charged as booked (see F-1). Shopify: Sum of the three Shopify columns. Amazon: Order total / 1.18
+  (shipping inside). Excludes: returns, cancels. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT
+  P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: 'Gross Sales = product net + discounts + shipping charged: before discount, ex-GST, incl. shipping (D-40,
-    D-52).'
+  human_readable: 'Everything customers were charged before discounts and before any return or cancel: product value before
+    discount plus shipping charged. Formula: product_net + discounts + shipping_charged. Date: order date (IST). GST: ex-GST
+    for product and discount; shipping charged as booked (see F-1). Shopify: Sum of the three Shopify columns. Amazon: Order
+    total / 1.18 (shipping inside). Excludes: returns, cancels.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

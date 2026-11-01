@@ -2,11 +2,14 @@ id: ssot_sale_orders
 display_name: SSOT sale orders
 category: finance
 status: approved
-description: 'Placed orders without the exchange channel (D-18). Grain: brand_day_channel. Date axis: native (one hybrid axis:
-  order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify;
-  Amazon is not included).'
+description: 'Placed orders without the exchange channel: real sales, not replacements. Formula: orders, exchange channel
+  removed. Date: order date (IST). GST: not applicable. Shopify: Channel exchange is left out. Amazon: Included. Excludes:
+  exchange channel. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Placed orders without the exchange channel (D-18).
+  human_readable: 'Placed orders without the exchange channel: real sales, not replacements. Formula: orders, exchange channel
+    removed. Date: order date (IST). GST: not applicable. Shopify: Channel exchange is left out. Amazon: Included. Excludes:
+    exchange channel.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

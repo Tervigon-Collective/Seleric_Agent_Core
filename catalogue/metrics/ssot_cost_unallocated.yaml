@@ -2,11 +2,16 @@ id: ssot_cost_unallocated
 display_name: SSOT cost not split into lines
 category: finance
 status: approved
-description: 'Gross COGS minus the eight cost lines; zero from 2026-09. Grain: brand_day_channel. Date axis: native (one hybrid
-  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+description: 'Cost that is in Gross COGS but not in any of the cost lines. Zero from 2026-09; before that it shows the old
+  payment-fee rule. Formula: placed_cogs - (twelve cost lines). Date: order date (IST). GST: no GST (a cost). Shopify: Zero
+  for dates from 2026-09-01. For older dates the COD / checkout / weight lines were not recorded and the gap shows here, not
+  hidden. Amazon: 0. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
   (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Gross COGS minus the eight cost lines; zero from 2026-09.
+  human_readable: 'Cost that is in Gross COGS but not in any of the cost lines. Zero from 2026-09; before that it shows the
+    old payment-fee rule. Formula: placed_cogs - (twelve cost lines). Date: order date (IST). GST: no GST (a cost). Shopify:
+    Zero for dates from 2026-09-01. For older dates the COD / checkout / weight lines were not recorded and the gap shows
+    here, not hidden. Amazon: 0.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

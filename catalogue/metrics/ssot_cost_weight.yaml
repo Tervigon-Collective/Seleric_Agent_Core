@@ -2,11 +2,14 @@ id: ssot_cost_weight
 display_name: SSOT weight-discrepancy charge
 category: finance
 status: approved
-description: 'Courier weight-discrepancy charge, order date. Grain: brand_day_channel. Date axis: native (one hybrid axis:
-  order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify;
-  Amazon is not included).'
+description: 'Extra charge from the courier when the parcel weighs more than declared. Formula: sum of weight-discrepancy
+  charges of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app costing, from the courier re-weigh;
+  arrives late, so recent days change. Amazon: 0. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT
+  P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Courier weight-discrepancy charge, order date.
+  human_readable: 'Extra charge from the courier when the parcel weighs more than declared. Formula: sum of weight-discrepancy
+    charges of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app costing, from the courier
+    re-weigh; arrives late, so recent days change. Amazon: 0.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

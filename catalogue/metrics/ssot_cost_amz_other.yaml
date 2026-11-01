@@ -2,10 +2,15 @@ id: ssot_cost_amz_other
 display_name: SSOT Amazon other service fees
 category: finance
 status: approved
-description: 'Amazon other service fees, purchase date. Amazon only. Grain: brand_day_channel. Date axis: native (one hybrid
-  axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Other Amazon service fees on the placed Amazon orders. Formula: sum of effective other service fees of the orders.
+  Date: purchase date (IST, a calendar date). GST: as stored in the warehouse. Shopify: 0. Amazon: fct_amazon_sp_order_pnl.effective_other_service_fees
+  (actual if settled, else estimate), positive cost. Zero in Oct 1-29. Excludes: tax withheld (TCS/TDS). Grain: brand_day_channel.
+  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
+  D-104).'
 formula:
-  human_readable: Amazon other service fees, purchase date. Amazon only.
+  human_readable: 'Other Amazon service fees on the placed Amazon orders. Formula: sum of effective other service fees of
+    the orders. Date: purchase date (IST, a calendar date). GST: as stored in the warehouse. Shopify: 0. Amazon: fct_amazon_sp_order_pnl.effective_other_service_fees
+    (actual if settled, else estimate), positive cost. Zero in Oct 1-29. Excludes: tax withheld (TCS/TDS).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

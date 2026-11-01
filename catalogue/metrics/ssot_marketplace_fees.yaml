@@ -2,14 +2,17 @@ id: ssot_marketplace_fees
 display_name: SSOT Amazon marketplace fees
 category: finance
 status: approved
-description: 'Amazon marketplace fees (Total Fees): commission + closing + shipping + other service fees on the purchase date,
-  minus the fees Amazon gives back on refunds (refund date). Equals the Dashboard Amazon page platform fees; tax withheld
-  (TCS/TDS) not included. Amazon only. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view
-  over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Total Amazon fees: commission + closing + shipping fee + other service fees, minus the fees Amazon gave back
+  on refunds. Same figure as the Dashboard Amazon page "platform fees". Formula: cost_amz_commission + cost_amz_closing +
+  cost_amz_shipping + cost_amz_other - fee_reversal. Date: fees on purchase date, reversals on refund-paid date (IST). GST:
+  as stored in the warehouse; reversals / 1.18. Shopify: 0. Amazon: As the formula. Excludes: tax withheld (TCS/TDS). Grain:
+  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
+  channel amazon; D-104).'
 formula:
-  human_readable: 'Amazon marketplace fees (Total Fees): commission + closing + shipping + other service fees on the purchase
-    date, minus the fees Amazon gives back on refunds (refund date). Equals the Dashboard Amazon page platform fees; tax withheld
-    (TCS/TDS) not included. Amazon only.'
+  human_readable: 'Total Amazon fees: commission + closing + shipping fee + other service fees, minus the fees Amazon gave
+    back on refunds. Same figure as the Dashboard Amazon page "platform fees". Formula: cost_amz_commission + cost_amz_closing
+    + cost_amz_shipping + cost_amz_other - fee_reversal. Date: fees on purchase date, reversals on refund-paid date (IST).
+    GST: as stored in the warehouse; reversals / 1.18. Shopify: 0. Amazon: As the formula. Excludes: tax withheld (TCS/TDS).'
   authoritative_source: cube
   depends_on:
   - ssot_cost_amz_commission

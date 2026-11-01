@@ -2,11 +2,12 @@ id: ssot_net_roas
 display_name: SSOT Net ROAS
 category: finance
 status: approved
-description: 'Net ROAS = Gross Profit / ad spend; break-even is 1.00. Grain: brand_day_channel. Date axis: native (one hybrid
-  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Gross Profit earned per rupee of ad spend. 1.00 means ads exactly pay for themselves before overheads. Formula:
+  gross_profit / ad_spend. Date: mixed. GST: ex-GST. Shopify: As formula. Amazon: As formula. Grain: brand_day_channel. Date
+  axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Net ROAS = Gross Profit / ad spend; break-even is 1.00.
+  human_readable: 'Gross Profit earned per rupee of ad spend. 1.00 means ads exactly pay for themselves before overheads.
+    Formula: gross_profit / ad_spend. Date: mixed. GST: ex-GST. Shopify: As formula. Amazon: As formula.'
   authoritative_source: cube
   depends_on:
   - ssot_gross_profit

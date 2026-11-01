@@ -2,11 +2,14 @@ id: ssot_cost_amz_closing
 display_name: SSOT Amazon closing fee
 category: finance
 status: approved
-description: 'Amazon closing fee, ex-GST, purchase date (estimated until settled). Amazon only. Grain: brand_day_channel.
-  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
-  D-104).'
+description: 'Amazon closing fee on the placed Amazon orders. Formula: sum of effective closing fee of the orders. Date: purchase
+  date (IST, a calendar date). GST: as stored in the warehouse. Shopify: 0. Amazon: fct_amazon_sp_order_pnl.effective_closing
+  (actual if settled, else estimate), positive cost. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Amazon closing fee, ex-GST, purchase date (estimated until settled). Amazon only.
+  human_readable: 'Amazon closing fee on the placed Amazon orders. Formula: sum of effective closing fee of the orders. Date:
+    purchase date (IST, a calendar date). GST: as stored in the warehouse. Shopify: 0. Amazon: fct_amazon_sp_order_pnl.effective_closing
+    (actual if settled, else estimate), positive cost.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

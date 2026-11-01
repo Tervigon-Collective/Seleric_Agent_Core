@@ -2,11 +2,22 @@ id: ssot_ad_spend
 display_name: SSOT ad spend
 category: finance
 status: approved
-description: 'Ad spend ex-GST: Meta on channel meta, Google on channel google. Grain: brand_day_channel. Date axis: native
-  (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Money spent on ads, on the day the ads ran, attributed to the channel that was advertised. Formula: Meta spend
+  on channel meta + Google spend on channel google + Amazon Ads spend on channel amazon. Date: ad report day of the platform
+  (Amazon: IST report date). GST: as delivered by the platform export (INR). Owner convention: platform spend is ex-GST and
+  is never divided by 1.18 (G3); the mart applies no GST adjustment.. Shopify: fct_meta_ads_daily.spend summed over every
+  account / campaign / ad of the day -> channel meta; fct_google_ads_daily.spend -> channel google. Other channels carry no
+  ad spend. Ad spend rows carry n/a in the order-state columns. Amazon: fct_amazon_daily_pnl.ad_spend (GST-exclusive per the
+  model) -> channel amazon. Excludes: platform-reported sales and ROAS (D-76). Grain: brand_day_channel. Date axis: native
+  (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: 'Ad spend ex-GST: Meta on channel meta, Google on channel google.'
+  human_readable: 'Money spent on ads, on the day the ads ran, attributed to the channel that was advertised. Formula: Meta
+    spend on channel meta + Google spend on channel google + Amazon Ads spend on channel amazon. Date: ad report day of the
+    platform (Amazon: IST report date). GST: as delivered by the platform export (INR). Owner convention: platform spend is
+    ex-GST and is never divided by 1.18 (G3); the mart applies no GST adjustment.. Shopify: fct_meta_ads_daily.spend summed
+    over every account / campaign / ad of the day -> channel meta; fct_google_ads_daily.spend -> channel google. Other channels
+    carry no ad spend. Ad spend rows carry n/a in the order-state columns. Amazon: fct_amazon_daily_pnl.ad_spend (GST-exclusive
+    per the model) -> channel amazon. Excludes: platform-reported sales and ROAS (D-76).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

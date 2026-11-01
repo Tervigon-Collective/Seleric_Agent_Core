@@ -2,11 +2,12 @@ id: ssot_discount_rate
 display_name: SSOT discount rate
 category: finance
 status: approved
-description: 'Discounts / Gross Sales (D-74). Grain: brand_day_channel. Date axis: native (one hybrid axis: order date for
-  sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify; Amazon
-  is not included).'
+description: 'Discount as a share of Gross Sales. Formula: discounts / gross_sales. Date: order date (IST). GST: ex-GST. Shopify:
+  As formula. Amazon: 0 (no discount split). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L
+  view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Discounts / Gross Sales (D-74).
+  human_readable: 'Discount as a share of Gross Sales. Formula: discounts / gross_sales. Date: order date (IST). GST: ex-GST.
+    Shopify: As formula. Amazon: 0 (no discount split).'
   authoritative_source: cube
   depends_on:
   - ssot_discounts

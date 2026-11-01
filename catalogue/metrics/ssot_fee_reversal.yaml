@@ -2,11 +2,16 @@ id: ssot_fee_reversal
 display_name: SSOT Amazon fee reversals
 category: finance
 status: approved
-description: 'Marketplace fees Amazon gives back on a refund, ex-GST, refund-paid date; reduces Net COGS. Amazon only. Grain:
-  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
-  channel amazon; D-104).'
+description: 'Marketplace fees Amazon gives back when it refunds an order. Reduces Net COGS. Formula: sum of ItemFeeAdjustment
+  of refund events / 1.18. Date: refund-paid date (finance event posted date, IST). GST: ItemFeeAdjustment amounts divided
+  by 1.18 to remove GST (Dashboard engine rule). Shopify: 0. Amazon: RefundEventList finance events whose line kind ends with
+  ItemFeeAdjustment, summed per order and day, / 1.18. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Marketplace fees Amazon gives back on a refund, ex-GST, refund-paid date; reduces Net COGS. Amazon only.
+  human_readable: 'Marketplace fees Amazon gives back when it refunds an order. Reduces Net COGS. Formula: sum of ItemFeeAdjustment
+    of refund events / 1.18. Date: refund-paid date (finance event posted date, IST). GST: ItemFeeAdjustment amounts divided
+    by 1.18 to remove GST (Dashboard engine rule). Shopify: 0. Amazon: RefundEventList finance events whose line kind ends
+    with ItemFeeAdjustment, summed per order and day, / 1.18.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

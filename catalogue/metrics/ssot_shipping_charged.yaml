@@ -2,11 +2,23 @@ id: ssot_shipping_charged
 display_name: SSOT shipping charged
 category: finance
 status: approved
-description: 'Shipping charged to customers, ex-GST; never reversed (D-33). Grain: brand_day_channel. Date axis: native (one
-  hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Shipping the customer paid on the order, as booked on the order. Never reversed on a return or cancel; stays
+  inside Net Sales. Formula: sum of the order shipping lines (Shopify shipping_lines price). Date: order date (IST). GST:
+  AS BOOKED. The code takes the shipping line price and does not remove GST. All Oct 1-29 shipping sits on orders with taxes_included
+  = true and the prices are round customer prices (49, 99, 149), so this line is very likely GST-INCLUSIVE while the other
+  sales lines are ex-GST. OPEN F-1: the owner must decide (strip GST, about 7,300 in Oct 1-29, or keep).. Shopify: fct_orders.total_shipping_charged
+  (silver trino_shopify_orders.shipping_amount). Amazon: 0 (Amazon shipping is inside product net, not split). Includes: exchange
+  replacements. Excludes: courier cost (that is a cost line). OPEN: F-1 GST basis of shipping. Grain: brand_day_channel. Date
+  axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Shipping charged to customers, ex-GST; never reversed (D-33).
+  human_readable: 'Shipping the customer paid on the order, as booked on the order. Never reversed on a return or cancel;
+    stays inside Net Sales. Formula: sum of the order shipping lines (Shopify shipping_lines price). Date: order date (IST).
+    GST: AS BOOKED. The code takes the shipping line price and does not remove GST. All Oct 1-29 shipping sits on orders with
+    taxes_included = true and the prices are round customer prices (49, 99, 149), so this line is very likely GST-INCLUSIVE
+    while the other sales lines are ex-GST. OPEN F-1: the owner must decide (strip GST, about 7,300 in Oct 1-29, or keep)..
+    Shopify: fct_orders.total_shipping_charged (silver trino_shopify_orders.shipping_amount). Amazon: 0 (Amazon shipping is
+    inside product net, not split). Includes: exchange replacements. Excludes: courier cost (that is a cost line). OPEN: F-1
+    GST basis of shipping.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

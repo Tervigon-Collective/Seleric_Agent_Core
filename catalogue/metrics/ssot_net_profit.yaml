@@ -2,11 +2,16 @@ id: ssot_net_profit
 display_name: SSOT net profit
 category: finance
 status: approved
-description: 'Net Profit = Gross Profit - ad spend: after COGS and ads, before fixed overheads and tax (D-19). Grain: brand_day_channel.
-  Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L
-  view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels) +
+  Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST.
+  Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own channel),
+  Amazon. Excludes: salaries, rent, tax, owner drawings. OPEN: F-1 GST basis of shipping. Grain: brand_day_channel. Date axis:
+  native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: 'Net Profit = Gross Profit - ad spend: after COGS and ads, before fixed overheads and tax (D-19).'
+  human_readable: 'Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels)
+    + Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST.
+    Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own
+    channel), Amazon. Excludes: salaries, rent, tax, owner drawings. OPEN: F-1 GST basis of shipping.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

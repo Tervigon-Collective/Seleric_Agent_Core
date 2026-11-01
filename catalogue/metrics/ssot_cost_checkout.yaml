@@ -2,10 +2,14 @@ id: ssot_cost_checkout
 display_name: SSOT checkout fee
 category: finance
 status: approved
-description: 'Checkout fee, order date. Grain: brand_day_channel. Date axis: native (one hybrid axis: order date for sales
-  and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Fee charged by the checkout app on the order. Formula: sum of checkout fee of the placed lines. Date: order
+  date (IST). GST: no GST (a cost). Shopify: Booked by the ops app (PG order cost); the dbt model does not compute it. In
+  Oct 1-29 it is about 0.17% of order value (not a fixed 0.25%). Amazon: 0. Grain: brand_day_channel. Date axis: native (one
+  hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Checkout fee, order date.
+  human_readable: 'Fee charged by the checkout app on the order. Formula: sum of checkout fee of the placed lines. Date: order
+    date (IST). GST: no GST (a cost). Shopify: Booked by the ops app (PG order cost); the dbt model does not compute it. In
+    Oct 1-29 it is about 0.17% of order value (not a fixed 0.25%). Amazon: 0.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

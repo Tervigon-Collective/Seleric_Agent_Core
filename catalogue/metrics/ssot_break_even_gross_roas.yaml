@@ -2,11 +2,12 @@ id: ssot_break_even_gross_roas
 display_name: SSOT break-even Gross ROAS
 category: finance
 status: approved
-description: 'Gross Sales / Gross Profit: the Gross ROAS at which Net Profit = 0 (D-68). Grain: brand_day_channel. Date axis:
-  native (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'The Gross ROAS at which Net Profit is exactly zero. Formula: gross_sales / gross_profit. Date: mixed. GST: as
+  gross_sales. Shopify: As formula. Amazon: As formula. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: 'Gross Sales / Gross Profit: the Gross ROAS at which Net Profit = 0 (D-68).'
+  human_readable: 'The Gross ROAS at which Net Profit is exactly zero. Formula: gross_sales / gross_profit. Date: mixed. GST:
+    as gross_sales. Shopify: As formula. Amazon: As formula.'
   authoritative_source: cube
   depends_on:
   - ssot_gross_sales

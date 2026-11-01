@@ -2,11 +2,18 @@ id: ssot_rto_cost
 display_name: SSOT return courier cost
 category: finance
 status: approved
-description: 'Return courier cost on the return date (any status). Grain: brand_day_channel. Date axis: native (one hybrid
-  axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Courier cost of the return leg: reverse shipping on returns and RTO, whatever their status, on the day of the
+  return event. Formula: sum of reverse shipping cost of return events. Date: return event date (IST): the day the return
+  is closed / the RTO completes. GST: no GST (a cost). Shopify: int_finance_return_events.rto_cost for return-class lines
+  (any status, open or closed); ops app costing reverse shipping. Amazon: 0 (Amazon return shipping is in its fees). Includes:
+  open and closed returns, RTO. Excludes: outbound courier. Grain: brand_day_channel. Date axis: native (one hybrid axis,
+  D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Return courier cost on the return date (any status).
+  human_readable: 'Courier cost of the return leg: reverse shipping on returns and RTO, whatever their status, on the day
+    of the return event. Formula: sum of reverse shipping cost of return events. Date: return event date (IST): the day the
+    return is closed / the RTO completes. GST: no GST (a cost). Shopify: int_finance_return_events.rto_cost for return-class
+    lines (any status, open or closed); ops app costing reverse shipping. Amazon: 0 (Amazon return shipping is in its fees).
+    Includes: open and closed returns, RTO. Excludes: outbound courier.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

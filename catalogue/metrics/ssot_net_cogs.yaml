@@ -2,11 +2,16 @@ id: ssot_net_cogs
 display_name: SSOT net COGS
 category: finance
 status: approved
-description: 'Net COGS = gross COGS + return courier cost - product-cost credit. Grain: brand_day_channel. Date axis: native
-  (one hybrid axis: order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Cost of goods after returns: Gross COGS plus the return courier cost, minus the product cost won back and the
+  Amazon fees given back. Formula: placed_cogs + rto_cost - product_cost_credit - fee_reversal. Date: mixed on purpose (D-07):
+  placed costs on order date, return-leg items on their event dates. GST: no GST (a cost). Shopify: fee_reversal is 0. Amazon:
+  Fees given back reduce the cost. Excludes: ad spend. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Net COGS = gross COGS + return courier cost - product-cost credit.
+  human_readable: 'Cost of goods after returns: Gross COGS plus the return courier cost, minus the product cost won back and
+    the Amazon fees given back. Formula: placed_cogs + rto_cost - product_cost_credit - fee_reversal. Date: mixed on purpose
+    (D-07): placed costs on order date, return-leg items on their event dates. GST: no GST (a cost). Shopify: fee_reversal
+    is 0. Amazon: Fees given back reduce the cost. Excludes: ad spend.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

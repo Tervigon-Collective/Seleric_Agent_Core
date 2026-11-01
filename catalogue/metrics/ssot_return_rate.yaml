@@ -2,11 +2,15 @@ id: ssot_return_rate
 display_name: SSOT return rate (incl. RTO)
 category: finance
 status: approved
-description: 'Closed returns incl. RTO / Gross Sales in the same window, by value on event dates (D-74). Use 7+ day windows.
-  Grain: brand_day_channel. Date axis: native (one hybrid axis: order date for sales and costs, event date for returns and
-  cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Share of sales value that came back as closed returns / RTO in the same window. Use windows of 7+ days: returns
+  close days after the sale. Formula: returns_closed / gross_sales. Date: returns on return date over sales on order date.
+  GST: as gross_sales. Shopify: As formula. Amazon: Amazon refunds on the refund-paid date. Excludes: open returns. Grain:
+  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
+  channel amazon; D-104).'
 formula:
-  human_readable: Closed returns incl. RTO / Gross Sales in the same window, by value on event dates (D-74). Use 7+ day windows.
+  human_readable: 'Share of sales value that came back as closed returns / RTO in the same window. Use windows of 7+ days:
+    returns close days after the sale. Formula: returns_closed / gross_sales. Date: returns on return date over sales on order
+    date. GST: as gross_sales. Shopify: As formula. Amazon: Amazon refunds on the refund-paid date. Excludes: open returns.'
   authoritative_source: cube
   depends_on:
   - ssot_returns_closed

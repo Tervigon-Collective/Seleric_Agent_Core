@@ -2,11 +2,13 @@ id: ssot_cancel_rate
 display_name: SSOT cancel rate
 category: finance
 status: approved
-description: 'Cancels / Gross Sales in the same window (D-74). Grain: brand_day_channel. Date axis: native (one hybrid axis:
-  order date for sales and costs, event date for returns and cancels, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify;
-  Amazon is not included).'
+description: 'Share of sales value cancelled in the same window. Formula: cancels / gross_sales. Date: cancels on cancellation
+  date over sales on order date. GST: as gross_sales. Shopify: As formula. Amazon: 0 (no cancel value for Amazon). Grain:
+  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
+  channel amazon; D-104).'
 formula:
-  human_readable: Cancels / Gross Sales in the same window (D-74).
+  human_readable: 'Share of sales value cancelled in the same window. Formula: cancels / gross_sales. Date: cancels on cancellation
+    date over sales on order date. GST: as gross_sales. Shopify: As formula. Amazon: 0 (no cancel value for Amazon).'
   authoritative_source: cube
   depends_on:
   - ssot_cancels

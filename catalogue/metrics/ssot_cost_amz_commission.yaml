@@ -2,10 +2,16 @@ id: ssot_cost_amz_commission
 display_name: SSOT Amazon commission
 category: finance
 status: approved
-description: 'Amazon commission, ex-GST, purchase date (estimated until settled). Amazon only. Grain: brand_day_channel. Date
-  axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Amazon referral commission on the placed Amazon orders. Formula: sum of effective commission of the orders.
+  Date: purchase date (IST, a calendar date). GST: as stored in the warehouse (the mart does not adjust GST). Shopify: 0.
+  Amazon: fct_amazon_sp_order_pnl.effective_commission, sign flipped to a positive cost. "Effective" = the actual settled
+  amount where it exists, otherwise the estimate; cancelled orders carry 0. Grain: brand_day_channel. Date axis: native (one
+  hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: Amazon commission, ex-GST, purchase date (estimated until settled). Amazon only.
+  human_readable: 'Amazon referral commission on the placed Amazon orders. Formula: sum of effective commission of the orders.
+    Date: purchase date (IST, a calendar date). GST: as stored in the warehouse (the mart does not adjust GST). Shopify: 0.
+    Amazon: fct_amazon_sp_order_pnl.effective_commission, sign flipped to a positive cost. "Effective" = the actual settled
+    amount where it exists, otherwise the estimate; cancelled orders carry 0.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:
