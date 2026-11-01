@@ -5,15 +5,17 @@ status: approved
 description: 'Discount given on the orders, with GST taken out. Memo line: Product net is already after discount, and Gross
   Sales adds the discount back. Formula: sum over lines of line discount x (order total - order GST) / order total. Date:
   order date (IST). GST: ex-GST by the ORDER-level ratio (order total - order GST) / order total, the same ratio GSTR-1 uses
-  (D-21, patch P4); orders with no GST keep the discount as is. Shopify: int_finance_order_lines.discount_excl_gst. Amazon:
-  0 (Amazon discounts are already inside the order total). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
-  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+  (D-21, patch P4); orders with no GST keep the discount as is. Shopify: int_finance_order_lines.discount_excl_gst. Zero-value
+  reship drafts (revenue-adjustment orders, D-120) count 0: a 100 percent discounted reship is not a sale with a discount.
+  Amazon: 0 (Amazon discounts are already inside the order total). Grain: brand_day_channel. Date axis: native (one hybrid
+  axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Discount given on the orders, with GST taken out. Memo line: Product net is already after discount, and
     Gross Sales adds the discount back. Formula: sum over lines of line discount x (order total - order GST) / order total.
     Date: order date (IST). GST: ex-GST by the ORDER-level ratio (order total - order GST) / order total, the same ratio GSTR-1
     uses (D-21, patch P4); orders with no GST keep the discount as is. Shopify: int_finance_order_lines.discount_excl_gst.
-    Amazon: 0 (Amazon discounts are already inside the order total).'
+    Zero-value reship drafts (revenue-adjustment orders, D-120) count 0: a 100 percent discounted reship is not a sale with
+    a discount. Amazon: 0 (Amazon discounts are already inside the order total).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

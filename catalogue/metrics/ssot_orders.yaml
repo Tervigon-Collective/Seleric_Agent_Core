@@ -3,23 +3,23 @@ display_name: SSOT placed orders
 category: finance
 status: approved
 description: 'Number of orders placed. Every order counts once, whatever happened to it later: exchange replacements, returned,
-  RTO, cancelled and unpaid orders all count. Formula: count of distinct orders with at least one qualifying line. Date: order
-  date (IST). GST: not applicable. Shopify: An order counts if it is not a test order and has at least one line that is not
-  a gift card. Draft orders count (order_kind draft). One Shopify KPI rule (is_revenue_adjustment with gross <= 0) drops the
-  free draft in the Dashboard; the mart keeps it, so consumers with the KPI rule read one order less until their SSOT flag
-  is on. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included, on the purchase date.
-  Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders, gift-card-only orders.
-  Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify
-  and Amazon, channel amazon; D-104).'
+  RTO, cancelled and unpaid orders all count. Zero-value reship drafts are not orders. Formula: count of distinct orders with
+  at least one qualifying line. Date: order date (IST). GST: not applicable. Shopify: An order counts if it is not a test
+  order and has at least one line that is not a gift card. Draft orders count (order_kind draft) EXCEPT zero-value reship
+  drafts (revenue-adjustment orders, D-120), which are not orders: Oct 1-29 gives 1,159, equal to GSTR-1 and the Dashboard
+  KPI. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included, on the purchase date.
+  Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders, gift-card-only orders,
+  zero-value reship drafts (revenue-adjustment orders). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Number of orders placed. Every order counts once, whatever happened to it later: exchange replacements,
-    returned, RTO, cancelled and unpaid orders all count. Formula: count of distinct orders with at least one qualifying line.
-    Date: order date (IST). GST: not applicable. Shopify: An order counts if it is not a test order and has at least one line
-    that is not a gift card. Draft orders count (order_kind draft). One Shopify KPI rule (is_revenue_adjustment with gross
-    <= 0) drops the free draft in the Dashboard; the mart keeps it, so consumers with the KPI rule read one order less until
-    their SSOT flag is on. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included,
-    on the purchase date. Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders,
-    gift-card-only orders.'
+    returned, RTO, cancelled and unpaid orders all count. Zero-value reship drafts are not orders. Formula: count of distinct
+    orders with at least one qualifying line. Date: order date (IST). GST: not applicable. Shopify: An order counts if it
+    is not a test order and has at least one line that is not a gift card. Draft orders count (order_kind draft) EXCEPT zero-value
+    reship drafts (revenue-adjustment orders, D-120), which are not orders: Oct 1-29 gives 1,159, equal to GSTR-1 and the
+    Dashboard KPI. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included, on the
+    purchase date. Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders, gift-card-only
+    orders, zero-value reship drafts (revenue-adjustment orders).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

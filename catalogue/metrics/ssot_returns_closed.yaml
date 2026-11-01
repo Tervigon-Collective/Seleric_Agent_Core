@@ -9,7 +9,9 @@ description: 'Value of orders customers sent back (closed returns) plus complete
   the return status is CLOSED or the order return status is RETURNED. Value = returned revenue ex-GST; if none, cancelled
   revenue; if a request is pending, placement value x returned quantity share; if the line is fully reversed with nothing
   left, the placement value (product before discount, ex-GST). Completed RTO with no refund amount is valued at placement
-  value (D-16). Active version 2 (closed only); version 1 counted every status. Amazon: Minus the Principal of RefundEventList
+  value (D-16). Active version 2 (closed only); version 1 counted every status. Return events of zero-value reship drafts
+  (revenue-adjustment orders, D-120) deduct nothing (the order never booked revenue); their return courier cost and product-cost
+  credit stay. Version 3 (v1 every status, v2 closed only incl. reship drafts). Amazon: Minus the Principal of RefundEventList
   finance events, on the refund-paid date (Dashboard Amazon engine rule, D-103). Includes: closed returns, completed RTO,
   exchange origin reversals. Excludes: open / requested returns, cancels (own line). Grain: brand_day_channel. Date axis:
   native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
@@ -21,8 +23,10 @@ formula:
     CLOSED when the return status is CLOSED or the order return status is RETURNED. Value = returned revenue ex-GST; if none,
     cancelled revenue; if a request is pending, placement value x returned quantity share; if the line is fully reversed with
     nothing left, the placement value (product before discount, ex-GST). Completed RTO with no refund amount is valued at
-    placement value (D-16). Active version 2 (closed only); version 1 counted every status. Amazon: Minus the Principal of
-    RefundEventList finance events, on the refund-paid date (Dashboard Amazon engine rule, D-103). Includes: closed returns,
+    placement value (D-16). Active version 2 (closed only); version 1 counted every status. Return events of zero-value reship
+    drafts (revenue-adjustment orders, D-120) deduct nothing (the order never booked revenue); their return courier cost and
+    product-cost credit stay. Version 3 (v1 every status, v2 closed only incl. reship drafts). Amazon: Minus the Principal
+    of RefundEventList finance events, on the refund-paid date (Dashboard Amazon engine rule, D-103). Includes: closed returns,
     completed RTO, exchange origin reversals. Excludes: open / requested returns, cancels (own line).'
   authoritative_source: cube
   depends_on: []
