@@ -1,0 +1,38 @@
+id: ssot_cac
+display_name: SSOT CAC
+category: finance
+status: approved
+description: 'Cost to win one new customer: Shopify ad spend (Meta + Google) per new customer. Formula: shopify_ad_spend /
+  new_customers. Date: mixed: ad day over order date. GST: as ad_spend. Shopify: As formula (D-71, D-18). Amazon: Outside.
+  Excludes: Amazon Ads, exchange. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over
+  gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Cost to win one new customer: Shopify ad spend (Meta + Google) per new customer. Formula: shopify_ad_spend
+    / new_customers. Date: mixed: ad day over order date. GST: as ad_spend. Shopify: As formula (D-71, D-18). Amazon: Outside.
+    Excludes: Amazon Ads, exchange.'
+  authoritative_source: cube
+  depends_on:
+  - ssot_shopify_ad_spend
+  - ssot_new_customers
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cac
+aggregation: ratio
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_sale_gross_sales
+  denominator: ssot_sale_orders

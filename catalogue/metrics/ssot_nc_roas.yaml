@@ -1,0 +1,40 @@
+id: ssot_nc_roas
+display_name: SSOT new-customer ROAS
+category: finance
+status: approved
+description: 'New-customer ROAS: Gross Sales of first orders of new customers per rupee of Shopify ad spend. Formula: new_customer_gross_sales
+  / shopify_ad_spend. Date: mixed: order date over ad day. GST: as gross_sales and ad_spend. Shopify: As formula. Amazon:
+  Amazon is outside (no customer identity, Amazon ad spend left out). Excludes: returning customers, Amazon. Grain: brand_day_channel.
+  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
+  D-104).'
+formula:
+  human_readable: 'New-customer ROAS: Gross Sales of first orders of new customers per rupee of Shopify ad spend. Formula:
+    new_customer_gross_sales / shopify_ad_spend. Date: mixed: order date over ad day. GST: as gross_sales and ad_spend. Shopify:
+    As formula. Amazon: Amazon is outside (no customer identity, Amazon ad spend left out). Excludes: returning customers,
+    Amazon.'
+  authoritative_source: cube
+  depends_on:
+  - ssot_new_customer_gross_sales
+  - ssot_shopify_ad_spend
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.nc_roas
+aggregation: ratio
+unit: ratio
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_sale_gross_sales
+  denominator: ssot_sale_orders
