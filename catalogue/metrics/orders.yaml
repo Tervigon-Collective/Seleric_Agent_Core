@@ -2,12 +2,13 @@ id: orders
 display_name: Orders
 category: commerce
 status: certified
-description: 'Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).
-  Grain: order. Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date
-  (outcomes on the day they happen). Redefined in semantic v3 (D-01; D-08; D-08a): the id is kept, the number may
-  change.'
+description: 'DEPRECATED (D-118): use ssot_orders (the SSOT metric); this legacy metric stays queryable for one release. Sale
+  orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08). Grain: order. Date axis: placement
+  only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined
+  in semantic v3 (D-01; D-08; D-08a): the id is kept, the number may change.'
 formula:
-  human_readable: Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).
+  human_readable: 'DEPRECATED (D-118): use ssot_orders (the SSOT metric); this legacy metric stays queryable for one release.
+    Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

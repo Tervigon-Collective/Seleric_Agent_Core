@@ -2,12 +2,13 @@ id: gross_profit
 display_name: Gross profit
 category: finance
 status: certified
-description: 'Gross profit = gross sales − gross COGS − ad spend. Grain: brand_day_channel_ad. Date axis: placement
-  only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen).
-  Redefined in semantic v3 (D-09a; D-03; D-01; D-02; D-02a; D-02b; D-03a; D-05…): the id is kept, the number may
-  change.'
+description: 'DEPRECATED (D-118): use ssot_gross_profit (the SSOT metric); this legacy metric stays queryable for one release.
+  Gross profit = gross sales − gross COGS − ad spend. Grain: brand_day_channel_ad. Date axis: placement only. date_axis=order_date
+  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-09a;
+  D-03; D-01; D-02; D-02a; D-02b; D-03a; D-05…): the id is kept, the number may change.'
 formula:
-  human_readable: Gross profit = gross sales − gross COGS − ad spend.
+  human_readable: 'DEPRECATED (D-118): use ssot_gross_profit (the SSOT metric); this legacy metric stays queryable for one
+    release. Gross profit = gross sales − gross COGS − ad spend.'
   authoritative_source: cube
   depends_on:
   - order_pnl_gross_sales

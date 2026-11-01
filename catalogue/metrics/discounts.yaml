@@ -2,11 +2,13 @@ id: discounts
 display_name: Discounts
 category: commerce
 status: certified
-description: 'Discounts ex-GST (memo: already deducted inside gross sales, D-09a). Grain: order. Date axis: placement
-  only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen).
-  Redefined in semantic v3 (D-09a; D-01; D-02b; D-08; D-08a; D-10): the id is kept, the number may change.'
+description: 'DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release.
+  Discounts ex-GST (memo: already deducted inside gross sales, D-09a). Grain: order. Date axis: placement only. date_axis=order_date
+  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-09a;
+  D-01; D-02b; D-08; D-08a; D-10): the id is kept, the number may change.'
 formula:
-  human_readable: 'Discounts ex-GST (memo: already deducted inside gross sales, D-09a).'
+  human_readable: 'DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release.
+    Discounts ex-GST (memo: already deducted inside gross sales, D-09a).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

@@ -2,14 +2,15 @@ id: net_profit
 display_name: Net profit
 category: finance
 status: certified
-description: 'Contribution after ads = contribution margin − ad spend. Opex is not in the warehouse, so this is
-  not a true net profit (D-18, D-18r). Grain: brand_day_channel_ad. Date axis: switchable. date_axis=order_date
-  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic
-  v3 (D-07; D-18r; D-01; D-02; D-02a; D-02b; D-03; D-03a…): the id is kept, the number may change. Also answers
-  the ids: pnl_net_profit.'
+description: 'DEPRECATED (D-118): use ssot_net_profit (the SSOT metric); this legacy metric stays queryable for one release.
+  Contribution after ads = contribution margin − ad spend. Opex is not in the warehouse, so this is not a true net profit
+  (D-18, D-18r). Grain: brand_day_channel_ad. Date axis: switchable. date_axis=order_date (default, orders placed in the period)
+  or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-07; D-18r; D-01; D-02; D-02a; D-02b; D-03;
+  D-03a…): the id is kept, the number may change. Also answers the ids: pnl_net_profit.'
 formula:
-  human_readable: Contribution after ads = contribution margin − ad spend. Opex is not in the warehouse, so this
-    is not a true net profit (D-18, D-18r).
+  human_readable: 'DEPRECATED (D-118): use ssot_net_profit (the SSOT metric); this legacy metric stays queryable for one release.
+    Contribution after ads = contribution margin − ad spend. Opex is not in the warehouse, so this is not a true net profit
+    (D-18, D-18r).'
   authoritative_source: cube
   depends_on:
   - contribution_margin

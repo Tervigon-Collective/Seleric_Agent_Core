@@ -175,7 +175,7 @@
    "status": "certified",
    "tier": 7,
    "allocated": false,
-   "formula": "Average order value incl. GST = total sales ÷ orders (D-02b).",
+   "formula": "DEPRECATED (D-118): use ssot_aov (the SSOT metric); this legacy metric stays queryable for one release. Average order value incl. GST = total sales ÷ orders (D-02b).",
    "ratio": {
     "numerator": "total_sales",
     "denominator": "orders"
@@ -879,7 +879,7 @@
    "status": "certified",
    "tier": null,
    "allocated": false,
-   "formula": "Cost per order = ad spend ÷ orders placed (D-31).",
+   "formula": "DEPRECATED (D-118): use ssot_cost_per_order (the SSOT metric); this legacy metric stays queryable for one release. Cost per order = ad spend ÷ orders placed (D-31).",
    "ratio": {
     "numerator": "ad_spend",
     "denominator": "channel_orders"
@@ -983,7 +983,7 @@
    "status": "certified",
    "tier": 1,
    "allocated": false,
-   "formula": "Discounts ex-GST (memo: already deducted inside gross sales, D-09a).",
+   "formula": "DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release. Discounts ex-GST (memo: already deducted inside gross sales, D-09a).",
    "ratio": null,
    "same_quantity_group": [
     "discounts",
@@ -1325,7 +1325,7 @@
    "status": "certified",
    "tier": 10,
    "allocated": false,
-   "formula": "Gross profit = gross sales − gross COGS − ad spend.",
+   "formula": "DEPRECATED (D-118): use ssot_gross_profit (the SSOT metric); this legacy metric stays queryable for one release. Gross profit = gross sales − gross COGS − ad spend.",
    "ratio": null,
    "same_quantity_group": [
     "contribution_margin",
@@ -1345,7 +1345,7 @@
    "status": "certified",
    "tier": null,
    "allocated": false,
-   "formula": "Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09).",
+   "formula": "DEPRECATED (D-118): use ssot_gross_roas (the SSOT metric); this legacy metric stays queryable for one release. Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09).",
    "ratio": {
     "numerator": "gross_sales",
     "denominator": "ad_spend"
@@ -1724,7 +1724,7 @@
    "status": "certified",
    "tier": 9,
    "allocated": false,
-   "formula": "Net COGS = product cost + operating cost + exchange cost, net of returns.",
+   "formula": "DEPRECATED (D-118): use ssot_net_cogs (the SSOT metric); this legacy metric stays queryable for one release. Net COGS = product cost + operating cost + exchange cost, net of returns.",
    "ratio": null,
    "same_quantity_group": [
     "net_cogs",
@@ -1765,7 +1765,7 @@
    "status": "certified",
    "tier": 10,
    "allocated": false,
-   "formula": "Contribution after ads = contribution margin − ad spend. Opex is not in the warehouse, so this is not a true net profit (D-18, D-18r).",
+   "formula": "DEPRECATED (D-118): use ssot_net_profit (the SSOT metric); this legacy metric stays queryable for one release. Contribution after ads = contribution margin − ad spend. Opex is not in the warehouse, so this is not a true net profit (D-18, D-18r).",
    "ratio": null,
    "same_quantity_group": [
     "net_profit",
@@ -1784,7 +1784,7 @@
    "status": "certified",
    "tier": null,
    "allocated": false,
-   "formula": "Net ROAS = contribution before ads ÷ ad spend. NULL when net sales <= 0; labelled on the event axis (D-31).",
+   "formula": "DEPRECATED (D-118): use ssot_net_roas (the SSOT metric); this legacy metric stays queryable for one release. Net ROAS = contribution before ads ÷ ad spend. NULL when net sales <= 0; labelled on the event axis (D-31).",
    "ratio": {
     "numerator": "contribution_margin",
     "denominator": "ad_spend"
@@ -1982,7 +1982,7 @@
    "status": "certified",
    "tier": 1,
    "allocated": false,
-   "formula": "Ad spend on delivery date, never allocated (D-07). Ignores date_axis.",
+   "formula": "DEPRECATED (D-118): use ssot_ad_spend (the SSOT metric); this legacy metric stays queryable for one release. Ad spend on delivery date, never allocated (D-07). Ignores date_axis.",
    "ratio": null,
    "same_quantity_group": [
     "ad_spend",
@@ -2023,7 +2023,7 @@
    "status": "certified",
    "tier": 1,
    "allocated": false,
-   "formula": "Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net sales.",
+   "formula": "DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release. Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net sales.",
    "ratio": null,
    "same_quantity_group": [
     "discounts",
@@ -2043,7 +2043,7 @@
    "status": "certified",
    "tier": 7,
    "allocated": false,
-   "formula": "Gross sales ex-GST at placement, after discounts (D-09a); the top line. Excludes shipping charged.",
+   "formula": "DEPRECATED (D-111): use ssot_gross_sales (the SSOT metric); this legacy metric stays queryable for one release. Gross sales ex-GST at placement, after discounts (D-09a); the top line. Excludes shipping charged.",
    "ratio": null,
    "same_quantity_group": [
     "gross_sales",
@@ -2063,7 +2063,7 @@
    "status": "certified",
    "tier": 8,
    "allocated": false,
-   "formula": "Net sales ex-GST = gross sales + shipping revenue − cancelled − RTO − returned − shipping reversed ± exchange price adjustment.",
+   "formula": "DEPRECATED (D-111): use ssot_net_sales (the SSOT metric); this legacy metric stays queryable for one release. Net sales ex-GST = gross sales + shipping revenue − cancelled − RTO − returned − shipping reversed ± exchange price adjustment.",
    "ratio": null,
    "same_quantity_group": [
     "funnel_order_revenue",
@@ -2155,7 +2155,7 @@
    "status": "certified",
    "tier": 6,
    "allocated": false,
-   "formula": "Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).",
+   "formula": "DEPRECATED (D-118): use ssot_orders (the SSOT metric); this legacy metric stays queryable for one release. Sale orders placed. Exchange replacements, zero-value and test orders are not sales (D-01 / D-08).",
    "ratio": null,
    "same_quantity_group": [
     "channel_orders",
@@ -3418,7 +3418,7 @@
    "status": "certified",
    "tier": 1,
    "allocated": false,
-   "formula": "Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net sales.",
+   "formula": "DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release. Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net sales.",
    "ratio": null,
    "same_quantity_group": [
     "discounts",
@@ -3470,7 +3470,7 @@
    "status": "certified",
    "tier": 7,
    "allocated": false,
-   "formula": "Gross sales ex-GST at placement, after discounts (D-09a); the top line. Excludes shipping charged.",
+   "formula": "DEPRECATED (D-111): use ssot_gross_sales (the SSOT metric); this legacy metric stays queryable for one release. Gross sales ex-GST at placement, after discounts (D-09a); the top line. Excludes shipping charged.",
    "ratio": null,
    "same_quantity_group": [
     "gross_sales",
@@ -3490,7 +3490,7 @@
    "status": "certified",
    "tier": 9,
    "allocated": false,
-   "formula": "Net COGS = product cost + operating cost + exchange cost, net of returns.",
+   "formula": "DEPRECATED (D-118): use ssot_net_cogs (the SSOT metric); this legacy metric stays queryable for one release. Net COGS = product cost + operating cost + exchange cost, net of returns.",
    "ratio": null,
    "same_quantity_group": [
     "net_cogs",
@@ -3509,7 +3509,7 @@
    "status": "certified",
    "tier": 8,
    "allocated": false,
-   "formula": "Net sales ex-GST = gross sales + shipping revenue − cancelled − RTO − returned − shipping reversed ± exchange price adjustment.",
+   "formula": "DEPRECATED (D-111): use ssot_net_sales (the SSOT metric); this legacy metric stays queryable for one release. Net sales ex-GST = gross sales + shipping revenue − cancelled − RTO − returned − shipping reversed ± exchange price adjustment.",
    "ratio": null,
    "same_quantity_group": [
     "funnel_order_revenue",
@@ -3836,7 +3836,7 @@
    "status": "certified",
    "tier": null,
    "allocated": true,
-   "formula": "Reverse shipping cost of RTOs and returns (gold rto_cost); back-filled for legacy RTOs (D-11c).",
+   "formula": "DEPRECATED (D-118): use ssot_rto_cost (the SSOT metric); this legacy metric stays queryable for one release. Reverse shipping cost of RTOs and returns (gold rto_cost); back-filled for legacy RTOs (D-11c).",
    "ratio": null,
    "same_quantity_group": [
     "product_rto_cost",
@@ -4382,7 +4382,7 @@
    "status": "certified",
    "tier": null,
    "allocated": false,
-   "formula": "Return rate = orders later returned ÷ orders placed. Cohort-only: refused on event_date (D-31); use order_date.",
+   "formula": "DEPRECATED (D-118): use ssot_return_rate (the SSOT metric); this legacy metric stays queryable for one release. Return rate = orders later returned ÷ orders placed. Cohort-only: refused on event_date (D-31); use order_date.",
    "ratio": {
     "numerator": "channel_returned_orders",
     "denominator": "channel_orders"
@@ -4512,7 +4512,7 @@
    "status": "certified",
    "tier": null,
    "allocated": false,
-   "formula": "Reverse shipping cost of RTOs and returns (gold rto_cost); back-filled for legacy RTOs (D-11c).",
+   "formula": "DEPRECATED (D-118): use ssot_rto_cost (the SSOT metric); this legacy metric stays queryable for one release. Reverse shipping cost of RTOs and returns (gold rto_cost); back-filled for legacy RTOs (D-11c).",
    "ratio": null,
    "same_quantity_group": [
     "product_rto_cost",

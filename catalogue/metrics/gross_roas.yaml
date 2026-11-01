@@ -2,12 +2,13 @@ id: gross_roas
 display_name: Gross ROAS
 category: finance
 status: certified
-description: 'Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09). Grain: brand_day_channel_ad.
-  Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes
-  on the day they happen). Redefined in semantic v3 (D-09; D-31; D-01; D-02; D-02a; D-02b; D-03; D-03a…): the id
-  is kept, the number may change.'
+description: 'DEPRECATED (D-118): use ssot_gross_roas (the SSOT metric); this legacy metric stays queryable for one release.
+  Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09). Grain: brand_day_channel_ad. Date axis: placement
+  only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined
+  in semantic v3 (D-09; D-31; D-01; D-02; D-02a; D-02b; D-03; D-03a…): the id is kept, the number may change.'
 formula:
-  human_readable: Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09).
+  human_readable: 'DEPRECATED (D-118): use ssot_gross_roas (the SSOT metric); this legacy metric stays queryable for one release.
+    Gross ROAS = gross sales (attributed at placement) ÷ ad spend (D-09).'
   authoritative_source: cube
   depends_on:
   - gross_sales

@@ -2,12 +2,14 @@ id: net_cogs
 display_name: Net COGS
 category: finance
 status: certified
-description: 'Net COGS = product cost + operating cost + exchange cost, net of returns. Grain: brand_day_channel_ad.
-  Date axis: switchable. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on
-  the day they happen). Redefined in semantic v3 (D-03; D-03a; D-01; D-02; D-02a; D-02b; D-05; D-06…): the id is
-  kept, the number may change. Also answers the ids: pnl_net_cogs.'
+description: 'DEPRECATED (D-118): use ssot_net_cogs (the SSOT metric); this legacy metric stays queryable for one release.
+  Net COGS = product cost + operating cost + exchange cost, net of returns. Grain: brand_day_channel_ad. Date axis: switchable.
+  date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in
+  semantic v3 (D-03; D-03a; D-01; D-02; D-02a; D-02b; D-05; D-06…): the id is kept, the number may change. Also answers the
+  ids: pnl_net_cogs.'
 formula:
-  human_readable: Net COGS = product cost + operating cost + exchange cost, net of returns.
+  human_readable: 'DEPRECATED (D-118): use ssot_net_cogs (the SSOT metric); this legacy metric stays queryable for one release.
+    Net COGS = product cost + operating cost + exchange cost, net of returns.'
   authoritative_source: cube
   depends_on:
   - product_cost

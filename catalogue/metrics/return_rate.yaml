@@ -2,13 +2,13 @@ id: return_rate
 display_name: Return rate
 category: finance
 status: certified
-description: 'Return rate = orders later returned ÷ orders placed. Cohort-only: refused on event_date (D-31); use
-  order_date. Grain: brand_day_channel_ad. Date axis: cohort only. Order-date cohort only (refuses event_date).
-  Redefined in semantic v3 (D-31; D-01; D-02; D-02a; D-02b; D-03; D-03a; D-05…): the id is kept, the number may
-  change.'
+description: 'DEPRECATED (D-118): use ssot_return_rate (the SSOT metric); this legacy metric stays queryable for one release.
+  Return rate = orders later returned ÷ orders placed. Cohort-only: refused on event_date (D-31); use order_date. Grain: brand_day_channel_ad.
+  Date axis: cohort only. Order-date cohort only (refuses event_date). Redefined in semantic v3 (D-31; D-01; D-02; D-02a;
+  D-02b; D-03; D-03a; D-05…): the id is kept, the number may change.'
 formula:
-  human_readable: 'Return rate = orders later returned ÷ orders placed. Cohort-only: refused on event_date (D-31);
-    use order_date.'
+  human_readable: 'DEPRECATED (D-118): use ssot_return_rate (the SSOT metric); this legacy metric stays queryable for one
+    release. Return rate = orders later returned ÷ orders placed. Cohort-only: refused on event_date (D-31); use order_date.'
   authoritative_source: cube
   depends_on:
   - channel_returned_orders

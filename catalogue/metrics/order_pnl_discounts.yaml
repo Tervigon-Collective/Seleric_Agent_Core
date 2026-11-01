@@ -2,13 +2,14 @@ id: order_pnl_discounts
 display_name: Discounts (P&L basis)
 category: finance
 status: certified
-description: 'Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net
-  sales. Grain: brand_day_channel_ad. Date axis: placement only. date_axis=order_date (default, orders placed in
-  the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-09a; D-01; D-02; D-02a;
-  D-02b; D-03; D-03a; D-05…): the id is kept, the number may change. Also answers the ids: pnl_discounts.'
+description: 'DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release.
+  Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net sales. Grain: brand_day_channel_ad.
+  Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day
+  they happen). Redefined in semantic v3 (D-09a; D-01; D-02; D-02a; D-02b; D-03; D-03a; D-05…): the id is kept, the number
+  may change. Also answers the ids: pnl_discounts.'
 formula:
-  human_readable: 'Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again
-    in net sales.'
+  human_readable: 'DEPRECATED (D-118): use ssot_discounts (the SSOT metric); this legacy metric stays queryable for one release.
+    Discounts ex-GST. Memo: already deducted inside gross_sales (D-09a), so not subtracted again in net sales.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:
