@@ -1367,7 +1367,7 @@
    "status": "certified",
    "tier": 7,
    "allocated": false,
-   "formula": "Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales.",
+   "formula": "DEPRECATED (D-111): use ssot_gross_sales (the SSOT metric); this legacy metric stays queryable for one release. Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales.",
    "ratio": null,
    "same_quantity_group": [
     "gross_sales",
@@ -1806,7 +1806,7 @@
    "status": "certified",
    "tier": 8,
    "allocated": false,
-   "formula": "Net sales ex-GST (ledger): gross + shipping − cancelled − RTO − returned − shipping reversed ± exchange adjustment. Equals finance.net_sales.",
+   "formula": "DEPRECATED (D-111): use ssot_net_sales (the SSOT metric); this legacy metric stays queryable for one release. Net sales ex-GST (ledger): gross + shipping − cancelled − RTO − returned − shipping reversed ± exchange adjustment. Equals finance.net_sales.",
    "ratio": null,
    "same_quantity_group": [
     "funnel_order_revenue",
@@ -1895,7 +1895,7 @@
    "status": "certified",
    "tier": 6,
    "allocated": false,
-   "formula": "First placed orders of new customers (D-15).",
+   "formula": "DEPRECATED (D-111): use ssot_new_customers (the SSOT metric); this legacy metric stays queryable for one release. First placed orders of new customers (D-15).",
    "ratio": null,
    "same_quantity_group": [
     "channel_new_customers",

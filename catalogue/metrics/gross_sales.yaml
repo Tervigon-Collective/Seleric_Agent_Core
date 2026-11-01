@@ -2,12 +2,13 @@ id: gross_sales
 display_name: Gross sales
 category: commerce
 status: certified
-description: 'Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales. Grain:
-  order. Date axis: placement only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes
-  on the day they happen). Redefined in semantic v3 (D-09a; D-02b; D-01; D-08; D-08a; D-10): the id is kept, the
-  number may change.'
+description: 'DEPRECATED (D-111): use ssot_gross_sales (the SSOT metric); this legacy metric stays queryable for one release.
+  Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales. Grain: order. Date axis: placement
+  only. date_axis=order_date (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined
+  in semantic v3 (D-09a; D-02b; D-01; D-08; D-08a; D-10): the id is kept, the number may change.'
 formula:
-  human_readable: Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales.
+  human_readable: 'DEPRECATED (D-111): use ssot_gross_sales (the SSOT metric); this legacy metric stays queryable for one
+    release. Gross sales ex-GST at placement, after discounts (D-09a). Same figure as finance.gross_sales.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

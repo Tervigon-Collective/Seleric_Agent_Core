@@ -2,11 +2,13 @@ id: new_customers
 display_name: New customers
 category: commerce
 status: certified
-description: 'First placed orders of new customers (D-15). Grain: order. Date axis: placement only. date_axis=order_date
-  (default, orders placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic
-  v3 (D-15; D-16; D-01; D-08; D-08a): the id is kept, the number may change.'
+description: 'DEPRECATED (D-111): use ssot_new_customers (the SSOT metric); this legacy metric stays queryable for one release.
+  First placed orders of new customers (D-15). Grain: order. Date axis: placement only. date_axis=order_date (default, orders
+  placed in the period) or event_date (outcomes on the day they happen). Redefined in semantic v3 (D-15; D-16; D-01; D-08;
+  D-08a): the id is kept, the number may change.'
 formula:
-  human_readable: First placed orders of new customers (D-15).
+  human_readable: 'DEPRECATED (D-111): use ssot_new_customers (the SSOT metric); this legacy metric stays queryable for one
+    release. First placed orders of new customers (D-15).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:
