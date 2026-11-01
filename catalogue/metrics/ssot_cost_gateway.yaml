@@ -1,0 +1,34 @@
+id: ssot_cost_gateway
+display_name: SSOT payment gateway fee
+category: finance
+status: approved
+description: 'Payment gateway fee on online-paid orders. Formula: sum of gateway fee of the placed lines. Date: order date
+  (IST). GST: no GST (a cost). Shopify: Ops app costing. In Oct 1-29 it appears only on orders the mart calls prepaid. Amazon:
+  0. Excludes: COD handling. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Payment gateway fee on online-paid orders. Formula: sum of gateway fee of the placed lines. Date: order
+    date (IST). GST: no GST (a cost). Shopify: Ops app costing. In Oct 1-29 it appears only on orders the mart calls prepaid.
+    Amazon: 0. Excludes: COD handling.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_gateway
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

@@ -1,0 +1,44 @@
+id: ssot_product_cost_credit
+display_name: SSOT product-cost credit
+category: finance
+status: approved
+description: 'Product cost won back because the goods went back on the shelf: closed returns, RTO, exchange origins and cancellations.
+  Reduces Net COGS. Formula: sum of product cost of the credited quantity. Date: return event date for closed returns / RTO,
+  cancellation date for cancels (both IST); Amazon: first refund date of the item. GST: no GST (a cost). Shopify: Credited
+  quantity per line: cancelled order = full quantity; RTO = full quantity; return = returned quantity; exchange origin = exchanged
+  quantity; minus quantity the ops app marks NOT_RESTOCKED. Active version 2 (closed returns + cancels); version 1 counted
+  every return status. Amazon: For each refunded order item: min(returned quantity from the Returns Report, ordered quantity)
+  x unit cost, on the first refund date of that item. Includes: closed returns, RTO, cancels. Excludes: open returns, written-off
+  stock. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify
+  and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Product cost won back because the goods went back on the shelf: closed returns, RTO, exchange origins and
+    cancellations. Reduces Net COGS. Formula: sum of product cost of the credited quantity. Date: return event date for closed
+    returns / RTO, cancellation date for cancels (both IST); Amazon: first refund date of the item. GST: no GST (a cost).
+    Shopify: Credited quantity per line: cancelled order = full quantity; RTO = full quantity; return = returned quantity;
+    exchange origin = exchanged quantity; minus quantity the ops app marks NOT_RESTOCKED. Active version 2 (closed returns
+    + cancels); version 1 counted every return status. Amazon: For each refunded order item: min(returned quantity from the
+    Returns Report, ordered quantity) x unit cost, on the first refund date of that item. Includes: closed returns, RTO, cancels.
+    Excludes: open returns, written-off stock.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.product_cost_credit
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

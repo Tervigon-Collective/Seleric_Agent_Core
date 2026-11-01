@@ -1,0 +1,40 @@
+id: ssot_aov
+display_name: SSOT AOV
+category: finance
+status: approved
+description: 'Average order value: Gross Sales per sale order, exchange replacements left out of both. Formula: sale_gross_sales
+  / sale_orders. Date: order date (IST). GST: as gross_sales. Shopify: Exchange channel out of numerator and denominator.
+  Amazon: Amazon counts in the business total (cancelled Amazon orders are in the denominator); filter sales_platform for
+  one platform. Excludes: exchange. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over
+  gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Average order value: Gross Sales per sale order, exchange replacements left out of both. Formula: sale_gross_sales
+    / sale_orders. Date: order date (IST). GST: as gross_sales. Shopify: Exchange channel out of numerator and denominator.
+    Amazon: Amazon counts in the business total (cancelled Amazon orders are in the denominator); filter sales_platform for
+    one platform. Excludes: exchange.'
+  authoritative_source: cube
+  depends_on:
+  - ssot_sale_gross_sales
+  - ssot_sale_orders
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.aov
+aggregation: ratio
+unit: ratio
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_sale_gross_sales
+  denominator: ssot_sale_orders

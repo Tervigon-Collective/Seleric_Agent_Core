@@ -1,0 +1,36 @@
+id: ssot_cost_per_order
+display_name: SSOT cost per order (ad)
+category: finance
+status: approved
+description: 'Ad spend per sale order (exchange replacements not counted). Formula: ad_spend / sale_orders. Date: mixed. GST:
+  as ad_spend. Shopify: Exchange out of the denominator. Amazon: Included. Excludes: exchange. Grain: brand_day_channel. Date
+  axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Ad spend per sale order (exchange replacements not counted). Formula: ad_spend / sale_orders. Date: mixed.
+    GST: as ad_spend. Shopify: Exchange out of the denominator. Amazon: Included. Excludes: exchange.'
+  authoritative_source: cube
+  depends_on:
+  - ssot_ad_spend
+  - ssot_sale_orders
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_per_order
+aggregation: ratio
+unit: ratio
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_ad_spend
+  denominator: ssot_sale_orders

@@ -1,0 +1,38 @@
+id: ssot_cost_cod
+display_name: SSOT COD handling fee
+category: finance
+status: approved
+description: 'Cash-on-delivery handling fee charged by the courier on COD orders. Formula: sum of COD handling fee of the
+  placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app costing, booked when the ops app treats the
+  order as COD. In Oct 1-29, 108 orders that the mart calls prepaid (no cod tag) carry this fee (3,711.27) and 133 mart-COD
+  orders carry none: the ops app and the cod tag disagree (OPEN F-2). Amazon: 0. Excludes: gateway fee. OPEN: F-2 COD per
+  tag vs COD per ops app. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Cash-on-delivery handling fee charged by the courier on COD orders. Formula: sum of COD handling fee of
+    the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app costing, booked when the ops app treats
+    the order as COD. In Oct 1-29, 108 orders that the mart calls prepaid (no cod tag) carry this fee (3,711.27) and 133 mart-COD
+    orders carry none: the ops app and the cod tag disagree (OPEN F-2). Amazon: 0. Excludes: gateway fee. OPEN: F-2 COD per
+    tag vs COD per ops app.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_cod
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

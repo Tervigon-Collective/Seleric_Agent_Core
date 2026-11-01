@@ -1,0 +1,40 @@
+id: ssot_product_net
+display_name: SSOT product net
+category: finance
+status: approved
+description: 'Value of the products ordered after discount, with GST taken out. Shipping is not in it. Formula: sum over lines
+  of max(0, line total - line discount - line GST). Date: order date (IST). GST: ex-GST: the actual CGST + SGST + IGST of
+  each line is taken out (not a flat 18%). Shopify: int_finance_order_lines.net_pre_refund_excl_gst, summed over the order
+  lines. Amazon: Amazon order total including shipping (effective_gross_revenue) / 1.18; shipping is NOT split out for Amazon,
+  so for Amazon the whole amount sits here and shipping charged is 0. Includes: exchange replacements. Excludes: shipping
+  charged, refunds, cancels (they are separate lines). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Value of the products ordered after discount, with GST taken out. Shipping is not in it. Formula: sum over
+    lines of max(0, line total - line discount - line GST). Date: order date (IST). GST: ex-GST: the actual CGST + SGST +
+    IGST of each line is taken out (not a flat 18%). Shopify: int_finance_order_lines.net_pre_refund_excl_gst, summed over
+    the order lines. Amazon: Amazon order total including shipping (effective_gross_revenue) / 1.18; shipping is NOT split
+    out for Amazon, so for Amazon the whole amount sits here and shipping charged is 0. Includes: exchange replacements. Excludes:
+    shipping charged, refunds, cancels (they are separate lines).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.product_net
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

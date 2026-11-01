@@ -1,0 +1,37 @@
+id: ssot_cost_courier
+display_name: SSOT courier cost (outbound)
+category: finance
+status: approved
+description: 'Courier cost to deliver the placed orders (outbound / forward shipping). Not the shipping the customer paid.
+  Formula: sum of forward shipping cost of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify: Ops app
+  costing (courier bill / passbook); booked once on the order date, never reversed (the return leg is Return courier cost).
+  Amazon: 0 (Amazon shipping is the Amazon shipping fee line). Excludes: return courier cost, shipping charged. Grain: brand_day_channel.
+  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
+  D-104).'
+formula:
+  human_readable: 'Courier cost to deliver the placed orders (outbound / forward shipping). Not the shipping the customer
+    paid. Formula: sum of forward shipping cost of the placed lines. Date: order date (IST). GST: no GST (a cost). Shopify:
+    Ops app costing (courier bill / passbook); booked once on the order date, never reversed (the return leg is Return courier
+    cost). Amazon: 0 (Amazon shipping is the Amazon shipping fee line). Excludes: return courier cost, shipping charged.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_courier
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

@@ -256,3 +256,13 @@ views:
     expected_cadence: hourly after gold sync, IST
   description: 'Collection / home / search card interactions: quick add, add to cart, Buy it now, product click. Empty until
     the theme flag seleric_listing_enabled is on.'
+- name: ssot_pnl
+  title: SSOT P&L
+  date_dimension: report_date
+  freshness:
+    source: Cube v3 view ssot_pnl (serve.ssot_pnl_daily, from gold.fct_ssot_pnl_daily)
+    expected_cadence: after each conformed_gold run (hourly), IST
+  description: 'SSOT P&L by day x channel (Shopify): gross and net sales, every cost line, net COGS, gross and net profit,
+    ad spend, ROAS, AOV, cost per order and the rates. ONE hybrid date axis (D-07): order date for sales and costs, event date
+    for closed returns and cancels, delivery date for ads. Exchange is its own channel; Amazon is not included. These are the
+    SSOT numbers (D-83), not the ledger numbers of the finance view.'

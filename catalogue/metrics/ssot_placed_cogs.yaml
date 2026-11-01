@@ -1,0 +1,40 @@
+id: ssot_placed_cogs
+display_name: SSOT gross COGS
+category: finance
+status: approved
+description: 'Gross COGS: every cost of the orders as placed, booked once on the order date. Formula: cost_product + cost_packaging
+  + cost_courier + cost_gateway + cost_cod + cost_checkout + cost_weight + cost_estimated_ops + cost_amz_commission + cost_amz_closing
+  + cost_amz_shipping + cost_amz_other + cost_unallocated. Date: order date (IST). GST: no GST (a cost). Shopify: Sum of gross_cogs
+  of the order lines (product + forward shipping + packaging + gateway + COD + checkout + weight + estimated ops). Amazon:
+  Product cost + the four Amazon fee lines. Excludes: return courier cost, credits (they come in Net COGS). Grain: brand_day_channel.
+  Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon;
+  D-104).'
+formula:
+  human_readable: 'Gross COGS: every cost of the orders as placed, booked once on the order date. Formula: cost_product +
+    cost_packaging + cost_courier + cost_gateway + cost_cod + cost_checkout + cost_weight + cost_estimated_ops + cost_amz_commission
+    + cost_amz_closing + cost_amz_shipping + cost_amz_other + cost_unallocated. Date: order date (IST). GST: no GST (a cost).
+    Shopify: Sum of gross_cogs of the order lines (product + forward shipping + packaging + gateway + COD + checkout + weight
+    + estimated ops). Amazon: Product cost + the four Amazon fee lines. Excludes: return courier cost, credits (they come
+    in Net COGS).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.placed_cogs
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

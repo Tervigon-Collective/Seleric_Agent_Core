@@ -1,0 +1,32 @@
+id: ssot_gross_profit
+display_name: SSOT gross profit
+category: finance
+status: approved
+description: 'What is left of Net Sales after Net COGS, before ads. Formula: net_sales - net_cogs. Date: mixed (D-07). GST:
+  ex-GST. Shopify: As formula. Amazon: As formula. Excludes: ad spend, settlement adjustments. Grain: brand_day_channel. Date
+  axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'What is left of Net Sales after Net COGS, before ads. Formula: net_sales - net_cogs. Date: mixed (D-07).
+    GST: ex-GST. Shopify: As formula. Amazon: As formula. Excludes: ad spend, settlement adjustments.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.gross_profit
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

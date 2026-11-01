@@ -1,0 +1,42 @@
+id: ssot_marketplace_fees
+display_name: SSOT Amazon marketplace fees
+category: finance
+status: approved
+description: 'Total Amazon fees: commission + closing + shipping fee + other service fees, minus the fees Amazon gave back
+  on refunds. Same figure as the Dashboard Amazon page "platform fees". Formula: cost_amz_commission + cost_amz_closing +
+  cost_amz_shipping + cost_amz_other - fee_reversal. Date: fees on purchase date, reversals on refund-paid date (IST). GST:
+  as stored in the warehouse; reversals / 1.18. Shopify: 0. Amazon: As the formula. Excludes: tax withheld (TCS/TDS). Grain:
+  brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon,
+  channel amazon; D-104).'
+formula:
+  human_readable: 'Total Amazon fees: commission + closing + shipping fee + other service fees, minus the fees Amazon gave
+    back on refunds. Same figure as the Dashboard Amazon page "platform fees". Formula: cost_amz_commission + cost_amz_closing
+    + cost_amz_shipping + cost_amz_other - fee_reversal. Date: fees on purchase date, reversals on refund-paid date (IST).
+    GST: as stored in the warehouse; reversals / 1.18. Shopify: 0. Amazon: As the formula. Excludes: tax withheld (TCS/TDS).'
+  authoritative_source: cube
+  depends_on:
+  - ssot_cost_amz_commission
+  - ssot_cost_amz_closing
+  - ssot_cost_amz_shipping
+  - ssot_cost_amz_other
+  - ssot_fee_reversal
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.marketplace_fees
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

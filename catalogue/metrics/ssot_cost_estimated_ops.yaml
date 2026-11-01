@@ -1,0 +1,40 @@
+id: ssot_cost_estimated_ops
+display_name: SSOT estimated ops cost
+category: finance
+status: approved
+description: 'Stand-in for the courier, packaging and fee costs of orders the ops app has not costed yet. Replaced by the
+  real costs when they arrive. Formula: average ops cost per fully costed order of the same month, per uncosted order. Date:
+  order date (IST). GST: no GST (a cost). Shopify: For an order with no ops costing row: the average ops cost (forward shipping
+  + packaging + gateway + COD + checkout + weight) per final order of the same month; all-time average when the month has
+  fewer than 30 final orders. Not applied to cancellations that never shipped (no tracking number). Amazon: 0. Excludes: cancelled-never-shipped
+  orders. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Stand-in for the courier, packaging and fee costs of orders the ops app has not costed yet. Replaced by
+    the real costs when they arrive. Formula: average ops cost per fully costed order of the same month, per uncosted order.
+    Date: order date (IST). GST: no GST (a cost). Shopify: For an order with no ops costing row: the average ops cost (forward
+    shipping + packaging + gateway + COD + checkout + weight) per final order of the same month; all-time average when the
+    month has fewer than 30 final orders. Not applied to cancellations that never shipped (no tracking number). Amazon: 0.
+    Excludes: cancelled-never-shipped orders.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_estimated_ops
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

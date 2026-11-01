@@ -1,0 +1,40 @@
+id: ssot_gross_roas
+display_name: SSOT Gross ROAS
+category: finance
+status: approved
+description: 'Gross Sales earned per rupee of ad spend, from our own attribution. The platform-reported ROAS is not used.
+  Formula: gross_sales / ad_spend. Date: mixed: order date over ad day. GST: as gross_sales and ad_spend. Shopify: By channel,
+  only meta and google have ad spend. Amazon: Amazon Ads spend sits on channel amazon. Excludes: platform-reported sales (D-76).
+  Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify
+  and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Gross Sales earned per rupee of ad spend, from our own attribution. The platform-reported ROAS is not used.
+    Formula: gross_sales / ad_spend. Date: mixed: order date over ad day. GST: as gross_sales and ad_spend. Shopify: By channel,
+    only meta and google have ad spend. Amazon: Amazon Ads spend sits on channel amazon. Excludes: platform-reported sales
+    (D-76).'
+  authoritative_source: cube
+  depends_on:
+  - ssot_gross_sales
+  - ssot_ad_spend
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.gross_roas
+aggregation: ratio
+unit: ratio
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_gross_sales
+  denominator: ssot_ad_spend

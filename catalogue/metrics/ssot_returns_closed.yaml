@@ -1,0 +1,48 @@
+id: ssot_returns_closed
+display_name: SSOT returns incl. RTO
+category: finance
+status: approved
+description: 'Value of orders customers sent back (closed returns) plus completed RTO (parcel returned undelivered), on the
+  day the return closes. Open or requested returns do not count yet. Formula: sum of the deduction value of return events
+  that are closed. Date: return event date (IST): the day the return is closed / the RTO completes. GST: ex-GST. Shopify:
+  A line is a return event when its refund class is RETURN and it is a real return request or not "kept". It is CLOSED when
+  the return status is CLOSED or the order return status is RETURNED. Value = returned revenue ex-GST; if none, cancelled
+  revenue; if a request is pending, placement value x returned quantity share; if the line is fully reversed with nothing
+  left, the placement value (product before discount, ex-GST). Completed RTO with no refund amount is valued at placement
+  value (D-16). Active version 2 (closed only); version 1 counted every status. Amazon: Minus the Principal of RefundEventList
+  finance events, on the refund-paid date (Dashboard Amazon engine rule, D-103). Includes: closed returns, completed RTO,
+  exchange origin reversals. Excludes: open / requested returns, cancels (own line). Grain: brand_day_channel. Date axis:
+  native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Value of orders customers sent back (closed returns) plus completed RTO (parcel returned undelivered),
+    on the day the return closes. Open or requested returns do not count yet. Formula: sum of the deduction value of return
+    events that are closed. Date: return event date (IST): the day the return is closed / the RTO completes. GST: ex-GST.
+    Shopify: A line is a return event when its refund class is RETURN and it is a real return request or not "kept". It is
+    CLOSED when the return status is CLOSED or the order return status is RETURNED. Value = returned revenue ex-GST; if none,
+    cancelled revenue; if a request is pending, placement value x returned quantity share; if the line is fully reversed with
+    nothing left, the placement value (product before discount, ex-GST). Completed RTO with no refund amount is valued at
+    placement value (D-16). Active version 2 (closed only); version 1 counted every status. Amazon: Minus the Principal of
+    RefundEventList finance events, on the refund-paid date (Dashboard Amazon engine rule, D-103). Includes: closed returns,
+    completed RTO, exchange origin reversals. Excludes: open / requested returns, cancels (own line).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.returns_closed
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

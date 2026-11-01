@@ -1,0 +1,34 @@
+id: ssot_cost_packaging
+display_name: SSOT packaging cost
+category: finance
+status: approved
+description: 'Packaging cost of the placed orders. Formula: sum of packaging cost of the placed lines. Date: order date (IST).
+  GST: no GST (a cost). Shopify: Ops app costing; order-level cost split to lines by quantity, booked once. Amazon: 0 (not
+  tracked for Amazon). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Packaging cost of the placed orders. Formula: sum of packaging cost of the placed lines. Date: order date
+    (IST). GST: no GST (a cost). Shopify: Ops app costing; order-level cost split to lines by quantity, booked once. Amazon:
+    0 (not tracked for Amazon).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.cost_packaging
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR
