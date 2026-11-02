@@ -4,18 +4,22 @@ category: finance
 status: approved
 description: 'Stand-in for the courier, packaging and fee costs of orders the ops app has not costed yet. Replaced by the
   real costs when they arrive. Formula: average ops cost per fully costed order of the same month, per uncosted order. Date:
-  order date (IST). GST: no GST (a cost). Shopify: For an order with no ops costing row: the average ops cost (forward shipping
-  + packaging + gateway + COD + checkout + weight) per final order of the same month; all-time average when the month has
-  fewer than 30 final orders. Not applied to cancellations that never shipped (no tracking number). Amazon: 0. Excludes: cancelled-never-shipped
+  order date (IST). GST: no GST (a cost). Shopify: For an order with no ops costing row and no courier bill row: the average
+  ops cost (forward shipping + packaging + gateway + COD + checkout + weight) of the order''s courier, taken from the courier''s
+  bill-backed orders of the last three months (DTDC; needs 30 orders), otherwise per final order of the same month, all-time
+  average when the month has fewer than 30 final orders. Replaced by the real cost when the courier bill or the ops costing
+  arrives. Not applied to cancellations that never shipped (no tracking number). Amazon: 0. Excludes: cancelled-never-shipped
   orders. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
   (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Stand-in for the courier, packaging and fee costs of orders the ops app has not costed yet. Replaced by
     the real costs when they arrive. Formula: average ops cost per fully costed order of the same month, per uncosted order.
-    Date: order date (IST). GST: no GST (a cost). Shopify: For an order with no ops costing row: the average ops cost (forward
-    shipping + packaging + gateway + COD + checkout + weight) per final order of the same month; all-time average when the
-    month has fewer than 30 final orders. Not applied to cancellations that never shipped (no tracking number). Amazon: 0.
-    Excludes: cancelled-never-shipped orders.'
+    Date: order date (IST). GST: no GST (a cost). Shopify: For an order with no ops costing row and no courier bill row: the
+    average ops cost (forward shipping + packaging + gateway + COD + checkout + weight) of the order''s courier, taken from
+    the courier''s bill-backed orders of the last three months (DTDC; needs 30 orders), otherwise per final order of the same
+    month, all-time average when the month has fewer than 30 final orders. Replaced by the real cost when the courier bill
+    or the ops costing arrives. Not applied to cancellations that never shipped (no tracking number). Amazon: 0. Excludes:
+    cancelled-never-shipped orders.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:
