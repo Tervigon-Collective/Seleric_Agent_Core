@@ -2,24 +2,28 @@ id: ssot_shipping_charged
 display_name: SSOT shipping charged
 category: finance
 status: approved
-description: 'Shipping the customer paid on the order, with GST taken out. Never reversed on a return or cancel; stays inside
-  Net Sales. Formula: sum of the order shipping lines (Shopify shipping_lines price), divided by (1 + shipping GST rate) on
-  orders with taxes_included. Date: order date (IST). GST: ex-GST (D-109, F-1 decided): on orders with taxes_included = true
-  the shipping price is divided by 1.18 (dbt var ssot_shipping_gst_rate = 0.18); on orders with taxes_included = false it
-  is taken as booked. The GST taken out is the memo metric shipping_gst. Metric version 2; version 1 (as booked, GST-inclusive)
-  is retired.. Shopify: fct_orders.total_shipping_charged (silver trino_shopify_orders.shipping_amount) with the GST rule
-  above. Amazon: 0 (Amazon shipping is inside product net, not split). Includes: exchange replacements. Excludes: courier
-  cost (that is a cost line). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
-  (Shopify and Amazon, channel amazon; D-104).'
+description: 'Shipping the customer paid on the order, with GST taken out. Stays inside Net Sales; given back through Cancellations
+  only when the whole order is cancelled before dispatch (D-143). Formula: sum of the order shipping lines (Shopify shipping_lines
+  price), divided by (1 + shipping GST rate) on orders with taxes_included. Date: order date (IST). GST: ex-GST (D-109, F-1
+  decided): on orders with taxes_included = true the shipping price is divided by 1.18 (dbt var ssot_shipping_gst_rate = 0.18);
+  on orders with taxes_included = false it is taken as booked. The GST taken out is the memo metric shipping_gst. Metric version
+  2; version 1 (as booked, GST-inclusive) is retired.. Shopify: fct_orders.total_shipping_charged (silver trino_shopify_orders.shipping_amount)
+  with the GST rule above. Shipping charged stays as charged; the reversal for a whole order cancelled before dispatch is
+  booked in Cancellations (D-143). Returns, RTO, cancels after dispatch and partial cancels never reverse it. Amazon: 0 (Amazon
+  shipping is inside product net, not split). Includes: exchange replacements. Excludes: courier cost (that is a cost line).
+  Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify
+  and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: 'Shipping the customer paid on the order, with GST taken out. Never reversed on a return or cancel; stays
-    inside Net Sales. Formula: sum of the order shipping lines (Shopify shipping_lines price), divided by (1 + shipping GST
-    rate) on orders with taxes_included. Date: order date (IST). GST: ex-GST (D-109, F-1 decided): on orders with taxes_included
-    = true the shipping price is divided by 1.18 (dbt var ssot_shipping_gst_rate = 0.18); on orders with taxes_included =
-    false it is taken as booked. The GST taken out is the memo metric shipping_gst. Metric version 2; version 1 (as booked,
-    GST-inclusive) is retired.. Shopify: fct_orders.total_shipping_charged (silver trino_shopify_orders.shipping_amount) with
-    the GST rule above. Amazon: 0 (Amazon shipping is inside product net, not split). Includes: exchange replacements. Excludes:
-    courier cost (that is a cost line).'
+  human_readable: 'Shipping the customer paid on the order, with GST taken out. Stays inside Net Sales; given back through
+    Cancellations only when the whole order is cancelled before dispatch (D-143). Formula: sum of the order shipping lines
+    (Shopify shipping_lines price), divided by (1 + shipping GST rate) on orders with taxes_included. Date: order date (IST).
+    GST: ex-GST (D-109, F-1 decided): on orders with taxes_included = true the shipping price is divided by 1.18 (dbt var
+    ssot_shipping_gst_rate = 0.18); on orders with taxes_included = false it is taken as booked. The GST taken out is the
+    memo metric shipping_gst. Metric version 2; version 1 (as booked, GST-inclusive) is retired.. Shopify: fct_orders.total_shipping_charged
+    (silver trino_shopify_orders.shipping_amount) with the GST rule above. Shipping charged stays as charged; the reversal
+    for a whole order cancelled before dispatch is booked in Cancellations (D-143). Returns, RTO, cancels after dispatch and
+    partial cancels never reverse it. Amazon: 0 (Amazon shipping is inside product net, not split). Includes: exchange replacements.
+    Excludes: courier cost (that is a cost line).'
   authoritative_source: cube
   depends_on: []
 cube_mapping:
