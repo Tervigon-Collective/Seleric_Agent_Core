@@ -1,0 +1,35 @@
+id: ssot_units
+display_name: SSOT units
+category: finance
+status: approved
+description: 'Item count of the placed orders: the sum of line quantity. Not reduced by returns or cancels (like Orders).
+  Formula: sum of quantity of the placed lines. Date: order date (IST). GST: not applicable. Shopify: Sum of line quantity
+  of the placed lines (gift cards out); zero-value reship drafts count 0, like Orders. Amazon: Ordered units of the order
+  (cancelled Amazon orders carry 0). Excludes: gift cards, zero-value reship drafts. Grain: brand_day_channel. Date axis:
+  native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Item count of the placed orders: the sum of line quantity. Not reduced by returns or cancels (like Orders).
+    Formula: sum of quantity of the placed lines. Date: order date (IST). GST: not applicable. Shopify: Sum of line quantity
+    of the placed lines (gift cards out); zero-value reship drafts count 0, like Orders. Amazon: Ordered units of the order
+    (cancelled Amazon orders carry 0). Excludes: gift cards, zero-value reship drafts.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.units
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
