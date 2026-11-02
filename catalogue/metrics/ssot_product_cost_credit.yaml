@@ -6,20 +6,22 @@ description: 'Product cost won back because the goods went back on the shelf: cl
   Reduces Net COGS. Formula: sum of product cost of the credited quantity. Date: return event date for closed returns / RTO,
   cancellation date for cancels (both IST); Amazon: first refund date of the item. GST: no GST (a cost). Shopify: Credited
   quantity per line: cancelled order = full quantity; RTO = full quantity; return = returned quantity; exchange origin = exchanged
-  quantity; minus quantity the ops app marks NOT_RESTOCKED. Active version 2 (closed returns + cancels); version 1 counted
-  every return status. Amazon: For each refunded order item: min(returned quantity from the Returns Report, ordered quantity)
-  x unit cost, on the first refund date of that item. Includes: closed returns, RTO, cancels. Excludes: open returns, written-off
-  stock. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify
-  and Amazon, channel amazon; D-104).'
+  quantity; minus quantity the ops app marks NOT_RESTOCKED. Orders placed before 2026-09-01 (old costing): the old costing''s
+  refunded product cost of the returned or cancelled line, restock status not checked. Active version 3 (closed returns +
+  cancels, old-costing orders included); version 1 counted every return status. Amazon: For each refunded order item: min(returned
+  quantity from the Returns Report, ordered quantity) x unit cost, on the first refund date of that item. Includes: closed
+  returns, RTO, cancels. Excludes: open returns, written-off stock. Grain: brand_day_channel. Date axis: native (one hybrid
+  axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Product cost won back because the goods went back on the shelf: closed returns, RTO, exchange origins and
     cancellations. Reduces Net COGS. Formula: sum of product cost of the credited quantity. Date: return event date for closed
     returns / RTO, cancellation date for cancels (both IST); Amazon: first refund date of the item. GST: no GST (a cost).
     Shopify: Credited quantity per line: cancelled order = full quantity; RTO = full quantity; return = returned quantity;
-    exchange origin = exchanged quantity; minus quantity the ops app marks NOT_RESTOCKED. Active version 2 (closed returns
-    + cancels); version 1 counted every return status. Amazon: For each refunded order item: min(returned quantity from the
-    Returns Report, ordered quantity) x unit cost, on the first refund date of that item. Includes: closed returns, RTO, cancels.
-    Excludes: open returns, written-off stock.'
+    exchange origin = exchanged quantity; minus quantity the ops app marks NOT_RESTOCKED. Orders placed before 2026-09-01
+    (old costing): the old costing''s refunded product cost of the returned or cancelled line, restock status not checked.
+    Active version 3 (closed returns + cancels, old-costing orders included); version 1 counted every return status. Amazon:
+    For each refunded order item: min(returned quantity from the Returns Report, ordered quantity) x unit cost, on the first
+    refund date of that item. Includes: closed returns, RTO, cancels. Excludes: open returns, written-off stock.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:
