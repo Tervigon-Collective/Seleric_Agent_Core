@@ -1,0 +1,35 @@
+id: ssot_ltv90_customers
+display_name: SSOT new customers with a complete 90 days
+category: finance
+status: approved
+description: 'New customers (the same first orders as New customers) whose 90 days after the first order are over. Formula:
+  count of new customers whose first-order date + 90 days is not after today. Date: first-order date (IST). GST: not applicable.
+  Shopify: One per new customer, on the day of the first order, once the 90 days are over. Amazon: Outside. Excludes: customers
+  whose 90 days are not over. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'New customers (the same first orders as New customers) whose 90 days after the first order are over. Formula:
+    count of new customers whose first-order date + 90 days is not after today. Date: first-order date (IST). GST: not applicable.
+    Shopify: One per new customer, on the day of the first order, once the 90 days are over. Amazon: Outside. Excludes: customers
+    whose 90 days are not over.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.ltv90_customers
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native

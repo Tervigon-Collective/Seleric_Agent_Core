@@ -1,0 +1,36 @@
+id: ssot_ltv90_contribution
+display_name: SSOT 90-day contribution of new customers
+category: finance
+status: approved
+description: 'Net sales minus net COGS in the 90 days after the first order, summed over the new customers whose 90 days are
+  over. Formula: sum over mature new customers of (net sales - net COGS of their orders within 90 days of the first order).
+  Date: first-order date (IST). GST: as net_sales (ex-GST). Shopify: Per order the mart net sales and net COGS as they stand
+  today. Amazon: Outside. Excludes: ad spend, customers whose 90 days are not over. Grain: brand_day_channel. Date axis: native
+  (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Net sales minus net COGS in the 90 days after the first order, summed over the new customers whose 90 days
+    are over. Formula: sum over mature new customers of (net sales - net COGS of their orders within 90 days of the first
+    order). Date: first-order date (IST). GST: as net_sales (ex-GST). Shopify: Per order the mart net sales and net COGS as
+    they stand today. Amazon: Outside. Excludes: ad spend, customers whose 90 days are not over.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.ltv90_contribution
+aggregation: additive
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

@@ -1,0 +1,46 @@
+id: ssot_ltv_90d
+display_name: SSOT LTV (90-day contribution)
+category: finance
+status: approved
+description: 'Contribution of a new customer in the 90 days after the first order, before ads. Formula: net sales - net COGS
+  of all the customer''s orders placed within 90 days of the first order, per new customer whose 90 days are over. Date: first-order
+  date (IST); the customer''s orders from that day up to 90 days later. GST: as net_sales (ex-GST). Shopify: Per order the
+  mart''s own net sales (placed - closed returns - cancels - shipping of whole orders cancelled before dispatch) and net COGS,
+  as they stand today, so a later return or cancel of an order in the window is included; customers of the window count only
+  when their 90 days are over (the first-order date + 90 days is not after today). Amazon: Outside (no customer identity).
+  Excludes: ad spend, new customers whose 90 days are not over. Grain: brand_day_channel. Date axis: native (one hybrid axis,
+  D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Contribution of a new customer in the 90 days after the first order, before ads. Formula: net sales - net
+    COGS of all the customer''s orders placed within 90 days of the first order, per new customer whose 90 days are over.
+    Date: first-order date (IST); the customer''s orders from that day up to 90 days later. GST: as net_sales (ex-GST). Shopify:
+    Per order the mart''s own net sales (placed - closed returns - cancels - shipping of whole orders cancelled before dispatch)
+    and net COGS, as they stand today, so a later return or cancel of an order in the window is included; customers of the
+    window count only when their 90 days are over (the first-order date + 90 days is not after today). Amazon: Outside (no
+    customer identity). Excludes: ad spend, new customers whose 90 days are not over.'
+  authoritative_source: cube
+  depends_on:
+  - ssot_ltv90_contribution
+  - ssot_ltv90_customers
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.ltv_90d
+aggregation: ratio
+unit: INR
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+ratio_components:
+  numerator: ssot_sale_gross_sales
+  denominator: ssot_sale_orders
