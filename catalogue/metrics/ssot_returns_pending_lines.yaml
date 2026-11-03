@@ -1,0 +1,39 @@
+id: ssot_returns_pending_lines
+display_name: SSOT Amazon returns initiated, refund not paid yet (lines)
+category: finance
+status: approved
+description: 'Number of Amazon return lines initiated but not yet refunded. Formula: count of open return lines. Date: the
+  earliest date of the return line (delivery date, else request date; any version of the line), i.e. when the return was initiated.
+  GST: ex-GST. Shopify: Outside. Amazon: Return lines from the Returns Report, not rejected, one per order x return id x SKU,
+  whose order has no refund event yet; the amount is the Returns Report refunded amount / 1.18. Memo only: never deducted
+  from net sales or profit; when Amazon pays the refund it drops out here and appears in Returns on the refund date. Excludes:
+  rejected returns, returns whose order already has a refund. Grain: brand_day_channel. Date axis: native (one hybrid axis,
+  D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+formula:
+  human_readable: 'Number of Amazon return lines initiated but not yet refunded. Formula: count of open return lines. Date:
+    the earliest date of the return line (delivery date, else request date; any version of the line), i.e. when the return
+    was initiated. GST: ex-GST. Shopify: Outside. Amazon: Return lines from the Returns Report, not rejected, one per order
+    x return id x SKU, whose order has no refund event yet; the amount is the Returns Report refunded amount / 1.18. Memo
+    only: never deducted from net sales or profit; when Amazon pays the refund it drops out here and appears in Returns on
+    the refund date. Excludes: rejected returns, returns whose order already has a refund.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_pnl
+  measure: ssot_pnl.returns_pending_lines
+aggregation: additive
+unit: count
+grain: brand_day_channel
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
