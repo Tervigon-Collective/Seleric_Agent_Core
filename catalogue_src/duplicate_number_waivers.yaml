@@ -282,3 +282,35 @@ waivers:
     level rows), so its product totals equal the brand''s finance / product_profit totals by construction (ALLOC-PROFIT-
     TOTAL contract, parity product_ads = finance per brand x month). The allocated family is cohort-only and used only
     when the product x ad attribution is asked for; not a duplicate definition.'
+- ids:
+  - ssot_campaign_cancels
+  - ssot_cancels
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - ssot_campaign_discounts
+  - ssot_discounts
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - ssot_campaign_rto_cost
+  - ssot_rto_cost
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - ssot_campaign_ad_spend
+  - ssot_shopify_ad_spend
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - ad_spend
+  - ssot_campaign_ad_spend
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - order_pnl_ad_spend
+  - ssot_campaign_ad_spend
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - product_ad_spend
+  - ssot_campaign_ad_spend
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'
+- ids:
+  - product_order_ad_spend
+  - ssot_campaign_ad_spend
+  reason: 'Grain twin (D-178): the same SSOT measure at campaign / ad set / ad grain (Cube view ssot_ad_pnl, Shopify) and at channel grain (ssot_pnl). Equal at brand level by construction (dbt test assert_fct_ad_channel_pnl_ties_fct_ssot_pnl_daily); the view decides the grain.'

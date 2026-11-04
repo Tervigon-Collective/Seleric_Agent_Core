@@ -1,0 +1,38 @@
+id: ssot_campaign_net_profit
+display_name: SSOT net profit by campaign / ad
+category: finance
+status: approved
+description: 'Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels) +
+  Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST.
+  Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own channel),
+  Amazon. Excludes: salaries, rent, tax, owner drawings. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104). Campaign / ad set / ad grain: this
+  is the same measure as ssot_net_profit split by channel, campaign, ad set and ad (Cube view ssot_ad_pnl, Shopify), summing
+  to it per day and channel; use it for any breakdown or filter by campaign, ad set or ad. Google is campaign grain.'
+formula:
+  human_readable: 'Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels)
+    + Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST.
+    Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own
+    channel), Amazon. Excludes: salaries, rent, tax, owner drawings.'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_ad_pnl
+  measure: ssot_ad_pnl.net_profit
+aggregation: additive
+unit: INR
+grain: brand_day_channel_campaign_adset_ad
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
+currency_default: INR

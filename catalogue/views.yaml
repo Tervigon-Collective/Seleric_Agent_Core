@@ -266,3 +266,13 @@ views:
     ad spend, ROAS, AOV, cost per order and the rates. ONE hybrid date axis (D-07): order date for sales and costs, event date
     for closed returns and cancels, delivery date for ads. Exchange replacements sit under the channel of their parent order with sub_channel = exchange (D-232), so Meta - exchange is channel meta + sub_channel exchange and a channel total includes its exchange; Amazon is not included. These are the
     SSOT numbers (D-83), not the ledger numbers of the finance view.'
+- name: ssot_ad_pnl
+  title: SSOT P&L by campaign / ad
+  date_dimension: report_date
+  freshness:
+    source: Cube v3 view ssot_ad_pnl (serve.ssot_ad_pnl_daily, from gold.fct_ad_channel_pnl_daily)
+    expected_cadence: after each conformed_gold run (hourly), IST
+  description: 'SSOT P&L at campaign, ad set and ad grain per day (Shopify): orders, gross and net sales, net COGS, gross profit,
+    ad spend, net profit and ROAS, split by channel, campaign, ad set, ad and the reason a paid order has no campaign. Same
+    numbers and definitions as ssot_pnl: summed over the ad dimensions it equals ssot_pnl for Shopify per day and channel.
+    Google is campaign grain (no ad set or ad). Delivery metrics (impressions, clicks, CTR) are in paid_media.'

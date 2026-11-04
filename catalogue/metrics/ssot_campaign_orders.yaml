@@ -1,0 +1,45 @@
+id: ssot_campaign_orders
+display_name: SSOT placed orders by campaign / ad
+category: finance
+status: approved
+description: 'Number of orders placed. Every order counts once, whatever happened to it later: exchange replacements, returned,
+  RTO, cancelled and unpaid orders all count. Zero-value reship drafts are not orders. Formula: count of distinct orders with
+  at least one qualifying line. Date: order date (IST). GST: not applicable. Shopify: An order counts if it is not a test
+  order and has at least one line that is not a gift card. Draft orders count (order_kind draft) EXCEPT zero-value reship
+  drafts (revenue-adjustment orders, D-120), which are not orders: Oct 1-29 gives 1,159, equal to GSTR-1 and the Dashboard
+  KPI. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included, on the purchase date.
+  Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders, gift-card-only orders,
+  zero-value reship drafts (revenue-adjustment orders). Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
+  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104). Campaign / ad set / ad grain: this
+  is the same measure as ssot_orders split by channel, campaign, ad set and ad (Cube view ssot_ad_pnl, Shopify), summing to
+  it per day and channel; use it for any breakdown or filter by campaign, ad set or ad. Google is campaign grain.'
+formula:
+  human_readable: 'Number of orders placed. Every order counts once, whatever happened to it later: exchange replacements,
+    returned, RTO, cancelled and unpaid orders all count. Zero-value reship drafts are not orders. Formula: count of distinct
+    orders with at least one qualifying line. Date: order date (IST). GST: not applicable. Shopify: An order counts if it
+    is not a test order and has at least one line that is not a gift card. Draft orders count (order_kind draft) EXCEPT zero-value
+    reship drafts (revenue-adjustment orders, D-120), which are not orders: Oct 1-29 gives 1,159, equal to GSTR-1 and the
+    Dashboard KPI. Amazon: Every row of the Amazon order P&L (fct_amazon_sp_order_pnl), cancelled orders included, on the
+    purchase date. Includes: exchange replacements, returned, RTO, cancelled, unpaid, draft. Excludes: test orders, gift-card-only
+    orders, zero-value reship drafts (revenue-adjustment orders).'
+  authoritative_source: cube
+  depends_on: []
+cube_mapping:
+  view: ssot_ad_pnl
+  measure: ssot_ad_pnl.orders
+aggregation: additive
+unit: count
+grain: brand_day_channel_campaign_adset_ad
+data_owner: Finance
+access_policy:
+  roles_allowed:
+  - analyst
+  - exec
+  - finance
+  - growth_lead
+  - ops
+  scopes:
+  - metrics:read
+version: 1.0.0
+replaces: []
+date_axis: native
