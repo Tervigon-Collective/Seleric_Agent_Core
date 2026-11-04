@@ -82,6 +82,7 @@ dimensions:
     attribution_paths: attribution_paths.ad_id
     returns: returns.ad_id
     finance: finance.ad_id
+    ssot_ad_pnl: ssot_ad_pnl.ad_id
   aliases: []
   coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
     at the campaign (device and network are available) and show no ad group or ad (L-03).'
@@ -116,6 +117,7 @@ dimensions:
     attribution_paths: attribution_paths.ad_name
     returns: returns.ad_name
     finance: finance.ad_name
+    ssot_ad_pnl: ssot_ad_pnl.ad_name
   aliases: []
   stable_key: ad_id
   coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
@@ -189,6 +191,7 @@ dimensions:
     attribution_paths: attribution_paths.adset_id
     returns: returns.adset_id
     finance: finance.adset_id
+    ssot_ad_pnl: ssot_ad_pnl.adset_id
   aliases: []
   coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
     at the campaign (device and network are available) and show no ad group or ad (L-03).'
@@ -211,6 +214,7 @@ dimensions:
     attribution_paths: attribution_paths.adset_name
     returns: returns.adset_name
     finance: finance.adset_name
+    ssot_ad_pnl: ssot_ad_pnl.adset_name
   aliases: []
   stable_key: adset_id
   coverage_note: 'Google Performance Max (about 74 % of Google spend) has no ad group / ad level: its rows stop
@@ -383,6 +387,7 @@ dimensions:
     quality_checks: quality_checks.brand_id
     vendors: vendors.brand_id
     procurement_sampling: procurement_sampling.brand_id
+    ssot_ad_pnl: ssot_ad_pnl.brand_id
   aliases: []
 - id: brand_name
   display_name: Brand Name
@@ -432,6 +437,7 @@ dimensions:
     returns: returns.campaign_id
     payments: payments.campaign_id
     finance: finance.campaign_id
+    ssot_ad_pnl: ssot_ad_pnl.campaign_id
   aliases: []
 - id: campaign_key
   display_name: Campaign Key
@@ -465,6 +471,7 @@ dimensions:
     returns: returns.campaign_name
     payments: payments.campaign_name
     finance: finance.campaign_name
+    ssot_ad_pnl: ssot_ad_pnl.campaign_name
   aliases:
   - by campaign
   - campaign-wise
@@ -567,6 +574,7 @@ dimensions:
     returns: returns.channel
     payments: payments.channel
     ssot_pnl: ssot_pnl.channel
+    ssot_ad_pnl: ssot_ad_pnl.channel
   aliases: []
   family: channel
   family_rank: 0
@@ -1690,6 +1698,7 @@ dimensions:
     paid_media_breakdowns: paid_media_breakdowns.report_date
     web_funnel: web_funnel.report_date
     web_events: web_events.report_date
+    ssot_ad_pnl: ssot_ad_pnl.report_date
   aliases: []
 - id: report_hour
   display_name: Report Hour
@@ -1919,6 +1928,7 @@ dimensions:
     payments: payments.sub_channel
     finance: finance.sub_channel
     ssot_pnl: ssot_pnl.sub_channel
+    ssot_ad_pnl: ssot_ad_pnl.sub_channel
   aliases: []
 - id: touch_count
   display_name: Touch Count
