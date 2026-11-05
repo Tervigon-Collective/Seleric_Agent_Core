@@ -3,15 +3,15 @@ display_name: SSOT net profit
 category: finance
 status: approved
 description: 'Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels) +
-  Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST.
-  Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own channel),
-  Amazon. Excludes: salaries, rent, tax, owner drawings. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07).
-  SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+  Amazon settlement adjustments. Formula: contribution_before_ads - ad_spend + platform_adjustments. Date: mixed (D-07). GST:
+  ex-GST. Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements
+  (own channel), Amazon. Excludes: salaries, rent, tax, owner drawings. Grain: brand_day_channel. Date axis: native (one hybrid
+  axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
 formula:
   human_readable: 'Profit after COGS and ads, before fixed overheads and tax: Net Sales - Net COGS - ad spend (all channels)
-    + Amazon settlement adjustments. Formula: gross_profit - ad_spend + platform_adjustments. Date: mixed (D-07). GST: ex-GST.
-    Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements (own
-    channel), Amazon. Excludes: salaries, rent, tax, owner drawings.'
+    + Amazon settlement adjustments. Formula: contribution_before_ads - ad_spend + platform_adjustments. Date: mixed (D-07).
+    GST: ex-GST. Shopify: platform_adjustments is 0. Amazon: Includes the settlement adjustments. Includes: exchange replacements
+    (own channel), Amazon. Excludes: salaries, rent, tax, owner drawings.'
   authoritative_source: cube
   depends_on: []
 cube_mapping:

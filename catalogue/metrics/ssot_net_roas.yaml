@@ -2,15 +2,17 @@ id: ssot_net_roas
 display_name: SSOT Net ROAS
 category: finance
 status: approved
-description: 'Gross Profit earned per rupee of ad spend. 1.00 means ads exactly pay for themselves before overheads. Formula:
-  gross_profit / ad_spend. Date: mixed. GST: ex-GST. Shopify: As formula. Amazon: As formula. Grain: brand_day_channel. Date
-  axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily (Shopify and Amazon, channel amazon; D-104).'
+description: 'Contribution before ads (Net Sales - Net COGS) earned per rupee of ad spend. 1.00 means ads exactly pay for
+  themselves before overheads. Formula: contribution_before_ads / ad_spend. Date: mixed. GST: ex-GST. Shopify: As formula.
+  Amazon: As formula. Grain: brand_day_channel. Date axis: native (one hybrid axis, D-07). SSOT P&L view over gold.fct_ssot_pnl_daily
+  (Shopify and Amazon, channel amazon; D-104).'
 formula:
-  human_readable: 'Gross Profit earned per rupee of ad spend. 1.00 means ads exactly pay for themselves before overheads.
-    Formula: gross_profit / ad_spend. Date: mixed. GST: ex-GST. Shopify: As formula. Amazon: As formula.'
+  human_readable: 'Contribution before ads (Net Sales - Net COGS) earned per rupee of ad spend. 1.00 means ads exactly pay
+    for themselves before overheads. Formula: contribution_before_ads / ad_spend. Date: mixed. GST: ex-GST. Shopify: As formula.
+    Amazon: As formula.'
   authoritative_source: cube
   depends_on:
-  - ssot_gross_profit
+  - ssot_contribution_before_ads
   - ssot_ad_spend
 cube_mapping:
   view: ssot_pnl
