@@ -34,5 +34,5 @@ version: 1.0.0
 replaces: []
 date_axis: native
 ratio_components:
-  numerator: ssot_gross_profit
+  numerator: ssot_contribution_before_ads
   denominator: ssot_ad_spend

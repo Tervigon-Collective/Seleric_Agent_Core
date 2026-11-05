@@ -33,4 +33,4 @@ replaces: []
 date_axis: native
 ratio_components:
   numerator: ssot_gross_sales
-  denominator: ssot_gross_profit
+  denominator: ssot_contribution_before_ads
