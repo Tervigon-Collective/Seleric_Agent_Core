@@ -249,10 +249,17 @@ terms:
 - term: gross margin %
   canonical_id: contribution_margin_pct
 - term: gross profit
-  canonical_id: contribution_margin
-  definition: Bare "gross profit" defaults to brand-day P&L Gross Profit (Net Sales − Net COGS, no channel). When
-    a channel is named (google/meta/organic), use gross_profit (Gross Sales − Ad Spend − Gross COGS, the Attribution
-    Overview tile).
+  canonical_id: ssot_gross_profit
+  definition: 'Gross profit is the SSOT metric (D-194): Gross Sales - Gross COGS - Ad Spend, before returns, cancels and cost reversals.
+    Net Sales - Net COGS before ads is a different metric, contribution before ads (ssot_contribution_before_ads). Channel names
+    still use gross_profit (the Attribution Overview tile, same formula).'
+- term: contribution before ads
+  canonical_id: ssot_contribution_before_ads
+  definition: 'Net Sales - Net COGS, before ad spend (what gross profit meant before D-194). SSOT metric contribution_before_ads.'
+- term: contribution profit before ads
+  canonical_id: ssot_contribution_before_ads
+- term: profit before ads
+  canonical_id: ssot_contribution_before_ads
 - term: gross profit by channel
   canonical_id: gross_profit
 - term: channel gross profit
