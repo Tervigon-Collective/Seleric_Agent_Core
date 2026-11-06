@@ -1,4 +1,17 @@
 aliases:
+  # owner choice 2026-11-07: bare returns = the P&L Returns card; "order date" in the question overrides the preset
+  returns:
+    concept: returns_cancels
+    axes:
+      action: return
+      measure: revenue
+      date: finance
+  return revenue:
+    concept: returns_cancels
+    axes:
+      action: return
+      measure: revenue
+      date: finance
   cost per click:
     concept: cost_per
     axes:

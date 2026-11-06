@@ -123,7 +123,7 @@ terms:
 - term: shopify-only returns cancels
   canonical_id: returned_or_cancelled_orders
 - term: return revenue
-  canonical_id: return_revenue
+  canonical_id: ssot_returns_closed
 - term: return revenue by state
   canonical_id: return_revenue
 - term: return revenue by region
@@ -133,11 +133,14 @@ terms:
 - term: returns by region
   canonical_id: returned_orders
 - term: returns revenue
-  canonical_id: return_revenue
+  canonical_id: ssot_returns_closed
 - term: returns
-  canonical_id: return_revenue
-  definition: P&L Returns card = return revenue ex-GST on event date. For order counts ask for "returned orders"
-    / returned_orders. For geo/payment breakdowns use return_revenue or returned_orders with shipping_region.
+  canonical_id: ssot_returns_closed
+  definition: 'P&L Returns card (owner choice 2026-11-07): ssot_returns_closed = closed returns + completed RTO, Shopify
+    + Amazon, ex-GST, on the day the return closes (return date only). Returns counted against the ORDER date (orders placed
+    in the period) are return_revenue with date_axis=order_date: Shopify customer returns only, no RTO, no Amazon - say so.
+    Order counts: returned_orders. Geo / COD breakdowns: return_revenue or returned_orders with shipping_region. Exchanges
+    are not returns (D-01).'
 - term: revenue lost to returns
   canonical_id: return_cancel_revenue
 - term: cancelled
