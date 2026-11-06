@@ -54,6 +54,16 @@ def test_compare_previous_period():
     assert (start, end) == (date(2026, 5, 11), date(2026, 6, 9))
 
 
+@pytest.mark.parametrize("cur, prev", [
+    ((date(2026, 10, 1), date(2026, 10, 31)), (date(2026, 9, 1), date(2026, 9, 30))),
+    ((date(2026, 8, 1), date(2026, 10, 31)), (date(2026, 5, 1), date(2026, 7, 31))),
+    ((date(2026, 3, 1), date(2026, 3, 31)), (date(2026, 2, 1), date(2026, 2, 28))),
+    ((date(2026, 1, 1), date(2026, 1, 31)), (date(2025, 12, 1), date(2025, 12, 31))),
+])
+def test_compare_previous_period_of_whole_months_is_the_previous_months(cur, prev):
+    assert derive_compare_range(*cur, "previous_period") == prev
+
+
 def test_compare_previous_year():
     start, end = derive_compare_range(date(2026, 6, 1), date(2026, 6, 30), "previous_year")
     assert (start, end) == (date(2025, 6, 1), date(2025, 6, 30))
@@ -267,7 +277,7 @@ async def test_compare_period_fires_two_loads(planner, fake_cube):
     assert len(fake_cube.queries) == 2
     ranges = [q["timeDimensions"][0]["dateRange"] for q in fake_cube.queries]
     assert ["2026-06-01", "2026-06-30"] in ranges
-    assert ["2026-05-02", "2026-05-31"] in ranges
+    assert ["2026-05-01", "2026-05-31"] in ranges  # a whole month compares with the whole previous month
     assert out["compare_rows"] is not None
     assert out["provenance"]["compare_period"]["mode"] == "previous_period"
 

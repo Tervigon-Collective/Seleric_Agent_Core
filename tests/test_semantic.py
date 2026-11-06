@@ -407,3 +407,30 @@ def test_prompt_guide_names_the_server_default():
     od = with_date_axis_guide("x", 3)
     assert "Default = event_date" in ev and "Default = order_date" not in ev and "Never mix the two axes" in ev
     assert "Default = order_date" in od and "Default = event_date" not in od
+
+
+def test_hourly_falls_back_to_order_date_under_the_event_default(planner_event, cube):
+    """The event date is a DATE: hour buckets only exist on the order timestamp, so a defaulted axis answers there."""
+    cube.by_prefix["commerce"] = [{"commerce.gross_sales": "10"}]
+    out = run(planner_event, ["gross_sales"], granularity="hour")
+    assert cube.queries[0]["timeDimensions"][0]["dimension"] == "commerce.order_created_at"
+    assert out["date_axis"] == "order_date"
+    assert any("hourly" in w for w in out["warnings"])
+
+
+def test_hourly_on_an_explicit_event_date_is_refused(planner_event):
+    with pytest.raises(PlanError, match="date_axis=order_date"):
+        run(planner_event, ["gross_sales"], "event_date", granularity="hour")
+
+
+@pytest.mark.parametrize("term", ["returns", "return revenue", "returns revenue"])
+def test_bare_returns_route_to_the_pnl_returns_card(v3, term):
+    """Owner choice 2026-11-07: bare returns = the P&L Returns card (closed returns + RTO, Shopify + Amazon)."""
+    assert v3.resolve_term(term).metric_id == "ssot_returns_closed"
+
+
+def test_returns_on_the_order_date_stay_on_the_legacy_metric(v3):
+    assert v3.resolve_concept("returns", {"date": "order"}).metric_id == "return_revenue"
+    assert v3.resolve_concept("return revenue by order date").metric_id == "return_revenue"
+    assert v3.resolve_term("returned orders").metric_id == "returned_orders"
+    assert v3.resolve_term("cancels").metric_id == "cancel_revenue"

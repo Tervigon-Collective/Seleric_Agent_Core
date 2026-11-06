@@ -79,6 +79,11 @@ resolves:
 - when:
     action: return
     measure: revenue
+    date: finance
+  metric: ssot_returns_closed
+- when:
+    action: return
+    measure: revenue
   metric: return_revenue
 - when:
     action: cancel
@@ -96,7 +101,11 @@ resolves:
     action: cancel
     measure: orders
   metric: cancelled_orders
-disambiguation: 'date_axis=event_date counts a return / cancel on the day it happened (P&L); order_date counts the
+disambiguation: 'Bare "returns" / "return revenue" is the P&L Returns card (ssot_returns_closed: closed returns + completed
+  RTO, Shopify + Amazon, on the day the return closes; owner choice 2026-11-07). Returns of the orders placed in the period
+  (order date) are return_revenue: Shopify customer returns only, no RTO, no Amazon - say so in the answer.
+
+  date_axis=event_date counts a return / cancel on the day it happened (P&L); order_date counts the
   returns / cancels of the orders placed in the period (cohort). Refund amounts and lines are the refunds concept.
 
   '

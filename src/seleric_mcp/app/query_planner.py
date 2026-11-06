@@ -87,6 +87,10 @@ def resolve_time_range(tr: TimeRange, today: date | None = None) -> tuple[date, 
 
 def derive_compare_range(start: date, end: date, mode: str) -> tuple[date, date]:
     if mode == "previous_period":
+        if start.day == 1 and (end + timedelta(days=1)).day == 1:  # whole calendar months: the same number of months before
+            months = (end.year - start.year) * 12 + end.month - start.month + 1
+            y, m = divmod(start.year * 12 + start.month - 1 - months, 12)
+            return date(y, m + 1, 1), start - timedelta(days=1)
         span = (end - start).days + 1
         return start - timedelta(days=span), end - timedelta(days=span)
     if mode == "previous_year":
@@ -204,9 +208,8 @@ class QueryPlanner:
             return f"{view}.{view_def.datetime_dimension}"
         raise PlanError(
             f"Granularity '{granularity}' is not available for metric '{m.id}' "
-            f"(view '{view}' has no intraday timestamp axis). Use granularity "
-            "'day', or query an hourly-capable metric such as orders / "
-            "total_sales on commerce_orders."
+            f"on this date axis (view '{view}' has no intraday timestamp axis for it). Use date_axis=order_date "
+            "(hours of order placement) where the view has an order timestamp, or granularity 'day'."
         )
 
     # ---------- validation ----------
@@ -320,6 +323,9 @@ class QueryPlanner:
         if default == "event_date" and asked is None and not alias_axes and cohort:
             default = "order_date"  # a cohort measure has no event-date meaning: answer the whole query on order_date
             defaulted_note.append(f"'{cohort[0].id}' is a cohort measure (no event-date meaning), so this query is on order_date.")
+        if default == "event_date" and asked is None and not alias_axes and request.granularity in SUBDAILY_GRANULARITIES:
+            default = "order_date"  # the event date is a DATE: hour buckets exist only on the order timestamp
+            defaulted_note.append("hourly buckets need the order timestamp, so this query is on order_date (orders placed in each hour).")
         if "event_date" in alias_axes and plain and asked is None and default != "event_date":
             raise PlanError(
                 f"'{plain[0].id}' (order-date by default) and the event-date id "
