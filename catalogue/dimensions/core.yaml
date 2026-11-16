@@ -1904,7 +1904,7 @@ dimensions:
   aliases: []
 - id: sub_channel
   display_name: Sub Channel
-  description: Detail within the channel (ad surface, or medium / source).
+  description: Detail within the channel (ad surface, or medium / source). On the SSOT P&L (ssot_pnl) it is 'exchange' for replacement orders, which are credited to the channel of their parent order (channel meta + sub_channel exchange = Meta - exchange), and blank otherwise.
   is_time: false
   views:
     commerce: commerce.sub_channel
@@ -1918,6 +1918,7 @@ dimensions:
     returns: returns.sub_channel
     payments: payments.sub_channel
     finance: finance.sub_channel
+    ssot_pnl: ssot_pnl.sub_channel
   aliases: []
 - id: touch_count
   display_name: Touch Count

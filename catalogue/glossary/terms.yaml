@@ -1166,3 +1166,12 @@ terms:
   canonical_id: sessions
 - term: visits
   canonical_id: sessions
+- term: exchange orders
+  canonical_id: ssot_orders
+  definition: 'Replacement (exchange) orders are the SSOT P&L rows with sub_channel = exchange (D-232); each sits under the channel of its parent order. Filter sub_channel = exchange on ssot_pnl; for one parent add channel (meta, google, ...).'
+- term: meta exchange
+  canonical_id: ssot_orders
+  definition: 'Meta - exchange: replacement orders whose parent order came from Meta (D-232): ssot_pnl with channel = meta and sub_channel = exchange. Any SSOT P&L metric can be sliced the same way; exchange orders carry no ad spend.'
+- term: google exchange
+  canonical_id: ssot_orders
+  definition: 'Google - exchange: replacement orders whose parent order came from Google (D-232): ssot_pnl with channel = google and sub_channel = exchange. Any SSOT P&L metric can be sliced the same way; exchange orders carry no ad spend.'

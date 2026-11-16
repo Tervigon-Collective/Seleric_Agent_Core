@@ -264,5 +264,5 @@ views:
     expected_cadence: after each conformed_gold run (hourly), IST
   description: 'SSOT P&L by day x channel (Shopify): gross and net sales, every cost line, net COGS, gross and net profit,
     ad spend, ROAS, AOV, cost per order and the rates. ONE hybrid date axis (D-07): order date for sales and costs, event date
-    for closed returns and cancels, delivery date for ads. Exchange is its own channel; Amazon is not included. These are the
+    for closed returns and cancels, delivery date for ads. Exchange replacements sit under the channel of their parent order with sub_channel = exchange (D-232), so Meta - exchange is channel meta + sub_channel exchange and a channel total includes its exchange; Amazon is not included. These are the
     SSOT numbers (D-83), not the ledger numbers of the finance view.'
