@@ -1,6 +1,7 @@
 """Tests for the Meta Ads management layer (ads/meta/, ads/envelope, ads/idempotency)."""
 
 import dataclasses
+import json
 import types
 
 import httpx
@@ -328,6 +329,11 @@ class _FakeMeta:
         self.posts.append((path, params))
         return {"id": "900001", "success": True}
 
+    async def paginate(self, path, params, **_):
+        self.gets.append((path, params))
+        return {"data": [{"spend": "12.5", "hourly_stats_aggregated_by_advertiser_time_zone": "11:00:00 - 11:59:59"}],
+                "after": None, "has_next": False}
+
 
 class _FakeCreds:
     def __init__(self, brand_id):
@@ -402,6 +408,29 @@ async def test_other_brand_write_refused_read_allowed(db):
     assert res["error"]["code"] == "POLICY_RESTRICTION" and res["error"]["field"] == "brand_id"
     read = await tool("meta_campaigns_get")(campaign_id="1234567", brand_id="28")
     assert read["success"] is True
+
+
+async def test_insights_live_reads_graph_with_encoded_params(db):
+    ctx, tool = _tools(db, brand=28)  # reads are not brand-gated
+    res = await tool("meta_insights_live")(
+        object_id="120251505337270783", brand_id="28", hourly=True,
+        time_range={"since": "2026-11-18", "until": "2026-11-18"},
+        filtering=[{"field": "ad.effective_status", "operator": "IN", "value": ["ACTIVE"]}],
+    )
+    assert res["success"] and res["data"][0]["spend"] == "12.5" and "live" in res["source"]
+    path, params = ctx.meta_ads.gets[-1]
+    assert path == "120251505337270783/insights"
+    assert params["breakdowns"] == "hourly_stats_aggregated_by_advertiser_time_zone"
+    assert json.loads(params["time_range"]) == {"since": "2026-11-18", "until": "2026-11-18"}
+    assert "date_preset" not in params and "spend" in params["fields"].split(",")
+    assert json.loads(params["filtering"])[0]["value"] == ["ACTIVE"]
+
+
+async def test_insights_live_needs_read_scope(db):
+    ctx, tool = _tools(db)
+    ctx.settings.caller_scopes = frozenset({"metrics:read"})
+    res = await tool("meta_insights_live")(object_id="act_1", brand_id="20")
+    assert res["error"]["code"] == "PERMISSION_DENIED" and ctx.meta_ads.gets == []
 
 
 # ----------------------------------------------------- per-request scopes

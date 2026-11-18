@@ -131,7 +131,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "meta_ads_list", "meta_ads_get", "meta_ads_create", "meta_ads_set_status",
         "meta_assets_upload_image", "meta_assets_upload_video",
         "meta_creatives_create_image", "meta_creatives_create_video", "meta_creatives_preview",
-        "meta_insights_query",
+        "meta_insights_query", "meta_insights_live",
     }
     google_ads = {
         "google_accounts_list_accessible", "google_query_gaql",

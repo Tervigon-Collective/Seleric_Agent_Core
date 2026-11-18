@@ -18,6 +18,8 @@ Graph API call; tokens are never part of the idempotency payload or logs.
 # (see the same note atop gateway/server.py). Python 3.12 evaluates the
 # `str | None` / `list[str]` hints below fine without it.
 
+import json
+import time
 from typing import TYPE_CHECKING
 
 import httpx
@@ -41,13 +43,23 @@ logger = structlog.get_logger()
 _ACCOUNT_FIELDS = "id,account_id,name,account_status,currency,timezone_name,amount_spent,balance"
 _CAMPAIGN_FIELDS = (
     "id,name,status,objective,buying_type,daily_budget,lifetime_budget,"
-    "bid_strategy,special_ad_categories,created_time,updated_time"
+    "bid_strategy,special_ad_categories,created_time,updated_time,effective_status,"
+    "start_time,stop_time"
 )
 _ADSET_FIELDS = (
     "id,name,status,campaign_id,billing_event,optimization_goal,daily_budget,"
-    "lifetime_budget,bid_strategy,bid_amount,targeting,start_time,end_time"
+    "lifetime_budget,bid_strategy,bid_amount,targeting,start_time,end_time,effective_status"
 )
-_AD_FIELDS = "id,name,status,adset_id,campaign_id,creative,created_time,updated_time"
+_AD_FIELDS = (
+    "id,name,status,effective_status,adset_id,campaign_id,creative,created_time,"
+    "updated_time,ad_review_feedback,issues_info"
+)
+# Default metrics for meta_insights_live (Graph Insights API names).
+_LIVE_INSIGHT_FIELDS = (
+    "spend", "impressions", "reach", "frequency", "clicks", "inline_link_clicks", "ctr",
+    "cpc", "cpm", "actions", "action_values", "purchase_roas",
+)
+_HOURLY_BREAKDOWN = "hourly_stats_aggregated_by_advertiser_time_zone"
 # Live state read before every write (preview + guardrails).
 _LIVE_FIELDS = "id,name,status,daily_budget,lifetime_budget"
 _AD_LIVE_FIELDS = "id,name,status"
@@ -171,7 +183,7 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             cred = await _cred(account_id=account_id)
             params: dict = {"fields": _CAMPAIGN_FIELDS}
             if status:
-                params["effective_status"] = status
+                params["effective_status"] = json.dumps(status)
             page = await ctx.meta_ads.paginate(
                 f"{account_id}/campaigns", params,
                 access_token=cred.access_token, api_version=cred.api_version,
@@ -981,4 +993,65 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         return await run_meta_insights(
             ctx, account_id=account_id, level=level, fields=fields, time_range=time_range,
             filters=filters, granularity=granularity, breakdowns=breakdowns, limit=limit,
+        )
+
+    @mcp.tool()
+    async def meta_insights_live(
+        object_id: str,
+        brand_id: str | None = None,
+        account_id: str | None = None,
+        level: str | None = None,
+        fields: list[str] | None = None,
+        date_preset: str = "today",
+        time_range: dict | None = None,
+        time_increment: str | None = None,
+        hourly: bool = False,
+        breakdowns: list[str] | None = None,
+        filtering: list[dict] | None = None,
+        limit: int = 100,
+        after: str | None = None,
+    ) -> dict:
+        """meta.insights.live — real-time Meta performance straight from the Graph
+        Insights API (GET /{object_id}/insights), minutes behind Meta rather than
+        the Cube warehouse lag. Use it to monitor live delivery (spend pacing,
+        impressions, clicks, purchases) of an account (act_...), campaign, ad set
+        or ad. NOT the certified number: Meta revises recent figures and
+        attribution; use meta_insights_query / metrics_query for reporting.
+        level breaks an account/campaign down (campaign|adset|ad). date_preset
+        (today, yesterday, last_3d, last_7d, ...) unless time_range
+        {"since","until"} (YYYY-MM-DD, account time zone). hourly=true adds the
+        hour-of-day breakdown (account time zone). time_increment "1" = one row
+        per day. filtering is Meta's filter list, e.g. [{"field":
+        "ad.effective_status","operator":"IN","value":["ACTIVE"]}]. Select the
+        tenant credential with brand_id or account_id. Read-only."""
+        log_call("meta_insights_live", object_id=object_id, level=level)
+        params: dict = {"fields": ",".join(fields or _LIVE_INSIGHT_FIELDS)}
+        if time_range:
+            params["time_range"] = json.dumps(time_range)
+        else:
+            params["date_preset"] = date_preset
+        if level:
+            params["level"] = level
+        if time_increment:
+            params["time_increment"] = time_increment
+        crumbs = list(breakdowns or []) + ([_HOURLY_BREAKDOWN] if hourly else [])
+        if crumbs:
+            params["breakdowns"] = ",".join(crumbs)
+        if filtering:
+            params["filtering"] = json.dumps(filtering)
+
+        async def action() -> dict:
+            cred = await _cred(account_id=account_id, brand_id=brand_id)
+            page = await ctx.meta_ads.paginate(
+                f"{object_id}/insights", params,
+                access_token=cred.access_token, api_version=cred.api_version,
+                limit=limit, after=after,
+            )
+            out = _list_result("insights.live", page)
+            out["source"] = "meta_graph_insights_api (live, not certified)"
+            out["as_of"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            return out
+
+        return await env.execute_read(
+            ctx, "meta_insights_live", "insights.live", account_id=account_id, action=action
         )
