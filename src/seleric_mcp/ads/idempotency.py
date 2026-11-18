@@ -1,7 +1,7 @@
 """Client-supplied-key idempotency + operation logging for the Ads write tools.
 
-Blueprint §13 (idempotency) and §16 (operation log). Distinct from the broker's
-``IdempotencyStore`` (``actions/stores.py``), which keys on a server-derived
+Blueprint §13 (idempotency) and §16 (operation log). Distinct from the removed broker's
+IdempotencyStore, which keyed on a server-derived
 ``{action_id}:{payload_hash}``. Here the key is the caller's ``idempotency_key``
 scoped per tool, and the full prior result is stored so a replay returns it
 verbatim.
@@ -13,7 +13,7 @@ import json
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from ..actions.tokens import payload_hash
+from .approval import payload_hash
 from ..storage.db import Database, utcnow_iso
 
 DEFAULT_ADS_IDEMPOTENCY_WINDOW = timedelta(hours=24)

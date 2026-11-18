@@ -3,7 +3,7 @@
 Each model is the second validation layer (after FastMCP's own annotation
 checks) and the single place that maps validated fields to Graph API request
 params. Complex fields (lists/dicts) are JSON-encoded as the Graph API expects
-for form params. Mirrors the style of ``actions/contracts.py``.
+for form params. Status rules: creates are PAUSED only, no write may set DELETED.
 """
 
 from __future__ import annotations
@@ -16,6 +16,10 @@ from pydantic import BaseModel, Field, model_validator
 # ---- shared enums ----
 
 Status = Literal["ACTIVE", "PAUSED", "ARCHIVED", "DELETED"]
+# Owner guardrails: no write may delete (archive instead); a create is always
+# PAUSED and activation is its own approved set_status call.
+WriteStatus = Literal["ACTIVE", "PAUSED", "ARCHIVED"]
+CreateStatus = Literal["PAUSED"]
 Objective = Literal[
     "OUTCOME_SALES", "OUTCOME_LEADS", "OUTCOME_ENGAGEMENT",
     "OUTCOME_AWARENESS", "OUTCOME_TRAFFIC", "OUTCOME_APP_PROMOTION",
@@ -65,7 +69,7 @@ class MetaCampaignCreate(BaseModel):
     account_id: str = Field(pattern=_ACCOUNT_ID)
     name: str = Field(min_length=1, max_length=400)
     objective: Objective
-    status: Status = "PAUSED"
+    status: CreateStatus = "PAUSED"
     special_ad_categories: list[str] = Field(default_factory=list)
     buying_type: BuyingType = "AUCTION"
     daily_budget: int | None = Field(default=None, gt=0)
@@ -119,7 +123,7 @@ class MetaAdsetCreate(BaseModel):
     account_id: str = Field(pattern=_ACCOUNT_ID)
     campaign_id: str = Field(pattern=_ID)
     name: str = Field(min_length=1, max_length=400)
-    status: Status = "PAUSED"
+    status: CreateStatus = "PAUSED"
     billing_event: BillingEvent = "IMPRESSIONS"
     optimization_goal: OptimizationGoal
     daily_budget: int | None = Field(default=None, gt=0)
@@ -196,7 +200,7 @@ class MetaAdCreate(BaseModel):
     adset_id: str = Field(pattern=_ID)
     name: str = Field(min_length=1, max_length=400)
     creative_id: str = Field(pattern=_ID)
-    status: Status = "PAUSED"
+    status: CreateStatus = "PAUSED"
     tracking_specs: list[dict] | None = None
     url_tags: str | None = None
 
@@ -215,7 +219,7 @@ class MetaSetStatus(BaseModel):
     """Shared status mutation for campaign/adset/ad."""
 
     entity_id: str = Field(pattern=_ID)
-    status: Status
+    status: WriteStatus
 
     def to_params(self) -> dict:
         return {"status": self.status}

@@ -100,7 +100,7 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
     example in this test file without anything else catching it."""
     mcp, ctx = built_server
     names = {t.name for t in mcp._tool_manager.list_tools()}
-    analytics_and_actions = {
+    analytics_tools = {
         "catalogue_search_metrics",
         "catalogue_list_metrics",
         "catalogue_bootstrap",
@@ -121,10 +121,6 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "metrics_drilldown",
         "semantic_sql",
         "insights_explain",
-        "actions_list_available",
-        "actions_propose",
-        "actions_commit",
-        "actions_status",
     }
     meta_ads = {
         "meta_accounts_list", "meta_accounts_get",
@@ -143,14 +139,14 @@ async def test_all_registered_tools_are_the_expected_set(built_server):
         "google_budgets_create", "google_campaigns_create",
     }
     # Ads management tools are third-party APIs, off by default.
-    assert names == analytics_and_actions
+    assert names == analytics_tools
     assert not names & (meta_ads | google_ads)
 
     import dataclasses
 
     enabled = build_server(dataclasses.replace(ctx.settings, ads_tools_enabled=True))
     enabled_names = {t.name for t in enabled._tool_manager.list_tools()}
-    assert enabled_names == analytics_and_actions | meta_ads | google_ads
+    assert enabled_names == analytics_tools | meta_ads | google_ads
 
 
 # ---------- access_policy.scopes enforcement (was declared, never checked) ----------
@@ -171,8 +167,6 @@ def built_server_no_scopes(fake_cube, result_store, tmp_path):
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",
-        pipeboard_mcp_url="http://pipeboard.test",
-        pipeboard_token="pb-token",
         write_enabled=False,
         mcp_service_token="svc-token",
         approval_secret="approval-secret",
@@ -600,8 +594,6 @@ def _pinned_settings(tmp_path, module):
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",
-        pipeboard_mcp_url="http://pipeboard.test",
-        pipeboard_token="pb-token",
         write_enabled=False,
         mcp_service_token="svc-token",
         approval_secret="approval-secret",

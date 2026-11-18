@@ -115,8 +115,6 @@ class Settings:
     cube_api_url: str
     seleric_api_key: str
     cubejs_api_secret: str
-    pipeboard_mcp_url: str
-    pipeboard_token: str
     write_enabled: bool
     mcp_service_token: str
     approval_secret: str
@@ -136,7 +134,7 @@ class Settings:
     module: str = ""
     # Third-party Meta/Google Ads management tools (ads/meta, ads/google) sit
     # outside the certified Cube serve views. Off unless explicitly enabled, so
-    # the default surface is catalogue + metrics_query + actions only.
+    # the default surface is catalogue + metrics_query only.
     # Env override: SELERIC_MCP_ADS_TOOLS=true.
     ads_tools_enabled: bool = False
     # Serve-database scope gate. When set, only metrics whose view reads
@@ -192,7 +190,12 @@ class Settings:
     meta_app_secret: str = ""
     meta_api_version: str = "v21.0"
     meta_graph_base_url: str = "https://graph.facebook.com"
-    meta_max_budget_minor: int = 0
+    # Hard daily-budget cap in paise (₹1,000/day); lifetime cap is 30x.
+    meta_max_budget_minor: int = 100000
+    # Brands whose Meta accounts may be written (env META_WRITE_BRANDS, comma list).
+    meta_write_brands: frozenset[str] = frozenset({"20"})
+    # created_only: writes only on entities created via meta_* tools; all: any entity.
+    meta_write_targets: str = "created_only"
     meta_http_timeout_seconds: float = 30.0
     meta_max_retries: int = 2
     # Resolved Meta credentials cache TTL (seconds) to avoid a DB hit per call.
@@ -272,7 +275,6 @@ def load_settings(config_path: Path | None = None) -> Settings:
     _load_env()
     cfg = _load_yaml_config(config_path or CONFIG_PATH)
     cube = _section(cfg, "cube")
-    pipeboard = _section(cfg, "pipeboard")
     meta = _section(cfg, "meta")
     meta_write_policies = _section(meta, "write_policies")
     google = _section(cfg, "google")
@@ -352,13 +354,6 @@ def load_settings(config_path: Path | None = None) -> Settings:
         ).rstrip("/"),
         seleric_api_key=_env_str("SELERIC_API_KEY"),
         cubejs_api_secret=_env_str("CUBEJS_API_SECRET"),
-        pipeboard_mcp_url=str(
-            _env_or(
-                "PIPEBOARD_MCP_URL",
-                _cfg_get(pipeboard, "mcp_url", "https://meta-ads.mcp.pipeboard.co"),
-            )
-        ).rstrip("/"),
-        pipeboard_token=_env_str("PIPEBOARD_TOKEN"),
         meta_access_token=_env_str("META_ACCESS_TOKEN"),
         meta_app_secret=_env_str("META_APP_SECRET"),
         meta_api_version=str(
@@ -373,9 +368,24 @@ def load_settings(config_path: Path | None = None) -> Settings:
         meta_max_budget_minor=_as_int(
             _env_or(
                 "META_MAX_BUDGET_MINOR",
-                _cfg_get(meta_write_policies, "maximum_budget_minor", 0),
+                _cfg_get(meta_write_policies, "maximum_budget_minor", 100000),
             ),
-            0,
+            100000,
+        ),
+        meta_write_brands=frozenset(
+            b.strip()
+            for b in str(
+                _env_or("META_WRITE_BRANDS", _cfg_get(meta_write_policies, "write_brands", "20"))
+            ).split(",")
+            if b.strip()
+        ),
+        # Anything but an explicit "all" stays created_only (fail closed).
+        meta_write_targets=(
+            "all"
+            if str(
+                _env_or("META_WRITE_TARGETS", _cfg_get(meta_write_policies, "write_targets", ""))
+            ).strip().lower() == "all"
+            else "created_only"
         ),
         meta_http_timeout_seconds=_as_float(
             _env_or("META_HTTP_TIMEOUT_S", _cfg_get(meta, "http_timeout_seconds", 30.0)),

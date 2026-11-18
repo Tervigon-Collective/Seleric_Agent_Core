@@ -13,7 +13,7 @@ Local OM: **http://127.0.0.1:8585** (OpenMetadata 1.13.1). Governance specs live
 | Metric values, filters, time series | Cube → Seleric MCP |
 | Owners, tier, release status, glossary | OpenMetadata MCP |
 | Lineage, contracts, DQ health | OpenMetadata MCP |
-| Write actions (ads, etc.) | Seleric MCP / Pipeboard |
+| Write actions (ads, etc.) | Seleric MCP `meta_*` tools (two-step approval) |
 
 Never compute business metrics from OpenMetadata. OM metric descriptions are
 formulas for governance only — Cube executes.

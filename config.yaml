@@ -6,9 +6,6 @@ cube:
   # 127.0.0.1:4003 (in compose the MCP uses http://cube-v3:4000 via CUBE_API_URL).
   api_url: http://127.0.0.1:4003
 
-pipeboard:
-  mcp_url: https://meta-ads.mcp.pipeboard.co
-
 # Meta Marketing Graph API — backend for the granular Meta Ads management tools
 # (src/seleric_mcp/ads/meta/). Access token / app secret stay in .env.
 meta:
@@ -17,9 +14,17 @@ meta:
   http_timeout_seconds: 30
   max_retries: 2
   write_policies:
-    # Hard cap (minor currency units) rejected by meta_campaigns/adsets_update_budget.
-    # 0 = unlimited (blueprint §12).
-    maximum_budget_minor: 0
+    # Owner guardrails (2026-11-18). Every Meta write also needs a confirmation
+    # token from its own preview (two-step approval, ads/approval.py).
+    # Daily cap in paise (100000 = ₹1,000/day); lifetime cap = 30x. A raise may
+    # be at most +10 % over the live budget; cuts are always allowed. 0 = refuse
+    # every budget. Env: META_MAX_BUDGET_MINOR.
+    maximum_budget_minor: 100000
+    # Brands whose Meta accounts may be written. Env: META_WRITE_BRANDS.
+    write_brands: "20"
+    # created_only = only entities created via the meta_* tools; all = any
+    # entity (still approval-gated). Env: META_WRITE_TARGETS.
+    write_targets: created_only
   # Cache TTL for resolved brand_envs credentials (seconds).
   cred_cache_ttl_seconds: 300
 
@@ -53,9 +58,9 @@ gateway:
   # Scopes granted to the caller
   scopes:
     - metrics:read
-    - meta_ads:write:status
     # Granular Meta Ads management tools (ads/meta/): read = entity list/get +
-    # insights; write = mutations (also gated by write_enabled above).
+    # insights; write = mutations (also gated by write_enabled above and
+    # by the two-step approval token). OAuth (JWT) callers never get :write.
     - meta_ads:read
     - meta_ads:write
     # Granular Google Ads management tools (ads/google/).

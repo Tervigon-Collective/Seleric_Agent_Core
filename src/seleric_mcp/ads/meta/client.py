@@ -1,7 +1,7 @@
 """Async client for the Meta Marketing Graph API.
 
-Self-contained httpx wrapper (there is no shared HTTP layer to reuse; modelled
-on ``actions/executors/pipeboard.py``). Handles auth (access token +
+Self-contained httpx wrapper (there is no shared HTTP layer to reuse).
+Handles auth (access token +
 optional appsecret_proof), GET/POST/multipart, cursor pagination, retry/backoff
 for Meta rate-limit codes, and Meta-error -> ``MetaApiError`` normalisation.
 

@@ -7,7 +7,6 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from seleric_mcp.actions.stores import ActionStore, IdempotencyStore
 from seleric_mcp.app.result_store import ResultStore
 from seleric_mcp.catalogue_service.loader import load_catalogue
 from seleric_mcp.catalogue_service.service import CatalogueService
@@ -40,12 +39,10 @@ def settings(tmp_path):
         cube_api_url="http://cube.test",
         seleric_api_key="test-key",
         cubejs_api_secret="",
-        pipeboard_mcp_url="http://pipeboard.test",
-        pipeboard_token="pb-token",
         write_enabled=False,
         mcp_service_token="svc-token",
-        approval_secret="approval-secret",
-        caller_scopes=frozenset({"metrics:read", "meta_ads:write:status"}),
+        approval_secret="approval-secret-for-tests-0123456789",
+        caller_scopes=frozenset({"metrics:read", "meta_ads:read"}),
         db_path=tmp_path / "test.db",
     )
 
@@ -78,44 +75,14 @@ class FakeCube:
         return {"cubes": []}
 
 
-class FakeExecutor:
-    def __init__(self):
-        self.executed: list[tuple[str, dict]] = []
-        self.fail = False
-
-    async def preview_state(self, action_type: str, payload: dict):
-        return None
-
-    async def execute(self, action_type: str, payload: dict) -> dict:
-        if self.fail:
-            raise RuntimeError("executor boom")
-        self.executed.append((action_type, payload))
-        return {"success": True, "ad_id": payload.get("ad_id"), "status": "PAUSED"}
-
-
 @pytest.fixture()
 def fake_cube():
     return FakeCube()
 
 
 @pytest.fixture()
-def fake_executor():
-    return FakeExecutor()
-
-
-@pytest.fixture()
 def result_store(db):
     return ResultStore(db)
-
-
-@pytest.fixture()
-def action_store(db):
-    return ActionStore(db)
-
-
-@pytest.fixture()
-def idempotency(db):
-    return IdempotencyStore(db)
 
 
 @pytest.fixture()

@@ -4,12 +4,15 @@ import dataclasses
 import types
 
 import httpx
+import pydantic
 import pytest
 
-from seleric_mcp.actions.tokens import payload_hash
+from seleric_mcp.ads.approval import ActionStore, payload_hash
 from seleric_mcp.ads import envelope as env
 from seleric_mcp.ads.idempotency import AdsIdempotencyStore, OperationLog
+from seleric_mcp.ads.meta import policy
 from seleric_mcp.ads.meta.client import MetaAdsClient, MetaApiError
+from seleric_mcp.ads.meta.credentials import MetaCredential
 from seleric_mcp.ads.meta.insights import run_meta_insights
 from seleric_mcp.observability.audit import AuditLog
 
@@ -62,11 +65,18 @@ def test_idempotency_hit_miss_conflict(db):
 
 # ---------------------------------------------------------- write-guard wrapper
 
-def _fake_ctx(db, *, scopes, write_enabled=True, max_budget=0):
+SECRET = "approval-secret-for-tests-0123456789"
+
+
+def _fake_ctx(db, *, scopes, write_enabled=True, max_budget=100_000,
+              brands=("20",), targets="created_only", secret=SECRET):
     settings = types.SimpleNamespace(
         caller_scopes=frozenset(scopes),
         write_enabled=write_enabled,
         meta_max_budget_minor=max_budget,
+        meta_write_brands=frozenset(brands),
+        meta_write_targets=targets,
+        approval_secret=secret,
         meta_http_timeout_seconds=30.0,
     )
     return types.SimpleNamespace(
@@ -74,8 +84,23 @@ def _fake_ctx(db, *, scopes, write_enabled=True, max_budget=0):
         ads_ops=OperationLog(db),
         ads_idempotency=AdsIdempotencyStore(db),
         audit=AuditLog(db),
+        approvals=ActionStore(db),
+        meta_owned=policy.OwnedEntities(db),
         actor="test-actor",
     )
+
+
+async def _approved(ctx, **kw):
+    """Preview (mints a token), then the same call with the token."""
+    first = await env.execute_write(ctx, **kw)
+    assert first["status"] == "APPROVAL_REQUIRED", first
+    return first, await env.execute_write(ctx, confirmation_token=first["confirmation_token"], **kw)
+
+
+def _w(action, payload=None, **kw):
+    return dict(tool_name="meta_campaigns_create", operation="campaigns.create",
+                payload=payload or {"x": 1}, idempotency_key=None, validate_only=False,
+                action=action, **kw)
 
 
 async def test_write_requires_scope(db):
@@ -87,43 +112,85 @@ async def test_write_requires_scope(db):
         called = True
         return env.ok("campaigns.create")
 
-    res = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload={"x": 1}, idempotency_key=None, validate_only=False, action=action,
-    )
+    res = await env.execute_write(ctx, **_w(action))
     assert res["error"]["code"] == "PERMISSION_DENIED"
     assert called is False
 
 
-async def test_write_kill_switch(db):
-    ctx = _fake_ctx(db, scopes={"meta_ads:write"}, write_enabled=False)
+async def test_write_without_token_previews_only(db):
+    ctx = _fake_ctx(db, scopes={"meta_ads:write"})
+    called = False
+
+    async def action():
+        nonlocal called
+        called = True
+        return env.ok("campaigns.create")
+
+    res = await env.execute_write(ctx, **_w(action))
+    assert res["approval_required"] is True and res["success"] is False
+    assert res["confirmation_token"] and res["expires_at"]
+    assert res["preview"]["change"] == {"x": 1}
+    assert called is False
+    assert ctx.approvals.get(res["approval_id"])["status"] == "PENDING"
+
+
+async def test_token_executes_once_then_rejected(db):
+    ctx = _fake_ctx(db, scopes={"meta_ads:write"})
+    calls = 0
+
+    async def action():
+        nonlocal calls
+        calls += 1
+        return env.ok("campaigns.create", entity={"type": "campaign", "id": "77"})
+
+    first, done = await _approved(ctx, **_w(action))
+    assert done["success"] and calls == 1
+    assert ctx.approvals.get(first["approval_id"])["status"] == "EXECUTED"
+    again = await env.execute_write(ctx, confirmation_token=first["confirmation_token"], **_w(action))
+    assert again["error"]["code"] == "APPROVAL_INVALID" and calls == 1
+
+
+async def test_token_bound_to_arguments_and_tool(db):
+    ctx = _fake_ctx(db, scopes={"meta_ads:write"})
 
     async def action():
         return env.ok("campaigns.create")
 
-    res = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload={"x": 1}, idempotency_key=None, validate_only=False, action=action,
-    )
-    assert res["error"]["code"] == "POLICY_RESTRICTION"
+    first = await env.execute_write(ctx, **_w(action, {"x": 1}))
+    tok = first["confirmation_token"]
+    changed = await env.execute_write(ctx, confirmation_token=tok, **_w(action, {"x": 2}))
+    assert changed["error"]["code"] == "APPROVAL_INVALID"
+    kw = _w(action, {"x": 1}) | {"tool_name": "meta_ads_create"}
+    other_tool = await env.execute_write(ctx, confirmation_token=tok, **kw)
+    assert other_tool["error"]["code"] == "APPROVAL_INVALID"
+    forged = await env.execute_write(ctx, confirmation_token=tok[:-2] + "xx", **_w(action, {"x": 1}))
+    assert forged["error"]["code"] == "APPROVAL_INVALID"
 
 
-async def test_write_budget_policy(db):
-    ctx = _fake_ctx(db, scopes={"meta_ads:write"}, max_budget=10_000)
+async def test_token_expired(db, monkeypatch):
+    ctx = _fake_ctx(db, scopes={"meta_ads:write"})
 
     async def action():
-        return env.ok("campaigns.update_budget")
+        return env.ok("campaigns.create")
 
-    res = await env.execute_write(
-        ctx, "meta_campaigns_update_budget", "campaigns.update_budget",
-        payload={"daily_budget": 50_000}, idempotency_key=None, validate_only=False,
-        budget_minor=50_000, action=action,
-    )
+    first = await env.execute_write(ctx, **_w(action))
+    real = env.time.time
+    monkeypatch.setattr(env.time, "time", lambda: real() + env.APPROVAL_TTL_SECONDS + 5)
+    res = await env.execute_write(ctx, confirmation_token=first["confirmation_token"], **_w(action))
+    assert res["error"]["code"] == "APPROVAL_EXPIRED"
+
+
+async def test_short_secret_refuses_writes(db):
+    ctx = _fake_ctx(db, scopes={"meta_ads:write"}, secret="change-me")
+
+    async def action():
+        return env.ok("campaigns.create")
+
+    res = await env.execute_write(ctx, **_w(action))
     assert res["error"]["code"] == "POLICY_RESTRICTION"
-    assert res["error"]["field"] == "budget"
 
 
-async def test_write_validate_only_no_mutation(db):
+async def test_write_kill_switch_keeps_token(db):
     ctx = _fake_ctx(db, scopes={"meta_ads:write"}, write_enabled=False)
     called = False
 
@@ -132,11 +199,24 @@ async def test_write_validate_only_no_mutation(db):
         called = True
         return env.ok("campaigns.create")
 
-    res = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload={"x": 1}, idempotency_key=None, validate_only=True, action=action,
-    )
+    first, res = await _approved(ctx, **_w(action))
+    assert res["error"]["code"] == "POLICY_RESTRICTION" and called is False
+    # the kill switch did not burn the token
+    assert ctx.approvals.get(first["approval_id"])["token_consumed_at"] is None
+
+
+async def test_write_validate_only_no_mutation_no_token(db):
+    ctx = _fake_ctx(db, scopes={"meta_ads:write"}, write_enabled=False)
+    called = False
+
+    async def action():
+        nonlocal called
+        called = True
+        return env.ok("campaigns.create")
+
+    res = await env.execute_write(ctx, **(_w(action) | {"validate_only": True}))
     assert res["success"] and res.get("validated") is True
+    assert "confirmation_token" not in res
     assert called is False  # never hit the platform
 
 
@@ -149,23 +229,15 @@ async def test_write_idempotency_replay_and_conflict(db):
         calls += 1
         return env.ok("campaigns.create", entity={"type": "campaign", "id": "77"})
 
-    payload = {"name": "A"}
-    first = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload=payload, idempotency_key="key1", validate_only=False, action=action,
-    )
-    second = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload=payload, idempotency_key="key1", validate_only=False, action=action,
-    )
+    kw = _w(action, {"name": "A"}) | {"idempotency_key": "key1"}
+    first_preview, first = await _approved(ctx, **kw)
+    # a network retry with the same (now consumed) token replays the result
+    second = await env.execute_write(ctx, confirmation_token=first_preview["confirmation_token"], **kw)
     assert first["entity"]["id"] == "77"
     assert second == first  # replayed verbatim
     assert calls == 1  # action ran only once
 
-    conflict = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload={"name": "B"}, idempotency_key="key1", validate_only=False, action=action,
-    )
+    _, conflict = await _approved(ctx, **(kw | {"payload": {"name": "B"}}))
     assert conflict["error"]["code"] == "IDEMPOTENCY_CONFLICT"
 
 
@@ -175,15 +247,199 @@ async def test_write_meta_error_not_stored(db):
     async def action():
         raise MetaApiError("bad arg", code=100, http_status=400)
 
-    res = await env.execute_write(
-        ctx, "meta_campaigns_create", "campaigns.create",
-        payload={"x": 1}, idempotency_key="k9", validate_only=False, action=action,
-    )
+    first, res = await _approved(ctx, **(_w(action) | {"idempotency_key": "k9"}))
     assert res["error"]["code"] == "INVALID_ARGUMENT"
+    assert ctx.approvals.get(first["approval_id"])["status"] == "FAILED"
     # failed writes must not register the idempotency key (retry stays allowed)
     assert ctx.ads_idempotency.lookup(
         "meta_campaigns_create", "k9", payload_hash({"x": 1})
     ).status == "MISS"
+
+
+async def test_google_write_path_unchanged(db):
+    ctx = _fake_ctx(db, scopes={"google_ads:write"})
+
+    async def action():
+        return env.ok("campaigns.set_status", platform="google")
+
+    res = await env.execute_write(
+        ctx, "google_campaigns_set_status", "campaigns.set_status",
+        payload={"x": 1}, idempotency_key=None, validate_only=False,
+        platform="google", write_scope="google_ads:write", budget_cap=0, action=action,
+    )
+    assert res["success"] is True and "confirmation_token" not in res
+
+
+# ------------------------------------------------------------- guardrails
+
+@pytest.mark.parametrize(
+    "payload, current, ok_",
+    [
+        ({"daily_budget": 100_000}, None, True),  # create at the cap
+        ({"daily_budget": 100_001}, None, False),  # create above the cap
+        ({"lifetime_budget": 3_000_000}, None, True),  # lifetime cap = 30x
+        ({"lifetime_budget": 3_000_001}, None, False),
+        ({"daily_budget": 1_200_000}, {"daily_budget": "1500000"}, True),  # cut above cap
+        ({"daily_budget": 1100}, {"daily_budget": "1000"}, True),  # +10 %
+        ({"daily_budget": 1101}, {"daily_budget": "1000"}, False),  # > +10 %
+        ({"daily_budget": 99_000}, {"daily_budget": "95000"}, True),
+        ({"daily_budget": 104_000}, {"daily_budget": "95000"}, False),  # +9.5 % but over cap
+        ({"daily_budget": 1000}, {"lifetime_budget": "5000"}, False),  # live daily unknown
+        ({"daily_budget": 1000}, {}, False),  # live unreadable
+        ({"name": "x"}, {"daily_budget": "1000"}, True),  # not a budget change
+    ],
+)
+def test_budget_rules(payload, current, ok_):
+    if ok_:
+        policy.check_budget(payload, current, 100_000)
+    else:
+        with pytest.raises(policy.PolicyViolation):
+            policy.check_budget(payload, current, 100_000)
+
+
+def test_budget_refused_when_cap_unset():
+    with pytest.raises(policy.PolicyViolation):
+        policy.check_budget({"daily_budget": 100}, None, 0)
+
+
+def test_write_status_rejects_deleted_and_create_rejects_active():
+    from seleric_mcp.ads.meta import schemas as S
+
+    with pytest.raises(pydantic.ValidationError):
+        S.MetaSetStatus(entity_id="123456", status="DELETED")
+    S.MetaSetStatus(entity_id="123456", status="ARCHIVED")
+    with pytest.raises(pydantic.ValidationError):
+        S.MetaCampaignCreate(account_id="act_1", name="n", objective="OUTCOME_SALES", status="ACTIVE")
+
+
+# ----------------------------------------------------- tools: brand / created-only
+
+class _FakeMeta:
+    def __init__(self, live=None):
+        self.live = live or {}
+        self.posts: list[tuple[str, dict]] = []
+        self.gets: list[str] = []
+
+    async def get(self, path, params, **_):
+        self.gets.append(path)
+        return {"id": path, **self.live.get(path, {})}
+
+    async def post(self, path, params, **_):
+        self.posts.append((path, params))
+        return {"id": "900001", "success": True}
+
+
+class _FakeCreds:
+    def __init__(self, brand_id):
+        self.brand_id = brand_id
+
+    async def resolve(self, account_id=None, brand_id=None, company_id=None):
+        return MetaCredential("tok", account_id or "act_1", "v21.0", self.brand_id, None, "brand_envs")
+
+
+def _tools(db, *, brand=20, live=None, **kw):
+    from mcp.server.fastmcp import FastMCP
+
+    from seleric_mcp.ads.meta.tools import register_meta_ads_tools
+
+    ctx = _fake_ctx(db, scopes={"meta_ads:read", "meta_ads:write"}, **kw)
+    ctx.meta_ads = _FakeMeta(live)
+    ctx.meta_creds = _FakeCreds(brand)
+    mcp = FastMCP("t")
+    register_meta_ads_tools(mcp, ctx)
+    return ctx, (lambda name: mcp._tool_manager.get_tool(name).fn)
+
+
+async def test_existing_entity_is_read_only(db):
+    ctx, tool = _tools(db)
+    res = await tool("meta_ads_set_status")(ad_id="1234567", status="PAUSED", brand_id="20")
+    assert res["error"]["code"] == "POLICY_RESTRICTION" and "not created by Seleric" in res["error"]["message"]
+    assert "confirmation_token" not in res
+    assert ctx.meta_ads.posts == [] and ctx.meta_ads.gets == []  # refused before any read
+
+
+async def test_created_entity_gets_token_and_child_create_rules(db):
+    ctx, tool = _tools(db, live={"900001": {"daily_budget": "50000", "status": "PAUSED"}})
+    create = dict(account_id="act_1", name="Seleric test", objective="OUTCOME_SALES", daily_budget=50_000)
+    first = await tool("meta_campaigns_create")(**create)
+    assert first["status"] == "APPROVAL_REQUIRED" and ctx.meta_ads.posts == []
+    done = await tool("meta_campaigns_create")(**create, confirmation_token=first["confirmation_token"])
+    assert done["success"] and ctx.meta_owned.has("900001")
+    assert ctx.meta_ads.posts[0][1]["status"] == "PAUSED"
+
+    # the Seleric-created campaign is now writable (preview carries live state)
+    budget = await tool("meta_campaigns_update_budget")(campaign_id="900001", daily_budget=55_000, brand_id="20")
+    assert budget["status"] == "APPROVAL_REQUIRED"
+    assert budget["preview"]["current"]["daily_budget"] == "50000"
+    too_much = await tool("meta_campaigns_update_budget")(campaign_id="900001", daily_budget=56_000, brand_id="20")
+    assert too_much["error"]["code"] == "POLICY_RESTRICTION"
+
+    # ad set under the Seleric campaign: ok; under an existing campaign: refused
+    ok_child = await tool("meta_adsets_create")(account_id="act_1", campaign_id="900001", name="s",
+                                                optimization_goal="LINK_CLICKS")
+    assert ok_child["status"] == "APPROVAL_REQUIRED"
+    bad_child = await tool("meta_adsets_create")(account_id="act_1", campaign_id="1234567", name="s",
+                                                 optimization_goal="LINK_CLICKS")
+    assert bad_child["error"]["code"] == "POLICY_RESTRICTION"
+
+
+async def test_asset_upload_allowed_without_owned_parent(db):
+    ctx, tool = _tools(db)
+    res = await tool("meta_creatives_create_image")(account_id="act_1", name="c", page_id="123456",
+                                                     image_hash="abc")
+    assert res["status"] == "APPROVAL_REQUIRED"
+
+
+async def test_write_targets_all_opens_existing_entities(db):
+    ctx, tool = _tools(db, targets="all")
+    res = await tool("meta_ads_set_status")(ad_id="1234567", status="PAUSED", brand_id="20")
+    assert res["status"] == "APPROVAL_REQUIRED"
+
+
+async def test_other_brand_write_refused_read_allowed(db):
+    ctx, tool = _tools(db, brand=28)
+    res = await tool("meta_campaigns_create")(account_id="act_1", name="n", objective="OUTCOME_SALES")
+    assert res["error"]["code"] == "POLICY_RESTRICTION" and res["error"]["field"] == "brand_id"
+    read = await tool("meta_campaigns_get")(campaign_id="1234567", brand_id="28")
+    assert read["success"] is True
+
+
+# ----------------------------------------------------- per-request scopes
+
+def test_oauth_jwt_caller_loses_write_scopes(monkeypatch):
+    from seleric_mcp.gateway import auth
+
+    settings = types.SimpleNamespace(
+        caller_scopes=frozenset({"meta_ads:read", "meta_ads:write"}), mcp_oauth_enabled=True,
+    )
+    mw = auth.BearerTokenMiddleware(app=None, token="svc", settings=settings)
+    monkeypatch.setattr(auth, "verify_access_token", lambda s, t: {"sub": "chatgpt"} if t == "jwt" else None)
+    assert mw._scopes_for("svc") == {"meta_ads:read", "meta_ads:write"}
+    assert mw._scopes_for("jwt") == {"meta_ads:read"}
+    assert mw._scopes_for("nope") is None
+
+
+def test_request_scopes_reads_request_state():
+    from mcp.server.lowlevel.server import request_ctx
+
+    from seleric_mcp.gateway.auth import request_scopes
+
+    settings = types.SimpleNamespace(caller_scopes=frozenset({"meta_ads:read", "meta_ads:write"}))
+    assert request_scopes(settings) == settings.caller_scopes  # no MCP request (stdio/tests)
+
+    def _with(scope):
+        return request_ctx.set(types.SimpleNamespace(request=types.SimpleNamespace(scope=scope)))
+
+    t = _with({"state": {"seleric_scopes": frozenset({"meta_ads:read"})}})
+    try:
+        assert request_scopes(settings) == {"meta_ads:read"}
+    finally:
+        request_ctx.reset(t)
+    t = _with({})  # HTTP request that skipped the middleware: read-only
+    try:
+        assert request_scopes(settings) == {"meta_ads:read"}
+    finally:
+        request_ctx.reset(t)
 
 
 # ------------------------------------------------------------------ meta client

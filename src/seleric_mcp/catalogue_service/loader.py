@@ -287,29 +287,6 @@ class ViewDef(BaseModel):
     databases: list[str] = Field(default_factory=list)
 
 
-class BusinessRule(BaseModel):
-    id: str
-    description: str
-    blocking: bool
-
-
-class ActionContractDef(BaseModel):
-    id: str
-    display_name: str
-    domain: str
-    status: Literal["approved", "draft"] = "approved"
-    description: str
-    executor: Literal["pipeboard", "backend_api"]
-    executor_action_type: str
-    payload_schema: str
-    scopes_required: list[str]
-    risk_level: Literal["low", "medium", "high"]
-    confirmation_ttl_seconds: int = 300
-    business_rules: list[BusinessRule] = Field(default_factory=list)
-    preview: dict = Field(default_factory=dict)
-    data_owner: str
-
-
 class Deprecation(BaseModel):
     old: str
     new: str
@@ -430,7 +407,6 @@ class Catalogue(BaseModel):
     dimensions: dict[str, DimensionDef]
     glossary: list[GlossaryTerm]
     views: dict[str, ViewDef]
-    actions: dict[str, ActionContractDef]
     deprecations: list[Deprecation]
     brands: BrandRegistry | None = None
     openmetadata: OpenMetadataRegistry | None = None
@@ -530,13 +506,6 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         v = ViewDef.model_validate(raw)
         views[v.name] = v
 
-    actions: dict[str, ActionContractDef] = {}
-    actions_dir = catalogue_dir / "actions"
-    if actions_dir.exists():
-        for p in sorted(actions_dir.glob("*.yaml")):
-            a = ActionContractDef.model_validate(_read_yaml(p))
-            actions[a.id] = a
-
     deprecations = [
         Deprecation.model_validate(raw)
         for raw in _read_yaml(catalogue_dir / "deprecations.yaml").get("deprecations", [])
@@ -631,7 +600,6 @@ def load_catalogue(catalogue_dir: Path) -> Catalogue:
         dimensions=dimensions,
         glossary=glossary,
         views=views,
-        actions=actions,
         deprecations=deprecations,
         brands=brands,
         openmetadata=om_registry,

@@ -1,13 +1,55 @@
-"""Pending-action and idempotency persistence over SQLite."""
+"""Approval primitives for Meta writes: single-use, short-TTL HMAC-SHA256
+confirmation tokens bound to the exact call (same primitive as seleric_systems
+dispatch_actions), and the ``pending_actions`` record each preview creates.
+A write cannot execute without a token minted from its own preview.
+"""
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
 import json
-from datetime import UTC, datetime, timedelta
 
 from ..storage.db import Database, utcnow_iso
 
-DEFAULT_IDEMPOTENCY_WINDOW = timedelta(hours=24)
+
+def payload_hash(payload: dict) -> str:
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def mint_token(secret: str, action_request_id: str, p_hash: str, expires_epoch: int) -> str:
+    msg = f"{action_request_id}:{p_hash}:{expires_epoch}".encode()
+    sig = hmac.new(secret.encode(), msg, hashlib.sha256).digest()
+    raw = base64.urlsafe_b64encode(sig).decode().rstrip("=")
+    # Token embeds its own claims so commit() can re-verify without a lookup key.
+    return f"{action_request_id}.{expires_epoch}.{raw}"
+
+
+def parse_token(token: str) -> tuple[str, int, str] | None:
+    parts = token.split(".")
+    if len(parts) != 3:
+        return None
+    action_request_id, expires_str, sig = parts
+    try:
+        return action_request_id, int(expires_str), sig
+    except ValueError:
+        return None
+
+
+def verify_token(secret: str, token: str, p_hash: str) -> tuple[bool, str | None, int | None]:
+    """Returns (signature_valid, action_request_id, expires_epoch). Constant-time compare."""
+    parsed = parse_token(token)
+    if parsed is None:
+        return False, None, None
+    action_request_id, expires_epoch, _ = parsed
+    expected = mint_token(secret, action_request_id, p_hash, expires_epoch)
+    return hmac.compare_digest(token, expected), action_request_id, expires_epoch
+
+
+def token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 class ActionStore:
@@ -84,32 +126,3 @@ class ActionStore:
                 action_request_id,
             ),
         )
-
-
-class IdempotencyStore:
-    def __init__(self, db: Database, window: timedelta = DEFAULT_IDEMPOTENCY_WINDOW):
-        self._db = db
-        self._window = window
-
-    def check_and_register(self, key: str, action_request_id: str) -> str | None:
-        """Returns the prior action_request_id if the key was already executed
-        inside the window, else registers it and returns None."""
-        now = datetime.now(UTC)
-        self._db.execute(
-            "DELETE FROM idempotency_keys WHERE expires_at <= ?", (now.isoformat(),)
-        )
-        row = self._db.fetchone(
-            "SELECT action_request_id FROM idempotency_keys WHERE idempotency_key = ?", (key,)
-        )
-        if row is not None:
-            return row["action_request_id"]
-        self._db.execute(
-            """INSERT INTO idempotency_keys (idempotency_key, action_request_id, created_at, expires_at)
-               VALUES (?,?,?,?)""",
-            (key, action_request_id, now.isoformat(), (now + self._window).isoformat()),
-        )
-        return None
-
-    def release(self, key: str) -> None:
-        """Free the key after a failed dispatch so a retry isn't blocked."""
-        self._db.execute("DELETE FROM idempotency_keys WHERE idempotency_key = ?", (key,))

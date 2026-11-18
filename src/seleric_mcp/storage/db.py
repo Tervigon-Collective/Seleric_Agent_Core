@@ -44,13 +44,6 @@ CREATE TABLE IF NOT EXISTS pending_actions (
 );
 CREATE INDEX IF NOT EXISTS idx_pending_actions_status ON pending_actions(status);
 
-CREATE TABLE IF NOT EXISTS idempotency_keys (
-    idempotency_key TEXT PRIMARY KEY,
-    action_request_id TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    expires_at TEXT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS audit_log (
     audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
     audit_ref TEXT,
@@ -63,8 +56,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_log_event ON audit_log(event, created_at);
 
 -- Client-supplied-key idempotency for the granular Ads write tools (blueprint
--- §13). Distinct from idempotency_keys (broker-derived keys): here the key is
--- the caller's idempotency_key, scoped per tool, and we store the full prior
+-- §13). The key is the caller's idempotency_key, scoped per tool, and we store the full prior
 -- result so a replay returns it verbatim. Same key + same request_hash => HIT
 -- (return stored result); same key + different request_hash => CONFLICT.
 CREATE TABLE IF NOT EXISTS ads_idempotency (
@@ -75,6 +67,18 @@ CREATE TABLE IF NOT EXISTS ads_idempotency (
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL,
     PRIMARY KEY (tool_name, idempotency_key)
+);
+
+-- Meta entities created through the meta_* tools. With META_WRITE_TARGETS=
+-- created_only, every change to an existing entity (and every child create)
+-- must target an id in this table; anything else stays read-only.
+CREATE TABLE IF NOT EXISTS meta_owned_entities (
+    entity_id TEXT PRIMARY KEY,
+    entity_type TEXT NOT NULL,
+    brand_id TEXT,
+    account_id TEXT,
+    parent_id TEXT,
+    created_at TEXT NOT NULL
 );
 
 -- Structured per-tool-call operation log for the Ads tools (blueprint §16).

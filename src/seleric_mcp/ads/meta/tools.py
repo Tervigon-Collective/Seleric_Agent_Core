@@ -3,8 +3,9 @@
 `register_meta_ads_tools(mcp, ctx)` defines every Meta tool as an `@mcp.tool()`
 closure over the shared `AppContext`, exactly like the tools in
 `gateway/server.py`. Reads use `execute_read`; writes use `execute_write`, which
-applies scope / kill-switch / budget-policy / idempotency / validate_only /
-audit uniformly.
+applies scope / guardrails (ads/meta/policy.py) / two-step approval /
+kill-switch / idempotency / validate_only / audit uniformly. Every write needs a
+confirmation_token minted by its own preview call.
 
 Credentials are resolved per call from Postgres ``core.brand_envs`` via
 ``ctx.meta_creds`` — the caller selects a tenant with ``account_id`` (act_ form)
@@ -23,8 +24,10 @@ import httpx
 import pydantic
 import structlog
 
+from ...gateway.auth import request_scopes
 from ...observability.logging import log_call
 from .. import envelope as env
+from . import policy
 from . import schemas as S
 from .insights import run_meta_insights
 
@@ -45,6 +48,9 @@ _ADSET_FIELDS = (
     "lifetime_budget,bid_strategy,bid_amount,targeting,start_time,end_time"
 )
 _AD_FIELDS = "id,name,status,adset_id,campaign_id,creative,created_time,updated_time"
+# Live state read before every write (preview + guardrails).
+_LIVE_FIELDS = "id,name,status,daily_budget,lifetime_budget"
+_AD_LIVE_FIELDS = "id,name,status"
 
 
 def _validation_error(operation: str, exc: pydantic.ValidationError) -> dict:
@@ -71,6 +77,38 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         which the read/write wrappers turn into a normalised error envelope)."""
         return await ctx.meta_creds.resolve(
             account_id=account_id, brand_id=brand_id, company_id=company_id
+        )
+
+    def _prepare(*, account_id=None, brand_id=None, entity_id=None, parent_id=None,
+                 live_fields=_LIVE_FIELDS):
+        """Pre-approval checks, run on the preview and again on the token call:
+        brand allow list, created-only rule on the target (or the parent of a
+        create), then the target's live state (None for a create)."""
+        async def prepare():
+            cred = await _cred(account_id=account_id, brand_id=brand_id)
+            policy.check_brand(cred.brand_id, ctx.settings.meta_write_brands)
+            target = entity_id or parent_id
+            if target:
+                policy.require_owned(ctx.meta_owned, target, ctx.settings.meta_write_targets)
+            if entity_id is None:
+                return None
+            return await ctx.meta_ads.get(
+                entity_id, {"fields": live_fields},
+                access_token=cred.access_token, api_version=cred.api_version,
+            )
+        return prepare
+
+    def _write(tool, operation, payload, action, *, confirmation_token, idempotency_key,
+               validate_only, account_id=None, brand_id=None, entity_id=None,
+               parent_id=None, live_fields=_LIVE_FIELDS):
+        return env.execute_write(
+            ctx, tool, operation, payload=payload, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id,
+            confirmation_token=confirmation_token,
+            approval_scope={"brand_id": brand_id},
+            prepare=_prepare(account_id=account_id, brand_id=brand_id, entity_id=entity_id,
+                             parent_id=parent_id, live_fields=live_fields),
+            action=action,
         )
 
     # ------------------------------------------------------------------ accounts
@@ -178,17 +216,23 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         bid_strategy: str | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.campaigns.create — create a campaign (POST
-        /{account_id}/campaigns). Budgets are minor currency units. Defaults to
-        PAUSED. Set validate_only=true to check without creating. Pass a stable
-        idempotency_key so a retry does not double-create."""
+        /{account_id}/campaigns). Budgets are minor currency units. Always
+        PAUSED (activate with a separate set_status). Set validate_only=true to
+        check without creating. Pass a stable
+        idempotency_key so a retry does not double-create. Approval: the first call
+        returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_campaigns_create", account_id=account_id)
         try:
             model = S.MetaCampaignCreate(
                 account_id=account_id, name=name, objective=objective, status=status,
                 special_ad_categories=special_ad_categories or [], buying_type=buying_type,
-                daily_budget=daily_budget, lifetime_budget=lifetime_budget, bid_strategy=bid_strategy,
+        daily_budget=daily_budget, lifetime_budget=lifetime_budget,
+        bid_strategy=bid_strategy,
             )
         except pydantic.ValidationError as e:
             return _validation_error("campaigns.create", e)
@@ -199,17 +243,19 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                 f"{account_id}/campaigns", model.to_params(),
                 access_token=cred.access_token, api_version=cred.api_version,
             )
+            if resp.get("id"):
+                ctx.meta_owned.add(resp["id"], "campaign", brand_id=cred.brand_id,
+                                   account_id=account_id, parent_id=None)
             return env.ok(
                 "campaigns.create",
                 entity={"type": "campaign", "id": resp.get("id"), "name": name},
                 request_id=resp.get("id"),
             )
 
-        return await env.execute_write(
-            ctx, "meta_campaigns_create", "campaigns.create",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
+        return await _write(
+            "meta_campaigns_create", "campaigns.create", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
             validate_only=validate_only, account_id=account_id,
-            budget_minor=daily_budget or lifetime_budget, action=action,
         )
 
     @mcp.tool()
@@ -221,9 +267,13 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         account_id: str | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.campaigns.update — update mutable campaign fields (POST
-        /{campaign_id}). Select tenant with brand_id or account_id."""
+        /{campaign_id}). Select tenant with brand_id or account_id. Approval: the
+        first call returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_campaigns_update", campaign_id=campaign_id)
         try:
             model = S.MetaCampaignUpdate(
@@ -243,20 +293,25 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             return env.ok("campaigns.update",
                           entity={"type": "campaign", "id": campaign_id}, changes=params)
 
-        return await env.execute_write(
-            ctx, "meta_campaigns_update", "campaigns.update",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, action=action,
+        return await _write(
+            "meta_campaigns_update", "campaigns.update", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=campaign_id,
         )
 
     @mcp.tool()
     async def meta_campaigns_set_status(
         campaign_id: str, status: str, brand_id: str | None = None, account_id: str | None = None,
         idempotency_key: str | None = None, validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.campaigns.set_status — pause/activate/archive a campaign (POST
-        /{campaign_id}). status in ACTIVE|PAUSED|ARCHIVED|DELETED. Select tenant
-        with brand_id or account_id."""
+        /{campaign_id}). status in ACTIVE|PAUSED|ARCHIVED (no DELETED). Select tenant
+        with brand_id or account_id. Approval: the first call returns a preview +
+        confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_campaigns_set_status", campaign_id=campaign_id, status=status)
         try:
             model = S.MetaSetStatus(entity_id=campaign_id, status=status)
@@ -271,10 +326,11 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                           entity={"type": "campaign", "id": campaign_id},
                           changes={"status": {"current": status}})
 
-        return await env.execute_write(
-            ctx, "meta_campaigns_set_status", "campaigns.set_status",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, action=action,
+        return await _write(
+            "meta_campaigns_set_status", "campaigns.set_status", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=campaign_id,
         )
 
     @mcp.tool()
@@ -286,10 +342,14 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         account_id: str | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.campaigns.update_budget — set daily or lifetime budget (POST
         /{campaign_id}). Minor currency units; exactly one budget field. Subject
-        to the org budget cap policy. Select tenant with brand_id or account_id."""
+        to the org budget cap policy. Select tenant with brand_id or account_id.
+        Approval: the first call returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_campaigns_update_budget", campaign_id=campaign_id)
         try:
             model = S.MetaCampaignUpdateBudget(
@@ -306,11 +366,11 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             return env.ok("campaigns.update_budget",
                           entity={"type": "campaign", "id": campaign_id}, changes=params)
 
-        return await env.execute_write(
-            ctx, "meta_campaigns_update_budget", "campaigns.update_budget",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, budget_minor=daily_budget or lifetime_budget,
-            action=action,
+        return await _write(
+            "meta_campaigns_update_budget", "campaigns.update_budget", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=campaign_id,
         )
 
     # -------------------------------------------------------------------- adsets
@@ -381,10 +441,14 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         targeting: dict | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.adsets.create — create an ad set (POST /{account_id}/adsets).
         Budgets are minor currency units; targeting is the Meta targeting spec.
-        Defaults to PAUSED."""
+        Always PAUSED (activate with a separate set_status). Approval: the first
+        call returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_adsets_create", account_id=account_id, campaign_id=campaign_id)
         try:
             model = S.MetaAdsetCreate(
@@ -403,15 +467,17 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                 f"{account_id}/adsets", model.to_params(),
                 access_token=cred.access_token, api_version=cred.api_version,
             )
+            if resp.get("id"):
+                ctx.meta_owned.add(resp["id"], "adset", brand_id=cred.brand_id,
+                                   account_id=account_id, parent_id=campaign_id)
             return env.ok("adsets.create",
                           entity={"type": "adset", "id": resp.get("id"), "name": name},
                           request_id=resp.get("id"))
 
-        return await env.execute_write(
-            ctx, "meta_adsets_create", "adsets.create",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, account_id=account_id,
-            budget_minor=daily_budget or lifetime_budget, action=action,
+        return await _write(
+            "meta_adsets_create", "adsets.create", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id, parent_id=campaign_id,
         )
 
     @mcp.tool()
@@ -425,9 +491,13 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         account_id: str | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.adsets.update — update mutable ad-set fields incl. bidding (POST
-        /{adset_id}). Select tenant with brand_id or account_id."""
+        /{adset_id}). Select tenant with brand_id or account_id. Approval: the first
+        call returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_adsets_update", adset_id=adset_id)
         try:
             model = S.MetaAdsetUpdate(
@@ -447,19 +517,24 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                                     access_token=cred.access_token, api_version=cred.api_version)
             return env.ok("adsets.update", entity={"type": "adset", "id": adset_id}, changes=params)
 
-        return await env.execute_write(
-            ctx, "meta_adsets_update", "adsets.update",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, action=action,
+        return await _write(
+            "meta_adsets_update", "adsets.update", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=adset_id,
         )
 
     @mcp.tool()
     async def meta_adsets_set_status(
         adset_id: str, status: str, brand_id: str | None = None, account_id: str | None = None,
         idempotency_key: str | None = None, validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.adsets.set_status — pause/activate an ad set (POST /{adset_id}).
-        Select tenant with brand_id or account_id."""
+        Select tenant with brand_id or account_id. Approval: the first call returns
+        a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_adsets_set_status", adset_id=adset_id, status=status)
         try:
             model = S.MetaSetStatus(entity_id=adset_id, status=status)
@@ -473,10 +548,11 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             return env.ok("adsets.set_status", entity={"type": "adset", "id": adset_id},
                           changes={"status": {"current": status}})
 
-        return await env.execute_write(
-            ctx, "meta_adsets_set_status", "adsets.set_status",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, action=action,
+        return await _write(
+            "meta_adsets_set_status", "adsets.set_status", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=adset_id,
         )
 
     @mcp.tool()
@@ -488,10 +564,14 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         account_id: str | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.adsets.update_budget — set daily or lifetime budget (POST
         /{adset_id}). Minor currency units; subject to the org budget cap.
-        Select tenant with brand_id or account_id."""
+        Select tenant with brand_id or account_id. Approval: the first call returns
+        a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_adsets_update_budget", adset_id=adset_id)
         try:
             model = S.MetaAdsetUpdateBudget(
@@ -508,21 +588,25 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             return env.ok("adsets.update_budget",
                           entity={"type": "adset", "id": adset_id}, changes=params)
 
-        return await env.execute_write(
-            ctx, "meta_adsets_update_budget", "adsets.update_budget",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, budget_minor=daily_budget or lifetime_budget,
-            action=action,
+        return await _write(
+            "meta_adsets_update_budget", "adsets.update_budget", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=adset_id,
         )
 
     @mcp.tool()
     async def meta_adsets_update_targeting(
         adset_id: str, targeting: dict, brand_id: str | None = None, account_id: str | None = None,
         idempotency_key: str | None = None, validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.adsets.update_targeting — replace the ad set's targeting spec
         (POST /{adset_id}). Accepts the Meta targeting object directly. Select
-        tenant with brand_id or account_id."""
+        tenant with brand_id or account_id. Approval: the first call returns a
+        preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_adsets_update_targeting", adset_id=adset_id)
         try:
             model = S.MetaAdsetUpdateTargeting(adset_id=adset_id, targeting=targeting)
@@ -536,10 +620,11 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             return env.ok("adsets.update_targeting", entity={"type": "adset", "id": adset_id},
                           changes={"targeting": "updated"})
 
-        return await env.execute_write(
-            ctx, "meta_adsets_update_targeting", "adsets.update_targeting",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, action=action,
+        return await _write(
+            "meta_adsets_update_targeting", "adsets.update_targeting", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=adset_id,
         )
 
     # ----------------------------------------------------------------------- ads
@@ -610,9 +695,13 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         url_tags: str | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.ads.create — create an ad from an existing creative (POST
-        /{account_id}/ads). Defaults to PAUSED."""
+        /{account_id}/ads). Always PAUSED (activate with a separate set_status).
+        Approval: the first call returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_ads_create", account_id=account_id, adset_id=adset_id)
         try:
             model = S.MetaAdCreate(
@@ -628,23 +717,30 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                 f"{account_id}/ads", model.to_params(),
                 access_token=cred.access_token, api_version=cred.api_version,
             )
+            if resp.get("id"):
+                ctx.meta_owned.add(resp["id"], "ad", brand_id=cred.brand_id,
+                                   account_id=account_id, parent_id=adset_id)
             return env.ok("ads.create",
                           entity={"type": "ad", "id": resp.get("id"), "name": name},
                           request_id=resp.get("id"))
 
-        return await env.execute_write(
-            ctx, "meta_ads_create", "ads.create",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, account_id=account_id, action=action,
+        return await _write(
+            "meta_ads_create", "ads.create", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id, parent_id=adset_id,
         )
 
     @mcp.tool()
     async def meta_ads_set_status(
         ad_id: str, status: str, brand_id: str | None = None, account_id: str | None = None,
         idempotency_key: str | None = None, validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.ads.set_status — pause/activate an ad (POST /{ad_id}). Select
-        tenant with brand_id or account_id."""
+        tenant with brand_id or account_id. Approval: the first call returns a
+        preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_ads_set_status", ad_id=ad_id, status=status)
         try:
             model = S.MetaSetStatus(entity_id=ad_id, status=status)
@@ -658,10 +754,11 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
             return env.ok("ads.set_status", entity={"type": "ad", "id": ad_id},
                           changes={"status": {"current": status}})
 
-        return await env.execute_write(
-            ctx, "meta_ads_set_status", "ads.set_status",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, action=action,
+        return await _write(
+            "meta_ads_set_status", "ads.set_status", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+        validate_only=validate_only, brand_id=brand_id, account_id=account_id,
+        entity_id=ad_id, live_fields=_AD_LIVE_FIELDS,
         )
 
     # ------------------------------------------------------------ assets/creatives
@@ -670,10 +767,14 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
     async def meta_assets_upload_image(
         account_id: str, file_url: str, name: str | None = None,
         idempotency_key: str | None = None, validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.assets.upload_image — upload an image to the account image
         library (POST /{account_id}/adimages). Fetches file_url and uploads the
-        bytes; returns the image hash used by creatives."""
+        bytes; returns the image hash used by creatives. Approval: the first call
+        returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_assets_upload_image", account_id=account_id)
         try:
             model = S.MetaUploadImage(account_id=account_id, file_url=file_url, name=name)
@@ -698,20 +799,24 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                                   "name": filename, "url": first.get("url")},
                           raw_response=resp)
 
-        return await env.execute_write(
-            ctx, "meta_assets_upload_image", "assets.upload_image",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, account_id=account_id, action=action,
+        return await _write(
+            "meta_assets_upload_image", "assets.upload_image", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id,
         )
 
     @mcp.tool()
     async def meta_assets_upload_video(
         account_id: str, file_url: str, name: str | None = None,
         idempotency_key: str | None = None, validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.assets.upload_video — upload a video by URL (POST
         /{account_id}/advideos with file_url). Returns the video id; the video
-        may still be processing before it can be used in a creative."""
+        may still be processing before it can be used in a creative. Approval: the
+        first call returns a preview + confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_assets_upload_video", account_id=account_id)
         try:
             model = S.MetaUploadVideo(account_id=account_id, file_url=file_url, name=name)
@@ -731,10 +836,10 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                           entity={"type": "video", "id": resp.get("id"), "name": name},
                           request_id=resp.get("id"), raw_response=resp)
 
-        return await env.execute_write(
-            ctx, "meta_assets_upload_video", "assets.upload_video",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, account_id=account_id, action=action,
+        return await _write(
+            "meta_assets_upload_video", "assets.upload_video", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id,
         )
 
     @mcp.tool()
@@ -748,10 +853,14 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         call_to_action: dict | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.creatives.create_image — create an image ad creative (POST
         /{account_id}/adcreatives). image_hash comes from
-        meta_assets_upload_image."""
+        meta_assets_upload_image. Approval: the first call returns a preview +
+        confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_creatives_create_image", account_id=account_id)
         try:
             model = S.MetaCreativeImage(
@@ -771,10 +880,10 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                           entity={"type": "adcreative", "id": resp.get("id"), "name": name},
                           request_id=resp.get("id"))
 
-        return await env.execute_write(
-            ctx, "meta_creatives_create_image", "creatives.create_image",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, account_id=account_id, action=action,
+        return await _write(
+            "meta_creatives_create_image", "creatives.create_image", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id,
         )
 
     @mcp.tool()
@@ -788,10 +897,14 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         call_to_action: dict | None = None,
         idempotency_key: str | None = None,
         validate_only: bool = False,
+        confirmation_token: str | None = None,
     ) -> dict:
         """meta.creatives.create_video — create a video ad creative (POST
         /{account_id}/adcreatives). video_id comes from
-        meta_assets_upload_video."""
+        meta_assets_upload_video. Approval: the first call returns a preview +
+        confirmation_token (nothing
+        changes); call again with the same arguments + confirmation_token after a
+        person approves."""
         log_call("meta_creatives_create_video", account_id=account_id)
         try:
             model = S.MetaCreativeVideo(
@@ -811,10 +924,10 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                           entity={"type": "adcreative", "id": resp.get("id"), "name": name},
                           request_id=resp.get("id"))
 
-        return await env.execute_write(
-            ctx, "meta_creatives_create_video", "creatives.create_video",
-            payload=model.model_dump(), idempotency_key=idempotency_key,
-            validate_only=validate_only, account_id=account_id, action=action,
+        return await _write(
+            "meta_creatives_create_video", "creatives.create_video", model.model_dump(), action,
+            confirmation_token=confirmation_token, idempotency_key=idempotency_key,
+            validate_only=validate_only, account_id=account_id,
         )
 
     @mcp.tool()
@@ -862,7 +975,7 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         day|week|month|none. Returns rows + provenance; the client interprets.
         (Cube-backed: needs no brand_envs credential.)"""
         log_call("meta_insights_query", account_id=account_id, level=level)
-        if "meta_ads:read" not in ctx.settings.caller_scopes:
+        if "meta_ads:read" not in request_scopes(ctx.settings):
             return env.error("insights.query", code="PERMISSION_DENIED",
                              message="Caller lacks scope 'meta_ads:read'.")
         return await run_meta_insights(

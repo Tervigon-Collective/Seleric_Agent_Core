@@ -289,36 +289,37 @@ complete bucket and the notes it returns; a null cell is missing data, not zero.
 
 
 CONFIRM_ACTION = """\
-An action has been proposed with action_request_id {action_request_id}.
+A Meta Ads write returned approval_required with approval_id {approval_id}.
+Nothing has changed on Meta yet.
 
-Do not commit the action yet. First, present a confirmation summary containing:
+Do not repeat the call yet. First, present a confirmation summary containing:
 
 1. Proposed change
-   - Show the returned `predicted_change`.
-   - Show the exact action payload in clear language.
+   - The tool and the target (`preview.target`, entity id).
+   - The exact change (`preview.change`) in clear language, budgets in rupees
+     (Meta budgets are paise: divide by 100).
 
 2. Current state
-   - Summarize the returned `current_state`.
+   - Summarize `preview.current` (live status / budget read from Meta now).
 
-3. Business-rule checks
-   - List every returned check.
-   - Label each as pass, fail, or unverifiable.
-   - Explain the result in plain language without changing its meaning.
+3. Guardrails
+   - The change already passed the brand, created-only, ₹1,000/day cap and
+     +10 % raise rules, or it would have been refused without a token.
+   - If `write_enabled` is false, say the change will be refused by the kill
+     switch even after approval.
 
-4. Risk and reversibility
-   - State the returned risk level.
-   - Explain whether and how the action can be reversed.
+4. Reversibility
+   - Explain how to undo it (status back, previous budget). Nothing is deleted.
 
 5. Confirmation validity
-   - State the exact token expiry time.
-   - Explain that approval is valid only until that time.
+   - State the exact `expires_at`. Approval is valid only until then.
 
 Finish with a direct yes-or-no confirmation question.
 
-Only call actions_commit after the user gives clear, explicit approval.
-Do not interpret silence, uncertainty, questions, or partial agreement as
-approval. If the user asks a question or expresses hesitation, answer first
-and request confirmation again afterward.
+Only after the user gives clear, explicit approval, call the SAME tool with the
+SAME arguments plus confirmation_token. Do not interpret silence, uncertainty,
+questions, or partial agreement as approval. If the user asks a question or
+expresses hesitation, answer first and request confirmation again afterward.
 """
 
 

@@ -54,21 +54,42 @@ Cursor / Claude / Seleric Agent keep using the static Bearer header — unchange
 
 Tools: `catalogue_search_metrics`, `catalogue_get_metric`,
 `catalogue_list_dimensions`, `catalogue_resolve_term`, `metrics_query`,
-`metrics_drilldown`, `insights_explain`, `actions_list_available`,
-`actions_propose`, `actions_commit`, `actions_status`.
+`metrics_drilldown`, `insights_explain`, plus the `meta_*` / `google_*` ads
+tools when `SELERIC_MCP_ADS_TOOLS=true`.
 Resources: `catalogue://glossary`, `catalogue://cubes/{view}`,
 `docs://data-freshness`. Prompts: `no_hallucination_guard`,
 `explain_metric_change`, `confirm_action`.
 
 (Names use `_` instead of the doc's `.` — MCP tool-name charset constraint.)
 
+### Meta Ads writes (one path: the `meta_*` tools)
+
+Every Meta write tool (create / update / set_status / update_budget /
+update_targeting / uploads / creatives) is two-step:
+
+1. Call it → `approval_required` with a preview (live state + the change), a
+   single-use `confirmation_token` (5 min, HMAC with `APPROVAL_SECRET`, bound to
+   the tool + exact arguments). Nothing changes on Meta.
+2. A person approves → call the same tool with the same arguments plus
+   `confirmation_token` → executes once (then `write_enabled` kill switch,
+   idempotency, audit with `approval_id`).
+
+Guardrails (`ads/meta/policy.py`, checked before a token is minted and again on
+execute): writes only for `META_WRITE_BRANDS` (default `20`); daily budget cap
+`META_MAX_BUDGET_MINOR` (100000 paise = ₹1,000), lifetime 30×; a raise is at
+most +10 % over the live budget, a cut is always allowed, an unknown live
+budget is refused; no `DELETED`; creates are always `PAUSED`.
+`META_WRITE_TARGETS=created_only` (default) limits changes to entities created
+through these tools (`meta_owned_entities`); `all` opens existing ones, still
+approval-gated. Only the service token gets `:write` scopes — OAuth (JWT)
+callers are read-only.
+
 ## Configuration
 
 Nothing behavioral is hardcoded. All tunables are env vars with defaults
 declared once in `src/seleric_mcp/config.py` (documented in `.env.example`):
 term-resolution confidence bands, row limits, Cube timeout, result TTL,
-idempotency window, insight-engine parameters, freshness cache TTL. Action
-TTLs/rules live per-action in `catalogue/actions/*.yaml`. The chat agent's
+idempotency window, insight-engine parameters, freshness cache TTL. The chat agent's
 working policy (self-correction, intent-based time defaults, stopping rules)
 is editable text in `scripts/agent_policy.md`, loaded at startup.
 
@@ -100,9 +121,6 @@ and paid are filters; a retired id is rejected naming its replacement + filters.
 
 ## Known follow-ups (see plan §Risks)
 
-- Pipeboard write endpoint shape (`POST /actions/{type}`) is inherited from
-  seleric_systems convention but unverified against Pipeboard's current API —
-  swap `actions/executors/pipeboard.py` for an MCP-client executor if needed.
 - OAuth 2.1 for ChatGPT custom MCP: set `MCP_OAUTH_ENABLED=true` +
   `MCP_OAUTH_SIGNING_KEY`, deploy nginx from `deploy/nginx/mcp.seleric.com`
   (proxies `/.well-known/` + `/oauth/`). In ChatGPT: Server URL

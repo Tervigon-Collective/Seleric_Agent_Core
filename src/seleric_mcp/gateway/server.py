@@ -20,13 +20,12 @@ import structlog
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
-from ..actions.broker import ActionBroker
-from ..actions.executors.pipeboard import PipeboardExecutor
-from ..actions.stores import ActionStore, IdempotencyStore
 from ..ads.google.client import GoogleAdsApiClient
 from ..ads.google.credentials import GoogleCredentialStore
 from ..ads.google.tools import register_google_ads_tools
+from ..ads.approval import ActionStore
 from ..ads.idempotency import AdsIdempotencyStore, OperationLog
+from ..ads.meta.policy import OwnedEntities
 from ..ads.meta.client import MetaAdsClient
 from ..ads.meta.credentials import MetaCredentialStore
 from ..ads.meta.tools import register_meta_ads_tools
@@ -120,20 +119,12 @@ class AppContext:
             db=self.db,
         )
         self.audit = AuditLog(self.db)
-        self.broker = ActionBroker(
-            settings=settings,
-            catalogue=self.catalogue,
-            cube=self.cube,
-            executors={"pipeboard": PipeboardExecutor(settings)},
-            action_store=ActionStore(self.db),
-            idempotency=IdempotencyStore(
-                self.db, window=timedelta(hours=settings.idempotency_window_hours)
-            ),
-            audit=self.audit,
-        )
         # --- Meta Ads management layer (ads/meta/) ---
         self.meta_ads = MetaAdsClient(settings)
         self.meta_creds = MetaCredentialStore(settings)
+        # Two-step approval records (pending_actions) + Seleric-created Meta ids.
+        self.approvals = ActionStore(self.db)
+        self.meta_owned = OwnedEntities(self.db)
         # --- Google Ads management layer (ads/google/) ---
         self.google_ads = GoogleAdsApiClient(settings)
         self.google_creds = GoogleCredentialStore(settings)
@@ -408,9 +399,8 @@ def build_server(settings: Settings) -> FastMCP:
 
     def _check_metric_scopes(metric_ids: list[str]) -> dict | None:
         """Enforce access_policy.scopes (declared on every catalogue metric)
-        against the caller's granted scopes — mirrors the existing check for
-        actions (actions/broker.py: scopes_required <= caller_scopes), which
-        previously had no metrics_query/metrics_drilldown equivalent despite
+        against the caller's granted scopes (the removed action broker had the
+        same scopes_required <= caller_scopes check), which previously had no metrics_query/metrics_drilldown equivalent despite
         every metric declaring a scopes list. Returns an access-denied payload
         if any requested metric requires a scope the caller doesn't have;
         None if authorized. Unknown metric ids are skipped here — QueryPlanner
@@ -1337,56 +1327,6 @@ def build_server(settings: Settings) -> FastMCP:
         report["provenance"] = json.loads(stored.provenance_json)
         return report
 
-    # ---------------- action tools ----------------
-
-    @mcp.tool()
-    def actions_list_available(domain: str | None = None) -> dict:
-        """Discover action contracts (payload schema, risk level, required
-        scopes) the caller may propose. Writes never execute from this tool."""
-        _log_call("actions_list_available", domain=domain)
-        return {
-            "actions": ctx.broker.list_available(domain, ctx.settings.caller_scopes),
-            "flow": "actions_propose -> show preview to user -> user confirms -> actions_commit",
-        }
-
-    @mcp.tool()
-    async def actions_propose(action_id: str, payload: dict) -> dict:
-        """Validate and preview an action WITHOUT executing it. Returns the
-        current state, business-rule results, and (if eligible) a single-use
-        confirmation token valid ~5 minutes. Show the preview to the user and
-        get an explicit yes before calling actions_commit."""
-        trace_id = _log_call("actions_propose", action_id=action_id)
-        try:
-            preview = await ctx.broker.propose(
-                action_id, payload, ctx.settings.caller_scopes, ctx.actor
-            )
-            return preview.model_dump(mode="json")
-        except (ValueError, PermissionError) as e:
-            return {"error": str(e)}
-        except Exception as e:
-            logger.error("actions_propose_failed", trace_id=trace_id, error=repr(e), exc_info=True)
-            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
-
-    @mcp.tool()
-    async def actions_commit(confirmation_token: str) -> dict:
-        """Execute a previously proposed action using its confirmation token.
-        Only call this after the user explicitly confirmed the preview. The
-        token is single-use and expires; idempotent duplicates are rejected."""
-        trace_id = _log_call("actions_commit")
-        try:
-            result = await ctx.broker.commit(confirmation_token, ctx.actor)
-            return result.model_dump(mode="json")
-        except Exception as e:
-            logger.error("actions_commit_failed", trace_id=trace_id, error=repr(e), exc_info=True)
-            return {"error": f"{type(e).__name__}: {str(e).strip() or repr(e)}"}
-
-    @mcp.tool()
-    def actions_status(action_request_id: str) -> dict:
-        """Status and audit trail of a past action request."""
-        _log_call("actions_status", action_request_id=action_request_id)
-        status = ctx.broker.status(action_request_id)
-        return status if status else {"error": f"Unknown action request '{action_request_id}'"}
-
     # ------- Meta / Google Ads management tools (ads/meta/, ads/google/) -------
     # Third-party platform APIs, not certified Cube serve views — only exposed
     # when settings.ads_tools_enabled is set (default off).
@@ -1614,9 +1554,10 @@ def build_server(settings: Settings) -> FastMCP:
         return prompt_templates.EXPLAIN_METRIC_CHANGE.format(query_id=query_id)
 
     @mcp.prompt()
-    def confirm_action(action_request_id: str) -> str:
-        """Render an action preview as an explicit user confirmation ask."""
-        return prompt_templates.CONFIRM_ACTION.format(action_request_id=action_request_id)
+    def confirm_action(approval_id: str) -> str:
+        """Render a Meta write's approval_required preview as an explicit user
+        confirmation ask (two-step approval on the meta_* write tools)."""
+        return prompt_templates.CONFIRM_ACTION.format(approval_id=approval_id)
 
     @mcp.prompt()
     def dashboard_analyst(module: str = "", brand_id: str = "") -> str:
