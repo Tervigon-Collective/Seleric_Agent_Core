@@ -423,6 +423,13 @@ def test_hourly_on_an_explicit_event_date_is_refused(planner_event):
         run(planner_event, ["gross_sales"], "event_date", granularity="hour")
 
 
+def test_hourly_refusal_on_a_daily_only_view_names_hourly_capable_metrics(planner):
+    """A daily-only view (ssot_pnl) cannot answer by hour; the refusal points at same-unit metrics that can, from the catalogue."""
+    with pytest.raises(PlanError, match="intraday timestamp axis") as err:
+        run(planner, ["ssot_net_sales"], granularity="hour")
+    assert "net_sales (view commerce)" in str(err.value) and "ssot_net_sales (" not in str(err.value).split("have hours:")[-1]
+
+
 @pytest.mark.parametrize("term", ["returns", "return revenue", "returns revenue"])
 def test_bare_returns_route_to_the_pnl_returns_card(v3, term):
     """Owner choice 2026-11-07: bare returns = the P&L Returns card (closed returns + RTO, Shopify + Amazon)."""

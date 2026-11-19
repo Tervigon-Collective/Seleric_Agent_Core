@@ -206,11 +206,35 @@ class QueryPlanner:
         view_def = self.catalogue.cat.views.get(view)
         if m.cube_mapping.time_dimension is None and view_def and view_def.datetime_dimension:
             return f"{view}.{view_def.datetime_dimension}"
+        if view_def and view_def.datetime_dimension:  # the view has hours; this metric is bound to a date axis of its own
+            raise PlanError(
+                f"Granularity '{granularity}' is not available for metric '{m.id}' on this date axis (it is bound to a "
+                f"date, not a timestamp). Use date_axis=order_date (hours of order placement), or granularity 'day'."
+            )
+        alts = self._intraday_alternatives(m)
+        hint = (
+            f" Metrics of the same unit and aggregation that have hours: {', '.join(alts)}. They read other views, so "
+            "name that source in the answer; their totals can differ from this metric's."
+            if alts else " Use granularity 'day'."
+        )
         raise PlanError(
             f"Granularity '{granularity}' is not available for metric '{m.id}' "
-            f"on this date axis (view '{view}' has no intraday timestamp axis for it). Use date_axis=order_date "
-            "(hours of order placement) where the view has an order timestamp, or granularity 'day'."
+            f"(view '{view}' has no intraday timestamp axis).{hint}"
         )
+
+    def _intraday_alternatives(self, m: MetricDef, limit: int = 3) -> list[str]:
+        """Queryable metrics on a view with an intraday timestamp that measure the same kind of quantity as ``m``
+        (same unit and aggregation), ranked by the catalogue's own search over ``m``'s display name."""
+        views = self.catalogue.cat.views
+        metrics = self.catalogue.cat.metrics
+        found = []
+        for match in self.catalogue.search(m.display_name).matches:
+            alt = metrics.get(match.id)
+            view_def = views.get(alt.cube_mapping.view) if alt else None
+            if (alt and alt.id != m.id and alt.unit == m.unit and alt.aggregation == m.aggregation
+                    and alt.cube_mapping.time_dimension is None and view_def and view_def.datetime_dimension):
+                found.append(f"{alt.id} (view {alt.cube_mapping.view})")
+        return found[:limit]
 
     # ---------- validation ----------
 
