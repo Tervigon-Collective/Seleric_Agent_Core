@@ -130,7 +130,8 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
         brand_id: str | None = None, account_id: str | None = None,
         limit: int = 100, after: str | None = None,
     ) -> dict:
-        """meta.accounts.list — accessible Meta ad accounts (GET /me/adaccounts).
+        """meta.accounts.list — the brand's active Seleric ad account (the one in
+        core.brand_envs); other accounts the token can see are left out.
         Select the tenant credential with brand_id or account_id. Read-only."""
         log_call("meta_accounts_list", brand_id=brand_id)
 
@@ -141,6 +142,7 @@ def register_meta_ads_tools(mcp: "FastMCP", ctx: "AppContext") -> None:
                 access_token=cred.access_token, api_version=cred.api_version,
                 limit=limit, after=after,
             )
+            page["data"] = [a for a in page["data"] if a.get("account_id") == cred.ad_account_id.removeprefix("act_")]
             return _list_result("accounts.list", page)
 
         return await env.execute_read(
